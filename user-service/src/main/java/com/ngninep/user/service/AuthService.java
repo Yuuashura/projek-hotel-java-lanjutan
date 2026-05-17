@@ -97,7 +97,7 @@ public class AuthService {
 
         Optional<OtpToken> activeOtp = otpService.getActiveOtp(request.getEmail());
         if (activeOtp.isPresent()) {
-            LocalDateTime canResendAt = activeOtp.get().getCreated_at().plusMinutes(5);
+            LocalDateTime canResendAt = activeOtp.get().getCreatedAt().plusMinutes(5);
             if (LocalDateTime.now().isBefore(canResendAt)) {
                 long secondsLeft = java.time.Duration.between(LocalDateTime.now(), canResendAt).getSeconds();
                 throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,

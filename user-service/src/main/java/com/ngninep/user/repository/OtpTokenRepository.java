@@ -25,6 +25,6 @@ public interface OtpTokenRepository extends JpaRepository<OtpToken, Integer> {
     // Hapus semua OTP yang sudah expired (dipakai oleh Scheduler)
     @Modifying
     @Transactional
-    @Query("DELETE FROM OtpToken o WHERE o.expired_at < :now")
+    @Query("DELETE FROM OtpToken o WHERE o.expiredAt < :now")
     void deleteByExpiredAtBefore(@Param("now") LocalDateTime now);
 }

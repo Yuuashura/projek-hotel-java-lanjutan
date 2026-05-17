@@ -12,7 +12,6 @@ public class RegisterRequest {
     @NotBlank(message = "First name wajib diisi")
     private String first_name;
 
-    @NotBlank(message = "Last name wajib diisi")
     private String last_name;
 
     @NotNull(message = "Umur wajib diisi")

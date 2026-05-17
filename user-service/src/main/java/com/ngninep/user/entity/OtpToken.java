@@ -26,11 +26,11 @@ public class OtpToken {
     @Column(nullable = false)
     private String otp_code;
 
-    @Column(nullable = false)
-    private LocalDateTime created_at;   // Untuk rate limit (cek < 5 menit)
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;   // Untuk rate limit (cek < 5 menit)
 
-    @Column(nullable = false)
-    private LocalDateTime expired_at;   // created_at + 5 menit
+    @Column(name = "expired_at", nullable = false)
+    private LocalDateTime expiredAt;   // created_at + 5 menit
 
     // ✅ Field tanpa prefix is_ agar Lombok generate: isUsed() / setUsed()
     @Column(name = "is_used")

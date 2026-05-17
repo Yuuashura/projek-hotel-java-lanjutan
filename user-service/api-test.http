@@ -1,0 +1,94 @@
+### =======================================
+### NgiNep User Service - API Testing
+### Gunakan file ini di IntelliJ (HTTP Client) 
+### Klik tombol "Run" (hijau) di sebelah kiri tiap request
+### =======================================
+
+### 1. Register Akun Baru
+# Setelah jalankan ini, cek email kamu untuk melihat kode OTP
+POST http://localhost:8081/api/auth/register
+Content-Type: application/json
+
+{
+  "first_name": "Budi",
+  "last_name": "Santoso",
+  "age": 25,
+  "city_id": 1,
+  "phone": "081234567890",
+  "email": "tzyudistira@gmail.com",
+  "password": "password123"
+}
+
+###
+
+### 2. Verify OTP
+# Ganti "123456" dengan 6 digit OTP yang kamu terima di email
+POST http://localhost:8081/api/auth/verify-otp
+Content-Type: application/json
+
+{
+  "email": "tzyudistira@gmail.com",
+  "otp_code": "123456"
+}
+
+###
+
+### 3. Resend OTP (Opsional jika OTP expired)
+POST http://localhost:8081/api/auth/resend-otp
+Content-Type: application/json
+
+{
+  "email": "tzyudistira@gmail.com"
+}
+
+###
+
+### 4. Login
+# Jika berhasil, kamu akan mendapat respons berisi "token"
+POST http://localhost:8081/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "tzyudistira@gmail.com",
+  "password": "password123"
+}
+
+### =======================================
+### ENDPOINT PROTECTED (BUTUH JWT TOKEN)
+### 
+### COPY "token" dari respons Login di atas,
+### lalu PASTE untuk menggantikan teks {{token}} di bawah ini
+### =======================================
+
+@token = paste_token_jwt_kamu_di_sini_tanpa_tanda_kutip
+
+### 5. Lihat Profil (GET /api/users/me)
+GET http://localhost:8081/api/users/me
+Authorization: Bearer {{token}}
+
+###
+
+### 6. Update Profil (PUT /api/users/me)
+PUT http://localhost:8081/api/users/me
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "first_name": "Budi",
+  "last_name": "Setiawan",
+  "phone": "08999999999",
+  "age": 26
+}
+
+###
+
+### 7. Ganti Password
+PUT http://localhost:8081/api/users/me/change-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "old_password": "password123",
+  "new_password": "newpassword123",
+  "confirm_password": "newpassword123"
+}

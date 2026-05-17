@@ -28,8 +28,8 @@ public class OtpService {
         OtpToken otp = OtpToken.builder()
                 .email(email)
                 .otp_code(otpCode)
-                .created_at(LocalDateTime.now())
-                .expired_at(LocalDateTime.now().plusMinutes(5))
+                .createdAt(LocalDateTime.now())
+                .expiredAt(LocalDateTime.now().plusMinutes(5))
                 .used(false)            // ✅ field sekarang: 'used'
                 .build();
 
@@ -59,7 +59,7 @@ public class OtpService {
             return "OTP_INVALID";
         }
 
-        if (LocalDateTime.now().isAfter(otp.getExpired_at())) {
+        if (LocalDateTime.now().isAfter(otp.getExpiredAt())) {
             return "OTP_EXPIRED";
         }
 
