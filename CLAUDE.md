@@ -151,7 +151,7 @@ public class Customer {
     private int id_customer;
 
     private String first_name;
-    private String last_name;
+    private String last_name;      // (Opsional) Boleh kosong
     private int age;               // Atau LocalDate date_of_birth
 
     private int city_id;           // ✅ Plain int — ID kota dari Hotel Service
@@ -164,8 +164,11 @@ public class Customer {
 
     private String password;       // BCrypt hash
 
-    private boolean is_banned;
-    private boolean is_verified;
+    @Column(name = "is_banned")
+    private boolean banned;        // ✅ Tanpa is_ agar Lombok generate isBanned()
+
+    @Column(name = "is_verified")
+    private boolean verified;      // ✅ Tanpa is_ agar Lombok generate isVerified()
 
     @Enumerated(EnumType.STRING)
     private Role role;             // ROLE_USER, ROLE_ADMIN_HOTEL, ROLE_ADMIN_APP
@@ -543,70 +546,8 @@ KIRI — Form Data Pemesan:               KANAN — Ringkasan Pesanan:
 
 **Aturan singkat**: `@JoinColumn` hanya untuk relasi antar tabel **dalam service yang sama**. Relasi ke service lain → simpan plain ID, ambil data via Feign Client.
 
----
 
-### C. Pemesanan (Booking)
 
-```java
-@Entity
-@Table(name = "bookings")
-public class Booking {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id_booking;        // PK, Auto Increment
-
-    private String check_in;       // ✅ Sebaiknya LocalDate
-    private String check_out;      // ✅ Sebaiknya LocalDate
-    private int number_of_guest;
-    private Long total_price;      // ✅ Sebaiknya Long atau BigDecimal
-
-    @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;     // FK ke Customer
-
-    @ManyToOne
-    @JoinColumn(name = "hotel_id")
-    private Hotel hotel;           // FK ke Hotel
-
-    // ✅ TAMBAHAN YANG SANGAT DISARANKAN:
-    @Enumerated(EnumType.STRING)
-    private BookingStatus status;  // PENDING, CONFIRMED, CANCELLED, COMPLETED
-
-    private LocalDateTime created_at;
-    private String payment_method; // Transfer, OVO, dll.
-    private String payment_proof;  // URL bukti pembayaran (opsional)
-}
-```
-
-> ⚠️ **Saran Entity Booking**:
-> - Field `check_in` dan `check_out` sangat disarankan menggunakan tipe `LocalDate` bukan `String` agar bisa dihitung selisih hari (untuk `total_price = jumlah_hari × harga_hotel`).
-> - `total_price` ubah dari `String` ke `Long` atau `BigDecimal`.
-> - Tambahkan `status` (enum: PENDING → CONFIRMED → COMPLETED / CANCELLED) untuk flow pemesanan yang jelas.
-> - Tambahkan `created_at` untuk sorting dan audit.
-> - **Spring Scheduler** bisa digunakan untuk auto-cancel booking yang statusnya masih PENDING setelah X jam tanpa konfirmasi pembayaran.
-
----
-
-### D. OTP (Tabel Tambahan)
-
-```java
-@Entity
-@Table(name = "otp_tokens")
-public class OtpToken {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-
-    private String email;
-    private String otp_code;       // 6 digit angka acak
-    private LocalDateTime expired_at; // Expired dalam 5–10 menit
-    private boolean is_used;
-}
-```
-
-> ✅ Tabel OTP terpisah lebih aman dan mudah di-expire / dihapus dengan **Spring Scheduler**.
-
----
 
 ## 🏗️ Arsitektur Microservices
 
@@ -794,9 +735,14 @@ public class OtpToken {
 
     private String email;          // Email tujuan OTP
     private String otp_code;       // 6 digit angka acak
-    private LocalDateTime created_at;   // Untuk rate limit (cek < 5 menit)
-    private LocalDateTime expired_at;   // created_at + 5 menit
-    private boolean is_used;            // true jika sudah dipakai / diinvalidate
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;   // Untuk rate limit (cek < 5 menit)
+    
+    @Column(name = "expired_at")
+    private LocalDateTime expiredAt;   // created_at + 5 menit
+    
+    @Column(name = "is_used")
+    private boolean used;              // ✅ Tanpa is_ agar Lombok generate isUsed()
 }
 ```
 
@@ -804,8 +750,16 @@ public class OtpToken {
 ```java
 @Scheduled(fixedRate = 3600000) // Setiap 1 jam
 public void cleanExpiredOtp() {
-    otpRepository.deleteByExpiredAtBeforeAndIsUsedFalse(LocalDateTime.now());
-    // Atau bisa juga hapus semua yang expired > 1 jam lalu
+    otpRepository.deleteByExpiredAtBefore(LocalDateTime.now());
+}
+```
+
+#### 🛠️ Global Exception Handler (Penanganan Error)
+Untuk menangani `ResponseStatusException` (seperti saat OTP salah atau expired) dan `MethodArgumentNotValidException` (seperti saat ada input kosong pada DTO), proyek menggunakan `@RestControllerAdvice`.
+Semua pesan error akan di-intercept dan diformat menjadi JSON standar:
+```json
+{
+  "message": "Kode OTP tidak valid"
 }
 ```
 
