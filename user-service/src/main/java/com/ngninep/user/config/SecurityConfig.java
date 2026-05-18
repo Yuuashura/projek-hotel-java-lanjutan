@@ -1,4 +1,4 @@
-package com.ngninep.user.security;
+package com.ngninep.user.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

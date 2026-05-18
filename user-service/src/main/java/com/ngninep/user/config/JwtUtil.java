@@ -1,4 +1,4 @@
-package com.ngninep.user.security;
+package com.ngninep.user.config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

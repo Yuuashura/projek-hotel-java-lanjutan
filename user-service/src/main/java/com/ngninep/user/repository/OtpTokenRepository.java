@@ -27,4 +27,5 @@ public interface OtpTokenRepository extends JpaRepository<OtpToken, Integer> {
     @Transactional
     @Query("DELETE FROM OtpToken o WHERE o.expiredAt < :now")
     void deleteByExpiredAtBefore(@Param("now") LocalDateTime now);
+
 }

@@ -1,4 +1,4 @@
-package com.ngninep.user.security;
+package com.ngninep.user.config;
 
 import com.ngninep.user.entity.Customer;
 import com.ngninep.user.repository.CustomerRepository;

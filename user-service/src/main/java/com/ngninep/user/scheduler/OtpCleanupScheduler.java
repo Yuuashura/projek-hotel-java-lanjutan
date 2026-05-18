@@ -20,6 +20,6 @@ public class OtpCleanupScheduler {
     public void cleanExpiredOtp() {
         log.info("Menjalankan OTP cleanup scheduler...");
         otpTokenRepository.deleteByExpiredAtBefore(LocalDateTime.now());
-        log.info("OTP expired berhasil dihapus.");
+        log.info("OTP expired berhasil dihapus.Pada" + LocalDateTime.now());
     }
 }
