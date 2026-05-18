@@ -1,0 +1,221 @@
+### =======================================
+### NgiNep Hotel Service - API Testing
+### Port: 8082
+### Gunakan file ini di IntelliJ (HTTP Client)
+### Klik tombol "Run" (hijau) di sebelah kiri tiap request
+###
+### ⚠️  Untuk endpoint protected, login dulu
+###     di user-service (port 8081), lalu
+###     copy token ke variabel @token di bawah
+### =======================================
+
+@baseUrl = http://localhost:8082
+@token = paste_token_jwt_kamu_di_sini_tanpa_tanda_kutip
+
+### ==========================================
+### CITY — Kota (Publik: GET, Admin: POST/PUT/DELETE)
+### ==========================================
+
+### 1. Lihat semua kota (untuk dropdown form Register/Profil/Hotel)
+GET {{baseUrl}}/api/cities
+
+###
+
+### 2. Lihat kota by ID
+GET {{baseUrl}}/api/cities/1
+
+###
+
+### 3. Tambah kota baru — Hanya ROLE_ADMIN_APP
+POST {{baseUrl}}/api/cities
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Bandung",
+  "province": "Jawa Barat"
+}
+
+###
+
+### 4. Update kota — Hanya ROLE_ADMIN_APP
+PUT {{baseUrl}}/api/cities/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Bandung",
+  "province": "Jawa Barat"
+}
+
+###
+
+### 5. Hapus kota — Hanya ROLE_ADMIN_APP
+DELETE {{baseUrl}}/api/cities/1
+Authorization: Bearer {{token}}
+
+### ==========================================
+### FACILITY — Fasilitas (Publik: GET, Admin: POST/PUT/DELETE)
+### ==========================================
+
+###
+
+### 6. Lihat semua fasilitas
+GET {{baseUrl}}/api/facilities
+
+###
+
+### 7. Tambah fasilitas — Hanya ROLE_ADMIN_APP
+POST {{baseUrl}}/api/facilities
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Free WiFi",
+  "icon": "wifi"
+}
+
+###
+
+### 8. Update fasilitas — Hanya ROLE_ADMIN_APP
+PUT {{baseUrl}}/api/facilities/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Free WiFi",
+  "icon": "wifi"
+}
+
+###
+
+### 9. Hapus fasilitas — Hanya ROLE_ADMIN_APP
+DELETE {{baseUrl}}/api/facilities/1
+Authorization: Bearer {{token}}
+
+### ==========================================
+### HOTEL — Hotel (Publik: GET, Admin Hotel/App: POST/PUT/DELETE)
+### ==========================================
+
+###
+
+### 10. Lihat semua hotel
+GET {{baseUrl}}/api/hotels
+
+###
+
+### 11. Cari hotel berdasarkan keyword nama
+GET {{baseUrl}}/api/hotels?keyword=Grand
+
+###
+
+### 12. Filter hotel berdasarkan kota
+GET {{baseUrl}}/api/hotels?cityId=1
+
+###
+
+### 13. Lihat hotel yang featured (untuk homepage)
+GET {{baseUrl}}/api/hotels/featured
+
+###
+
+### 14. Lihat detail hotel by ID
+GET {{baseUrl}}/api/hotels/1
+
+###
+
+### 15. Tambah hotel baru — ROLE_ADMIN_HOTEL atau ROLE_ADMIN_APP
+### city dikirim sebagai objek dengan id_city
+POST {{baseUrl}}/api/hotels
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Grand Hotel Bandung",
+  "city": { "id_city": 1 },
+  "address": "Jl. Asia Afrika No. 10, Bandung",
+  "type": "Bintang 4",
+  "description": "Hotel mewah di pusat kota Bandung dengan pemandangan gunung yang indah.",
+  "admin_hotel_id": 1,
+  "featured": true,
+  "onSale": false,
+  "discount_percent": 0,
+  "rating": 4.5
+}
+
+###
+
+### 16. Update hotel — ROLE_ADMIN_HOTEL atau ROLE_ADMIN_APP
+PUT {{baseUrl}}/api/hotels/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Grand Hotel Bandung Updated",
+  "city": { "id_city": 1 },
+  "address": "Jl. Asia Afrika No. 10, Bandung",
+  "type": "Bintang 5",
+  "description": "Hotel mewah bintang 5 di pusat kota Bandung.",
+  "onSale": true,
+  "discount_percent": 10,
+  "rating": 4.8
+}
+
+###
+
+### 17. Hapus hotel — ROLE_ADMIN_HOTEL atau ROLE_ADMIN_APP
+DELETE {{baseUrl}}/api/hotels/1
+Authorization: Bearer {{token}}
+
+### ==========================================
+### ROOM TYPE — Tipe Kamar
+### ==========================================
+
+###
+
+### 18. Lihat semua tipe kamar milik hotel tertentu
+GET {{baseUrl}}/api/room-types/hotel/1
+
+###
+
+### 19. Lihat detail tipe kamar by ID
+GET {{baseUrl}}/api/room-types/1
+
+###
+
+### 20. Tambah tipe kamar — ROLE_ADMIN_HOTEL atau ROLE_ADMIN_APP
+POST {{baseUrl}}/api/room-types
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "hotel": { "id_hotel": 1 },
+  "name": "Deluxe Room",
+  "price_per_night": 500000,
+  "room_available": 10,
+  "max_guest": 2,
+  "smoking": false,
+  "description": "Kamar deluxe dengan pemandangan kota dan fasilitas lengkap."
+}
+
+###
+
+### 21. Update tipe kamar — ROLE_ADMIN_HOTEL atau ROLE_ADMIN_APP
+PUT {{baseUrl}}/api/room-types/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Deluxe Room",
+  "price_per_night": 550000,
+  "room_available": 8,
+  "max_guest": 2,
+  "smoking": false,
+  "description": "Kamar deluxe dengan harga update."
+}
+
+###
+
+### 22. Hapus tipe kamar — ROLE_ADMIN_HOTEL atau ROLE_ADMIN_APP
+DELETE {{baseUrl}}/api/room-types/1
+Authorization: Bearer {{token}}
