@@ -2,6 +2,8 @@ package com.ngninep.hotel.service.impl;
 
 import com.ngninep.hotel.dto.req.HotelRequest;
 import com.ngninep.hotel.dto.res.CityResponse;
+import com.ngninep.hotel.dto.res.FacilityResponse;
+import com.ngninep.hotel.dto.res.HotelImageResponse;
 import com.ngninep.hotel.dto.res.HotelResponse;
 import com.ngninep.hotel.entity.City;
 import com.ngninep.hotel.entity.Hotel;
@@ -34,6 +36,49 @@ public class HotelServiceImpl implements HotelService {
                     .build();
         }
 
+        List<Object> imagesResponse = new ArrayList<>();
+        if (hotel.getImages() != null) {
+            imagesResponse = hotel.getImages().stream().map(img -> 
+                HotelImageResponse.builder()
+                    .idImage(img.getIdImage())
+                    .imageUrl(img.getImage_url())
+                    .sortOrder(img.getSort_order())
+                    .build()
+            ).collect(Collectors.toList());
+        }
+
+        List<Object> facilitiesResponse = new ArrayList<>();
+        if (hotel.getFacilities() != null) {
+            facilitiesResponse = hotel.getFacilities().stream().map(hf -> {
+                if (hf.getFacility() != null) {
+                    return FacilityResponse.builder()
+                            .idFacility(hf.getFacility().getIdFacility())
+                            .name(hf.getFacility().getName())
+                            .icon(hf.getFacility().getIcon())
+                            .build();
+                }
+                return null;
+            }).filter(java.util.Objects::nonNull).collect(Collectors.toList());
+        }
+
+        List<com.ngninep.hotel.dto.res.RoomTypeResponse> roomTypesResponse = new ArrayList<>();
+        if (hotel.getRoomTypes() != null) {
+            roomTypesResponse = hotel.getRoomTypes().stream().map(rt -> 
+                com.ngninep.hotel.dto.res.RoomTypeResponse.builder()
+                    .idRoomType(rt.getIdRoomType())
+                    .name(rt.getName())
+                    .hotelId(hotel.getIdHotel())
+                    .description(rt.getDescription())
+                    .pricePerNight(rt.getPrice_per_night())
+                    .maxGuest(rt.getMax_guest())
+                    .smoking(rt.isSmoking())
+                    .roomAvailable(rt.getRoom_available())
+                    .images(new ArrayList<>()) // Can be mapped later if needed
+                    .facilities(new ArrayList<>()) // Can be mapped later if needed
+                    .build()
+            ).collect(Collectors.toList());
+        }
+
         return HotelResponse.builder()
                 .idHotel(hotel.getIdHotel())
                 .name(hotel.getName())
@@ -46,9 +91,9 @@ public class HotelServiceImpl implements HotelService {
                 .onSale(hotel.isOnSale())
                 .discountPercent(hotel.getDiscount_percent())
                 .rating(hotel.getRating())
-                .images(new ArrayList<>()) // Simplified for now
-                .facilities(new ArrayList<>()) // Simplified for now
-                .roomTypes(new ArrayList<>()) // Simplified for now
+                .images(imagesResponse)
+                .facilities(facilitiesResponse)
+                .roomTypes(roomTypesResponse)
                 .build();
     }
 

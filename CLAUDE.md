@@ -1025,18 +1025,21 @@ User pilih hotel → Isi form booking (check_in, check_out, guests)
 
 ### Backend (Per Service)
 ```
-user-service/
+user-service/ (atau service lainnya)
 ├── src/main/java/com/ngninep/user/
 │   ├── config/          # SecurityConfig, JwtConfig, MailConfig
 │   ├── controller/      # AuthController, UserController
 │   ├── service/         # AuthService, OtpService, UserService
 │   ├── repository/      # CustomerRepository, OtpRepository
 │   ├── entity/          # Customer, OtpToken
-│   ├── dto/             # RegisterRequest, LoginRequest, LoginResponse
+│   ├── dto/             # Data Transfer Objects
+│   │   ├── req/         # Request DTOs (e.g. CityRequest, HotelRequest)
+│   │   └── res/         # Response DTOs (e.g. CityResponse, WebResponse)
+│   ├── exception/       # GlobalExceptionHandler (standardized error responses)
 │   ├── security/        # JwtUtil, JwtFilter
 │   └── scheduler/       # OtpCleanupScheduler
 └── src/main/resources/
-    └── application.yml
+    └── application.properties (atau application.yml)
 ```
 
 ### Frontend (React)
@@ -1053,6 +1056,27 @@ src/
 ├── services/            # api.js (Axios instance + interceptor)
 └── utils/               # formatCurrency, formatDate
 ```
+
+## 🌐 Standar Response API & DTO Pattern
+
+Untuk menjamin konsistensi integrasi antara frontend (React) dan backend (Spring Boot), semua microservices (User, Hotel, Booking) wajib mengikuti standar response format dan DTO pattern berikut:
+
+### 1. Format Response JSON Standar (`WebResponse<T>`)
+Semua endpoint REST API harus membungkus balikan datanya dengan objek wrapper `WebResponse<T>` yang memiliki struktur:
+```json
+{
+  "status": "200",      // HTTP status code dalam bentuk String (atau kode error)
+  "message": "Success", // Pesan keterangan (misal: "Success", "Hotel tidak ditemukan", dll.)
+  "data": { ... }       // Konten data utama (bisa object, array, atau null)
+}
+```
+
+### 2. DTO (Data Transfer Object) Pattern
+- **Request DTO (`dto.req`)**: Semua data masuk melalui `RequestBody` (seperti saat Create atau Update) harus dipetakan ke Request DTO kelas khusus (contoh: `HotelRequest`, `RoomTypeRequest`). Jangan pernah menerima entity database langsung di Controller. Tambahkan validasi input standar seperti `@NotBlank` atau `@NotNull` dan `@Valid` di Controller.
+- **Response DTO (`dto.res`)**: Semua data keluar dari Controller harus dipetakan ke Response DTO kelas khusus (contoh: `HotelResponse`, `RoomTypeResponse`). Ini sangat penting untuk menghindari *infinite JSON serialization loops* pada relasi bidirectional JPA (seperti relasi `Hotel` ↔ `RoomType`) dan menyembunyikan field internal database yang tidak perlu diekspos ke frontend.
+
+### 3. Penanganan Error Global (`GlobalExceptionHandler`)
+Setiap service wajib mengimplementasikan `@RestControllerAdvice` yang menangkap exception (ResponseStatusException, MethodArgumentNotValidException, dll.) dan mengubahnya menjadi format `WebResponse<String>` standar agar format error di frontend konsisten dengan format sukses.
 
 ---
 
