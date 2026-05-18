@@ -15,10 +15,13 @@ public class RoomType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id_room_type;
+    @Column(name = "id_room_type")
+    @com.fasterxml.jackson.annotation.JsonProperty("id_room_type")
+    private int idRoomType;
 
     @ManyToOne
     @JoinColumn(name = "hotel_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"roomTypes", "images", "facilities"})
     private Hotel hotel;
 
     @Column(nullable = false)
@@ -38,9 +41,11 @@ public class RoomType {
 
     // Relasi ke gambar kamar
     @OneToMany(mappedBy = "roomType", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties("roomType")
     private List<RoomTypeImage> images;
 
     // Relasi ke fasilitas khusus kamar
     @OneToMany(mappedBy = "roomType", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties("roomType")
     private List<RoomTypeFacility> facilities;
 }

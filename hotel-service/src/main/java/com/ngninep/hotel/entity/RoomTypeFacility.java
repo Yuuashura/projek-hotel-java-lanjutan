@@ -17,6 +17,7 @@ public class RoomTypeFacility {
 
     @ManyToOne
     @JoinColumn(name = "room_type_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"facilities", "images"})
     private RoomType roomType;
 
     // Pakai tabel Facility yang sama dengan HotelFacility

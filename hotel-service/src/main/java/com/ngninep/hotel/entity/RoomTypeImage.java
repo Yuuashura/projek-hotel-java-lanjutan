@@ -13,10 +13,12 @@ public class RoomTypeImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id_image;
+    @Column(name = "id_image")
+    private int idImage;
 
     @ManyToOne
     @JoinColumn(name = "room_type_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"images", "facilities"})
     private RoomType roomType;
 
     private String image_url;

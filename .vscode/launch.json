@@ -2,11 +2,28 @@
     "configurations": [
         {
             "type": "java",
+            "name": "HotelServiceApplication",
+            "request": "launch",
+            "mainClass": "com.ngninep.hotel.HotelServiceApplication",
+            "projectName": ""
+        },
+        {
+            "type": "java",
             "name": "Spring Boot-UserApplication<user-service>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "mainClass": "com.ngninep.user.UserApplication",
             "projectName": "user-service",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-HotelServiceApplication<hotel-service>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.ngninep.hotel.HotelServiceApplication",
+            "projectName": "hotel-service",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
         }

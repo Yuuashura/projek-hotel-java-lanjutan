@@ -15,7 +15,9 @@ public class Hotel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id_hotel;
+    @Column(name = "id_hotel")
+    @com.fasterxml.jackson.annotation.JsonProperty("id_hotel")
+    private int idHotel;
 
     @Column(nullable = false)
     private String name;
@@ -47,13 +49,16 @@ public class Hotel {
 
     // Relasi ke gambar hotel
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties("hotel")
     private List<HotelImage> images;
 
     // Relasi ke fasilitas hotel
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties("hotel")
     private List<HotelFacility> facilities;
 
     // Relasi ke tipe kamar
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties("hotel")
     private List<RoomType> roomTypes;
 }

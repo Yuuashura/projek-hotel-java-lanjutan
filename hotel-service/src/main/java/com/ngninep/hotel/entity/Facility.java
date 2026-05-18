@@ -13,7 +13,9 @@ public class Facility {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id_facility;
+    @Column(name = "id_facility")
+    @com.fasterxml.jackson.annotation.JsonProperty("id_facility")
+    private int idFacility;
 
     @Column(unique = true, nullable = false)
     private String name;    // "Free WiFi", "AC", "Shower", "Kolam Renang", dll.

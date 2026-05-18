@@ -13,10 +13,12 @@ public class HotelImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id_image;
+    @Column(name = "id_image")
+    private int idImage;
 
     @ManyToOne
     @JoinColumn(name = "hotel_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"images", "facilities", "roomTypes"})
     private Hotel hotel;
 
     private String image_url;   // URL gambar hotel (eksterior, lobi, kolam, dll.)
