@@ -1143,8 +1143,8 @@ cd booking-service && mvn spring-boot:run
 ### Frontend
 ```bash
 cd frontend
-npm install
-npm start
+pnpm install
+pnpm start
 # Berjalan di http://localhost:3000
 ```
 

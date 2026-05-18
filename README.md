@@ -1139,31 +1139,54 @@ CREATE DATABASE ngninep_hotel;
 CREATE DATABASE ngninep_booking;
 ```
 
-Konfigurasi di masing-masing `application.yml`:
+Konfigurasi `application.properties` di user-service:
 ```yaml
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/ngninep_user
-    username: root
-    password:
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
+server.port=8081
 
-jwt:
-  secret: your-very-long-secret-key-here
-  expiration: 3600000 # 1 jam
+# Database Configuration
+spring.datasource.url=jdbc:mysql://localhost:3306/ngninep_user?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=
 
-spring:
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: youremail@gmail.com
-    password: your-app-password  # Google App Password (bukan password Gmail biasa)
-    properties:
-      mail.smtp.auth: true
-      mail.smtp.starttls.enable: true
+# Hibernate / JPA
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+# JWT Secret (HARUS SAMA dengan hotel-service)
+# Dalam production, pindahkan ke environment variable
+jwt.secret=ngninep-user-service-super-secret-key-yang-sangat-panjang-untuk-keamanan-jwt-2025
+jwt.expiration=3600000
+
+# Email Configuration
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=ngninep.app@gmail.com # Gamti Email anda
+spring.mail.password=abcd efgh asds awsd  # Gmail App Password
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+```
+
+
+Konfigurasi `application.properties` di hotel-service:
+```yaml
+server.port=8082
+
+# Database Configuration
+spring.datasource.url=jdbc:mysql://localhost:3306/ngninep_hotel?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=
+
+# Hibernate / JPA
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+# JWT Secret (HARUS SAMA dengan user-service)
+# Dalam production, pindahkan ke environment variable
+jwt.secret=ngninep-user-service-super-secret-key-yang-sangat-panjang-untuk-keamanan-jwt-2025
+jwt.expiration=3600000
+
 ```
 
 ---
@@ -1189,8 +1212,9 @@ cd booking-service && mvn spring-boot:run
 ### Frontend
 ```bash
 cd frontend
-npm install
-npm start
+pnpm install
+pnpm start
+# Atau pnpm run dev (tergantung konfigurasi package.json)
 # Berjalan di http://localhost:3000
 ```
 
