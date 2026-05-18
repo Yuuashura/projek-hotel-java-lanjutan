@@ -1,5 +1,7 @@
 package com.ngninep.hotel.service.impl;
 
+import com.ngninep.hotel.dto.req.FacilityRequest;
+import com.ngninep.hotel.dto.res.FacilityResponse;
 import com.ngninep.hotel.entity.Facility;
 import com.ngninep.hotel.repository.FacilityRepository;
 import com.ngninep.hotel.service.FacilityService;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -16,33 +19,52 @@ public class FacilityServiceImpl implements FacilityService {
 
     private final FacilityRepository facilityRepository;
 
-    @Override
-    public List<Facility> getAll() {
-        return facilityRepository.findAll();
+    private FacilityResponse mapToResponse(Facility facility) {
+        return FacilityResponse.builder()
+                .idFacility(facility.getIdFacility())
+                .name(facility.getName())
+                .icon(facility.getIcon())
+                .build();
     }
 
     @Override
-    public Facility getById(int id) {
-        return facilityRepository.findById(id)
+    public List<FacilityResponse> getAll() {
+        return facilityRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public FacilityResponse getById(int id) {
+        Facility facility = facilityRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Fasilitas tidak ditemukan"));
+        return mapToResponse(facility);
     }
 
     @Override
-    public Facility create(Facility facility) {
-        return facilityRepository.save(facility);
+    public FacilityResponse create(FacilityRequest request) {
+        Facility facility = Facility.builder()
+                .name(request.getName())
+                .icon(request.getIcon())
+                .build();
+        return mapToResponse(facilityRepository.save(facility));
     }
 
     @Override
-    public Facility update(int id, Facility facilityData) {
-        Facility facility = getById(id);
-        facility.setName(facilityData.getName());
-        facility.setIcon(facilityData.getIcon());
-        return facilityRepository.save(facility);
+    public FacilityResponse update(int id, FacilityRequest request) {
+        Facility facility = facilityRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Fasilitas tidak ditemukan"));
+        
+        facility.setName(request.getName());
+        facility.setIcon(request.getIcon());
+        
+        return mapToResponse(facilityRepository.save(facility));
     }
 
     @Override
     public void delete(int id) {
-        Facility facility = getById(id);
+        Facility facility = facilityRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Fasilitas tidak ditemukan"));
         facilityRepository.delete(facility);
     }
 }

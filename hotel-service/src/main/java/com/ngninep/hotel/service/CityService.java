@@ -1,13 +1,14 @@
 package com.ngninep.hotel.service;
 
-import com.ngninep.hotel.entity.City;
+import com.ngninep.hotel.dto.req.CityRequest;
+import com.ngninep.hotel.dto.res.CityResponse;
 
 import java.util.List;
 
 public interface CityService {
-    List<City> getAll();
-    City getById(int id);
-    City create(City city);
-    City update(int id, City city);
+    List<CityResponse> getAll();
+    CityResponse getById(int id);
+    CityResponse create(CityRequest request);
+    CityResponse update(int id, CityRequest request);
     void delete(int id);
 }

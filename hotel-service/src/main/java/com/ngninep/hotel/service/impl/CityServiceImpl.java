@@ -1,5 +1,7 @@
 package com.ngninep.hotel.service.impl;
 
+import com.ngninep.hotel.dto.req.CityRequest;
+import com.ngninep.hotel.dto.res.CityResponse;
 import com.ngninep.hotel.entity.City;
 import com.ngninep.hotel.repository.CityRepository;
 import com.ngninep.hotel.service.CityService;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -16,33 +19,52 @@ public class CityServiceImpl implements CityService {
 
     private final CityRepository cityRepository;
 
-    @Override
-    public List<City> getAll() {
-        return cityRepository.findAll();
+    private CityResponse mapToResponse(City city) {
+        return CityResponse.builder()
+                .idCity(city.getIdCity())
+                .name(city.getName())
+                .province(city.getProvince())
+                .build();
     }
 
     @Override
-    public City getById(int id) {
-        return cityRepository.findById(id)
+    public List<CityResponse> getAll() {
+        return cityRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public CityResponse getById(int id) {
+        City city = cityRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kota tidak ditemukan"));
+        return mapToResponse(city);
     }
 
     @Override
-    public City create(City city) {
-        return cityRepository.save(city);
+    public CityResponse create(CityRequest request) {
+        City city = City.builder()
+                .name(request.getName())
+                .province(request.getProvince())
+                .build();
+        return mapToResponse(cityRepository.save(city));
     }
 
     @Override
-    public City update(int id, City cityData) {
-        City city = getById(id);
-        city.setName(cityData.getName());
-        city.setProvince(cityData.getProvince());
-        return cityRepository.save(city);
+    public CityResponse update(int id, CityRequest request) {
+        City city = cityRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kota tidak ditemukan"));
+        
+        city.setName(request.getName());
+        city.setProvince(request.getProvince());
+        
+        return mapToResponse(cityRepository.save(city));
     }
 
     @Override
     public void delete(int id) {
-        City city = getById(id);
+        City city = cityRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kota tidak ditemukan"));
         cityRepository.delete(city);
     }
 }

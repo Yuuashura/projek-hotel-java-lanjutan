@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "BookingServiceApplication",
+            "request": "launch",
+            "mainClass": "com.ngninep.booking.BookingServiceApplication",
+            "projectName": ""
+        },
+        {
+            "type": "java",
             "name": "HotelServiceApplication",
             "request": "launch",
             "mainClass": "com.ngninep.hotel.HotelServiceApplication",
@@ -24,6 +31,16 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "com.ngninep.hotel.HotelServiceApplication",
             "projectName": "hotel-service",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-BookingServiceApplication<booking-service>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.ngninep.booking.BookingServiceApplication",
+            "projectName": "booking-service",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
         }

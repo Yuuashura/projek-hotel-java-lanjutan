@@ -1,13 +1,14 @@
 package com.ngninep.hotel.service;
 
-import com.ngninep.hotel.entity.RoomType;
+import com.ngninep.hotel.dto.req.RoomTypeRequest;
+import com.ngninep.hotel.dto.res.RoomTypeResponse;
 
 import java.util.List;
 
 public interface RoomTypeService {
-    List<RoomType> getByHotelId(int hotelId);
-    RoomType getById(int id);
-    RoomType create(RoomType roomType);
-    RoomType update(int id, RoomType roomType);
+    List<RoomTypeResponse> getByHotelId(int hotelId);
+    RoomTypeResponse getById(int id);
+    RoomTypeResponse create(RoomTypeRequest request);
+    RoomTypeResponse update(int id, RoomTypeRequest request);
     void delete(int id);
 }

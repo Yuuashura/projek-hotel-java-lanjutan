@@ -1,12 +1,15 @@
 package com.ngninep.hotel.controller;
 
-import com.ngninep.hotel.entity.Facility;
+import com.ngninep.hotel.dto.req.FacilityRequest;
+import com.ngninep.hotel.dto.res.FacilityResponse;
+import com.ngninep.hotel.dto.res.WebResponse;
 import com.ngninep.hotel.service.FacilityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -18,32 +21,56 @@ public class FacilityController {
 
     // ✅ Publik — untuk tampilkan fasilitas di halaman hotel
     @GetMapping
-    public ResponseEntity<List<Facility>> getAll() {
-        return ResponseEntity.ok(facilityService.getAll());
+    public ResponseEntity<WebResponse<List<FacilityResponse>>> getAll() {
+        WebResponse<List<FacilityResponse>> response = WebResponse.<List<FacilityResponse>>builder()
+                .status("200")
+                .message("Success")
+                .data(facilityService.getAll())
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Facility> getById(@PathVariable int id) {
-        return ResponseEntity.ok(facilityService.getById(id));
+    public ResponseEntity<WebResponse<FacilityResponse>> getById(@PathVariable int id) {
+        WebResponse<FacilityResponse> response = WebResponse.<FacilityResponse>builder()
+                .status("200")
+                .message("Success")
+                .data(facilityService.getById(id))
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     // 🔒 Hanya Admin Aplikasi
     @PostMapping
     @PreAuthorize("hasAuthority('ROLE_ADMIN_APP')")
-    public ResponseEntity<Facility> create(@RequestBody Facility facility) {
-        return ResponseEntity.ok(facilityService.create(facility));
+    public ResponseEntity<WebResponse<FacilityResponse>> create(@Valid @RequestBody FacilityRequest request) {
+        WebResponse<FacilityResponse> response = WebResponse.<FacilityResponse>builder()
+                .status("200")
+                .message("Success")
+                .data(facilityService.create(request))
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN_APP')")
-    public ResponseEntity<Facility> update(@PathVariable int id, @RequestBody Facility facility) {
-        return ResponseEntity.ok(facilityService.update(id, facility));
+    public ResponseEntity<WebResponse<FacilityResponse>> update(@PathVariable int id, @Valid @RequestBody FacilityRequest request) {
+        WebResponse<FacilityResponse> response = WebResponse.<FacilityResponse>builder()
+                .status("200")
+                .message("Success")
+                .data(facilityService.update(id, request))
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN_APP')")
-    public ResponseEntity<Void> delete(@PathVariable int id) {
+    public ResponseEntity<WebResponse<Void>> delete(@PathVariable int id) {
         facilityService.delete(id);
-        return ResponseEntity.noContent().build();
+        WebResponse<Void> response = WebResponse.<Void>builder()
+                .status("200")
+                .message("Success")
+                .build();
+        return ResponseEntity.ok(response);
     }
 }

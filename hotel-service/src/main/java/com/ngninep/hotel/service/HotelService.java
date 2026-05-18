@@ -1,15 +1,16 @@
 package com.ngninep.hotel.service;
 
-import com.ngninep.hotel.entity.Hotel;
+import com.ngninep.hotel.dto.req.HotelRequest;
+import com.ngninep.hotel.dto.res.HotelResponse;
 
 import java.util.List;
 
 public interface HotelService {
-    List<Hotel> getAll();
-    List<Hotel> search(String keyword, Integer cityId);
-    List<Hotel> getFeatured();
-    Hotel getById(int id);
-    Hotel create(Hotel hotel);
-    Hotel update(int id, Hotel hotel);
+    List<HotelResponse> getAll();
+    List<HotelResponse> search(String keyword, Integer cityId);
+    List<HotelResponse> getFeatured();
+    HotelResponse getById(int id);
+    HotelResponse create(HotelRequest request);
+    HotelResponse update(int id, HotelRequest request);
     void delete(int id);
 }

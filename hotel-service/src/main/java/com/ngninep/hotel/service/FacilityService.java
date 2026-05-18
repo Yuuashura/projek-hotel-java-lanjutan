@@ -1,13 +1,14 @@
 package com.ngninep.hotel.service;
 
-import com.ngninep.hotel.entity.Facility;
+import com.ngninep.hotel.dto.req.FacilityRequest;
+import com.ngninep.hotel.dto.res.FacilityResponse;
 
 import java.util.List;
 
 public interface FacilityService {
-    List<Facility> getAll();
-    Facility getById(int id);
-    Facility create(Facility facility);
-    Facility update(int id, Facility facility);
+    List<FacilityResponse> getAll();
+    FacilityResponse getById(int id);
+    FacilityResponse create(FacilityRequest request);
+    FacilityResponse update(int id, FacilityRequest request);
     void delete(int id);
 }

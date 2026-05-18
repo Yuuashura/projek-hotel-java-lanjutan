@@ -1,12 +1,15 @@
 package com.ngninep.hotel.controller;
 
-import com.ngninep.hotel.entity.RoomType;
+import com.ngninep.hotel.dto.req.RoomTypeRequest;
+import com.ngninep.hotel.dto.res.RoomTypeResponse;
+import com.ngninep.hotel.dto.res.WebResponse;
 import com.ngninep.hotel.service.RoomTypeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -18,32 +21,56 @@ public class RoomTypeController {
 
     // ✅ Publik — lihat tipe kamar untuk suatu hotel
     @GetMapping("/hotel/{hotelId}")
-    public ResponseEntity<List<RoomType>> getByHotel(@PathVariable int hotelId) {
-        return ResponseEntity.ok(roomTypeService.getByHotelId(hotelId));
+    public ResponseEntity<WebResponse<List<RoomTypeResponse>>> getByHotel(@PathVariable int hotelId) {
+        WebResponse<List<RoomTypeResponse>> response = WebResponse.<List<RoomTypeResponse>>builder()
+                .status("200")
+                .message("Success")
+                .data(roomTypeService.getByHotelId(hotelId))
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RoomType> getById(@PathVariable int id) {
-        return ResponseEntity.ok(roomTypeService.getById(id));
+    public ResponseEntity<WebResponse<RoomTypeResponse>> getById(@PathVariable int id) {
+        WebResponse<RoomTypeResponse> response = WebResponse.<RoomTypeResponse>builder()
+                .status("200")
+                .message("Success")
+                .data(roomTypeService.getById(id))
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     // 🔒 Admin Hotel & Admin Aplikasi — kelola tipe kamar
     @PostMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_HOTEL', 'ROLE_ADMIN_APP')")
-    public ResponseEntity<RoomType> create(@RequestBody RoomType roomType) {
-        return ResponseEntity.ok(roomTypeService.create(roomType));
+    public ResponseEntity<WebResponse<RoomTypeResponse>> create(@Valid @RequestBody RoomTypeRequest request) {
+        WebResponse<RoomTypeResponse> response = WebResponse.<RoomTypeResponse>builder()
+                .status("200")
+                .message("Success")
+                .data(roomTypeService.create(request))
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_HOTEL', 'ROLE_ADMIN_APP')")
-    public ResponseEntity<RoomType> update(@PathVariable int id, @RequestBody RoomType roomType) {
-        return ResponseEntity.ok(roomTypeService.update(id, roomType));
+    public ResponseEntity<WebResponse<RoomTypeResponse>> update(@PathVariable int id, @Valid @RequestBody RoomTypeRequest request) {
+        WebResponse<RoomTypeResponse> response = WebResponse.<RoomTypeResponse>builder()
+                .status("200")
+                .message("Success")
+                .data(roomTypeService.update(id, request))
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_HOTEL', 'ROLE_ADMIN_APP')")
-    public ResponseEntity<Void> delete(@PathVariable int id) {
+    public ResponseEntity<WebResponse<Void>> delete(@PathVariable int id) {
         roomTypeService.delete(id);
-        return ResponseEntity.noContent().build();
+        WebResponse<Void> response = WebResponse.<Void>builder()
+                .status("200")
+                .message("Success")
+                .build();
+        return ResponseEntity.ok(response);
     }
 }
