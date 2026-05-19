@@ -134,7 +134,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(customer.getEmail());
-        String token = jwtUtil.generateToken(userDetails);
+        String token = jwtUtil.generateToken(userDetails, customer.getId_customer());
 
         return LoginResponse.builder()
                 .token(token)

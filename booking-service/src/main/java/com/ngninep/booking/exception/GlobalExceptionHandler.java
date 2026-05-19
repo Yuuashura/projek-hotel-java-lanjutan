@@ -1,6 +1,6 @@
 package com.ngninep.booking.exception;
 
-import org.springframework.http.HttpStatus;
+import com.ngninep.booking.dto.res.WebResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -8,33 +8,39 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<Map<String, String>> handleResponseStatusException(ResponseStatusException ex) {
-        Map<String, String> response = new HashMap<>();
-        response.put("message", ex.getReason());
-        return new ResponseEntity<>(response, ex.getStatusCode());
+    public ResponseEntity<WebResponse<String>> handleResponseStatus(ResponseStatusException ex) {
+        WebResponse<String> response = WebResponse.<String>builder()
+                .status(String.valueOf(ex.getStatusCode().value()))
+                .message(ex.getReason())
+                .build();
+        return ResponseEntity.status(ex.getStatusCode()).body(response);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            errors.put("message", error.getDefaultMessage());
-            break; // Ambil pesan error pertama saja agar simpel seperti CLAUDE.md
-        }
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<WebResponse<String>> handleValidation(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .map(FieldError::getDefaultMessage)
+                .collect(Collectors.joining(", "));
+        
+        WebResponse<String> response = WebResponse.<String>builder()
+                .status("400")
+                .message(message)
+                .build();
+        return ResponseEntity.badRequest().body(response);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleGenericException(Exception ex) {
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Terjadi kesalahan internal server: " + ex.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<WebResponse<String>> handleGeneral(Exception ex) {
+        WebResponse<String> response = WebResponse.<String>builder()
+                .status("500")
+                .message("Terjadi kesalahan: " + ex.getMessage())
+                .build();
+        return ResponseEntity.internalServerError().body(response);
     }
 }

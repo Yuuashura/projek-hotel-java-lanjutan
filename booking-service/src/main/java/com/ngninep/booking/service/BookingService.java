@@ -1,24 +1,26 @@
 package com.ngninep.booking.service;
 
-import com.ngninep.booking.entity.Booking;
+import com.ngninep.booking.dto.req.BookingRequest;
+import com.ngninep.booking.dto.req.PaymentRequest;
+import com.ngninep.booking.dto.res.BookingResponse;
 import com.ngninep.booking.entity.BookingStatus;
 
 import java.util.List;
 
 public interface BookingService {
-    Booking createBooking(Booking booking, int customerId);
+    BookingResponse createBooking(BookingRequest request, int customerId);
     
-    List<Booking> getMyBookings(int customerId, String statusFilter);
+    List<BookingResponse> getMyBookings(int customerId, String statusFilter);
     
-    List<Booking> getAllBookings();
+    List<BookingResponse> getAllBookings();
     
-    List<Booking> getBookingsByHotel(int hotelId);
+    List<BookingResponse> getBookingsByHotel(int hotelId);
     
-    Booking getBookingById(int id);
+    BookingResponse getBookingById(int id);
     
-    Booking payBooking(int id, String paymentMethod, String paymentProof, int customerId);
+    BookingResponse payBooking(int id, PaymentRequest request, int customerId);
     
-    Booking updateStatus(int id, BookingStatus status);
+    BookingResponse updateStatus(int id, BookingStatus status);
     
     void deleteBooking(int id);
 }

@@ -34,6 +34,13 @@ public class JwtUtil {
         return buildToken(claims, userDetails.getUsername());
     }
 
+    public String generateToken(UserDetails userDetails, int userId) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", userDetails.getAuthorities().iterator().next().getAuthority());
+        claims.put("userId", userId);
+        return buildToken(claims, userDetails.getUsername());
+    }
+
     private String buildToken(Map<String, Object> extraClaims, String subject) {
         return Jwts.builder()
                 .claims(extraClaims)

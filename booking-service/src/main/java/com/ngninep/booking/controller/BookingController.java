@@ -1,8 +1,13 @@
 package com.ngninep.booking.controller;
 
-import com.ngninep.booking.entity.Booking;
+import com.ngninep.booking.dto.req.BookingRequest;
+import com.ngninep.booking.dto.req.PaymentRequest;
+import com.ngninep.booking.dto.req.UpdateStatusRequest;
+import com.ngninep.booking.dto.res.BookingResponse;
+import com.ngninep.booking.dto.res.WebResponse;
 import com.ngninep.booking.entity.BookingStatus;
 import com.ngninep.booking.service.BookingService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,7 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -23,72 +27,109 @@ public class BookingController {
     // Helper untuk mengambil userId dari JWT
     private int getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return (Integer) authentication.getCredentials();
+        Object credentials = authentication.getCredentials();
+        if (credentials == null) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.UNAUTHORIZED, "User ID tidak ditemukan dalam token"
+            );
+        }
+        return (Integer) credentials;
     }
 
     // 🔒 USER — Membuat pesanan baru
     @PostMapping
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<Booking> createBooking(@RequestBody Booking booking) {
+    public ResponseEntity<WebResponse<BookingResponse>> createBooking(@Valid @RequestBody BookingRequest request) {
         int customerId = getCurrentUserId();
-        return ResponseEntity.ok(bookingService.createBooking(booking, customerId));
+        WebResponse<BookingResponse> response = WebResponse.<BookingResponse>builder()
+                .status("200")
+                .message("Pesanan berhasil dibuat")
+                .data(bookingService.createBooking(request, customerId))
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     // 🔒 USER — Melihat riwayat pesanan sendiri
     @GetMapping("/my")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<List<Booking>> getMyBookings(
+    public ResponseEntity<WebResponse<List<BookingResponse>>> getMyBookings(
             @RequestParam(required = false, defaultValue = "all") String status) {
         int customerId = getCurrentUserId();
-        return ResponseEntity.ok(bookingService.getMyBookings(customerId, status));
+        WebResponse<List<BookingResponse>> response = WebResponse.<List<BookingResponse>>builder()
+                .status("200")
+                .message("Berhasil mengambil data pesanan")
+                .data(bookingService.getMyBookings(customerId, status))
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     // 🔒 USER — Membayar pesanan (Upload bukti bayar)
     @PatchMapping("/{id}/pay")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public ResponseEntity<Booking> payBooking(
+    public ResponseEntity<WebResponse<BookingResponse>> payBooking(
             @PathVariable int id, 
-            @RequestBody Map<String, String> payload) {
+            @Valid @RequestBody PaymentRequest request) {
         
         int customerId = getCurrentUserId();
-        String paymentMethod = payload.get("payment_method");
-        String paymentProof = payload.get("payment_proof");
         
-        return ResponseEntity.ok(bookingService.payBooking(id, paymentMethod, paymentProof, customerId));
+        WebResponse<BookingResponse> response = WebResponse.<BookingResponse>builder()
+                .status("200")
+                .message("Pembayaran berhasil diproses")
+                .data(bookingService.payBooking(id, request, customerId))
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     // 🔒 ADMIN_APP & ADMIN_HOTEL — Melihat semua pesanan
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_APP', 'ROLE_ADMIN_HOTEL')")
-    public ResponseEntity<List<Booking>> getAllBookings() {
-        return ResponseEntity.ok(bookingService.getAllBookings());
+    public ResponseEntity<WebResponse<List<BookingResponse>>> getAllBookings() {
+        WebResponse<List<BookingResponse>> response = WebResponse.<List<BookingResponse>>builder()
+                .status("200")
+                .message("Berhasil mengambil semua pesanan")
+                .data(bookingService.getAllBookings())
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     // 🔒 ADMIN_HOTEL — Melihat pesanan berdasarkan hotel miliknya (Untuk filter manual)
     @GetMapping("/hotel/{hotelId}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_APP', 'ROLE_ADMIN_HOTEL')")
-    public ResponseEntity<List<Booking>> getBookingsByHotel(@PathVariable int hotelId) {
-        return ResponseEntity.ok(bookingService.getBookingsByHotel(hotelId));
+    public ResponseEntity<WebResponse<List<BookingResponse>>> getBookingsByHotel(@PathVariable int hotelId) {
+        WebResponse<List<BookingResponse>> response = WebResponse.<List<BookingResponse>>builder()
+                .status("200")
+                .message("Berhasil mengambil pesanan hotel")
+                .data(bookingService.getBookingsByHotel(hotelId))
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     // 🔒 ADMIN_APP & ADMIN_HOTEL — Mengupdate status pesanan (Konfirmasi, Cancel, Selesai)
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_APP', 'ROLE_ADMIN_HOTEL')")
-    public ResponseEntity<Booking> updateStatus(
+    public ResponseEntity<WebResponse<BookingResponse>> updateStatus(
             @PathVariable int id, 
-            @RequestBody Map<String, String> payload) {
+            @Valid @RequestBody UpdateStatusRequest request) {
         
-        String statusStr = payload.get("status");
-        BookingStatus status = BookingStatus.valueOf(statusStr.toUpperCase());
+        BookingStatus status = BookingStatus.valueOf(request.getStatus().toUpperCase());
         
-        return ResponseEntity.ok(bookingService.updateStatus(id, status));
+        WebResponse<BookingResponse> response = WebResponse.<BookingResponse>builder()
+                .status("200")
+                .message("Status pesanan berhasil diperbarui")
+                .data(bookingService.updateStatus(id, status))
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     // 🔒 ADMIN_APP — Menghapus pesanan secara permanen
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN_APP')")
-    public ResponseEntity<Void> deleteBooking(@PathVariable int id) {
+    public ResponseEntity<WebResponse<Void>> deleteBooking(@PathVariable int id) {
         bookingService.deleteBooking(id);
-        return ResponseEntity.noContent().build();
+        WebResponse<Void> response = WebResponse.<Void>builder()
+                .status("200")
+                .message("Pesanan berhasil dihapus secara permanen")
+                .build();
+        return ResponseEntity.ok(response);
     }
 }
