@@ -48,4 +48,25 @@ public class UserController {
         String message = userService.changePassword(userDetails.getUsername(), request);
         return ResponseEntity.ok(Map.of("message", message));
     }
+
+    // GET /api/users — Lihat semua pengguna (Admin)
+    @GetMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyAuthority('ROLE_ADMIN_APP', 'ROLE_ADMIN_HOTEL')")
+    public ResponseEntity<java.util.List<UserProfileResponse>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    // PATCH /api/users/{id}/ban
+    @PatchMapping("/{id}/ban")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyAuthority('ROLE_ADMIN_APP', 'ROLE_ADMIN_HOTEL')")
+    public ResponseEntity<?> banUser(@PathVariable int id) {
+        return ResponseEntity.ok(Map.of("message", userService.banUser(id)));
+    }
+
+    // PATCH /api/users/{id}/unban
+    @PatchMapping("/{id}/unban")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyAuthority('ROLE_ADMIN_APP', 'ROLE_ADMIN_HOTEL')")
+    public ResponseEntity<?> unbanUser(@PathVariable int id) {
+        return ResponseEntity.ok(Map.of("message", userService.unbanUser(id)));
+    }
 }

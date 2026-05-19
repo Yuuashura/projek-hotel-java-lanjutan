@@ -1,0 +1,101 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+
+// === Public Pages ===
+import Home from './pages/public/Home';
+import Login from './pages/public/Login';
+import Register from './pages/public/Register';
+import VerifyOtp from './pages/public/VerifyOtp';
+import Hotels from './pages/public/Hotels';
+import HotelDetail from './pages/public/HotelDetail';
+
+// === User Pages ===
+import Booking from './pages/user/Booking';
+import Payment from './pages/user/Payment';
+import MyBookings from './pages/user/MyBookings';
+import Profile from './pages/user/Profile';
+
+// === Admin Pages ===
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminHotels from './pages/admin/AdminHotels';
+import AdminVisitors from './pages/admin/AdminVisitors';
+import AdminBookings from './pages/admin/AdminBookings';
+
+// ==========================================
+// Route Guards
+// ==========================================
+const UserRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== 'ROLE_USER') return <Navigate to="/admin/dashboard" replace />;
+  return children;
+};
+
+const AdminRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== 'ROLE_ADMIN_HOTEL' && user.role !== 'ROLE_ADMIN_APP') return <Navigate to="/" replace />;
+  return children;
+};
+
+// ==========================================
+// Public Layout (Navbar + Footer)
+// ==========================================
+const PublicLayout = ({ children }) => (
+  <>
+    <Navbar />
+    <main>{children}</main>
+    <Footer />
+  </>
+);
+
+// ==========================================
+// App Routes
+// ==========================================
+function AppRoutes() {
+  return (
+    <Routes>
+      {/* ============ PUBLIC ROUTES ============ */}
+      <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
+      <Route path="/hotels" element={<PublicLayout><Hotels /></PublicLayout>} />
+      <Route path="/hotels/:id" element={<PublicLayout><HotelDetail /></PublicLayout>} />
+
+      {/* Auth (No Layout) */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/verify-otp" element={<VerifyOtp />} />
+
+      {/* ============ USER ROUTES ============ */}
+      <Route path="/booking/:hotelId" element={<UserRoute><PublicLayout><Booking /></PublicLayout></UserRoute>} />
+      <Route path="/payment/:bookingId" element={<UserRoute><PublicLayout><Payment /></PublicLayout></UserRoute>} />
+      <Route path="/my-bookings" element={<UserRoute><PublicLayout><MyBookings /></PublicLayout></UserRoute>} />
+      <Route path="/profile" element={<UserRoute><PublicLayout><Profile /></PublicLayout></UserRoute>} />
+
+      {/* ============ ADMIN ROUTES ============ */}
+      <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+      <Route path="/admin/hotels" element={<AdminRoute><AdminHotels /></AdminRoute>} />
+      <Route path="/admin/visitors" element={<AdminRoute><AdminVisitors /></AdminRoute>} />
+      <Route path="/admin/bookings" element={<AdminRoute><AdminBookings /></AdminRoute>} />
+
+      {/* Catch all */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppRoutes />
+      </Router>
+    </AuthProvider>
+  );
+}
+
+export default App;

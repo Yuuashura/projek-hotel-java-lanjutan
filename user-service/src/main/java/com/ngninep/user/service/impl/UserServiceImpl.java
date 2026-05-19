@@ -89,4 +89,29 @@ public class UserServiceImpl implements UserService {
                 .profile_picture(customer.getProfile_picture())
                 .build();
     }
+
+    @Override
+    public java.util.List<UserProfileResponse> getAllUsers() {
+        return customerRepository.findAll().stream()
+                .map(this::toProfileResponse)
+                .toList();
+    }
+
+    @Override
+    public String banUser(int userId) {
+        Customer customer = customerRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User tidak ditemukan"));
+        customer.setBanned(true);
+        customerRepository.save(customer);
+        return "User berhasil diban";
+    }
+
+    @Override
+    public String unbanUser(int userId) {
+        Customer customer = customerRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User tidak ditemukan"));
+        customer.setBanned(false);
+        customerRepository.save(customer);
+        return "User berhasil di-unban";
+    }
 }
