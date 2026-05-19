@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, X, Check, AlertCircle, Star, MapPin } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Check, AlertCircle, Star, MapPin, Bed } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { formatCurrency } from '../../utils/formatters';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../utils/api';
@@ -104,8 +105,9 @@ const AdminHotels = () => {
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button onClick={() => openEdit(h)} className="btn btn-primary btn-sm"><Pencil size={13} /></button>
-                      <button onClick={() => openDelete(h)} className="btn btn-red btn-sm"><Trash2 size={13} /></button>
+                      <Link to={`/admin/hotels/${h.id_hotel}/rooms`} className="btn btn-orange btn-sm" title="Kelola Kamar"><Bed size={13} /></Link>
+                      <button onClick={() => openEdit(h)} className="btn btn-primary btn-sm" title="Edit Hotel"><Pencil size={13} /></button>
+                      <button onClick={() => openDelete(h)} className="btn btn-red btn-sm" title="Hapus Hotel"><Trash2 size={13} /></button>
                     </div>
                   </td>
                 </tr>

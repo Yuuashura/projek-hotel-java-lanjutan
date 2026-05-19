@@ -203,10 +203,10 @@ const Home = () => {
         </h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
           {[
-            { emoji: '🚀', color: 'var(--neo-purple)', title: 'Microservices Modern', desc: 'Dibangun dengan arsitektur microservices Java Spring Boot — User, Hotel, dan Booking Service berjalan independen untuk performa optimal.' },
-            { emoji: '🔒', color: 'var(--neo-green)', title: 'Keamanan JWT', desc: 'JWT Token terenkripsi, pola DTO untuk mencegah kebocoran data, dan BCrypt password hashing memastikan akun Anda selalu aman.' },
-            { emoji: '⚡', color: 'var(--neo-yellow)', title: 'Verifikasi Instan', desc: 'OTP via email untuk verifikasi registrasi dengan countdown 5 menit. Sistem auto-cancel pesanan PENDING yang melewati batas 24 jam.' },
-            { emoji: '📊', color: 'var(--neo-orange)', title: 'Panel Admin Lengkap', desc: 'Dashboard Admin Hotel dengan statistik lengkap, kelola hotel, tipe kamar, konfirmasi pembayaran, dan manajemen pengunjung.' },
+            { emoji: '🏨', color: 'var(--neo-purple)', title: 'Pilihan Hotel Terbaik', desc: 'Menyediakan beragam pilihan kamar dari hotel butik yang estetik hingga resort mewah bintang lima di destinasi favorit Anda.' },
+            { emoji: '🔒', color: 'var(--neo-green)', title: 'Transaksi Aman & Mudah', desc: 'Sistem enkripsi modern menjamin privasi Anda, didukung pilihan pembayaran transfer bank & QRIS yang mudah dan terpercaya.' },
+            { emoji: '⚡', color: 'var(--neo-yellow)', title: 'Konfirmasi Instan', desc: 'Proses verifikasi pembayaran yang cepat oleh pihak hotel memastikan voucher menginap Anda segera terbit tanpa repot.' },
+            { emoji: '💸', color: 'var(--neo-orange)', title: 'Promo Diskon Eksklusif', desc: 'Nikmati potongan harga spesial hingga penawaran menit-menit terakhir (last-minute deals) setiap harinya.' },
           ].map(f => (
             <div key={f.title} className="card" style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <div style={{ fontSize: '2rem' }}>{f.emoji}</div>

@@ -11,6 +11,7 @@ import Register from './pages/public/Register';
 import VerifyOtp from './pages/public/VerifyOtp';
 import Hotels from './pages/public/Hotels';
 import HotelDetail from './pages/public/HotelDetail';
+import About from './pages/public/About';
 
 // === User Pages ===
 import Booking from './pages/user/Booking';
@@ -23,6 +24,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminHotels from './pages/admin/AdminHotels';
 import AdminVisitors from './pages/admin/AdminVisitors';
 import AdminBookings from './pages/admin/AdminBookings';
+import AdminRoomTypes from './pages/admin/AdminRoomTypes';
 
 // ==========================================
 // Route Guards
@@ -64,6 +66,7 @@ function AppRoutes() {
       <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
       <Route path="/hotels" element={<PublicLayout><Hotels /></PublicLayout>} />
       <Route path="/hotels/:id" element={<PublicLayout><HotelDetail /></PublicLayout>} />
+      <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
 
       {/* Auth (No Layout) */}
       <Route path="/login" element={<Login />} />
@@ -79,6 +82,7 @@ function AppRoutes() {
       {/* ============ ADMIN ROUTES ============ */}
       <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
       <Route path="/admin/hotels" element={<AdminRoute><AdminHotels /></AdminRoute>} />
+      <Route path="/admin/hotels/:hotelId/rooms" element={<AdminRoute><AdminRoomTypes /></AdminRoute>} />
       <Route path="/admin/visitors" element={<AdminRoute><AdminVisitors /></AdminRoute>} />
       <Route path="/admin/bookings" element={<AdminRoute><AdminBookings /></AdminRoute>} />
 

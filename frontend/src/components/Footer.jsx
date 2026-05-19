@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Heart, Globe, MessageCircle, Share2 } from 'lucide-react';
 
 const Footer = () => (
@@ -19,18 +20,30 @@ const Footer = () => (
       </div>
       <div>
         <h3 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', color: 'var(--neo-blue)', letterSpacing: '0.05em', fontSize: '0.9rem', marginBottom: '1rem' }}>Layanan</h3>
-        {['Beranda', 'Cari Hotel', 'Promo & Diskon', 'Pesanan Saya', 'Profil Saya'].map(l => (
-          <a key={l} href="#" style={{ display: 'block', color: '#9ca3af', fontWeight: 500, textDecoration: 'none', fontSize: '0.875rem', marginBottom: '0.6rem', transition: 'color 0.15s' }}
+        {[
+          { text: 'Beranda', to: '/' },
+          { text: 'Cari Hotel', to: '/hotels' },
+          { text: 'Promo & Diskon', to: '/hotels?sale=true' },
+          { text: 'Pesanan Saya', to: '/my-bookings' },
+          { text: 'Profil Saya', to: '/profile' }
+        ].map(l => (
+          <Link key={l.text} to={l.to} style={{ display: 'block', color: '#9ca3af', fontWeight: 500, textDecoration: 'none', fontSize: '0.875rem', marginBottom: '0.6rem', transition: 'color 0.15s' }}
             onMouseEnter={e => e.currentTarget.style.color = 'var(--neo-yellow)'}
-            onMouseLeave={e => e.currentTarget.style.color = '#9ca3af'}>{l}</a>
+            onMouseLeave={e => e.currentTarget.style.color = '#9ca3af'}>{l.text}</Link>
         ))}
       </div>
       <div>
         <h3 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', color: 'var(--neo-purple)', letterSpacing: '0.05em', fontSize: '0.9rem', marginBottom: '1rem' }}>Perusahaan</h3>
-        {['Tentang Kami', 'Syarat & Ketentuan', 'Kebijakan Privasi', 'Karir', 'Blog'].map(l => (
-          <a key={l} href="#" style={{ display: 'block', color: '#9ca3af', fontWeight: 500, textDecoration: 'none', fontSize: '0.875rem', marginBottom: '0.6rem', transition: 'color 0.15s' }}
+        {[
+          { text: 'Tentang Kami', to: '/about' },
+          { text: 'Syarat & Ketentuan', to: '#' },
+          { text: 'Kebijakan Privasi', to: '#' },
+          { text: 'Karir', to: '#' },
+          { text: 'Blog', to: '#' }
+        ].map(l => (
+          <Link key={l.text} to={l.to} style={{ display: 'block', color: '#9ca3af', fontWeight: 500, textDecoration: 'none', fontSize: '0.875rem', marginBottom: '0.6rem', transition: 'color 0.15s' }}
             onMouseEnter={e => e.currentTarget.style.color = 'var(--neo-yellow)'}
-            onMouseLeave={e => e.currentTarget.style.color = '#9ca3af'}>{l}</a>
+            onMouseLeave={e => e.currentTarget.style.color = '#9ca3af'}>{l.text}</Link>
         ))}
       </div>
       <div>

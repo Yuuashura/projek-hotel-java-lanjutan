@@ -36,6 +36,7 @@ const Navbar = () => {
         <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }} className="hidden-mobile">
           <Link to="/" style={{ fontFamily: 'Space Grotesk', fontWeight: 700, color: 'var(--neo-dark)', textDecoration: 'none', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Beranda</Link>
           <Link to="/hotels" style={{ fontFamily: 'Space Grotesk', fontWeight: 700, color: 'var(--neo-dark)', textDecoration: 'none', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Hotel</Link>
+          <Link to="/about" style={{ fontFamily: 'Space Grotesk', fontWeight: 700, color: 'var(--neo-dark)', textDecoration: 'none', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tentang Kami</Link>
           {isAdmin && <Link to="/admin/dashboard" style={{ fontFamily: 'Space Grotesk', fontWeight: 700, color: 'var(--neo-purple)', textDecoration: 'none', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Admin Panel</Link>}
         </div>
 
@@ -94,6 +95,7 @@ const Navbar = () => {
         <div style={{ borderTop: '3px solid var(--neo-dark)', background: 'white', padding: '1rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <Link to="/" onClick={() => setIsOpen(false)} style={{ fontFamily: 'Space Grotesk', fontWeight: 700, textDecoration: 'none', color: 'var(--neo-dark)', textTransform: 'uppercase', fontSize: '0.9rem', paddingBottom: '0.75rem', borderBottom: '1px dashed #d1d5db' }}>Beranda</Link>
           <Link to="/hotels" onClick={() => setIsOpen(false)} style={{ fontFamily: 'Space Grotesk', fontWeight: 700, textDecoration: 'none', color: 'var(--neo-dark)', textTransform: 'uppercase', fontSize: '0.9rem', paddingBottom: '0.75rem', borderBottom: '1px dashed #d1d5db' }}>Hotel</Link>
+          <Link to="/about" onClick={() => setIsOpen(false)} style={{ fontFamily: 'Space Grotesk', fontWeight: 700, textDecoration: 'none', color: 'var(--neo-dark)', textTransform: 'uppercase', fontSize: '0.9rem', paddingBottom: '0.75rem', borderBottom: '1px dashed #d1d5db' }}>Tentang Kami</Link>
           {user ? (
             <>
               {user.role === 'ROLE_USER' && <Link to="/my-bookings" onClick={() => setIsOpen(false)} className="btn btn-blue btn-sm" style={{ textAlign: 'center' }}>Pesanan Saya</Link>}
