@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, X, Check, AlertCircle, Star, MapPin, Bed } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Plus, Pencil, Trash2, X, Check, AlertCircle, Star, MapPin, Bed, ImageIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatCurrency } from '../../utils/formatters';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../utils/api';
 
-const EMPTY_FORM = { name: '', city_id: '', address: '', type: '', description: '', is_featured: false, is_on_sale: false, discount_percent: 0, rating: 0 };
+const EMPTY_FORM = { name: '', city_id: '', address: '', type: '', description: '', is_featured: false, is_on_sale: false, discount_percent: 0, rating: 0, image_url: '' };
 
 const AdminHotels = () => {
   const [hotels, setHotels] = useState([]);
@@ -16,6 +16,8 @@ const AdminHotels = () => {
   const [form, setForm] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [imgPreview, setImgPreview] = useState('');
+  const fileRef = useRef();
 
   const load = () => {
     setLoading(true);
@@ -27,10 +29,17 @@ const AdminHotels = () => {
 
   useEffect(() => { load(); }, []);
 
-  const openCreate = () => { setForm(EMPTY_FORM); setError(''); setModal('create'); };
-  const openEdit = (h) => { setSelected(h); setForm({ name: h.name, city_id: h.city?.id_city || '', address: h.address || '', type: h.type || '', description: h.description || '', is_featured: h.featured, is_on_sale: h.onSale, discount_percent: h.discount_percent || 0, rating: h.rating || 0 }); setError(''); setModal('edit'); };
+  const openCreate = () => { setForm(EMPTY_FORM); setImgPreview(''); setError(''); setModal('create'); };
+  const openEdit = (h) => {
+    setSelected(h);
+    const existingImg = h.images?.[0]?.imageUrl || h.images?.[0]?.image_url || '';
+    setForm({ name: h.name, city_id: h.city?.id_city || '', address: h.address || '', type: h.type || '', description: h.description || '', is_featured: h.featured, is_on_sale: h.onSale, discount_percent: h.discount_percent || 0, rating: h.rating || 0, image_url: existingImg });
+    setImgPreview(existingImg);
+    setError('');
+    setModal('edit');
+  };
   const openDelete = (h) => { setSelected(h); setModal('delete'); };
-  const closeModal = () => { setModal(null); setSelected(null); setError(''); };
+  const closeModal = () => { setModal(null); setSelected(null); setError(''); setImgPreview(''); };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,7 +55,8 @@ const AdminHotels = () => {
         featured: form.is_featured,
         onSale: form.is_on_sale,
         discount_percent: parseInt(form.discount_percent || 0),
-        rating: parseFloat(form.rating || 0)
+        rating: parseFloat(form.rating || 0),
+        image_url: form.image_url
       };
       if (modal === 'create') await api.post('/api/hotels', payload);
       if (modal === 'edit') await api.put(`/api/hotels/${selected.id_hotel}`, payload);
@@ -127,30 +137,62 @@ const AdminHotels = () => {
           </div>
           {error && <div style={{ background: '#fff0f3', border: '3px solid var(--neo-pink)', padding: '0.75rem', marginBottom: '1rem', fontWeight: 600, color: '#be123c', fontSize: '0.875rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}><AlertCircle size={16} />{error}</div>}
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div><label className="label">Nama Hotel *</label><input className="input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required /></div>
-              <div><label className="label">Kota *</label><select className="input" value={form.city_id} onChange={e => setForm(f => ({ ...f, city_id: e.target.value }))} required><option value="">Pilih Kota</option>{cities.map(c => <option key={c.id_city} value={c.id_city}>{c.name}</option>)}</select></div>
-            </div>
-            <div><label className="label">Alamat</label><input className="input" value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} /></div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div><label className="label">Tipe Hotel</label><select className="input" value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}><option value="">Pilih Tipe</option>{['Budget', 'Bintang 2', 'Bintang 3', 'Bintang 4', 'Bintang 5', 'Resort', 'Boutique'].map(t => <option key={t}>{t}</option>)}</select></div>
-              <div><label className="label">Rating (0-5)</label><input type="number" className="input" min={0} max={5} step={0.1} value={form.rating} onChange={e => setForm(f => ({ ...f, rating: e.target.value }))} /></div>
-            </div>
-            <div><label className="label">Deskripsi</label><textarea className="input" rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} style={{ resize: 'vertical' }} /></div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', border: '3px solid var(--neo-dark)', background: form.is_featured ? 'var(--neo-yellow)' : 'white', cursor: 'pointer' }} onClick={() => setForm(f => ({ ...f, is_featured: !f.is_featured }))}>
-                <input type="checkbox" checked={form.is_featured} readOnly style={{ width: 18, height: 18, accentColor: 'var(--neo-dark)' }} />
-                <label className="label" style={{ margin: 0, cursor: 'pointer' }}>Is Featured</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div><label className="label">Nama Hotel *</label><input className="input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required /></div>
+                <div><label className="label">Kota *</label><select className="input" value={form.city_id} onChange={e => setForm(f => ({ ...f, city_id: e.target.value }))} required><option value="">Pilih Kota</option>{cities.map(c => <option key={c.id_city} value={c.id_city}>{c.name}</option>)}</select></div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', border: '3px solid var(--neo-dark)', background: form.is_on_sale ? '#fff0f3' : 'white', cursor: 'pointer' }} onClick={() => setForm(f => ({ ...f, is_on_sale: !f.is_on_sale }))}>
-                <input type="checkbox" checked={form.is_on_sale} readOnly style={{ width: 18, height: 18, accentColor: 'var(--neo-pink)' }} />
-                <label className="label" style={{ margin: 0, cursor: 'pointer' }}>On Sale</label>
+              <div><label className="label">Alamat</label><input className="input" value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} /></div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div><label className="label">Tipe Hotel</label><select className="input" value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}><option value="">Pilih Tipe</option>{['Budget', 'Bintang 2', 'Bintang 3', 'Bintang 4', 'Bintang 5', 'Resort', 'Boutique'].map(t => <option key={t}>{t}</option>)}</select></div>
+                <div><label className="label">Rating (0-5)</label><input type="number" className="input" min={0} max={5} step={0.1} value={form.rating} onChange={e => setForm(f => ({ ...f, rating: e.target.value }))} /></div>
               </div>
+              <div><label className="label">Deskripsi</label><textarea className="input" rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} style={{ resize: 'vertical' }} /></div>
+              <div>
+                <label className="label"><ImageIcon size={12} style={{ display: 'inline', marginRight: '0.4rem' }} />Foto Hotel (opsional)</label>
+                <div
+                  onClick={() => fileRef.current?.click()}
+                  style={{ border: `3px dashed ${imgPreview ? 'var(--neo-green)' : 'var(--neo-dark)'}`, padding: '1.25rem', textAlign: 'center', cursor: 'pointer', background: imgPreview ? '#f0fdf4' : '#fafafa', transition: 'all 0.2s' }}
+                >
+                  {imgPreview ? (
+                    <div>
+                      <img src={imgPreview} alt="preview" style={{ maxHeight: 140, maxWidth: '100%', objectFit: 'cover', border: '3px solid var(--neo-dark)', marginBottom: '0.4rem' }} />
+                      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#16a34a' }}>Klik untuk ganti gambar</div>
+                    </div>
+                  ) : (
+                    <div>
+                      <ImageIcon size={32} style={{ color: '#9ca3af', marginBottom: '0.4rem' }} />
+                      <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>Klik untuk upload foto hotel</div>
+                      <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.2rem' }}>JPG, PNG, WEBP · Maks 5MB</div>
+                    </div>
+                  )}
+                </div>
+                <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  if (!file.type.startsWith('image/')) { setError('Hanya file gambar yang diperbolehkan.'); return; }
+                  if (file.size > 5 * 1024 * 1024) { setError('Ukuran file maksimal 5MB.'); return; }
+                  setError('');
+                  const reader = new FileReader();
+                  reader.onloadend = () => { setImgPreview(reader.result); setForm(f => ({ ...f, image_url: reader.result })); };
+                  reader.readAsDataURL(file);
+                }} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', border: '3px solid var(--neo-dark)', background: form.is_featured ? 'var(--neo-yellow)' : 'white', cursor: 'pointer' }} onClick={() => setForm(f => ({ ...f, is_featured: !f.is_featured }))}>
+                  <input type="checkbox" checked={form.is_featured} readOnly style={{ width: 18, height: 18, accentColor: 'var(--neo-dark)' }} />
+                  <label className="label" style={{ margin: 0, cursor: 'pointer' }}>Is Featured</label>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', border: '3px solid var(--neo-dark)', background: form.is_on_sale ? '#fff0f3' : 'white', cursor: 'pointer' }} onClick={() => setForm(f => ({ ...f, is_on_sale: !f.is_on_sale }))}>
+                  <input type="checkbox" checked={form.is_on_sale} readOnly style={{ width: 18, height: 18, accentColor: 'var(--neo-pink)' }} />
+                  <label className="label" style={{ margin: 0, cursor: 'pointer' }}>On Sale</label>
+                </div>
+              </div>
+              {form.is_on_sale && <div><label className="label">Persen Diskon (%)</label><input type="number" className="input" min={0} max={100} value={form.discount_percent} onChange={e => setForm(f => ({ ...f, discount_percent: e.target.value }))} /></div>}
+              <button type="submit" className="btn btn-dark btn-full" disabled={submitting} style={{ marginTop: '0.5rem', justifyContent: 'center' }}>
+                {submitting ? 'Menyimpan...' : <><Check size={15} /> {modal === 'create' ? 'Tambah Hotel' : 'Simpan Perubahan'}</>}
+              </button>
             </div>
-            {form.is_on_sale && <div><label className="label">Persen Diskon (%)</label><input type="number" className="input" min={0} max={100} value={form.discount_percent} onChange={e => setForm(f => ({ ...f, discount_percent: e.target.value }))} /></div>}
-            <button type="submit" className="btn btn-dark btn-full" disabled={submitting} style={{ marginTop: '0.5rem', justifyContent: 'center' }}>
-              {submitting ? 'Menyimpan...' : <><Check size={15} /> {modal === 'create' ? 'Tambah Hotel' : 'Simpan Perubahan'}</>}
-            </button>
           </form>
         </ModalOverlay>
       )}

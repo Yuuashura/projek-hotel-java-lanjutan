@@ -27,7 +27,7 @@ const Navbar = () => {
             fontFamily: 'Space Grotesk, sans-serif', fontWeight: 900, fontSize: '1.4rem',
              letterSpacing: '-0.02em', color: 'var(--neo-dark)',
             boxShadow: '3px 3px 0px 0px #121212'
-          }}>
+          }} className="hover-wiggle animate-pop">
             NgiNep.
           </div>
         </Link>

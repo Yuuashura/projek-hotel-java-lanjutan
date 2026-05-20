@@ -84,8 +84,8 @@ const Home = () => {
           }}>
             <img src={s.image} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.75) 40%, rgba(0,0,0,0.15))' }} />
-            <div style={{ position: 'absolute', bottom: '4rem', left: '3rem', zIndex: 2, color: 'white', maxWidth: 500 }}>
-              <span className="badge badge-yellow" style={{ marginBottom: '0.75rem', display: 'inline-block' }}>{s.city}</span>
+            <div style={{ position: 'absolute', bottom: '4rem', left: '3rem', zIndex: 2, color: 'white', maxWidth: 500 }} className="animate-slide-in">
+              <span className="badge badge-yellow animate-pop" style={{ marginBottom: '0.75rem', display: 'inline-block', animationDelay: '0.1s' }}>{s.city}</span>
               <h1 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', textTransform: 'uppercase', margin: '0.5rem 0', lineHeight: 1.1 }}>{s.title}</h1>
               <p style={{ fontWeight: 500, color: 'rgba(255,255,255,0.8)', marginBottom: '1rem' }}>{s.desc}</p>
               <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -207,9 +207,9 @@ const Home = () => {
             { emoji: '🔒', color: 'var(--neo-green)', title: 'Transaksi Aman & Mudah', desc: 'Sistem enkripsi modern menjamin privasi Anda, didukung pilihan pembayaran transfer bank & QRIS yang mudah dan terpercaya.' },
             { emoji: '⚡', color: 'var(--neo-yellow)', title: 'Konfirmasi Instan', desc: 'Proses verifikasi pembayaran yang cepat oleh pihak hotel memastikan voucher menginap Anda segera terbit tanpa repot.' },
             { emoji: '💸', color: 'var(--neo-orange)', title: 'Promo Diskon Eksklusif', desc: 'Nikmati potongan harga spesial hingga penawaran menit-menit terakhir (last-minute deals) setiap harinya.' },
-          ].map(f => (
-            <div key={f.title} className="card" style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <div style={{ fontSize: '2rem' }}>{f.emoji}</div>
+          ].map((f, i) => (
+            <div key={f.title} className="card card-hover animate-slide-in" style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', animationDelay: `${i * 0.1}s` }}>
+              <div style={{ fontSize: '2rem' }} className="hover-wiggle">{f.emoji}</div>
               <div style={{ width: 40, height: 4, background: f.color, border: '2px solid var(--neo-dark)' }} />
               <h3 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', fontSize: '1rem', margin: 0 }}>{f.title}</h3>
               <p style={{ color: '#6b7280', fontWeight: 500, lineHeight: 1.6, fontSize: '0.875rem', margin: 0 }}>{f.desc}</p>

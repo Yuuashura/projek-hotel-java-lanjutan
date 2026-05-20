@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Upload, Clock, Check, AlertCircle, X } from 'lucide-react';
+import { Upload, Clock, Check, AlertCircle, X, ImageIcon } from 'lucide-react';
 import { formatCurrency, formatDate, diffDays } from '../../utils/formatters';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
@@ -16,12 +16,15 @@ const Payment = () => {
   const { bookingId } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const fileRef = useRef();
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [form, setForm] = useState({ payment_method: '', payment_proof: '' });
+  const [previewFile, setPreviewFile] = useState(null); // file object untuk preview
+  const [previewUrl, setPreviewUrl] = useState('');   // data URL untuk preview
   const [timeLeft, setTimeLeft] = useState(0);
 
   useEffect(() => {
@@ -35,6 +38,11 @@ const Payment = () => {
         if (!b) { navigate('/my-bookings'); return; }
         if (b.status !== 'PENDING') { navigate('/my-bookings'); return; }
         setBooking(b);
+        // Jika sudah ada bukti sebelumnya, tampilkan
+        if (b.payment_proof) {
+          setPreviewUrl(b.payment_proof);
+          setForm(f => ({ ...f, payment_method: b.payment_method || '', payment_proof: b.payment_proof }));
+        }
         if (b.payment_deadline) {
           const deadline = new Date(b.payment_deadline).getTime();
           setTimeLeft(Math.max(0, Math.floor((deadline - Date.now()) / 1000)));
@@ -56,14 +64,38 @@ const Payment = () => {
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setError('Hanya file gambar (JPG, PNG, WEBP) yang diperbolehkan.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Ukuran file maksimal 5MB.');
+      return;
+    }
+    setPreviewFile(file);
+    setError('');
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewUrl(reader.result);
+      setForm(f => ({ ...f, payment_proof: reader.result })); // simpan base64 / bisa diganti upload ke server
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.payment_method) return setError('Pilih metode pembayaran terlebih dahulu');
-    if (!form.payment_proof) return setError('Masukkan URL bukti pembayaran');
+    if (!form.payment_proof) return setError('Upload bukti pembayaran terlebih dahulu');
     setSubmitting(true);
     setError('');
     try {
-      await api.patch(`/api/bookings/${bookingId}/pay`, { payment_method: form.payment_method, payment_proof: form.payment_proof });
+      await api.patch(`/api/bookings/${bookingId}/pay`, {
+        payment_method: form.payment_method,
+        payment_proof: form.payment_proof,
+      });
       setSuccess(true);
     } catch (err) {
       setError(err.response?.data?.message || 'Gagal mengirim konfirmasi pembayaran');
@@ -113,9 +145,9 @@ const Payment = () => {
       )}
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '2rem', alignItems: 'flex-start' }}>
-        {/* Left: Ringkasan & Metode Bayar */}
+        {/* Left */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* Ringkasan Pesanan */}
+          {/* Ringkasan */}
           <div className="card" style={{ padding: '1.5rem' }}>
             <h3 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.95rem', marginBottom: '1.25rem', borderBottom: '2px solid var(--neo-dark)', paddingBottom: '0.75rem' }}>Ringkasan Pesanan</h3>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.875rem' }}>
@@ -136,9 +168,9 @@ const Payment = () => {
             </div>
           </div>
 
-          {/* Metode Pembayaran */}
+          {/* Metode Pembayaran + Upload Bukti */}
           <div className="card" style={{ padding: '1.5rem' }}>
-            <h3 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.95rem', marginBottom: '1.25rem', borderBottom: '2px solid var(--neo-dark)', paddingBottom: '0.75rem' }}>Pilih Metode Pembayaran</h3>
+            <h3 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.95rem', marginBottom: '1.25rem', borderBottom: '2px solid var(--neo-dark)', paddingBottom: '0.75rem' }}>Pilih Metode & Upload Bukti</h3>
             <form onSubmit={handleSubmit}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
                 {PAYMENT_METHODS.map(m => (
@@ -152,10 +184,39 @@ const Payment = () => {
                 ))}
               </div>
 
+              {/* Upload Bukti Pembayaran */}
               <div style={{ marginBottom: '1.25rem' }}>
-                <label className="label"><Upload size={14} style={{ display: 'inline', marginRight: '0.4rem' }} />URL Bukti Pembayaran *</label>
-                <input type="url" className="input" placeholder="https://imgur.com/bukti-transfer.jpg" value={form.payment_proof} onChange={e => setForm(f => ({ ...f, payment_proof: e.target.value }))} required />
-                <p style={{ fontSize: '0.75rem', color: '#9ca3af', fontWeight: 500, marginTop: '0.4rem' }}>Upload gambar ke imgur.com atau layanan lain, lalu paste URL-nya di sini.</p>
+                <label className="label"><Upload size={14} style={{ display: 'inline', marginRight: '0.4rem' }} />Upload Bukti Pembayaran *</label>
+
+                {/* Preview area */}
+                <div
+                  onClick={() => fileRef.current?.click()}
+                  style={{
+                    border: `3px dashed ${previewUrl ? 'var(--neo-green)' : 'var(--neo-dark)'}`,
+                    padding: '1.5rem',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    background: previewUrl ? '#f0fdf4' : '#fafafa',
+                    transition: 'all 0.2s',
+                    marginBottom: '0.5rem'
+                  }}
+                >
+                  {previewUrl ? (
+                    <div>
+                      <img src={previewUrl} alt="Bukti bayar" style={{ maxHeight: 200, maxWidth: '100%', objectFit: 'contain', border: '3px solid var(--neo-dark)', marginBottom: '0.5rem' }} />
+                      <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#16a34a' }}>
+                        {previewFile ? previewFile.name : 'Bukti pembayaran sebelumnya'} — Klik untuk ganti
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <ImageIcon size={40} style={{ color: '#9ca3af', marginBottom: '0.5rem' }} />
+                      <div style={{ fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: '0.875rem' }}>Klik untuk pilih gambar</div>
+                      <div style={{ fontSize: '0.75rem', color: '#9ca3af', fontWeight: 500, marginTop: '0.25rem' }}>JPG, PNG, WEBP · Maks 5MB</div>
+                    </div>
+                  )}
+                </div>
+                <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
               </div>
 
               {error && (

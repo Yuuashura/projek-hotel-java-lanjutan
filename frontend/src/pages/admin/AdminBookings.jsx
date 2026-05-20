@@ -152,7 +152,11 @@ const AdminBookings = () => {
             {selected.payment_proof && (
               <div style={{ marginBottom: '1.5rem' }}>
                 <div style={{ fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', color: '#9ca3af', marginBottom: '0.5rem' }}>Bukti Pembayaran</div>
-                <a href={selected.payment_proof} target="_blank" rel="noopener noreferrer" className="btn btn-blue btn-sm">Lihat Bukti Bayar</a>
+                {selected.payment_proof.startsWith('data:image') || selected.payment_proof.match(/\.(jpeg|jpg|gif|png)$/) != null ? (
+                  <img src={selected.payment_proof} alt="Bukti Pembayaran" style={{ maxWidth: '100%', maxHeight: 300, objectFit: 'contain', border: '3px solid var(--neo-dark)', background: '#f3f4f6' }} />
+                ) : (
+                  <a href={selected.payment_proof} target="_blank" rel="noopener noreferrer" className="btn btn-blue btn-sm">Lihat Bukti Bayar</a>
+                )}
               </div>
             )}
 

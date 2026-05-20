@@ -75,7 +75,7 @@ public class Booking {
     @com.fasterxml.jackson.annotation.JsonProperty("payment_method")
     private String paymentMethod;
 
-    @Column(name = "payment_proof")
+    @Column(name = "payment_proof", columnDefinition = "MEDIUMTEXT")
     @com.fasterxml.jackson.annotation.JsonProperty("payment_proof")
     private String paymentProof;
 

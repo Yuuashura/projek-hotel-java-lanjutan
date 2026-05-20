@@ -21,6 +21,7 @@ public class RoomTypeImage {
     @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"images", "facilities"})
     private RoomType roomType;
 
+    @Column(name = "image_url", columnDefinition = "MEDIUMTEXT")
     private String image_url;
 
     private int sort_order;     // 0 = foto utama tipe kamar

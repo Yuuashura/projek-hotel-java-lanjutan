@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Calendar, Clock, CheckCircle, XCircle, AlertCircle, ArrowRight } from 'lucide-react';
-import { formatCurrency, formatDate, statusColor } from '../../utils/formatters';
+import { Calendar, Clock, CheckCircle, XCircle, AlertCircle, ArrowRight, ChevronDown, ChevronUp, MapPin, Users } from 'lucide-react';
+import { formatCurrency, formatDate, diffDays, statusColor } from '../../utils/formatters';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 
@@ -16,13 +16,25 @@ const MyBookings = () => {
     if (!user || user.role !== 'ROLE_USER') navigate('/login');
   }, [user]);
 
-  useEffect(() => {
+  const loadBookings = () => {
     setLoading(true);
     api.get(`/api/bookings/my?status=${tab}`)
       .then(r => setBookings(r.data.data || []))
       .catch(() => setBookings([]))
       .finally(() => setLoading(false));
-  }, [tab]);
+  };
+
+  useEffect(() => { loadBookings(); }, [tab]);
+
+  const handleCancel = async (bookingId) => {
+    if (!window.confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) return;
+    try {
+      await api.patch(`/api/bookings/${bookingId}/cancel`);
+      loadBookings();
+    } catch {
+      alert('Gagal membatalkan pesanan. Silakan coba lagi.');
+    }
+  };
 
   const tabs = [
     { key: 'active', label: 'Pesanan Aktif', icon: Clock, color: 'var(--neo-orange)' },
@@ -69,16 +81,19 @@ const MyBookings = () => {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          {bookings.map(booking => <BookingCard key={booking.id_booking || booking.id} booking={booking} tab={tab} />)}
+          {bookings.map(booking => <BookingCard key={booking.id_booking || booking.id} booking={booking} onCancel={handleCancel} />)}
         </div>
       )}
     </div>
   );
 };
 
-const BookingCard = ({ booking, tab }) => {
+const BookingCard = ({ booking, onCancel }) => {
   const { bg, color, label } = statusColor(booking.status);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [expanded, setExpanded] = useState(false);
+
+  const alreadyPaid = !!booking.payment_proof;
 
   useEffect(() => {
     if (booking.payment_deadline && booking.status === 'PENDING') {
@@ -94,20 +109,24 @@ const BookingCard = ({ booking, tab }) => {
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
   };
 
+  const nights = diffDays(booking.check_in, booking.check_out);
+
   return (
     <div className="card" style={{ padding: '1.5rem', overflow: 'hidden' }}>
+      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
         <div>
           <span style={{ fontFamily: 'Space Grotesk', fontWeight: 900, color: '#9ca3af', fontSize: '0.75rem', textTransform: 'uppercase' }}>
-            #{booking.id_booking || booking.id} • Hotel ID {booking.hotel_id}
+            Pesanan #{booking.id_booking || booking.id}
           </span>
           <h3 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '1rem', textTransform: 'uppercase', margin: '0.25rem 0', color: 'var(--neo-dark)' }}>
-            Hotel #{booking.hotel_id}
+            {booking.hotel_name || `Hotel #${booking.hotel_id}`}
           </h3>
         </div>
         <span className="badge" style={{ background: bg, color, border: `2px solid var(--neo-dark)`, boxShadow: '2px 2px 0px 0px var(--neo-dark)' }}>{label}</span>
       </div>
 
+      {/* Summary Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem', marginBottom: '1rem', padding: '1rem', background: 'var(--neo-light)', border: '2px solid var(--neo-dark)' }}>
         <div>
           <div style={{ color: '#9ca3af', fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Check-In</div>
@@ -116,6 +135,10 @@ const BookingCard = ({ booking, tab }) => {
         <div>
           <div style={{ color: '#9ca3af', fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Check-Out</div>
           <div style={{ fontWeight: 700, fontSize: '0.875rem' }}>{formatDate(booking.check_out)}</div>
+        </div>
+        <div>
+          <div style={{ color: '#9ca3af', fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Durasi</div>
+          <div style={{ fontWeight: 700, fontSize: '0.875rem' }}>{nights} malam</div>
         </div>
         <div>
           <div style={{ color: '#9ca3af', fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Tamu</div>
@@ -127,6 +150,14 @@ const BookingCard = ({ booking, tab }) => {
         </div>
       </div>
 
+      {/* Bukti Upload - jika sudah dibayar */}
+      {alreadyPaid && (
+        <div style={{ background: '#f0fdf4', border: '2px solid #16a34a', padding: '0.6rem 0.875rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', fontWeight: 600, color: '#166534' }}>
+          <CheckCircle size={14} style={{ color: '#16a34a', flexShrink: 0 }} />
+          Bukti pembayaran sudah dikirim — menunggu konfirmasi admin hotel.
+        </div>
+      )}
+
       {/* Pending Countdown */}
       {booking.status === 'PENDING' && timeLeft > 0 && (
         <div style={{ background: '#fff8e1', border: '2px solid var(--neo-orange)', padding: '0.6rem 0.875rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -135,19 +166,57 @@ const BookingCard = ({ booking, tab }) => {
         </div>
       )}
 
+      {/* Detail Expandable */}
+      {expanded && (
+        <div style={{ background: '#f9fafb', border: '2px solid #e5e7eb', padding: '1rem', marginBottom: '1rem', fontSize: '0.875rem' }}>
+          <h4 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.8rem', marginBottom: '0.75rem', color: '#6b7280' }}>Detail Pemesan</h4>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem 1.5rem' }}>
+            {[
+              { label: 'Nama Pemesan', val: booking.orderer_name },
+              { label: 'Email', val: booking.orderer_email },
+              { label: 'No. Telepon', val: booking.orderer_phone },
+              { label: 'Metode Bayar', val: booking.payment_method || '-' },
+              { label: 'ID Pesanan', val: `#${booking.id_booking || booking.id}` },
+            ].map(({ label, val }) => val && (
+              <div key={label}>
+                <div style={{ color: '#9ca3af', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase' }}>{label}</div>
+                <div style={{ fontWeight: 600, marginTop: '0.15rem' }}>{val}</div>
+              </div>
+            ))}
+          </div>
+          {booking.payment_proof && (
+            <div style={{ marginTop: '0.75rem' }}>
+              <div style={{ color: '#9ca3af', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.4rem' }}>Bukti Pembayaran</div>
+              <a href={booking.payment_proof} target="_blank" rel="noopener noreferrer">
+                <img src={booking.payment_proof} alt="Bukti Bayar" style={{ maxHeight: 160, maxWidth: '100%', border: '3px solid var(--neo-dark)', objectFit: 'contain' }} />
+              </a>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Action Buttons */}
       <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-        {booking.status === 'PENDING' && (
+        {/* Bayar Sekarang hanya muncul jika PENDING dan belum ada bukti pembayaran */}
+        {booking.status === 'PENDING' && !alreadyPaid && (
           <Link to={`/payment/${booking.id_booking || booking.id}`} className="btn btn-orange btn-sm">
             <Calendar size={13} /> Bayar Sekarang
+          </Link>
+        )}
+        {/* Upload Ulang hanya jika PENDING dan sudah ada bukti tapi ingin ganti */}
+        {booking.status === 'PENDING' && alreadyPaid && (
+          <Link to={`/payment/${booking.id_booking || booking.id}`} className="btn btn-sm" style={{ background: '#e0f2fe', color: '#0369a1', border: '3px solid #0369a1', boxShadow: '3px 3px 0 #0369a1' }}>
+            Ganti Bukti Bayar
           </Link>
         )}
         {booking.status === 'COMPLETED' && (
           <Link to={`/hotels/${booking.hotel_id}`} className="btn btn-primary btn-sm">Pesan Lagi</Link>
         )}
-        <Link to="#" className="btn btn-white btn-sm">Lihat Detail</Link>
+        <button onClick={() => setExpanded(e => !e)} className="btn btn-white btn-sm">
+          {expanded ? <><ChevronUp size={13} /> Sembunyikan</> : <><ChevronDown size={13} /> Lihat Detail</>}
+        </button>
         {booking.status === 'PENDING' && (
-          <button className="btn btn-sm" style={{ background: '#fff0f3', color: 'var(--neo-pink)', border: '3px solid var(--neo-pink)', boxShadow: '3px 3px 0px 0px var(--neo-pink)' }}>
+          <button onClick={() => onCancel(booking.id_booking || booking.id)} className="btn btn-sm" style={{ background: '#fff0f3', color: 'var(--neo-pink)', border: '3px solid var(--neo-pink)', boxShadow: '3px 3px 0px 0px var(--neo-pink)' }}>
             <XCircle size={13} /> Batalkan
           </button>
         )}

@@ -7,12 +7,15 @@ import com.ngninep.hotel.dto.res.HotelImageResponse;
 import com.ngninep.hotel.dto.res.HotelResponse;
 import com.ngninep.hotel.entity.City;
 import com.ngninep.hotel.entity.Hotel;
+import com.ngninep.hotel.entity.HotelImage;
 import com.ngninep.hotel.repository.CityRepository;
+import com.ngninep.hotel.repository.HotelImageRepository;
 import com.ngninep.hotel.repository.HotelRepository;
 import com.ngninep.hotel.service.HotelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
@@ -25,6 +28,7 @@ public class HotelServiceImpl implements HotelService {
 
     private final HotelRepository hotelRepository;
     private final CityRepository cityRepository;
+    private final HotelImageRepository hotelImageRepository;
 
     private HotelResponse mapToResponse(Hotel hotel) {
         CityResponse cityResponse = null;
@@ -133,6 +137,7 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
+    @Transactional
     public HotelResponse create(HotelRequest request) {
         City city = cityRepository.findById(request.getCityId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kota tidak valid"));
@@ -149,11 +154,23 @@ public class HotelServiceImpl implements HotelService {
                 .discount_percent(request.getDiscountPercent())
                 .rating(request.getRating())
                 .build();
-                
-        return mapToResponse(hotelRepository.save(hotel));
+        
+        Hotel saved = hotelRepository.save(hotel);
+
+        // Simpan gambar jika ada
+        if (request.getImageUrl() != null && !request.getImageUrl().isBlank()) {
+            hotelImageRepository.save(HotelImage.builder()
+                    .hotel(saved)
+                    .image_url(request.getImageUrl())
+                    .sort_order(0)
+                    .build());
+        }
+
+        return mapToResponse(hotelRepository.findById(saved.getIdHotel()).orElse(saved));
     }
 
     @Override
+    @Transactional
     public HotelResponse update(int id, HotelRequest request) {
         Hotel hotel = hotelRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotel tidak ditemukan"));
@@ -172,7 +189,20 @@ public class HotelServiceImpl implements HotelService {
         hotel.setDiscount_percent(request.getDiscountPercent());
         hotel.setRating(request.getRating());
         
-        return mapToResponse(hotelRepository.save(hotel));
+        Hotel saved = hotelRepository.save(hotel);
+
+        // Update gambar jika ada yang baru
+        if (request.getImageUrl() != null && !request.getImageUrl().isBlank()) {
+            // Hapus semua gambar lama dan ganti dengan yang baru
+            hotelImageRepository.deleteByHotelId(id);
+            hotelImageRepository.save(HotelImage.builder()
+                    .hotel(saved)
+                    .image_url(request.getImageUrl())
+                    .sort_order(0)
+                    .build());
+        }
+
+        return mapToResponse(hotelRepository.findById(saved.getIdHotel()).orElse(saved));
     }
 
     @Override

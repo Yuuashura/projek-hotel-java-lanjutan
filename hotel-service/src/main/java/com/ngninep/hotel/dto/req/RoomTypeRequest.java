@@ -33,4 +33,7 @@ public class RoomTypeRequest {
     
     @JsonProperty("room_available")
     private int roomAvailable;
+
+    @JsonProperty("image_url")
+    private String imageUrl;  // URL atau base64 gambar utama kamar
 }

@@ -38,4 +38,7 @@ public class HotelRequest {
     private int discountPercent;
     
     private float rating;
+
+    @JsonProperty("image_url")
+    private String imageUrl;  // URL atau base64 gambar utama hotel
 }

@@ -126,7 +126,11 @@ const Hotels = () => {
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: viewMode === 'grid' ? 'repeat(auto-fill, minmax(300px, 1fr))' : '1fr', gap: '1.5rem' }}>
-            {hotels.map(hotel => viewMode === 'grid' ? <HotelCard key={hotel.id_hotel} hotel={hotel} /> : <HotelCardList key={hotel.id_hotel} hotel={hotel} />)}
+            {hotels.map((hotel, index) => (
+              <div key={hotel.id_hotel} className="animate-slide-in" style={{ animationDelay: `${index * 0.05}s` }}>
+                {viewMode === 'grid' ? <HotelCard hotel={hotel} /> : <HotelCardList hotel={hotel} />}
+              </div>
+            ))}
           </div>
         )}
       </div>

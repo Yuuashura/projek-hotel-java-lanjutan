@@ -80,6 +80,19 @@ public class BookingController {
         return ResponseEntity.ok(response);
     }
 
+    // 🔒 USER — Membatalkan pesanan sendiri (hanya PENDING)
+    @PatchMapping("/{id}/cancel")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public ResponseEntity<WebResponse<BookingResponse>> cancelBooking(@PathVariable int id) {
+        int customerId = getCurrentUserId();
+        WebResponse<BookingResponse> response = WebResponse.<BookingResponse>builder()
+                .status("200")
+                .message("Pesanan berhasil dibatalkan")
+                .data(bookingService.cancelBooking(id, customerId))
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
     // 🔒 ADMIN_APP & ADMIN_HOTEL — Melihat semua pesanan
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_APP', 'ROLE_ADMIN_HOTEL')")

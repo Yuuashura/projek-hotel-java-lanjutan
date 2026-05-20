@@ -19,15 +19,27 @@ const Login = () => {
     try {
       const res = await api.post('/api/auth/login', form);
       const data = res.data;
-      const user = {
-        email: data.email,
-        first_name: data.first_name,
-        last_name: data.last_name,
-        role: data.role
-      };
-      login(data.token, user);
+      // Simpan token dulu agar request berikutnya bisa auth
+      localStorage.setItem('token', data.token);
+      // Fetch profil lengkap dari /api/users/me untuk dapat age, city_id, phone, dll.
+      let userData;
+      try {
+        const profileRes = await api.get('/api/users/me', {
+          headers: { Authorization: `Bearer ${data.token}` }
+        });
+        userData = profileRes.data;
+      } catch {
+        // Fallback ke data login response jika gagal fetch profil
+        userData = {
+          email: data.email,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          role: data.role
+        };
+      }
+      login(data.token, userData);
       // Redirect berdasarkan role
-      if (user.role === 'ROLE_ADMIN_HOTEL' || user.role === 'ROLE_ADMIN_APP') {
+      if (userData.role === 'ROLE_ADMIN_HOTEL' || userData.role === 'ROLE_ADMIN_APP') {
         navigate('/admin/dashboard');
       } else {
         navigate('/');

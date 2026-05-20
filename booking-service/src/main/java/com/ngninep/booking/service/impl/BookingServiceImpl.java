@@ -132,6 +132,22 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    public BookingResponse cancelBooking(int id, int customerId) {
+        Booking booking = getBookingEntityById(id);
+        
+        if (booking.getCustomerId() != customerId) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Anda tidak memiliki akses ke booking ini");
+        }
+        
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hanya pesanan dengan status PENDING yang bisa dibatalkan");
+        }
+        
+        booking.setStatus(BookingStatus.CANCELLED);
+        return mapToResponse(bookingRepository.save(booking));
+    }
+
+    @Override
     public void deleteBooking(int id) {
         Booking booking = getBookingEntityById(id);
         bookingRepository.delete(booking);

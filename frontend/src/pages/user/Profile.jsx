@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Lock, Camera, Save, AlertCircle, CheckCircle, Eye, EyeOff } from 'lucide-react';
+import { User, Lock, Camera, Save, AlertCircle, CheckCircle, Eye, EyeOff, Upload } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 
@@ -11,10 +11,12 @@ const Profile = () => {
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState({ type: '', text: '' });
+  const avatarRef = useRef();
 
   const [form, setForm] = useState({ first_name: '', last_name: '', age: '', city_id: '', phone: '', profile_picture: '' });
   const [pwForm, setPwForm] = useState({ old_password: '', new_password: '', confirm: '' });
   const [showPw, setShowPw] = useState({ old: false, new: false, confirm: false });
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (!user) navigate('/login');
@@ -26,18 +28,36 @@ const Profile = () => {
 
   const showMsg = (type, text) => { setMsg({ type, text }); setTimeout(() => setMsg({ type: '', text: '' }), 4000); };
 
-  const [isEditing, setIsEditing] = useState(false);
-
   const handleProfileSave = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const res = await api.put('/api/users/me', { first_name: form.first_name, last_name: form.last_name, age: parseInt(form.age), city_id: parseInt(form.city_id), phone: form.phone, profile_picture: form.profile_picture });
-      login(token, res.data); // FIX: use res.data directly instead of res.data.data
+      login(token, res.data);
       showMsg('success', 'Profil berhasil diperbarui!');
       setIsEditing(false);
     } catch (err) {
       showMsg('error', err.response?.data?.message || 'Gagal memperbarui profil');
+    } finally { setLoading(false); }
+  };
+
+  const handlePwSave = async (e) => {
+    e.preventDefault();
+    if (pwForm.new_password !== pwForm.confirm) {
+      showMsg('error', 'Konfirmasi password baru tidak cocok!');
+      return;
+    }
+    if (pwForm.new_password.length < 6) {
+      showMsg('error', 'Password baru minimal 6 karakter.');
+      return;
+    }
+    setLoading(true);
+    try {
+      await api.put('/api/users/me/change-password', { old_password: pwForm.old_password, new_password: pwForm.new_password, confirm_password: pwForm.confirm });
+      showMsg('success', 'Password berhasil diubah! Silakan login kembali.');
+      setTimeout(() => { logout(); navigate('/login'); }, 2000);
+    } catch (err) {
+      showMsg('error', err.response?.data?.message || 'Gagal mengubah password. Pastikan password lama benar.');
     } finally { setLoading(false); }
   };
 
@@ -65,11 +85,6 @@ const Profile = () => {
               <User size={36} style={{ color: 'var(--neo-dark)' }} />
             )}
           </div>
-          {isEditing && (
-            <button style={{ position: 'absolute', bottom: -6, right: -6, width: 28, height: 28, background: 'var(--neo-orange)', border: '3px solid var(--neo-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '2px 2px 0px 0px var(--neo-dark)' }}>
-              <Camera size={13} style={{ color: 'white' }} />
-            </button>
-          )}
         </div>
         <div>
           <h1 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: 'clamp(1.25rem, 2.5vw, 1.75rem)', textTransform: 'uppercase', margin: 0 }}>{user?.first_name} {user?.last_name}</h1>
@@ -114,7 +129,6 @@ const Profile = () => {
             </div>
           ) : (
             <form onSubmit={handleProfileSave} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              {/* Read-only email */}
               <div>
                 <label className="label">Email (tidak dapat diubah)</label>
                 <input className="input" type="email" value={user?.email || ''} disabled style={{ background: '#f3f4f6', cursor: 'not-allowed', color: '#9ca3af' }} />

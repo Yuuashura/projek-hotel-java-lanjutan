@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Plus, Pencil, Trash2, X, AlertCircle, ArrowLeft, Users } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, AlertCircle, ArrowLeft, Users, ImageIcon } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../utils/api';
@@ -11,7 +11,8 @@ const EMPTY_FORM = {
   price_per_night: '',
   max_guest: '2',
   room_available: '5',
-  smoking: false
+  smoking: false,
+  image_url: '',
 };
 
 const AdminRoomTypes = () => {
@@ -24,6 +25,8 @@ const AdminRoomTypes = () => {
   const [form, setForm] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [imgPreview, setImgPreview] = useState('');
+  const fileRef = useRef();
 
   const loadData = async () => {
     setLoading(true);
@@ -45,24 +48,30 @@ const AdminRoomTypes = () => {
     loadData();
   }, [hotelId]);
 
-  const openCreate = () => {
-    setForm(EMPTY_FORM);
-    setError('');
-    setModal('create');
-  };
+  // openCreate is now defined after openEdit
 
   const openEdit = (room) => {
     setSelected(room);
+    const existingImg = room.images?.[0]?.imageUrl || '';
     setForm({
       name: room.name,
       description: room.description || '',
       price_per_night: room.price_per_night.toString(),
       max_guest: room.max_guest.toString(),
       room_available: room.room_available.toString(),
-      smoking: room.is_smoking || room.smoking || false
+      smoking: room.is_smoking || room.smoking || false,
+      image_url: existingImg,
     });
+    setImgPreview(existingImg);
     setError('');
     setModal('edit');
+  };
+
+  const openCreate = () => {
+    setForm(EMPTY_FORM);
+    setImgPreview('');
+    setError('');
+    setModal('create');
   };
 
   const openDelete = (room) => {
@@ -88,7 +97,8 @@ const AdminRoomTypes = () => {
         price_per_night: parseInt(form.price_per_night),
         max_guest: parseInt(form.max_guest),
         room_available: parseInt(form.room_available),
-        smoking: form.smoking
+        smoking: form.smoking,
+        image_url: form.image_url
       };
 
       if (modal === 'create') {
@@ -156,51 +166,63 @@ const AdminRoomTypes = () => {
           <table className="neo-table">
             <thead>
               <tr>
-                {['#', 'Tipe Kamar', 'Harga / Malam', 'Kapasitas', 'Kamar Tersedia', 'Smoking', 'Aksi'].map(h => <th key={h}>{h}</th>)}
+                {['#', 'Gambar', 'Tipe Kamar', 'Harga / Malam', 'Kapasitas', 'Kamar Tersedia', 'Smoking', 'Aksi'].map(h => <th key={h}>{h}</th>)}
               </tr>
             </thead>
             <tbody>
-              {rooms.map(r => (
-                <tr key={r.id_room_type}>
-                  <td style={{ fontFamily: 'Space Grotesk', fontWeight: 700 }}>#{r.id_room_type}</td>
-                  <td>
-                    <div style={{ fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '0.9rem', textTransform: 'uppercase' }}>
-                      {r.name}
-                    </div>
-                    <div style={{ color: '#9ca3af', fontSize: '0.75rem', fontWeight: 500 }}>
-                      {r.description || 'Tidak ada deskripsi'}
-                    </div>
-                  </td>
-                  <td style={{ fontFamily: 'Space Grotesk', fontWeight: 700, color: 'var(--neo-orange)' }}>
-                    {formatCurrency(r.price_per_night)}
-                  </td>
-                  <td style={{ fontWeight: 500 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                      <Users size={14} /> {r.max_guest} Tamu
-                    </div>
-                  </td>
-                  <td style={{ fontWeight: 700 }}>
-                    {r.room_available} Kamar
-                  </td>
-                  <td>
-                    {r.is_smoking || r.smoking ? (
-                      <span className="badge badge-gray" style={{ fontSize: '0.7rem' }}>Boleh Merokok</span>
-                    ) : (
-                      <span className="badge badge-green" style={{ fontSize: '0.7rem' }}>Bebas Asap</span>
-                    )}
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button onClick={() => openEdit(r)} className="btn btn-primary btn-sm" title="Edit Tipe Kamar">
-                        <Pencil size={13} />
-                      </button>
-                      <button onClick={() => openDelete(r)} className="btn btn-red btn-sm" title="Hapus Tipe Kamar">
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {rooms.map(r => {
+                const thumb = r.images?.[0]?.imageUrl || '';
+                return (
+                  <tr key={r.id_room_type}>
+                    <td style={{ fontFamily: 'Space Grotesk', fontWeight: 700 }}>#{r.id_room_type}</td>
+                    <td>
+                      {thumb ? (
+                        <img src={thumb} alt={r.name} style={{ width: 60, height: 45, objectFit: 'cover', border: '2px solid var(--neo-dark)' }} />
+                      ) : (
+                        <div style={{ width: 60, height: 45, background: '#f3f4f6', border: '2px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <ImageIcon size={16} style={{ color: '#9ca3af' }} />
+                        </div>
+                      )}
+                    </td>
+                    <td>
+                      <div style={{ fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '0.9rem', textTransform: 'uppercase' }}>
+                        {r.name}
+                      </div>
+                      <div style={{ color: '#9ca3af', fontSize: '0.75rem', fontWeight: 500 }}>
+                        {r.description || 'Tidak ada deskripsi'}
+                      </div>
+                    </td>
+                    <td style={{ fontFamily: 'Space Grotesk', fontWeight: 700, color: 'var(--neo-orange)' }}>
+                      {formatCurrency(r.price_per_night)}
+                    </td>
+                    <td style={{ fontWeight: 500 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <Users size={14} /> {r.max_guest} Tamu
+                      </div>
+                    </td>
+                    <td style={{ fontWeight: 700 }}>
+                      {r.room_available} Kamar
+                    </td>
+                    <td>
+                      {r.is_smoking || r.smoking ? (
+                        <span className="badge badge-gray" style={{ fontSize: '0.7rem' }}>Boleh Merokok</span>
+                      ) : (
+                        <span className="badge badge-green" style={{ fontSize: '0.7rem' }}>Bebas Asap</span>
+                      )}
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button onClick={() => openEdit(r)} className="btn btn-primary btn-sm" title="Edit Tipe Kamar">
+                          <Pencil size={13} />
+                        </button>
+                        <button onClick={() => openDelete(r)} className="btn btn-red btn-sm" title="Hapus Tipe Kamar">
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
           {rooms.length === 0 && (
@@ -248,6 +270,38 @@ const AdminRoomTypes = () => {
                   Smoking Room (Boleh Merokok)
                 </label>
               </div>
+            </div>
+
+            {/* Gambar Kamar */}
+            <div>
+              <label className="label"><ImageIcon size={12} style={{ display: 'inline', marginRight: '0.4rem' }} />Foto Kamar (opsional)</label>
+              <div
+                onClick={() => fileRef.current?.click()}
+                style={{ border: `3px dashed ${imgPreview ? 'var(--neo-green)' : 'var(--neo-dark)'}`, padding: '1.25rem', textAlign: 'center', cursor: 'pointer', background: imgPreview ? '#f0fdf4' : '#fafafa', transition: 'all 0.2s' }}
+              >
+                {imgPreview ? (
+                  <div>
+                    <img src={imgPreview} alt="preview" style={{ maxHeight: 140, maxWidth: '100%', objectFit: 'cover', border: '3px solid var(--neo-dark)', marginBottom: '0.4rem' }} />
+                    <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#16a34a' }}>Klik untuk ganti gambar</div>
+                  </div>
+                ) : (
+                  <div>
+                    <ImageIcon size={32} style={{ color: '#9ca3af', marginBottom: '0.4rem' }} />
+                    <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>Klik untuk upload foto kamar</div>
+                    <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.2rem' }}>JPG, PNG, WEBP · Maks 5MB</div>
+                  </div>
+                )}
+              </div>
+              <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                if (!file.type.startsWith('image/')) { setError('Hanya file gambar yang diperbolehkan.'); return; }
+                if (file.size > 5 * 1024 * 1024) { setError('Ukuran file maksimal 5MB.'); return; }
+                setError('');
+                const reader = new FileReader();
+                reader.onloadend = () => { setImgPreview(reader.result); setForm(f => ({ ...f, image_url: reader.result })); };
+                reader.readAsDataURL(file);
+              }} />
             </div>
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
               <button type="submit" className="btn btn-orange" disabled={submitting} style={{ opacity: submitting ? 0.7 : 1 }}>
