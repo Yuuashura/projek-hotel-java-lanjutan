@@ -3,10 +3,10 @@ import axios from 'axios';
 // Gunakan URL relatif sehingga Vite dev proxy bisa meneruskan ke port 8080
 // Saat production build, ubah ke URL gateway langsung: 'http://localhost:8080'
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080',
-  headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+  baseURL: import.meta.env.VITE_API_URL || '/',
+  headers: { 'Content-Type': 'application/json' },
 });
-  
+
 // Sisipkan Bearer Token secara otomatis pada setiap request
 api.interceptors.request.use(
   (config) => {
