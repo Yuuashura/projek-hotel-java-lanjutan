@@ -11,7 +11,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/');
   };
 
   const isAdmin = user?.role === 'ROLE_ADMIN_HOTEL' || user?.role === 'ROLE_ADMIN_APP';
@@ -54,35 +54,38 @@ const Navbar = () => {
                 <span>Hai, {user.first_name}</span>
                 <ChevronDown size={12} />
               </button>
-              {dropdownOpen && (
-                <div className="reveal active" style={{
-                  position: 'absolute', right: 0, top: 'calc(100% + 8px)', width: 220,
-                  background: 'var(--color-surface)', border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-float)', zIndex: 100,
-                  borderRadius: 'var(--radius-sm)', overflow: 'hidden'
-                }}>
-                  <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--color-accent)', background: 'var(--color-background)' }}>
-                    <p style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '0.85rem', margin: 0, color: 'var(--color-text)' }}>{user.first_name} {user.last_name}</p>
-                    <span className="badge" style={{ marginTop: 6, fontSize: '0.65rem', background: 'rgba(212,175,55,0.1)', color: 'var(--color-primary)', borderColor: 'transparent' }}>{user.role?.replace('ROLE_', '')}</span>
-                  </div>
-                  {user.role === 'ROLE_USER' && (
-                    <Link to="/my-bookings" onClick={() => setDropdownOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.85rem 1.25rem', textDecoration: 'none', color: 'var(--color-text)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', borderBottom: '1px solid var(--color-accent)', transition: 'background 0.3s' }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'var(--color-background)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                      <Calendar size={14} /> Pesanan Saya
-                    </Link>
-                  )}
-                  <Link to="/profile" onClick={() => setDropdownOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.85rem 1.25rem', textDecoration: 'none', color: 'var(--color-text)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', borderBottom: '1px solid var(--color-accent)', transition: 'background 0.3s' }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'var(--color-background)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                    <User size={14} /> Profil Saya
-                  </Link>
-                  <button onClick={() => { setDropdownOpen(false); handleLogout(); }} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.85rem 1.25rem', background: 'none', border: 'none', cursor: 'pointer', color: '#E53E3E', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', width: '100%', textAlign: 'left', transition: 'background 0.3s' }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'var(--color-background)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                    <LogOut size={14} /> Keluar
-                  </button>
+              <div style={{
+                position: 'absolute', right: 0, top: 'calc(100% + 8px)', width: 220,
+                background: 'var(--color-surface)', border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-float)', zIndex: 100,
+                borderRadius: 'var(--radius-sm)', overflow: 'hidden',
+                transformOrigin: 'top right',
+                transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                opacity: dropdownOpen ? 1 : 0,
+                transform: dropdownOpen ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(-8px)',
+                pointerEvents: dropdownOpen ? 'auto' : 'none',
+              }}>
+                <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--color-accent)', background: 'var(--color-background)' }}>
+                  <p style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '0.85rem', margin: 0, color: 'var(--color-text)' }}>{user.first_name} {user.last_name}</p>
+                  <span className="badge" style={{ marginTop: 6, fontSize: '0.65rem', background: 'rgba(44,82,130,0.1)', color: 'var(--color-primary)', borderColor: 'transparent' }}>{user.role?.replace('ROLE_', '')}</span>
                 </div>
-              )}
+                {user.role === 'ROLE_USER' && (
+                  <Link to="/my-bookings" onClick={() => setDropdownOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.85rem 1.25rem', textDecoration: 'none', color: 'var(--color-text)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', borderBottom: '1px solid var(--color-accent)', transition: 'background 0.3s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'var(--color-background)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    <Calendar size={14} /> Pesanan Saya
+                  </Link>
+                )}
+                <Link to="/profile" onClick={() => setDropdownOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.85rem 1.25rem', textDecoration: 'none', color: 'var(--color-text)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', borderBottom: '1px solid var(--color-accent)', transition: 'background 0.3s' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--color-background)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <User size={14} /> Profil Saya
+                </Link>
+                <button onClick={() => { setDropdownOpen(false); handleLogout(); }} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.85rem 1.25rem', background: 'none', border: 'none', cursor: 'pointer', color: '#E53E3E', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', width: '100%', textAlign: 'left', transition: 'background 0.3s' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--color-background)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <LogOut size={14} /> Keluar
+                </button>
+              </div>
             </div>
           ) : (
             <>

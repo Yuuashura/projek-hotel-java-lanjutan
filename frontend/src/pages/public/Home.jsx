@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Search, Star, MapPin, ArrowRight, ChevronDown } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 import api from '../../utils/api';
+import CitySearchSelect from '../../components/CitySearchSelect';
 
 // FAQ Data
 const faqs = [
@@ -142,10 +143,12 @@ const Home = () => {
             </div>
             <div style={{ flex: 1, minWidth: 150 }}>
               <label className="label" style={{ fontSize: '0.7rem', letterSpacing: '1px' }}>Kota</label>
-              <select className="input" style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', padding: '0.5rem 0', background: 'transparent', borderRadius: 0, color: 'var(--color-text)' }} value={search.city} onChange={e => setSearch(s => ({ ...s, city: e.target.value }))}>
-                <option value="">Semua Kota</option>
-                {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
+              <CitySearchSelect
+                cities={cities}
+                value={search.city}
+                onChange={val => setSearch(s => ({ ...s, city: val }))}
+                placeholder="Semua Kota"
+              />
             </div>
             <button type="submit" className="btn btn-primary btn-lg" style={{ height: 56, flexShrink: 0, padding: '0 2.5rem', background: 'var(--color-primary)' }}>
               Discover

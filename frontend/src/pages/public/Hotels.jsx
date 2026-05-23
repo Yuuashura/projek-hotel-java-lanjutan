@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Search, SlidersHorizontal, Star, MapPin, Grid, List, X, Loader } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 import api from '../../utils/api';
+import CitySearchSelect from '../../components/CitySearchSelect';
 
 const Hotels = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -57,10 +58,13 @@ const Hotels = () => {
 
           <form onSubmit={handleSearch} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', flex: 1, justifyContent: 'flex-end', maxWidth: 800 }}>
             <input className="input" style={{ width: 'auto', minWidth: 200, padding: '0.5rem 1rem', height: 42 }} placeholder="Cari kata kunci..." value={filters.keyword} onChange={e => setFilters(f => ({ ...f, keyword: e.target.value }))} />
-            <select className="input" style={{ width: 'auto', minWidth: 160, padding: '0.5rem 1rem', height: 42 }} value={filters.cityId} onChange={e => setFilters(f => ({ ...f, cityId: e.target.value }))}>
-              <option value="">Semua Kota</option>
-              {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
+            <CitySearchSelect
+              cities={cities}
+              value={filters.cityId}
+              onChange={val => setFilters(f => ({ ...f, cityId: val }))}
+              placeholder="Semua Kota"
+              style={{ width: 'auto', minWidth: 160 }}
+            />
             <button type="submit" className="btn btn-primary" style={{ padding: '0 1.5rem', height: 42, background: 'var(--color-primary)' }}><Search size={14} /> Cari</button>
           </form>
         </div>

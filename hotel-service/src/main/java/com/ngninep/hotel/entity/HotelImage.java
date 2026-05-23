@@ -21,7 +21,7 @@ public class HotelImage {
     @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"images", "facilities", "roomTypes"})
     private Hotel hotel;
 
-    @Column(name = "image_url", columnDefinition = "MEDIUMTEXT")
+    @Column(name = "image_url", columnDefinition = "TEXT")
     private String image_url;   // URL atau base64 gambar hotel (eksterior, lobi, kolam, dll.)
 
     private int sort_order;     // Urutan tampil (0 = foto utama)

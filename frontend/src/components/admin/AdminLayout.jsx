@@ -16,38 +16,38 @@ const AdminLayout = ({ children }) => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
-  const handleLogout = () => { logout(); navigate('/login'); };
+  const handleLogout = () => { logout(); navigate('/'); };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--neo-light)' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--color-background)' }}>
       {/* Sidebar */}
       <aside style={{
-        width: 260, flexShrink: 0, background: 'white', borderRight: '4px solid var(--neo-dark)',
+        width: 260, flexShrink: 0, background: 'white', borderRight: '1px solid var(--color-accent)',
         display: 'flex', flexDirection: 'column',
         position: 'fixed', top: 0, height: '100vh', zIndex: 50,
         transition: 'transform 0.25s ease',
-        boxShadow: sidebarOpen ? 'var(--neo-shadow-lg)' : 'none',
+        boxShadow: sidebarOpen ? 'var(--shadow-hover)' : 'none',
       }} className={`sidebar-fixed ${sidebarOpen ? 'open' : ''}`}>
         {/* Logo */}
-        <div style={{ padding: '1.25rem 1rem', borderBottom: '4px solid var(--neo-dark)', background: 'var(--neo-dark)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ background: 'var(--neo-yellow)', border: '2px solid white', padding: '3px 12px', fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '1.1rem', color: 'var(--neo-dark)', boxShadow: '2px 2px 0px 0px rgba(255,255,255,0.5)' }}>NgiNep.</div>
-          <span style={{ color: '#9ca3af', fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase' }}>Admin Panel</span>
+        <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--color-accent)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.4rem', color: 'var(--color-primary)', fontStyle: 'italic', letterSpacing: '1px' }}>NgiNep.</div>
+          <span style={{ color: 'var(--color-muted)', fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Admin</span>
         </div>
 
         {/* User Info */}
-        <div style={{ padding: '1rem', borderBottom: '2px solid var(--neo-dark)', background: '#f9f9f9' }}>
-          <div style={{ fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '0.9rem' }}>{user?.first_name} {user?.last_name}</div>
-          <div style={{ color: '#9ca3af', fontWeight: 500, fontSize: '0.75rem', marginBottom: '0.35rem' }}>{user?.email}</div>
-          <span className="badge badge-dark" style={{ fontSize: '0.65rem' }}>{user?.role?.replace('ROLE_', '')}</span>
+        <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--color-accent)', background: '#FAFBFD' }}>
+          <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.1rem', color: 'var(--color-text)' }}>{user?.first_name} {user?.last_name}</div>
+          <div style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.75rem', marginBottom: '0.5rem' }}>{user?.email}</div>
+          <span className="badge badge-yellow" style={{ fontSize: '0.65rem' }}>{user?.role?.replace('ROLE_', '')}</span>
         </div>
 
         {/* Nav Links */}
-        <nav style={{ flex: 1, padding: '0.75rem 0', overflowY: 'auto' }}>
+        <nav style={{ flex: 1, padding: '1rem 0', overflowY: 'auto' }}>
           {adminMenu.map(({ path, label, icon: Icon }) => {
             const active = location.pathname === path;
             return (
               <Link key={path} to={path} onClick={() => setSidebarOpen(false)} className={`sidebar-link ${active ? 'active' : ''}`}>
-                <Icon size={18} style={{ color: active ? 'var(--neo-dark)' : '#6b7280' }} />
+                <Icon size={16} style={{ color: active ? 'var(--color-primary)' : 'var(--color-muted)' }} />
                 {label}
               </Link>
             );
@@ -55,33 +55,33 @@ const AdminLayout = ({ children }) => {
         </nav>
 
         {/* Logout */}
-        <div style={{ borderTop: '3px solid var(--neo-dark)', padding: '0.75rem' }}>
-          <button onClick={handleLogout} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.875rem 1rem', background: 'none', border: '3px solid var(--neo-dark)', cursor: 'pointer', fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: '0.875rem', color: 'var(--neo-pink)', textTransform: 'uppercase', transition: 'all 0.1s' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--neo-pink)'; e.currentTarget.style.color = 'white'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--neo-pink)'; }}>
-            <LogOut size={16} /> Keluar
+        <div style={{ borderTop: '1px solid var(--color-accent)', padding: '1rem' }}>
+          <button onClick={handleLogout} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'none', border: '1px solid var(--color-accent)', cursor: 'pointer', fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '0.75rem', color: '#be123c', textTransform: 'uppercase', letterSpacing: '1.5px', borderRadius: 'var(--radius-sm)', transition: 'all 0.3s ease' }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#be123c'; e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = '#be123c'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#be123c'; e.currentTarget.style.borderColor = 'var(--color-accent)'; }}>
+            <LogOut size={14} /> Keluar
           </button>
         </div>
       </aside>
 
       {/* Overlay (mobile) */}
-      {sidebarOpen && <div onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 40 }} />}
+      {sidebarOpen && <div onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 40 }} />}
 
       {/* Main Content */}
       <div style={{ flex: 1, marginLeft: 260, display: 'flex', flexDirection: 'column' }} className="admin-content">
         {/* Top Bar */}
-        <div style={{ background: 'white', borderBottom: '4px solid var(--neo-dark)', padding: '0.875rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', position: 'sticky', top: 0, zIndex: 30 }}>
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="show-mobile-admin" style={{ background: 'none', border: '3px solid var(--neo-dark)', padding: '0.5rem', cursor: 'pointer', display: 'none' }}>
-            <Menu size={18} />
+        <div style={{ background: 'white', borderBottom: '1px solid var(--color-accent)', padding: '1rem 2rem', display: 'flex', alignItems: 'center', gap: '1rem', position: 'sticky', top: 0, zIndex: 30 }}>
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="show-mobile-admin" style={{ background: 'none', border: '1px solid var(--color-accent)', padding: '0.5rem', cursor: 'pointer', display: 'none', borderRadius: 'var(--radius-sm)' }}>
+            <Menu size={16} />
           </button>
-          <h1 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '1rem', textTransform: 'uppercase', flex: 1, margin: 0 }}>
+          <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.4rem', textTransform: 'uppercase', letterSpacing: '1px', flex: 1, margin: 0, color: 'var(--color-text)' }}>
             {adminMenu.find(m => m.path === location.pathname)?.label || 'Admin Panel'}
           </h1>
-          <span style={{ fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: '0.8rem', color: '#9ca3af' }}>NgiNep Admin</span>
+          <span style={{ fontFamily: 'var(--font-body)', fontWeight: 300, fontSize: '0.75rem', color: 'var(--color-muted)', letterSpacing: '1px', textTransform: 'uppercase' }}>NgiNep Admin</span>
         </div>
 
         {/* Page Content */}
-        <main style={{ flex: 1, padding: '2rem 1.5rem' }}>
+        <main style={{ flex: 1, padding: '2.5rem 2rem' }}>
           {children}
         </main>
       </div>

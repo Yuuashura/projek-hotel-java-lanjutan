@@ -6,11 +6,11 @@
    ============================================ */
 
 :root {
-  --color-primary: #D4AF37;       /* Gold */
-  --color-background: #F7FAFC;    /* Coastal Blue-White */
+  --color-primary: #2C5282;       /* Elegant Slate Blue */
+  --color-background: #F4F7FA;    /* Soft Coastal Ice Blue */
   --color-surface: #FFFFFF;       /* White */
-  --color-text: #1A365D;          /* Deep Navy */
-  --color-muted: #718096;         /* Slate */
+  --color-text: #1E2D4A;          /* Slate Navy */
+  --color-muted: #64748B;         /* Slate Gray */
   --color-accent: #E2E8F0;        /* Soft Blue-Grey */
   
   --font-heading: 'Cormorant Garamond', serif;
@@ -24,11 +24,11 @@
   
   /* Backward compatibility for CSS variables used globally */
   --neo-yellow: var(--color-primary);
-  --neo-orange: #C5a850;
-  --neo-purple: #2C5282;
-  --neo-blue: #4299E1;
-  --neo-green: #48BB78;
-  --neo-pink: #E53E3E;
+  --neo-orange: #3182CE;
+  --neo-purple: #1E2D4A;
+  --neo-blue: #2C5282;
+  --neo-green: #319795;
+  --neo-pink: #C53030;
   --neo-dark: var(--color-text);
   --neo-light: var(--color-background);
   --neo-border: 1px solid var(--color-accent);
@@ -93,7 +93,7 @@ h1, h2, h3, h4, h5, h6 {
   color: #FFFFFF; 
 }
 .btn-primary:hover {
-  background: #C59B27;
+  background: #2A4365;
 }
 
 .btn-dark { 
@@ -167,7 +167,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 .input:focus { 
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.1);
+  box-shadow: 0 0 0 2px rgba(44, 82, 130, 0.1);
 }
 .input::placeholder { 
   color: var(--color-muted); 
@@ -201,7 +201,7 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--color-background);
   color: var(--color-text);
 }
-.badge-yellow { background: rgba(212, 175, 55, 0.1); color: var(--color-primary); border-color: rgba(212, 175, 55, 0.2); }
+.badge-yellow { background: rgba(44, 82, 130, 0.1); color: var(--color-primary); border-color: rgba(44, 82, 130, 0.2); }
 .badge-dark { background: var(--color-text); color: white; }
 .badge-gray { background: var(--color-accent); color: var(--color-muted); }
 .badge-green { background: rgba(72, 187, 120, 0.1); color: #2F855A; border-color: rgba(72, 187, 120, 0.2); }

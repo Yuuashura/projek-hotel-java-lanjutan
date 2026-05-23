@@ -5,8 +5,6 @@ import com.ngninep.user.repository.OtpTokenRepository;
 import com.ngninep.user.service.OtpService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,7 +18,7 @@ import java.util.Random;
 public class OtpServiceImpl implements OtpService {
 
     private final OtpTokenRepository otpTokenRepository;
-    private final JavaMailSender mailSender;
+    private final OtpMailSender otpMailSender;
 
     @Override
     public void generateAndSendOtp(String email) {
@@ -35,7 +33,7 @@ public class OtpServiceImpl implements OtpService {
                 .build();
 
         otpTokenRepository.save(otp);
-        sendOtpEmail(email, otpCode);
+        otpMailSender.sendOtpEmailAsync(email, otpCode);
 
         log.info("OTP dikirim ke {}: {}", email, otpCode);
     }
@@ -81,20 +79,5 @@ public class OtpServiceImpl implements OtpService {
         Random random = new Random();
         int otp = 100000 + random.nextInt(900000);
         return String.valueOf(otp);
-    }
-
-    private void sendOtpEmail(String toEmail, String otpCode) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(toEmail);
-        message.setSubject("Kode Verifikasi NgiNep");
-        message.setText(
-                "Halo!\n\n" +
-                "Kode OTP verifikasi akun NgiNep kamu adalah:\n\n" +
-                "  " + otpCode + "\n\n" +
-                "Kode ini berlaku selama 5 menit.\n" +
-                "Jangan bagikan kode ini kepada siapapun.\n\n" +
-                "Tim NgiNep"
-        );
-        mailSender.send(message);
     }
 }

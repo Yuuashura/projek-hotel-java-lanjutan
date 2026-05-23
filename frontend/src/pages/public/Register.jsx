@@ -2,9 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, UserPlus, AlertCircle, CheckCircle } from 'lucide-react';
 import api from '../../utils/api';
+import CitySearchSelect from '../../components/CitySearchSelect';
+import { useAuth } from '../../context/AuthContext';
 
 const Register = () => {
+  const { token, user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (token) {
+      if (user?.role === 'ROLE_ADMIN_HOTEL' || user?.role === 'ROLE_ADMIN_APP') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/');
+      }
+    }
+  }, [token, user, navigate]);
+
   const [form, setForm] = useState({ first_name: '', last_name: '', age: '', city_id: '', phone: '', email: '', password: '', confirmPassword: '' });
   const [cities, setCities] = useState([]);
   const [showPw, setShowPw] = useState(false);
@@ -64,6 +78,12 @@ const Register = () => {
         <div className="card" style={{ maxWidth: 420, width: '100%', padding: '3rem 2rem', textAlign: 'center', border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-float)' }}>
           <AlertCircle size={48} style={{ color: 'var(--color-primary)', marginBottom: '1.5rem' }} />
           <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.8rem', marginBottom: '0.75rem' }}>Akun Belum Diverifikasi</h2>
+          {error && (
+            <div style={{ background: '#FFF5F5', border: '1px solid #FEB2B2', padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
+              <AlertCircle size={16} style={{ color: '#E53E3E', flexShrink: 0 }} />
+              <span style={{ fontWeight: 300, color: '#C53030', fontSize: '0.85rem', textAlign: 'left' }}>{error}</span>
+            </div>
+          )}
           <p style={{ color: 'var(--color-muted)', fontWeight: 300, lineHeight: 1.6, marginBottom: '2rem', fontSize: '0.9rem' }}>
             Email <strong>{form.email}</strong> sudah terdaftar namun belum diverifikasi. Kirim ulang OTP untuk melanjutkan verifikasi.
           </p>
@@ -75,19 +95,26 @@ const Register = () => {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-background)', padding: '5rem 1rem' }}>
-      <div style={{ maxWidth: 560, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--color-background)', padding: '5rem 1rem', position: 'relative', overflow: 'hidden' }}>
+      {/* Decorative Glowing Blobs */}
+      <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(44, 82, 130, 0.12) 0%, rgba(44, 82, 130, 0) 70%)', top: '-5%', left: '-10%', pointerEvents: 'none', filter: 'blur(60px)' }} />
+      <div style={{ position: 'absolute', width: 450, height: 450, borderRadius: '50%', background: 'radial-gradient(circle, rgba(49, 130, 206, 0.08) 0%, rgba(49, 130, 206, 0) 70%)', bottom: '-10%', right: '-10%', pointerEvents: 'none', filter: 'blur(60px)' }} />
+      
+      <div style={{ maxWidth: 560, margin: '0 auto', position: 'relative', zIndex: 1 }} className="animate-slide-in">
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <Link to="/" style={{ textDecoration: 'none' }}>
-            <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '2.2rem', color: 'var(--color-text)', letterSpacing: '1px' }}>
+            <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '2.5rem', color: 'var(--color-text)', letterSpacing: '1px' }}>
               NgiNep<span style={{ color: 'var(--color-primary)' }}>.</span>
             </div>
           </Link>
-          <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.8rem', marginTop: '1.5rem', marginBottom: '0.25rem', color: 'var(--color-text)' }}>Buat Akun Baru</h1>
+          <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.8rem', marginTop: '1.25rem', marginBottom: '0.25rem', color: 'var(--color-text)' }}>Buat Akun Baru</h1>
           <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>Sudah punya akun? <Link to="/login" style={{ color: 'var(--color-primary)', fontWeight: 400, textDecoration: 'none' }}>Masuk di sini</Link></p>
         </div>
 
-        <div className="card" style={{ padding: '2.5rem 2.5rem', border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-float)' }}>
+        <div className="card" style={{ padding: '2.5rem 2.5rem', border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-float)', background: 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(10px)', position: 'relative', overflow: 'hidden' }}>
+          {/* Card Top Accent Line */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, var(--color-primary), #3182ce)' }} />
+
           {error && (
             <div style={{ background: '#FFF5F5', border: '1px solid #FEB2B2', padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
               <AlertCircle size={16} style={{ color: '#E53E3E', flexShrink: 0 }} />
@@ -99,51 +126,53 @@ const Register = () => {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.25rem' }}>
               <div>
                 <label className="label">Nama Depan *</label>
-                <input className="input" style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', background: 'transparent', borderRadius: 0, paddingLeft: 0 }} placeholder="Budi" value={form.first_name} onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))} required />
+                <input className="input" placeholder="Budi" value={form.first_name} onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))} required />
               </div>
               <div>
                 <label className="label">Nama Belakang</label>
-                <input className="input" style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', background: 'transparent', borderRadius: 0, paddingLeft: 0 }} placeholder="Santoso" value={form.last_name} onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))} />
+                <input className="input" placeholder="Santoso" value={form.last_name} onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))} />
               </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.25rem' }}>
               <div>
                 <label className="label">Umur *</label>
-                <input className="input" style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', background: 'transparent', borderRadius: 0, paddingLeft: 0 }} type="number" min="17" placeholder="22" value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))} required />
+                <input className="input" type="number" min="17" placeholder="22" value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))} required />
               </div>
               <div>
                 <label className="label">Kota *</label>
-                <select className="input" style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', background: 'transparent', borderRadius: 0, paddingLeft: 0, color: 'var(--color-text)' }} value={form.city_id} onChange={e => setForm(f => ({ ...f, city_id: e.target.value }))} required>
-                  <option value="">Pilih Kota</option>
-                  {cities.map(c => <option key={c.id_city} value={c.id_city}>{c.name}</option>)}
-                </select>
+                <CitySearchSelect
+                  cities={cities}
+                  value={form.city_id}
+                  onChange={val => setForm(f => ({ ...f, city_id: val }))}
+                  placeholder="Pilih Kota"
+                />
               </div>
             </div>
 
             <div style={{ marginBottom: '1.25rem' }}>
               <label className="label">No. Telepon *</label>
-              <input className="input" style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', background: 'transparent', borderRadius: 0, paddingLeft: 0 }} type="tel" placeholder="08123456789" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} required />
+              <input className="input" type="tel" placeholder="08123456789" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} required />
             </div>
 
             <div style={{ marginBottom: '1.25rem' }}>
               <label className="label">Email *</label>
-              <input className="input" style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', background: 'transparent', borderRadius: 0, paddingLeft: 0 }} type="email" placeholder="nama@email.com" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required />
+              <input className="input" type="email" placeholder="nama@email.com" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required />
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
               <div>
                 <label className="label">Password *</label>
                 <div style={{ position: 'relative' }}>
-                  <input className="input" style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', background: 'transparent', borderRadius: 0, paddingLeft: 0, paddingRight: '2rem' }} type={showPw ? 'text' : 'password'} placeholder="Min 8 karakter" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required minLength={8} />
-                  <button type="button" onClick={() => setShowPw(!showPw)} style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)' }}>
-                    {showPw ? <EyeOff size={14} /> : <Eye size={14} />}
+                  <input className="input" style={{ paddingRight: '2.5rem' }} type={showPw ? 'text' : 'password'} placeholder="Min 8 karakter" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required minLength={8} />
+                  <button type="button" onClick={() => setShowPw(!showPw)} style={{ position: 'absolute', right: '0.875rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)' }}>
+                    {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
               </div>
               <div>
                 <label className="label">Konfirmasi Password *</label>
-                <input className="input" style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', background: 'transparent', borderRadius: 0, paddingLeft: 0 }} type="password" placeholder="Ulangi password" value={form.confirmPassword} onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))} required />
+                <input className="input" type="password" placeholder="Ulangi password" value={form.confirmPassword} onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))} required />
               </div>
             </div>
 

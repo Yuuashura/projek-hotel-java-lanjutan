@@ -134,9 +134,8 @@ const HotelDetail = () => {
                           boxShadow: isSelected ? 'var(--shadow-hover)' : 'none',
                           transition: 'all 0.3s ease'
                         }}>
-                        {/* Room image placeholder / actual */}
                         <div style={{ width: 220, height: '100%', flexShrink: 0, overflow: 'hidden' }}>
-                          <img src={room.image_url || 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=400'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          <img src={room.images?.[0]?.imageUrl || 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=400'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
                         {/* Room description */}
                         <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>

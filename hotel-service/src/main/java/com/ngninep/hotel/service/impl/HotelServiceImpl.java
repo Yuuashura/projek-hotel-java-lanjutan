@@ -5,6 +5,7 @@ import com.ngninep.hotel.dto.res.CityResponse;
 import com.ngninep.hotel.dto.res.FacilityResponse;
 import com.ngninep.hotel.dto.res.HotelImageResponse;
 import com.ngninep.hotel.dto.res.HotelResponse;
+import com.ngninep.hotel.dto.res.RoomTypeImageResponse;
 import com.ngninep.hotel.entity.City;
 import com.ngninep.hotel.entity.Hotel;
 import com.ngninep.hotel.entity.HotelImage;
@@ -77,7 +78,13 @@ public class HotelServiceImpl implements HotelService {
                     .maxGuest(rt.getMax_guest())
                     .smoking(rt.isSmoking())
                     .roomAvailable(rt.getRoom_available())
-                    .images(new ArrayList<>()) // Can be mapped later if needed
+                    .images(rt.getImages() != null ? rt.getImages().stream().map(img -> 
+                        RoomTypeImageResponse.builder()
+                            .idImage(img.getIdImage())
+                            .imageUrl(img.getImage_url())
+                            .sortOrder(img.getSort_order())
+                            .build()
+                    ).collect(Collectors.toList()) : new ArrayList<>())
                     .facilities(new ArrayList<>()) // Can be mapped later if needed
                     .build()
             ).collect(Collectors.toList());
@@ -159,11 +166,17 @@ public class HotelServiceImpl implements HotelService {
 
         // Simpan gambar jika ada
         if (request.getImageUrl() != null && !request.getImageUrl().isBlank()) {
-            hotelImageRepository.save(HotelImage.builder()
-                    .hotel(saved)
-                    .image_url(request.getImageUrl())
-                    .sort_order(0)
-                    .build());
+            String[] urls = request.getImageUrl().split("\\|\\|\\|");
+            for (int i = 0; i < urls.length; i++) {
+                String url = urls[i].trim();
+                if (!url.isEmpty()) {
+                    hotelImageRepository.save(HotelImage.builder()
+                            .hotel(saved)
+                            .image_url(url)
+                            .sort_order(i)
+                            .build());
+                }
+            }
         }
 
         return mapToResponse(hotelRepository.findById(saved.getIdHotel()).orElse(saved));
@@ -195,11 +208,17 @@ public class HotelServiceImpl implements HotelService {
         if (request.getImageUrl() != null && !request.getImageUrl().isBlank()) {
             // Hapus semua gambar lama dan ganti dengan yang baru
             hotelImageRepository.deleteByHotelId(id);
-            hotelImageRepository.save(HotelImage.builder()
-                    .hotel(saved)
-                    .image_url(request.getImageUrl())
-                    .sort_order(0)
-                    .build());
+            String[] urls = request.getImageUrl().split("\\|\\|\\|");
+            for (int i = 0; i < urls.length; i++) {
+                String url = urls[i].trim();
+                if (!url.isEmpty()) {
+                    hotelImageRepository.save(HotelImage.builder()
+                            .hotel(saved)
+                            .image_url(url)
+                            .sort_order(i)
+                            .build());
+                }
+            }
         }
 
         return mapToResponse(hotelRepository.findById(saved.getIdHotel()).orElse(saved));

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { formatCurrency } from '../../utils/formatters';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../utils/api';
+import CitySearchSelect from '../../components/CitySearchSelect';
 
 const EMPTY_FORM = { name: '', city_id: '', address: '', type: '', description: '', is_featured: false, is_on_sale: false, discount_percent: 0, rating: 0, image_url: '' };
 
@@ -16,7 +17,7 @@ const AdminHotels = () => {
   const [form, setForm] = useState(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [imgPreview, setImgPreview] = useState('');
+  const [imagesList, setImagesList] = useState([]);
   const fileRef = useRef();
 
   const load = () => {
@@ -24,22 +25,43 @@ const AdminHotels = () => {
     Promise.all([
       api.get('/api/hotels'),
       api.get('/api/cities'),
-    ]).then(([h, c]) => { setHotels(h.data.data || []); setCities(c.data.data || []); }).finally(() => setLoading(false));
+    ]).then(([h, c]) => { 
+      setHotels(h.data.data || []); 
+      setCities(c.data.data || []); 
+    }).finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);
 
-  const openCreate = () => { setForm(EMPTY_FORM); setImgPreview(''); setError(''); setModal('create'); };
+  const openCreate = () => { 
+    setForm(EMPTY_FORM); 
+    setImagesList([]); 
+    setError(''); 
+    setModal('create'); 
+  };
+
   const openEdit = (h) => {
     setSelected(h);
-    const existingImg = h.images?.[0]?.imageUrl || h.images?.[0]?.image_url || '';
-    setForm({ name: h.name, city_id: h.city?.id_city || '', address: h.address || '', type: h.type || '', description: h.description || '', is_featured: h.featured, is_on_sale: h.onSale, discount_percent: h.discount_percent || 0, rating: h.rating || 0, image_url: existingImg });
-    setImgPreview(existingImg);
+    const hotelImgs = h.images?.map(img => img.imageUrl || img.image_url).filter(Boolean) || [];
+    setImagesList(hotelImgs);
+    setForm({ 
+      name: h.name, 
+      city_id: h.city?.id_city || '', 
+      address: h.address || '', 
+      type: h.type || '', 
+      description: h.description || '', 
+      is_featured: h.featured, 
+      is_on_sale: h.onSale, 
+      discount_percent: h.discount_percent || 0, 
+      rating: h.rating || 0, 
+      image_url: hotelImgs.join('|||') 
+    });
     setError('');
     setModal('edit');
   };
+
   const openDelete = (h) => { setSelected(h); setModal('delete'); };
-  const closeModal = () => { setModal(null); setSelected(null); setError(''); setImgPreview(''); };
+  const closeModal = () => { setModal(null); setSelected(null); setError(''); setImagesList([]); };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -56,7 +78,7 @@ const AdminHotels = () => {
         onSale: form.is_on_sale,
         discount_percent: parseInt(form.discount_percent || 0),
         rating: parseFloat(form.rating || 0),
-        image_url: form.image_url
+        image_url: imagesList.join('|||')
       };
       if (modal === 'create') await api.post('/api/hotels', payload);
       if (modal === 'edit') await api.put(`/api/hotels/${selected.id_hotel}`, payload);
@@ -80,16 +102,16 @@ const AdminHotels = () => {
 
   return (
     <AdminLayout>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h2 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '1.5rem', textTransform: 'uppercase', margin: 0 }}>Kelola Hotel</h2>
-          <p style={{ color: '#9ca3af', fontWeight: 500, fontSize: '0.875rem', margin: '0.25rem 0 0' }}>{hotels.length} hotel terdaftar</p>
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.75rem', textTransform: 'uppercase', letterSpacing: '1px', margin: 0, color: 'var(--color-text)' }}>Kelola Hotel</h2>
+          <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', margin: '0.25rem 0 0' }}>{hotels.length} hotel terdaftar</p>
         </div>
-        <button onClick={openCreate} className="btn btn-orange"><Plus size={16} /> Tambah Hotel</button>
+        <button onClick={openCreate} className="btn btn-primary btn-sm"><Plus size={14} /> Tambah Hotel</button>
       </div>
 
       {loading ? (
-        <div className="card" style={{ padding: '3rem', textAlign: 'center', color: '#9ca3af', fontWeight: 600 }}>Memuat data hotel...</div>
+        <div className="card" style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>Memuat data hotel...</div>
       ) : (
         <div style={{ overflowX: 'auto' }}>
           <table className="neo-table">
@@ -99,98 +121,109 @@ const AdminHotels = () => {
             <tbody>
               {hotels.map(h => (
                 <tr key={h.id_hotel}>
-                  <td style={{ fontFamily: 'Space Grotesk', fontWeight: 700 }}>#{h.id_hotel}</td>
+                  <td style={{ fontWeight: 400, color: 'var(--color-muted)', fontSize: '0.85rem' }}>#{h.id_hotel}</td>
                   <td>
-                    <div style={{ fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '0.9rem', textTransform: 'uppercase' }}>{h.name}</div>
-                    <div style={{ color: '#9ca3af', fontSize: '0.75rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.25rem' }}><MapPin size={10} />{h.address}</div>
+                    <div style={{ fontWeight: 400, fontSize: '0.9rem', color: 'var(--color-text)' }}>{h.name}</div>
+                    <div style={{ color: 'var(--color-muted)', fontSize: '0.75rem', fontWeight: 300, display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.15rem' }}><MapPin size={10} />{h.address}</div>
                   </td>
-                  <td>{h.city?.name}</td>
+                  <td style={{ fontSize: '0.875rem', color: 'var(--color-text)', fontWeight: 300 }}>{h.city?.name}</td>
                   <td><span className="badge badge-gray">{h.type}</span></td>
-                  <td style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--neo-orange)' }}><Star size={12} fill="var(--neo-orange)" />{h.rating}</td>
+                  <td style={{ color: 'var(--color-primary)', fontSize: '0.875rem', fontWeight: 400 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <Star size={12} fill="var(--color-primary)" style={{ stroke: 'var(--color-primary)' }} />
+                      {h.rating?.toFixed(1) || '0.0'}
+                    </div>
+                  </td>
                   <td>
                     <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-                      {h.featured && <span className="badge badge-dark" style={{ fontSize: '0.65rem' }}>Featured</span>}
-                      {h.onSale && <span className="badge badge-red" style={{ fontSize: '0.65rem' }}>-{h.discount_percent}%</span>}
+                      {h.featured && <span className="badge badge-yellow" style={{ background: 'var(--color-primary)', color: 'white', borderColor: 'transparent' }}>Featured</span>}
+                      {h.onSale && <span className="badge badge-red">-{h.discount_percent}%</span>}
                     </div>
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <Link to={`/admin/hotels/${h.id_hotel}/rooms`} className="btn btn-orange btn-sm" title="Kelola Kamar"><Bed size={13} /></Link>
-                      <button onClick={() => openEdit(h)} className="btn btn-primary btn-sm" title="Edit Hotel"><Pencil size={13} /></button>
-                      <button onClick={() => openDelete(h)} className="btn btn-red btn-sm" title="Hapus Hotel"><Trash2 size={13} /></button>
+                      <Link to={`/admin/hotels/${h.id_hotel}/rooms`} className="btn btn-white btn-sm" style={{ padding: '0.4rem 0.8rem' }} title="Kelola Kamar"><Bed size={13} /></Link>
+                      <button onClick={() => openEdit(h)} className="btn btn-white btn-sm" style={{ padding: '0.4rem 0.8rem' }} title="Edit Hotel"><Pencil size={13} /></button>
+                      <button onClick={() => openDelete(h)} className="btn btn-white btn-sm" style={{ padding: '0.4rem 0.8rem', color: '#be123c' }} title="Hapus Hotel"><Trash2 size={13} /></button>
                     </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {hotels.length === 0 && <div style={{ textAlign: 'center', padding: '3rem', color: '#9ca3af', fontWeight: 600 }}>Belum ada data hotel</div>}
+          {hotels.length === 0 && <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>Belum ada data hotel</div>}
         </div>
       )}
 
       {/* Create/Edit Modal */}
       {(modal === 'create' || modal === 'edit') && (
         <ModalOverlay onClose={closeModal}>
-          <div style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', fontSize: '1.1rem', marginBottom: '1.5rem', borderBottom: '3px solid var(--neo-dark)', paddingBottom: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, textTransform: 'uppercase', letterSpacing: '1px', fontSize: '1.2rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--color-text)' }}>
             {modal === 'create' ? 'Tambah Hotel Baru' : 'Edit Hotel'}
-            <button onClick={closeModal} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
+            <button onClick={closeModal} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)' }}><X size={18} /></button>
           </div>
-          {error && <div style={{ background: '#fff0f3', border: '3px solid var(--neo-pink)', padding: '0.75rem', marginBottom: '1rem', fontWeight: 600, color: '#be123c', fontSize: '0.875rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}><AlertCircle size={16} />{error}</div>}
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          {error && <div style={{ background: '#fff0f3', border: '1px solid #fda4af', borderRadius: 'var(--radius-sm)', padding: '0.75rem', marginBottom: '1.25rem', fontWeight: 300, color: '#be123c', fontSize: '0.85rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}><AlertCircle size={16} />{error}</div>}
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
                 <div><label className="label">Nama Hotel *</label><input className="input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required /></div>
-                <div><label className="label">Kota *</label><select className="input" value={form.city_id} onChange={e => setForm(f => ({ ...f, city_id: e.target.value }))} required><option value="">Pilih Kota</option>{cities.map(c => <option key={c.id_city} value={c.id_city}>{c.name}</option>)}</select></div>
+                <div><label className="label">Kota *</label><CitySearchSelect cities={cities} value={form.city_id} onChange={val => setForm(f => ({ ...f, city_id: val }))} placeholder="Pilih Kota" /></div>
               </div>
               <div><label className="label">Alamat</label><input className="input" value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} /></div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
                 <div><label className="label">Tipe Hotel</label><select className="input" value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}><option value="">Pilih Tipe</option>{['Budget', 'Bintang 2', 'Bintang 3', 'Bintang 4', 'Bintang 5', 'Resort', 'Boutique'].map(t => <option key={t}>{t}</option>)}</select></div>
                 <div><label className="label">Rating (0-5)</label><input type="number" className="input" min={0} max={5} step={0.1} value={form.rating} onChange={e => setForm(f => ({ ...f, rating: e.target.value }))} /></div>
               </div>
               <div><label className="label">Deskripsi</label><textarea className="input" rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} style={{ resize: 'vertical' }} /></div>
+              
+              {/* Multiple Images Upload Section */}
               <div>
-                <label className="label"><ImageIcon size={12} style={{ display: 'inline', marginRight: '0.4rem' }} />Foto Hotel (opsional)</label>
-                <div
-                  onClick={() => fileRef.current?.click()}
-                  style={{ border: `3px dashed ${imgPreview ? 'var(--neo-green)' : 'var(--neo-dark)'}`, padding: '1.25rem', textAlign: 'center', cursor: 'pointer', background: imgPreview ? '#f0fdf4' : '#fafafa', transition: 'all 0.2s' }}
-                >
-                  {imgPreview ? (
-                    <div>
-                      <img src={imgPreview} alt="preview" style={{ maxHeight: 140, maxWidth: '100%', objectFit: 'cover', border: '3px solid var(--neo-dark)', marginBottom: '0.4rem' }} />
-                      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#16a34a' }}>Klik untuk ganti gambar</div>
+                <label className="label"><ImageIcon size={12} style={{ display: 'inline', marginRight: '0.4rem', verticalAlign: 'middle' }} />Galeri Foto Hotel</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                  {imagesList.map((img, idx) => (
+                    <div key={idx} style={{ position: 'relative', height: 75, border: '1px solid var(--color-accent)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
+                      <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <button type="button" onClick={() => setImagesList(list => list.filter((_, i) => i !== idx))}
+                        style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,0.6)', color: 'white', border: 'none', borderRadius: '50%', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '10px' }}>
+                        <X size={10} />
+                      </button>
                     </div>
-                  ) : (
-                    <div>
-                      <ImageIcon size={32} style={{ color: '#9ca3af', marginBottom: '0.4rem' }} />
-                      <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>Klik untuk upload foto hotel</div>
-                      <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.2rem' }}>JPG, PNG, WEBP · Maks 5MB</div>
-                    </div>
-                  )}
+                  ))}
+                  <div
+                    onClick={() => fileRef.current?.click()}
+                    style={{ border: '1px dashed var(--color-primary)', borderRadius: 'var(--radius-sm)', height: 75, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: 'rgba(212,175,55,0.02)', transition: 'all 0.2s' }}
+                  >
+                    <Plus size={16} style={{ color: 'var(--color-primary)' }} />
+                    <span style={{ fontSize: '0.65rem', color: 'var(--color-primary)', marginTop: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Upload</span>
+                  </div>
                 </div>
-                <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  if (!file.type.startsWith('image/')) { setError('Hanya file gambar yang diperbolehkan.'); return; }
-                  if (file.size > 5 * 1024 * 1024) { setError('Ukuran file maksimal 5MB.'); return; }
-                  setError('');
-                  const reader = new FileReader();
-                  reader.onloadend = () => { setImgPreview(reader.result); setForm(f => ({ ...f, image_url: reader.result })); };
-                  reader.readAsDataURL(file);
+                <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => {
+                  const files = Array.from(e.target.files || []);
+                  files.forEach(file => {
+                    if (!file.type.startsWith('image/')) return;
+                    if (file.size > 5 * 1024 * 1024) return;
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setImagesList(list => [...list, reader.result]);
+                    };
+                    reader.readAsDataURL(file);
+                  });
                 }} />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', border: '3px solid var(--neo-dark)', background: form.is_featured ? 'var(--neo-yellow)' : 'white', cursor: 'pointer' }} onClick={() => setForm(f => ({ ...f, is_featured: !f.is_featured }))}>
-                  <input type="checkbox" checked={form.is_featured} readOnly style={{ width: 18, height: 18, accentColor: 'var(--neo-dark)' }} />
-                  <label className="label" style={{ margin: 0, cursor: 'pointer' }}>Is Featured</label>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', border: '1px solid var(--color-accent)', background: form.is_featured ? 'rgba(212,175,55,0.03)' : 'white', cursor: 'pointer', borderRadius: 'var(--radius-sm)', transition: 'all 0.3s ease' }} onClick={() => setForm(f => ({ ...f, is_featured: !f.is_featured }))}>
+                  <input type="checkbox" checked={form.is_featured} readOnly style={{ width: 15, height: 15, accentColor: 'var(--color-primary)' }} />
+                  <label className="label" style={{ margin: 0, cursor: 'pointer', color: 'var(--color-text)' }}>Is Featured</label>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', border: '3px solid var(--neo-dark)', background: form.is_on_sale ? '#fff0f3' : 'white', cursor: 'pointer' }} onClick={() => setForm(f => ({ ...f, is_on_sale: !f.is_on_sale }))}>
-                  <input type="checkbox" checked={form.is_on_sale} readOnly style={{ width: 18, height: 18, accentColor: 'var(--neo-pink)' }} />
-                  <label className="label" style={{ margin: 0, cursor: 'pointer' }}>On Sale</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', border: '1px solid var(--color-accent)', background: form.is_on_sale ? 'rgba(229,62,62,0.03)' : 'white', cursor: 'pointer', borderRadius: 'var(--radius-sm)', transition: 'all 0.3s ease' }} onClick={() => setForm(f => ({ ...f, is_on_sale: !f.is_on_sale }))}>
+                  <input type="checkbox" checked={form.is_on_sale} readOnly style={{ width: 15, height: 15, accentColor: '#E53E3E' }} />
+                  <label className="label" style={{ margin: 0, cursor: 'pointer', color: 'var(--color-text)' }}>On Sale</label>
                 </div>
               </div>
               {form.is_on_sale && <div><label className="label">Persen Diskon (%)</label><input type="number" className="input" min={0} max={100} value={form.discount_percent} onChange={e => setForm(f => ({ ...f, discount_percent: e.target.value }))} /></div>}
-              <button type="submit" className="btn btn-dark btn-full" disabled={submitting} style={{ marginTop: '0.5rem', justifyContent: 'center' }}>
-                {submitting ? 'Menyimpan...' : <><Check size={15} /> {modal === 'create' ? 'Tambah Hotel' : 'Simpan Perubahan'}</>}
+              <button type="submit" className="btn btn-primary btn-full" disabled={submitting} style={{ marginTop: '0.5rem', justifyContent: 'center' }}>
+                {submitting ? 'Menyimpan...' : <><Check size={14} /> {modal === 'create' ? 'Tambah Hotel' : 'Simpan Perubahan'}</>}
               </button>
             </div>
           </form>
@@ -199,15 +232,15 @@ const AdminHotels = () => {
 
       {/* Delete Confirm */}
       {modal === 'delete' && selected && (
-        <ModalOverlay onClose={closeModal} maxWidth={420}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🗑️</div>
-            <h3 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', fontSize: '1.1rem', marginBottom: '0.75rem' }}>Hapus Hotel?</h3>
-            <p style={{ color: '#6b7280', fontWeight: 500, marginBottom: '1.5rem' }}>Hotel <strong>"{selected.name}"</strong> akan dihapus permanen. Tindakan ini tidak dapat dibatalkan!</p>
-            {error && <div style={{ color: '#be123c', fontWeight: 700, marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</div>}
+        <ModalOverlay onClose={closeModal} maxWidth={400}>
+          <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🗑️</div>
+            <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, textTransform: 'uppercase', letterSpacing: '1px', fontSize: '1.25rem', marginBottom: '0.75rem', color: 'var(--color-text)' }}>Hapus Hotel?</h3>
+            <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem', lineHeight: 1.5, marginBottom: '1.75rem' }}>Hotel <strong>"{selected.name}"</strong> akan dihapus permanen beserta seluruh tipe kamar dan data pemesanan di dalamnya.</p>
+            {error && <div style={{ color: '#be123c', fontWeight: 400, marginBottom: '1rem', fontSize: '0.85rem' }}>{error}</div>}
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
-              <button onClick={closeModal} className="btn btn-white">Batalkan</button>
-              <button onClick={handleDelete} className="btn btn-red" disabled={submitting}>{submitting ? 'Menghapus...' : 'Hapus Permanen'}</button>
+              <button onClick={closeModal} className="btn btn-white btn-sm">Batalkan</button>
+              <button onClick={handleDelete} className="btn btn-primary btn-sm" style={{ background: '#be123c', color: 'white' }} disabled={submitting}>{submitting ? 'Menghapus...' : 'Hapus'}</button>
             </div>
           </div>
         </ModalOverlay>
@@ -216,9 +249,9 @@ const AdminHotels = () => {
   );
 };
 
-const ModalOverlay = ({ children, onClose, maxWidth = 600 }) => (
-  <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: '1rem' }} onClick={e => e.target === e.currentTarget && onClose()}>
-    <div style={{ background: 'white', border: '4px solid var(--neo-dark)', padding: '2rem', width: '100%', maxWidth, maxHeight: '90vh', overflowY: 'auto', boxShadow: 'var(--neo-shadow-lg)', animation: 'slideIn 0.2s ease' }}>
+const ModalOverlay = ({ children, onClose, maxWidth = 550 }) => (
+  <div style={{ position: 'fixed', inset: 0, background: 'rgba(26,54,93,0.3)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: '1rem' }} onClick={e => e.target === e.currentTarget && onClose()}>
+    <div style={{ background: 'white', border: '1px solid var(--color-accent)', borderRadius: 'var(--radius-sm)', padding: '2rem', width: '100%', maxWidth, maxHeight: '90vh', overflowY: 'auto', boxShadow: 'var(--shadow-hover)', animation: 'fadeIn 0.2s ease-out' }}>
       {children}
     </div>
   </div>
