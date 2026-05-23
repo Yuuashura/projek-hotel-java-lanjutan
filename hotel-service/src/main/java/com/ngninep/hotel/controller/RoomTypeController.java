@@ -3,6 +3,7 @@ package com.ngninep.hotel.controller;
 import com.ngninep.hotel.dto.req.RoomTypeRequest;
 import com.ngninep.hotel.dto.res.RoomTypeResponse;
 import com.ngninep.hotel.dto.res.WebResponse;
+import com.ngninep.hotel.service.FileStorageService;
 import com.ngninep.hotel.service.RoomTypeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/room-types")
@@ -18,6 +20,7 @@ import java.util.List;
 public class RoomTypeController {
 
     private final RoomTypeService roomTypeService;
+    private final FileStorageService fileStorageService;
 
     // ✅ Publik — lihat tipe kamar untuk suatu hotel
     @GetMapping("/hotel/{hotelId}")
@@ -70,6 +73,18 @@ public class RoomTypeController {
         WebResponse<Void> response = WebResponse.<Void>builder()
                 .status("200")
                 .message("Success")
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping(value = "/upload-image", consumes = "multipart/form-data")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_HOTEL', 'ROLE_ADMIN_APP')")
+    public ResponseEntity<WebResponse<Map<String, String>>> uploadImage(@RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        String imageUrl = fileStorageService.saveRoomTypeImage(file);
+        WebResponse<Map<String, String>> response = WebResponse.<Map<String, String>>builder()
+                .status("200")
+                .message("Gambar tipe kamar berhasil diunggah")
+                .data(Map.of("url", imageUrl))
                 .build();
         return ResponseEntity.ok(response);
     }

@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Pencil, Trash2, X, Check, AlertCircle, Star, MapPin, Bed, ImageIcon } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Check, AlertCircle, Star, MapPin, Bed, ImageIcon, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatCurrency } from '../../utils/formatters';
 import AdminLayout from '../../components/admin/AdminLayout';
+import PaginationControls from '../../components/admin/PaginationControls';
 import api from '../../utils/api';
 import CitySearchSelect from '../../components/CitySearchSelect';
+import { getErrorMessage, unwrapList } from '../../utils/response';
+import { uploadFile, validateImageFile } from '../../utils/uploads';
 
 const EMPTY_FORM = { name: '', city_id: '', address: '', type: '', description: '', is_featured: false, is_on_sale: false, discount_percent: 0, rating: 0, image_url: '' };
+const PAGE_SIZE = 25;
 
 const AdminHotels = () => {
   const [hotels, setHotels] = useState([]);
@@ -18,26 +22,31 @@ const AdminHotels = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [imagesList, setImagesList] = useState([]);
+  const [page, setPage] = useState(0);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [excelUploading, setExcelUploading] = useState(false);
   const fileRef = useRef();
+  const excelRef = useRef();
 
   const load = () => {
     setLoading(true);
+    setError('');
     Promise.all([
       api.get('/api/hotels'),
       api.get('/api/cities'),
-    ]).then(([h, c]) => { 
-      setHotels(h.data.data || []); 
-      setCities(c.data.data || []); 
-    }).finally(() => setLoading(false));
+    ]).then(([h, c]) => {
+      setHotels(unwrapList(h.data));
+      setCities(unwrapList(c.data));
+    }).catch((err) => setError(getErrorMessage(err, 'Gagal memuat data hotel'))).finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);
 
-  const openCreate = () => { 
-    setForm(EMPTY_FORM); 
-    setImagesList([]); 
-    setError(''); 
-    setModal('create'); 
+  const openCreate = () => {
+    setForm(EMPTY_FORM);
+    setImagesList([]);
+    setError('');
+    setModal('create');
   };
 
   const openEdit = (h) => {
@@ -100,6 +109,56 @@ const AdminHotels = () => {
     } finally { setSubmitting(false); }
   };
 
+  const handleImageUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    const invalidFile = files.find(file => validateImageFile(file));
+    if (invalidFile) {
+      setError(validateImageFile(invalidFile));
+      return;
+    }
+
+    setImageUploading(true);
+    setError('');
+    try {
+      const uploadedUrls = await Promise.all(files.map(file => uploadFile('/api/hotels/upload-image', file)));
+      setImagesList(list => [...list, ...uploadedUrls.filter(Boolean)]);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Gagal mengunggah gambar hotel');
+    } finally {
+      setImageUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
+  const handleExcelUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.xlsx')) {
+      setError('File harus berformat .xlsx');
+      return;
+    }
+
+    setExcelUploading(true);
+    setError('');
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      await api.post('/api/hotels/upload-excel', formData);
+      load();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Gagal mengunggah file Excel');
+    } finally {
+      setExcelUploading(false);
+      if (excelRef.current) excelRef.current.value = '';
+    }
+  };
+
+  const totalPages = Math.max(1, Math.ceil(hotels.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages - 1);
+  const paginatedHotels = hotels.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+
   return (
     <AdminLayout>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
@@ -107,8 +166,21 @@ const AdminHotels = () => {
           <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.75rem', textTransform: 'uppercase', letterSpacing: '1px', margin: 0, color: 'var(--color-text)' }}>Kelola Hotel</h2>
           <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', margin: '0.25rem 0 0' }}>{hotels.length} hotel terdaftar</p>
         </div>
-        <button onClick={openCreate} className="btn btn-primary btn-sm"><Plus size={14} /> Tambah Hotel</button>
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <button onClick={() => excelRef.current?.click()} className="btn btn-white btn-sm" disabled={excelUploading}>
+            <Upload size={14} /> {excelUploading ? 'Mengunggah...' : 'Upload Excel'}
+          </button>
+          <button onClick={openCreate} className="btn btn-primary btn-sm"><Plus size={14} /> Tambah Hotel</button>
+          <input ref={excelRef} type="file" accept=".xlsx" style={{ display: 'none' }} onChange={handleExcelUpload} />
+        </div>
       </div>
+
+      {error && (
+        <div style={{ background: '#fff0f3', border: '1px solid #fda4af', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <AlertCircle size={16} style={{ color: '#be123c', flexShrink: 0 }} />
+          <span style={{ fontWeight: 300, color: '#be123c', fontSize: '0.85rem' }}>{error}</span>
+        </div>
+      )}
 
       {loading ? (
         <div className="card" style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>Memuat data hotel...</div>
@@ -119,7 +191,7 @@ const AdminHotels = () => {
               <tr>{['#', 'Hotel', 'Kota', 'Tipe', 'Rating', 'Status', 'Aksi'].map(h => <th key={h}>{h}</th>)}</tr>
             </thead>
             <tbody>
-              {hotels.map(h => (
+              {paginatedHotels.map(h => (
                 <tr key={h.id_hotel}>
                   <td style={{ fontWeight: 400, color: 'var(--color-muted)', fontSize: '0.85rem' }}>#{h.id_hotel}</td>
                   <td>
@@ -152,6 +224,13 @@ const AdminHotels = () => {
             </tbody>
           </table>
           {hotels.length === 0 && <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>Belum ada data hotel</div>}
+          <PaginationControls
+            page={currentPage}
+            totalPages={totalPages}
+            totalItems={hotels.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setPage}
+          />
         </div>
       )}
 
@@ -194,21 +273,10 @@ const AdminHotels = () => {
                     style={{ border: '1px dashed var(--color-primary)', borderRadius: 'var(--radius-sm)', height: 75, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: 'rgba(212,175,55,0.02)', transition: 'all 0.2s' }}
                   >
                     <Plus size={16} style={{ color: 'var(--color-primary)' }} />
-                    <span style={{ fontSize: '0.65rem', color: 'var(--color-primary)', marginTop: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Upload</span>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--color-primary)', marginTop: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{imageUploading ? 'Uploading' : 'Upload'}</span>
                   </div>
                 </div>
-                <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => {
-                  const files = Array.from(e.target.files || []);
-                  files.forEach(file => {
-                    if (!file.type.startsWith('image/')) return;
-                    if (file.size > 5 * 1024 * 1024) return;
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      setImagesList(list => [...list, reader.result]);
-                    };
-                    reader.readAsDataURL(file);
-                  });
-                }} />
+                <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" multiple style={{ display: 'none' }} onChange={handleImageUpload} />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>

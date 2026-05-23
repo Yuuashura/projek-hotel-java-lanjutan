@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface HotelService {
     List<HotelResponse> getAll();
-    List<HotelResponse> search(String keyword, Integer cityId);
+    List<HotelResponse> search(String keyword, Integer cityId, Integer page, Integer size);
     List<HotelResponse> getFeatured();
     HotelResponse getById(int id);
     HotelResponse create(HotelRequest request);

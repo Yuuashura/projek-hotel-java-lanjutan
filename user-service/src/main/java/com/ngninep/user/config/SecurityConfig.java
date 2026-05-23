@@ -3,6 +3,7 @@ package com.ngninep.user.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -33,6 +34,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Endpoint publik — tidak butuh token
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/users/uploads/**").permitAll()
                 // Endpoint user — butuh login
                 .requestMatchers("/api/users/**").authenticated()
                 // Semua request lain harus authenticated

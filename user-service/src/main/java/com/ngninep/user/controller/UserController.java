@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -40,6 +41,15 @@ public class UserController {
         return ResponseEntity.ok(updated);
     }
 
+    @PostMapping(value = "/me/profile-picture", consumes = "multipart/form-data")
+    public ResponseEntity<UserProfileResponse> uploadProfilePicture(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam("file") MultipartFile file
+    ) {
+        UserProfileResponse updated = userService.updateProfilePicture(userDetails.getUsername(), file);
+        return ResponseEntity.ok(updated);
+    }
+
     // PUT /api/users/me/change-password — Ganti password
     @PutMapping("/me/change-password")
     public ResponseEntity<?> changePassword(
@@ -53,8 +63,10 @@ public class UserController {
     // GET /api/users — Lihat semua pengguna (Admin)
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_APP', 'ROLE_ADMIN_HOTEL')")
-    public ResponseEntity<java.util.List<UserProfileResponse>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    public ResponseEntity<java.util.List<UserProfileResponse>> getAllUsers(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
+        return ResponseEntity.ok(userService.getAllUsers(page, size));
     }
 
     // PATCH /api/users/{id}/ban

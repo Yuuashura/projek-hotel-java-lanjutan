@@ -10,6 +10,10 @@ const api = axios.create({
 // 🔒 Inject Bearer Token secara otomatis
 api.interceptors.request.use(
   (config) => {
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+
     const token = localStorage.getItem('token');
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
@@ -21,7 +25,9 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status;
+    const hasBackendMessage = Boolean(error.response?.data?.message);
+    if (status === 401 || (status === 403 && !hasBackendMessage)) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       if (!window.location.pathname.includes('/login')) {

@@ -5,11 +5,15 @@ import com.ngninep.user.dto.UpdateProfileRequest;
 import com.ngninep.user.dto.UserProfileResponse;
 import com.ngninep.user.entity.Customer;
 import com.ngninep.user.repository.CustomerRepository;
+import com.ngninep.user.service.FileStorageService;
 import com.ngninep.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -18,6 +22,7 @@ public class UserServiceImpl implements UserService {
 
     private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
+    private final FileStorageService fileStorageService;
 
     @Override
     public UserProfileResponse getProfile(String email) {
@@ -91,10 +96,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public java.util.List<UserProfileResponse> getAllUsers() {
-        return customerRepository.findAll().stream()
+    public java.util.List<UserProfileResponse> getAllUsers(Integer page, Integer size) {
+        Pageable pageable = toPageable(page, size);
+        java.util.List<Customer> customers = pageable != null
+                ? customerRepository.findAll(pageable).getContent()
+                : customerRepository.findAll();
+        return customers.stream()
                 .map(this::toProfileResponse)
                 .toList();
+    }
+
+    @Override
+    public UserProfileResponse updateProfilePicture(String email, MultipartFile file) {
+        Customer customer = customerRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User tidak ditemukan"));
+
+        String imageUrl = fileStorageService.saveProfilePicture(file);
+        customer.setProfile_picture(imageUrl);
+        customerRepository.save(customer);
+        return toProfileResponse(customer);
     }
 
     @Override
@@ -113,5 +133,15 @@ public class UserServiceImpl implements UserService {
         customer.setBanned(false);
         customerRepository.save(customer);
         return "User berhasil di-unban";
+    }
+
+    private Pageable toPageable(Integer page, Integer size) {
+        if (page == null && size == null) {
+            return null;
+        }
+
+        int safePage = page != null && page >= 0 ? page : 0;
+        int safeSize = size != null && size > 0 ? Math.min(size, 100) : 10;
+        return PageRequest.of(safePage, safeSize);
     }
 }

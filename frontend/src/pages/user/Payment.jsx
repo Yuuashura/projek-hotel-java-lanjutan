@@ -4,6 +4,7 @@ import { Upload, Clock, Check, AlertCircle, X, ImageIcon } from 'lucide-react';
 import { formatCurrency, formatDate, diffDays } from '../../utils/formatters';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
+import { validateImageFile } from '../../utils/uploads';
 
 const PAYMENT_METHODS = [
   { id: 'Transfer Bank BCA', label: 'Transfer Bank BCA', info: 'No. Rek: 1234567890 a.n. PT NgiNep Corp', emoji: '🏦' },
@@ -65,35 +66,34 @@ const Payment = () => {
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      setError('Hanya file gambar (JPG, PNG, WEBP) yang diperbolehkan.');
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Ukuran file maksimal 5MB.');
+    const validationError = validateImageFile(file);
+    if (validationError) {
+      setError(validationError);
       return;
     }
     setPreviewFile(file);
     setError('');
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreviewUrl(reader.result);
-      setForm(f => ({ ...f, payment_proof: reader.result }));
-    };
-    reader.readAsDataURL(file);
+    setPreviewUrl(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.payment_method) return setError('Pilih metode pembayaran terlebih dahulu');
-    if (!form.payment_proof) return setError('Upload bukti pembayaran terlebih dahulu');
+    if (!previewFile && !form.payment_proof) return setError('Upload bukti pembayaran terlebih dahulu');
     setSubmitting(true);
     setError('');
     try {
-      await api.patch(`/api/bookings/${bookingId}/pay`, {
-        payment_method: form.payment_method,
-        payment_proof: form.payment_proof,
-      });
+      if (previewFile) {
+        const formData = new FormData();
+        formData.append('payment_method', form.payment_method);
+        formData.append('payment_proof', previewFile);
+        await api.patch(`/api/bookings/${bookingId}/pay-upload`, formData);
+      } else {
+        await api.patch(`/api/bookings/${bookingId}/pay`, {
+          payment_method: form.payment_method,
+          payment_proof: form.payment_proof,
+        });
+      }
       setSuccess(true);
     } catch (err) {
       setError(err.response?.data?.message || 'Gagal mengirim konfirmasi pembayaran');

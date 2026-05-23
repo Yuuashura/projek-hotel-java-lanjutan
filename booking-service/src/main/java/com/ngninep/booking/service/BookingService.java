@@ -10,11 +10,11 @@ import java.util.List;
 public interface BookingService {
     BookingResponse createBooking(BookingRequest request, int customerId);
     
-    List<BookingResponse> getMyBookings(int customerId, String statusFilter);
+    List<BookingResponse> getMyBookings(int customerId, String statusFilter, Integer page, Integer size);
     
-    List<BookingResponse> getAllBookings();
+    List<BookingResponse> getAllBookings(Integer page, Integer size);
     
-    List<BookingResponse> getBookingsByHotel(int hotelId);
+    List<BookingResponse> getBookingsByHotel(int hotelId, Integer page, Integer size);
     
     BookingResponse getBookingById(int id);
     

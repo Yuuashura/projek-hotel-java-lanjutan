@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Shield, ShieldOff, AlertCircle } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
+import PaginationControls from '../../components/admin/PaginationControls';
 import api from '../../utils/api';
+import { getErrorMessage, unwrapList } from '../../utils/response';
+
+const PAGE_SIZE = 25;
 
 const AdminVisitors = () => {
   const [users, setUsers] = useState([]);
@@ -11,18 +15,20 @@ const AdminVisitors = () => {
   const [search, setSearch] = useState('');
   const [actionLoading, setActionLoading] = useState(null);
   const [error, setError] = useState('');
+  const [page, setPage] = useState(0);
 
   const load = () => {
     setLoading(true);
+    setError('');
     Promise.all([
       api.get('/api/users'),
       api.get('/api/cities').catch(() => ({ data: { data: [] } })) // Fallback if cities fail
     ]).then(([resUsers, resCities]) => {
-      const data = (resUsers.data || []).filter(u => u.role === 'ROLE_USER');
+      const data = unwrapList(resUsers.data).filter(u => u.role === 'ROLE_USER');
       setUsers(data);
       setFiltered(data);
-      setCities(resCities.data.data || []);
-    }).catch(() => setError('Gagal memuat data pengunjung')).finally(() => setLoading(false));
+      setCities(unwrapList(resCities.data));
+    }).catch((err) => setError(getErrorMessage(err, 'Gagal memuat data pengunjung'))).finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);
@@ -31,6 +37,12 @@ const AdminVisitors = () => {
     const q = search.toLowerCase();
     setFiltered(users.filter(u => u.email?.toLowerCase().includes(q) || u.first_name?.toLowerCase().includes(q) || u.last_name?.toLowerCase().includes(q) || u.phone?.includes(q)));
   }, [search, users]);
+
+  useEffect(() => { setPage(0); }, [search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages - 1);
+  const paginated = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
 
   const handleToggleBan = async (userId, currentBanned) => {
     setActionLoading(userId);
@@ -73,7 +85,7 @@ const AdminVisitors = () => {
               <tr>{['#', 'Nama', 'Email', 'Telepon', 'Kota', 'Status', 'Aksi'].map(h => <th key={h}>{h}</th>)}</tr>
             </thead>
             <tbody>
-              {filtered.map(u => (
+              {paginated.map(u => (
                 <tr key={u.id_customer || u.id}>
                   <td style={{ fontWeight: 400, color: 'var(--color-muted)', fontSize: '0.85rem' }}>#{u.id_customer || u.id}</td>
                   <td>
@@ -114,6 +126,13 @@ const AdminVisitors = () => {
             </tbody>
           </table>
           {filtered.length === 0 && <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>Tidak ada pengunjung ditemukan</div>}
+          <PaginationControls
+            page={currentPage}
+            totalPages={totalPages}
+            totalItems={filtered.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setPage}
+          />
         </div>
       )}
     </AdminLayout>

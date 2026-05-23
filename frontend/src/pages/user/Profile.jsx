@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { User, Lock, Camera, Save, AlertCircle, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
+import { validateImageFile } from '../../utils/uploads';
 
 const Profile = () => {
   const { user, login, token, logout } = useAuth();
@@ -10,7 +11,9 @@ const Profile = () => {
   const [tab, setTab] = useState('info');
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [profileUploading, setProfileUploading] = useState(false);
   const [msg, setMsg] = useState({ type: '', text: '' });
+  const fileRef = useRef();
 
   const [form, setForm] = useState({ first_name: '', last_name: '', age: '', city_id: '', phone: '', profile_picture: '' });
   const [pwForm, setPwForm] = useState({ old_password: '', new_password: '', confirm: '' });
@@ -26,6 +29,31 @@ const Profile = () => {
   }, [user]);
 
   const showMsg = (type, text) => { setMsg({ type, text }); setTimeout(() => setMsg({ type: '', text: '' }), 4000); };
+
+  const handleProfilePictureChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const validationError = validateImageFile(file);
+    if (validationError) {
+      showMsg('error', validationError);
+      return;
+    }
+
+    setProfileUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await api.post('/api/users/me/profile-picture', formData);
+      login(token, res.data);
+      setForm(f => ({ ...f, profile_picture: res.data.profile_picture || '' }));
+      showMsg('success', 'Foto profil berhasil diunggah!');
+    } catch (err) {
+      showMsg('error', err.response?.data?.message || 'Gagal mengunggah foto profil');
+    } finally {
+      setProfileUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
 
   const handleProfileSave = async (e) => {
     e.preventDefault();
@@ -86,6 +114,16 @@ const Profile = () => {
                 <User size={36} style={{ color: 'var(--color-muted)' }} />
               )}
             </div>
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={profileUploading}
+              title="Upload foto profil"
+              style={{ position: 'absolute', right: -4, bottom: -4, width: 34, height: 34, borderRadius: '50%', border: '1px solid var(--color-accent)', background: 'white', color: 'var(--color-primary)', cursor: profileUploading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-float)' }}
+            >
+              <Camera size={15} />
+            </button>
+            <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: 'none' }} onChange={handleProfilePictureChange} />
           </div>
           <div>
             <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '2rem', margin: 0, color: 'var(--color-text)' }}>{user?.first_name} {user?.last_name}</h1>
@@ -179,8 +217,10 @@ const Profile = () => {
                   <input type="tel" className="input" style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', background: 'transparent', borderRadius: 0, paddingLeft: 0 }} value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} required />
                 </div>
                 <div>
-                  <label className="label">URL Foto Profil (opsional)</label>
-                  <input type="url" className="input" style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', background: 'transparent', borderRadius: 0, paddingLeft: 0 }} placeholder="https://..." value={form.profile_picture} onChange={e => setForm(f => ({ ...f, profile_picture: e.target.value }))} />
+                  <label className="label">Foto Profil</label>
+                  <button type="button" onClick={() => fileRef.current?.click()} className="btn btn-white" disabled={profileUploading} style={{ height: 42, padding: '0 1.25rem' }}>
+                    <Camera size={14} /> {profileUploading ? 'Mengunggah...' : 'Upload Foto Profil'}
+                  </button>
                 </div>
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                   <button type="submit" className="btn btn-primary" disabled={loading} style={{ background: 'var(--color-primary)', padding: '0 2rem', height: 44 }}>

@@ -6,6 +6,7 @@ import com.ngninep.booking.dto.req.UpdateStatusRequest;
 import com.ngninep.booking.dto.res.BookingResponse;
 import com.ngninep.booking.dto.res.WebResponse;
 import com.ngninep.booking.entity.BookingStatus;
+import com.ngninep.booking.service.FileStorageService;
 import com.ngninep.booking.service.BookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -23,6 +25,7 @@ import java.util.List;
 public class BookingController {
 
     private final BookingService bookingService;
+    private final FileStorageService fileStorageService;
 
     // Helper untuk mengambil userId dari JWT
     private int getCurrentUserId() {
@@ -53,12 +56,14 @@ public class BookingController {
     @GetMapping("/my")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<WebResponse<List<BookingResponse>>> getMyBookings(
-            @RequestParam(required = false, defaultValue = "all") String status) {
+            @RequestParam(required = false, defaultValue = "all") String status,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
         int customerId = getCurrentUserId();
         WebResponse<List<BookingResponse>> response = WebResponse.<List<BookingResponse>>builder()
                 .status("200")
                 .message("Berhasil mengambil data pesanan")
-                .data(bookingService.getMyBookings(customerId, status))
+                .data(bookingService.getMyBookings(customerId, status, page, size))
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -72,6 +77,28 @@ public class BookingController {
         
         int customerId = getCurrentUserId();
         
+        WebResponse<BookingResponse> response = WebResponse.<BookingResponse>builder()
+                .status("200")
+                .message("Pembayaran berhasil diproses")
+                .data(bookingService.payBooking(id, request, customerId))
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping(value = "/{id}/pay-upload", consumes = "multipart/form-data")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public ResponseEntity<WebResponse<BookingResponse>> payBookingWithUpload(
+            @PathVariable int id,
+            @RequestParam("payment_method") String paymentMethod,
+            @RequestParam("payment_proof") MultipartFile paymentProof) {
+
+        int customerId = getCurrentUserId();
+        String proofUrl = fileStorageService.savePaymentProof(paymentProof);
+        PaymentRequest request = PaymentRequest.builder()
+                .paymentMethod(paymentMethod)
+                .paymentProof(proofUrl)
+                .build();
+
         WebResponse<BookingResponse> response = WebResponse.<BookingResponse>builder()
                 .status("200")
                 .message("Pembayaran berhasil diproses")
@@ -96,11 +123,13 @@ public class BookingController {
     // 🔒 ADMIN_APP & ADMIN_HOTEL — Melihat semua pesanan
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_APP', 'ROLE_ADMIN_HOTEL')")
-    public ResponseEntity<WebResponse<List<BookingResponse>>> getAllBookings() {
+    public ResponseEntity<WebResponse<List<BookingResponse>>> getAllBookings(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
         WebResponse<List<BookingResponse>> response = WebResponse.<List<BookingResponse>>builder()
                 .status("200")
                 .message("Berhasil mengambil semua pesanan")
-                .data(bookingService.getAllBookings())
+                .data(bookingService.getAllBookings(page, size))
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -108,11 +137,14 @@ public class BookingController {
     // 🔒 ADMIN_HOTEL — Melihat pesanan berdasarkan hotel miliknya (Untuk filter manual)
     @GetMapping("/hotel/{hotelId}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_APP', 'ROLE_ADMIN_HOTEL')")
-    public ResponseEntity<WebResponse<List<BookingResponse>>> getBookingsByHotel(@PathVariable int hotelId) {
+    public ResponseEntity<WebResponse<List<BookingResponse>>> getBookingsByHotel(
+            @PathVariable int hotelId,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
         WebResponse<List<BookingResponse>> response = WebResponse.<List<BookingResponse>>builder()
                 .status("200")
                 .message("Berhasil mengambil pesanan hotel")
-                .data(bookingService.getBookingsByHotel(hotelId))
+                .data(bookingService.getBookingsByHotel(hotelId, page, size))
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -124,7 +156,15 @@ public class BookingController {
             @PathVariable int id, 
             @Valid @RequestBody UpdateStatusRequest request) {
         
-        BookingStatus status = BookingStatus.valueOf(request.getStatus().toUpperCase());
+        BookingStatus status;
+        try {
+            status = BookingStatus.valueOf(request.getStatus().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST,
+                    "Status booking tidak valid"
+            );
+        }
         
         WebResponse<BookingResponse> response = WebResponse.<BookingResponse>builder()
                 .status("200")

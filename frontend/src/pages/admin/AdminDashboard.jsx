@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Hotel, Users, Calendar, TrendingUp, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Hotel, Calendar, TrendingUp, CheckCircle, Clock, XCircle, Upload, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../utils/api';
+import { unwrapList } from '../../utils/response';
 
 const StatCard = ({ label, value, icon: Icon, color, sub }) => (
   <div className="card" style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', position: 'relative', overflow: 'hidden', border: '1px solid var(--color-accent)', boxShadow: 'none' }}>
@@ -22,18 +23,50 @@ const StatCard = ({ label, value, icon: Icon, color, sub }) => (
 const AdminDashboard = () => {
   const [stats, setStats] = useState({ hotels: 0, bookings: [], totalRevenue: 0 });
   const [loading, setLoading] = useState(true);
+  const [excelUploading, setExcelUploading] = useState(false);
+  const [error, setError] = useState('');
+  const excelRef = React.useRef();
 
-  useEffect(() => {
+  const loadStats = () => {
+    setLoading(true);
     Promise.all([
-      api.get('/api/hotels').catch(() => ({ data: { data: [] } })),
-      api.get('/api/bookings').catch(() => ({ data: { data: [] } })),
+      api.get('/api/hotels', { params: { page: 0, size: 100 } }).catch(() => ({ data: { data: [] } })),
+      api.get('/api/bookings', { params: { page: 0, size: 100 } }).catch(() => ({ data: { data: [] } })),
     ]).then(([hotels, bookings]) => {
-      const bs = bookings.data.data || [];
+      const hotelList = unwrapList(hotels.data);
+      const bs = unwrapList(bookings.data);
       const confirmed = bs.filter(b => b.status === 'CONFIRMED' || b.status === 'COMPLETED');
       const totalRevenue = confirmed.reduce((sum, b) => sum + (b.total_price || 0), 0);
-      setStats({ hotels: (hotels.data.data || []).length, bookings: bs, totalRevenue });
+      setStats({ hotels: hotelList.length, bookings: bs, totalRevenue });
     }).finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadStats();
   }, []);
+
+  const handleExcelUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.xlsx')) {
+      setError('File harus berformat .xlsx');
+      return;
+    }
+
+    setExcelUploading(true);
+    setError('');
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      await api.post('/api/hotels/upload-excel', formData);
+      loadStats();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Gagal mengunggah file Excel');
+    } finally {
+      setExcelUploading(false);
+      if (excelRef.current) excelRef.current.value = '';
+    }
+  };
 
   const bookingStats = [
     { label: 'Menunggu', status: 'PENDING', bg: 'rgba(237,137,54,0.06)', color: '#DD6B20', icon: Clock },
@@ -46,10 +79,23 @@ const AdminDashboard = () => {
   return (
     <AdminLayout>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-        <div>
-          <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.75rem', textTransform: 'uppercase', letterSpacing: '1px', margin: 0, color: 'var(--color-text)' }}>Dashboard</h2>
-          <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', margin: '0.25rem 0 0' }}>Selamat datang kembali! Berikut ringkasan platform NgiNep hari ini.</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+          <div>
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.75rem', textTransform: 'uppercase', letterSpacing: '1px', margin: 0, color: 'var(--color-text)' }}>Dashboard</h2>
+            <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', margin: '0.25rem 0 0' }}>Selamat datang kembali! Berikut ringkasan platform NgiNep hari ini.</p>
+          </div>
+          <button onClick={() => excelRef.current?.click()} className="btn btn-white btn-sm" disabled={excelUploading}>
+            <Upload size={14} /> {excelUploading ? 'Mengunggah...' : 'Upload Hotel Excel'}
+          </button>
+          <input ref={excelRef} type="file" accept=".xlsx" style={{ display: 'none' }} onChange={handleExcelUpload} />
         </div>
+
+        {error && (
+          <div style={{ background: '#fff0f3', border: '1px solid #fda4af', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <AlertCircle size={16} style={{ color: '#be123c', flexShrink: 0 }} />
+            <span style={{ fontWeight: 300, color: '#be123c', fontSize: '0.85rem' }}>{error}</span>
+          </div>
+        )}
 
         {/* Stats Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1.25rem' }}>

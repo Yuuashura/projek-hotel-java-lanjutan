@@ -4,6 +4,7 @@ import com.ngninep.hotel.dto.req.HotelRequest;
 import com.ngninep.hotel.dto.res.HotelResponse;
 import com.ngninep.hotel.dto.res.WebResponse;
 import com.ngninep.hotel.repository.HotelImageRepository;
+import com.ngninep.hotel.service.FileStorageService;
 import com.ngninep.hotel.service.HotelService;
 
 import org.springframework.http.HttpStatus;
@@ -14,15 +15,18 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/hotels")
 public class HotelController {
 
     private final HotelService hotelService;
+    private final FileStorageService fileStorageService;
 
-    public HotelController(HotelService hotelService) {
+    public HotelController(HotelService hotelService, FileStorageService fileStorageService) {
         this.hotelService = hotelService;
+        this.fileStorageService = fileStorageService;
     }
 
 
@@ -30,11 +34,13 @@ public class HotelController {
     @GetMapping
     public ResponseEntity<WebResponse<List<HotelResponse>>> getAll(
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Integer cityId) {
+            @RequestParam(required = false) Integer cityId,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
         WebResponse<List<HotelResponse>> response = WebResponse.<List<HotelResponse>>builder()
                 .status("200")
                 .message("Success")
-                .data(hotelService.search(keyword, cityId))
+                .data(hotelService.search(keyword, cityId, page, size))
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -95,7 +101,7 @@ public class HotelController {
     }
 
     @PostMapping("/uploadHotel")
-    // @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_HOTEL', 'ROLE_ADMIN_APP')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_HOTEL', 'ROLE_ADMIN_APP')")
     public ResponseEntity<String> uploadExcel(@RequestParam("file") MultipartFile file) {
         try{
             hotelService.uploadExcel(file);
@@ -103,5 +109,32 @@ public class HotelController {
         }catch(Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @PostMapping(value = "/upload-excel", consumes = "multipart/form-data")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_HOTEL', 'ROLE_ADMIN_APP')")
+    public ResponseEntity<WebResponse<Void>> uploadExcelFile(@RequestParam("file") MultipartFile file) {
+        try {
+            hotelService.uploadExcel(file);
+            WebResponse<Void> response = WebResponse.<Void>builder()
+                    .status("200")
+                    .message("Excel berhasil diunggah")
+                    .build();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            throw new org.springframework.web.server.ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @PostMapping(value = "/upload-image", consumes = "multipart/form-data")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_HOTEL', 'ROLE_ADMIN_APP')")
+    public ResponseEntity<WebResponse<Map<String, String>>> uploadImage(@RequestParam("file") MultipartFile file) {
+        String imageUrl = fileStorageService.saveHotelImage(file);
+        WebResponse<Map<String, String>> response = WebResponse.<Map<String, String>>builder()
+                .status("200")
+                .message("Gambar hotel berhasil diunggah")
+                .data(Map.of("url", imageUrl))
+                .build();
+        return ResponseEntity.ok(response);
     }
 }

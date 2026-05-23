@@ -4,6 +4,7 @@ import { Plus, Pencil, Trash2, X, AlertCircle, ArrowLeft, Users, ImageIcon, Chec
 import { formatCurrency } from '../../utils/formatters';
 import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../utils/api';
+import { uploadFile, validateImageFile } from '../../utils/uploads';
 
 const EMPTY_FORM = {
   name: '',
@@ -26,6 +27,7 @@ const AdminRoomTypes = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [imgPreview, setImgPreview] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
   const fileRef = useRef();
 
   const loadData = async () => {
@@ -285,20 +287,28 @@ const AdminRoomTypes = () => {
                 ) : (
                   <div>
                     <ImageIcon size={28} style={{ color: 'var(--color-muted)', marginBottom: '0.4rem' }} />
-                    <div style={{ fontWeight: 300, fontSize: '0.8rem', color: 'var(--color-text)' }}>Klik untuk upload foto kamar</div>
+                    <div style={{ fontWeight: 300, fontSize: '0.8rem', color: 'var(--color-text)' }}>{uploadingImage ? 'Mengunggah foto...' : 'Klik untuk upload foto kamar'}</div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--color-muted)', marginTop: '0.2rem' }}>JPG, PNG, WEBP · Maks 5MB</div>
                   </div>
                 )}
               </div>
-              <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => {
+              <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: 'none' }} onChange={async e => {
                 const file = e.target.files?.[0];
                 if (!file) return;
-                if (!file.type.startsWith('image/')) { setError('Hanya file gambar yang diperbolehkan.'); return; }
-                if (file.size > 5 * 1024 * 1024) { setError('Ukuran file maksimal 5MB.'); return; }
+                const validationError = validateImageFile(file);
+                if (validationError) { setError(validationError); return; }
                 setError('');
-                const reader = new FileReader();
-                reader.onloadend = () => { setImgPreview(reader.result); setForm(f => ({ ...f, image_url: reader.result })); };
-                reader.readAsDataURL(file);
+                setUploadingImage(true);
+                try {
+                  const imageUrl = await uploadFile('/api/room-types/upload-image', file);
+                  setImgPreview(imageUrl);
+                  setForm(f => ({ ...f, image_url: imageUrl }));
+                } catch (err) {
+                  setError(err.response?.data?.message || 'Gagal mengunggah foto kamar');
+                } finally {
+                  setUploadingImage(false);
+                  if (fileRef.current) fileRef.current.value = '';
+                }
               }} />
             </div>
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>

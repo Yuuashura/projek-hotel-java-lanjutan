@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Search, Check, X, AlertCircle, Eye } from 'lucide-react';
 import { formatCurrency, formatDate, statusColor } from '../../utils/formatters';
 import AdminLayout from '../../components/admin/AdminLayout';
+import PaginationControls from '../../components/admin/PaginationControls';
 import api from '../../utils/api';
+import { getErrorMessage, unwrapList } from '../../utils/response';
 
 const STATUS_OPTIONS = ['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED'];
+const PAGE_SIZE = 25;
 
 const AdminBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -17,14 +20,16 @@ const AdminBookings = () => {
   const [newStatus, setNewStatus] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [page, setPage] = useState(0);
 
   const load = () => {
     setLoading(true);
+    setError('');
     api.get('/api/bookings').then(r => {
-      const data = r.data.data || [];
+      const data = unwrapList(r.data);
       setBookings(data);
       setFiltered(data);
-    }).catch(() => setError('Gagal memuat data pemesanan')).finally(() => setLoading(false));
+    }).catch((err) => setError(getErrorMessage(err, 'Gagal memuat data pemesanan'))).finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);
@@ -36,6 +41,12 @@ const AdminBookings = () => {
       (b.orderer_name?.toLowerCase().includes(q) || b.orderer_email?.toLowerCase().includes(q) || String(b.id_booking || b.id).includes(q))
     ));
   }, [search, statusFilter, bookings]);
+
+  useEffect(() => { setPage(0); }, [search, statusFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages - 1);
+  const paginated = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
 
   const openDetail = (b) => { setSelected(b); setNewStatus(b.status); setError(''); setModal('detail'); };
 
@@ -98,7 +109,7 @@ const AdminBookings = () => {
               <tr>{['ID', 'Pemesan', 'Hotel', 'Check-In', 'Check-Out', 'Total', 'Status', 'Aksi'].map(h => <th key={h}>{h}</th>)}</tr>
             </thead>
             <tbody>
-              {filtered.map(b => {
+              {paginated.map(b => {
                 const { bg, color, label } = statusColor(b.status);
                 // Simplify status matching for styling
                 const badgeClass = b.status === 'PENDING' ? 'orange' : b.status === 'CONFIRMED' ? 'green' : b.status === 'CANCELLED' ? 'red' : 'gray';
@@ -125,6 +136,13 @@ const AdminBookings = () => {
             </tbody>
           </table>
           {filtered.length === 0 && <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>Tidak ada data pemesanan</div>}
+          <PaginationControls
+            page={currentPage}
+            totalPages={totalPages}
+            totalItems={filtered.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setPage}
+          />
         </div>
       )}
 

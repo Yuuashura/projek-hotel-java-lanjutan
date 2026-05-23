@@ -16,6 +16,8 @@ import com.ngninep.hotel.service.HotelService;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -122,14 +124,21 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
-    public List<HotelResponse> search(String keyword, Integer cityId) {
+    public List<HotelResponse> search(String keyword, Integer cityId, Integer page, Integer size) {
         List<Hotel> hotels;
+        Pageable pageable = toPageable(page, size);
         if (keyword != null && !keyword.isBlank()) {
-            hotels = hotelRepository.findByNameContainingIgnoreCase(keyword);
+            hotels = pageable != null
+                    ? hotelRepository.findByNameContainingIgnoreCase(keyword, pageable).getContent()
+                    : hotelRepository.findByNameContainingIgnoreCase(keyword);
         } else if (cityId != null) {
-            hotels = hotelRepository.findByCity_IdCity(cityId);
+            hotels = pageable != null
+                    ? hotelRepository.findByCity_IdCity(cityId, pageable).getContent()
+                    : hotelRepository.findByCity_IdCity(cityId);
         } else {
-            hotels = hotelRepository.findAll();
+            hotels = pageable != null
+                    ? hotelRepository.findAll(pageable).getContent()
+                    : hotelRepository.findAll();
         }
 
         return hotels.stream().map(this::mapToResponse).collect(Collectors.toList());
@@ -352,4 +361,13 @@ public class HotelServiceImpl implements HotelService {
         return null;
     }
 
+    private Pageable toPageable(Integer page, Integer size) {
+        if (page == null && size == null) {
+            return null;
+        }
+
+        int safePage = page != null && page >= 0 ? page : 0;
+        int safeSize = size != null && size > 0 ? Math.min(size, 100) : 10;
+        return PageRequest.of(safePage, safeSize);
+    }
 }
