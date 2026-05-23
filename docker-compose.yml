@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SERVER_PORT=8081
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0
+      - SPRING_DATASOURCE_USERNAME=postgres.kpepeocugzbyugpgywvy
+      - SPRING_DATASOURCE_PASSWORD=yuuashura12
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    restart: always
+
+  hotel-service:
+    build:
+      context: ./hotel-service
+      dockerfile: Dockerfile
+    container_name: hotel-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SERVER_PORT=8082
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0
+      - SPRING_DATASOURCE_USERNAME=postgres.kpepeocugzbyugpgywvy
+      - SPRING_DATASOURCE_PASSWORD=yuuashura12
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    restart: always
+
+  booking-service:
+    build:
+      context: ./booking-service
+      dockerfile: Dockerfile
+    container_name: booking-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SERVER_PORT=8083
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0
+      - SPRING_DATASOURCE_USERNAME=postgres.kpepeocugzbyugpgywvy
+      - SPRING_DATASOURCE_PASSWORD=yuuashura12
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    restart: always
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - user-service
+      - hotel-service
+      - booking-service
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_CLOUD_GATEWAY_ROUTES_0_ID=user-service
+      - SPRING_CLOUD_GATEWAY_ROUTES_0_URI=http://user-service:8081
+      - SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0=Path=/api/auth/**,/api/users/**
+      - SPRING_CLOUD_GATEWAY_ROUTES_1_ID=hotel-service
+      - SPRING_CLOUD_GATEWAY_ROUTES_1_URI=http://hotel-service:8082
+      - SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0=Path=/api/hotels/**,/api/room-types/**,/api/cities/**,/api/facilities/**
+      - SPRING_CLOUD_GATEWAY_ROUTES_2_ID=booking-service
+      - SPRING_CLOUD_GATEWAY_ROUTES_2_URI=http://booking-service:8083
+      - SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0=Path=/api/bookings/**
+    restart: always

@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { translations } from './translations';
 
 const PreferencesContext = createContext(null);
@@ -17,6 +17,7 @@ const interpolate = (value, params = {}) => {
 export const PreferencesProvider = ({ children }) => {
   const [language, setLanguage] = useState(() => localStorage.getItem('ngninep-language') || DEFAULT_LANGUAGE);
   const [theme, setTheme] = useState(() => localStorage.getItem('ngninep-theme') || DEFAULT_THEME);
+  const didMountTheme = useRef(false);
 
   useEffect(() => {
     const safeLanguage = translations[language] ? language : DEFAULT_LANGUAGE;
@@ -26,9 +27,23 @@ export const PreferencesProvider = ({ children }) => {
 
   useEffect(() => {
     const safeTheme = theme === 'dark' ? 'dark' : DEFAULT_THEME;
+    let transitionTimer;
+    if (didMountTheme.current) {
+      document.documentElement.classList.add('theme-transitioning');
+      transitionTimer = window.setTimeout(() => {
+        document.documentElement.classList.remove('theme-transitioning');
+      }, 420);
+    } else {
+      didMountTheme.current = true;
+    }
     document.documentElement.dataset.theme = safeTheme;
     document.documentElement.style.colorScheme = safeTheme;
     localStorage.setItem('ngninep-theme', safeTheme);
+
+    return () => {
+      if (transitionTimer) window.clearTimeout(transitionTimer);
+      document.documentElement.classList.remove('theme-transitioning');
+    };
   }, [theme]);
 
   const value = useMemo(() => {

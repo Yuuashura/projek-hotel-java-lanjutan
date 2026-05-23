@@ -80,15 +80,15 @@ const Login = () => {
           <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>Belum punya akun? <Link to="/register" style={{ color: 'var(--color-primary)', fontWeight: 400, textDecoration: 'none' }}>Daftar sekarang</Link></p>
         </div>
 
-        <div className="card" style={{ padding: '2.5rem 2.5rem', border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-float)', background: 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(10px)', position: 'relative', overflow: 'hidden' }}>
+        <div className="card" style={{ padding: '2.5rem 2.5rem', border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-float)', background: 'var(--color-surface-glass)', backdropFilter: 'blur(10px)', position: 'relative', overflow: 'hidden' }}>
           {/* Card Top Accent Line */}
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, var(--color-primary), #3182ce)' }} />
 
           {/* Error Alert */}
           {error && (
-            <div style={{ background: '#FFF5F5', border: '1px solid #FEB2B2', padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
-              <AlertCircle size={16} style={{ color: '#E53E3E', flexShrink: 0 }} />
-              <span style={{ fontWeight: 300, color: '#C53030', fontSize: '0.85rem' }}>{error}</span>
+            <div className="alert-danger" style={{ padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
+              <AlertCircle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
+              <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.85rem' }}>{error}</span>
             </div>
           )}
 

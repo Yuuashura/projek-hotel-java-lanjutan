@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { usePreferences } from '../context/PreferencesContext';
@@ -40,6 +40,18 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [logoRotating, setLogoRotating] = useState(false);
+  const didMountTheme = useRef(false);
+
+  useEffect(() => {
+    if (!didMountTheme.current) {
+      didMountTheme.current = true;
+      return;
+    }
+    setLogoRotating(true);
+    const timer = window.setTimeout(() => setLogoRotating(false), 560);
+    return () => window.clearTimeout(timer);
+  }, [theme]);
 
   const handleLogout = () => {
     logout();
@@ -52,8 +64,19 @@ const Navbar = () => {
 
   const preferenceControls = (
     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 2, padding: 3, border: '1px solid rgba(255,255,255,0.24)', background: 'rgba(255,255,255,0.1)', borderRadius: 'var(--radius-sm)' }}>
-        <Globe size={13} style={{ color: 'rgba(255,255,255,0.85)', margin: '0 0.35rem' }} />
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 2, padding: 3, border: '1px solid rgba(255,255,255,0.24)', background: 'rgba(255,255,255,0.1)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
+        <Globe size={13} style={{ color: 'rgba(255,255,255,0.85)', margin: '0 0.35rem', zIndex: 1 }} />
+        <span style={{
+          position: 'absolute',
+          top: 3,
+          bottom: 3,
+          left: language === 'id' ? 35 : 71,
+          width: 34,
+          borderRadius: 'var(--radius-sm)',
+          background: 'rgba(246,211,101,0.95)',
+          boxShadow: '0 6px 18px rgba(0,0,0,0.16)',
+          transition: 'left 0.28s cubic-bezier(0.16, 1, 0.3, 1)',
+        }} />
         {['id', 'en'].map((lang) => (
           <button
             key={lang}
@@ -65,8 +88,10 @@ const Navbar = () => {
               minWidth: 34,
               border: 'none',
               cursor: 'pointer',
+              position: 'relative',
+              zIndex: 1,
               borderRadius: 'var(--radius-sm)',
-              background: language === lang ? 'rgba(246,211,101,0.95)' : 'transparent',
+              background: 'transparent',
               color: language === lang ? '#15314F' : 'rgba(255,255,255,0.9)',
               fontFamily: 'var(--font-body)',
               fontSize: '0.7rem',
@@ -86,7 +111,7 @@ const Navbar = () => {
         className="btn btn-white btn-sm"
         style={{ ...frostedButtonStyle, height: 38, width: 42, padding: 0 }}
       >
-        <ThemeIcon size={15} />
+        <ThemeIcon key={theme} size={15} className="theme-icon-rotate" />
       </button>
     </div>
   );
@@ -106,7 +131,7 @@ const Navbar = () => {
 
         {/* Logo */}
         <Link to="/" style={{ textDecoration: 'none' }}>
-          <div style={{
+          <div className={`brand-logo ${logoRotating ? 'is-rotating' : ''}`} style={{
             fontFamily: 'var(--font-heading)',
             fontWeight: 400,
             fontSize: '1.8rem',

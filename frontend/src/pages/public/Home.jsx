@@ -82,17 +82,18 @@ const Home = () => {
           }}>
             <img src={s.image} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: i === current ? 'scale(1.02)' : 'scale(1)', transition: 'transform 6s ease' }} />
             {/* Dark luxury navy overlay */}
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(26,54,93,0.7) 10%, rgba(26,54,93,0.2) 100%)' }} />
-            <div style={{ position: 'absolute', bottom: '12rem', left: '5%', right: '5%', zIndex: 2, color: 'white', maxWidth: 800 }}>
-              <span className="badge badge-yellow animate-fade-in" style={{ marginBottom: '1rem', background: 'rgba(212,175,55,0.2)', border: '1px solid var(--color-primary)', color: 'var(--color-primary)', padding: '0.4rem 1rem' }}>{s.city}</span>
-              <h1 className="animate-slide-in" style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: 'clamp(2rem, 6vw, 4.5rem)', textTransform: 'none', margin: '0.5rem 0', lineHeight: 1.1 }}>
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(7,22,38,0.74) 0%, rgba(7,22,38,0.48) 42%, rgba(7,22,38,0.16) 100%)' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(7,22,38,0.74) 0%, rgba(7,22,38,0.2) 58%, rgba(7,22,38,0.34) 100%)' }} />
+            <div style={{ position: 'absolute', bottom: '12rem', left: '5%', right: '5%', zIndex: 2, color: '#FFFFFF', maxWidth: 800, textShadow: '0 3px 18px rgba(0,0,0,0.38)' }}>
+              <span className="badge badge-yellow animate-fade-in" style={{ marginBottom: '1rem', background: 'rgba(246,211,101,0.95)', border: '1px solid rgba(246,211,101,0.95)', color: '#15314F', padding: '0.4rem 1rem', textShadow: 'none' }}>{s.city}</span>
+              <h1 className="animate-slide-in" style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: 'clamp(2rem, 6vw, 4.5rem)', textTransform: 'none', margin: '0.5rem 0', lineHeight: 1.05, color: '#FFFFFF', textShadow: '0 4px 24px rgba(0,0,0,0.5)' }}>
                 {s.title}
               </h1>
-              <p className="animate-slide-in" style={{ fontFamily: 'var(--font-body)', fontWeight: 300, color: 'rgba(255,255,255,0.8)', marginBottom: '2rem', fontSize: 'clamp(1rem, 1.5vw, 1.25rem)', letterSpacing: '0.5px' }}>
+              <p className="animate-slide-in" style={{ fontFamily: 'var(--font-body)', fontWeight: 400, color: 'rgba(255,255,255,0.94)', marginBottom: '2rem', fontSize: 'clamp(1rem, 1.5vw, 1.25rem)', letterSpacing: '0.5px', maxWidth: 720 }}>
                 {s.desc}
               </p>
               <div className="animate-slide-in" style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                <span style={{ fontFamily: 'var(--font-body)', fontWeight: 300, fontSize: '1.1rem', letterSpacing: '1px' }}>{t('home.heroPrice', { price: formatCurrency(s.price) })}</span>
+                <span style={{ fontFamily: 'var(--font-body)', fontWeight: 500, fontSize: '1.1rem', letterSpacing: '1px', color: '#FFFFFF' }}>{t('home.heroPrice', { price: formatCurrency(s.price) })}</span>
                 <Link to="/hotels" className="btn btn-primary" style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}>{t('home.heroCta')}</Link>
               </div>
             </div>
@@ -126,11 +127,11 @@ const Home = () => {
         <form onSubmit={handleSearch} style={{ background: 'var(--color-surface)', borderRadius: 'var(--radius-sm)', padding: '1.25rem 2rem', boxShadow: 'var(--shadow-float)', border: '1px solid var(--color-accent)' }}>
           <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
             <div style={{ flex: 2, minWidth: 200 }}>
-              <label className="label" style={{ fontSize: '0.7rem', letterSpacing: '1px' }}>{t('home.searchDestination')}</label>
-              <input className="input" style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', padding: '0.5rem 0', background: 'transparent', borderRadius: 0 }} placeholder={t('home.searchPlaceholder')} value={search.keyword} onChange={e => setSearch(s => ({ ...s, keyword: e.target.value }))} />
+              <label className="label" style={{ fontSize: '0.7rem', letterSpacing: '1px', color: 'var(--color-text)', fontWeight: 500 }}>{t('home.searchDestination')}</label>
+              <input className="input" style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', padding: '0.5rem 0', background: 'transparent', borderRadius: 0, color: 'var(--color-text)', fontWeight: 400 }} placeholder={t('home.searchPlaceholder')} value={search.keyword} onChange={e => setSearch(s => ({ ...s, keyword: e.target.value }))} />
             </div>
             <div style={{ flex: 1, minWidth: 150 }}>
-              <label className="label" style={{ fontSize: '0.7rem', letterSpacing: '1px' }}>{t('common.city')}</label>
+              <label className="label" style={{ fontSize: '0.7rem', letterSpacing: '1px', color: 'var(--color-text)', fontWeight: 500 }}>{t('common.city')}</label>
               <CitySearchSelect
                 cities={cities}
                 value={search.city}

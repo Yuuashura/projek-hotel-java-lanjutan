@@ -138,9 +138,9 @@ const Booking = () => {
         <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '2.5rem', marginBottom: '3rem', color: 'var(--color-text)' }}>Checkout</h1>
 
         {error && (
-          <div style={{ background: '#fff0f3', border: '1px solid #C53030', padding: '1rem', marginBottom: '2.5rem', display: 'flex', gap: '0.6rem', borderRadius: 'var(--radius-sm)' }}>
-            <AlertCircle size={18} style={{ color: '#C53030', flexShrink: 0 }} />
-            <span style={{ fontWeight: 300, color: '#C53030', fontSize: '0.9rem' }}>{error}</span>
+          <div className="alert-danger" style={{ padding: '1rem', marginBottom: '2.5rem', display: 'flex', gap: '0.6rem', borderRadius: 'var(--radius-sm)' }}>
+            <AlertCircle size={18} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
+            <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.9rem' }}>{error}</span>
           </div>
         )}
 
@@ -227,7 +227,7 @@ const Booking = () => {
 
           {/* Right Column (35%): Order Summary */}
           <div style={{ position: 'sticky', top: 120 }}>
-            <div style={{ background: '#F7FAFC', border: '1px solid var(--color-accent)', padding: '2.5rem 2rem', borderRadius: 'var(--radius-sm)' }}>
+            <div className="card" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-accent)', padding: '2.5rem 2rem', borderRadius: 'var(--radius-sm)' }}>
               <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--color-text)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.75rem', fontWeight: 300 }}>Order Summary</h3>
               
               <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>

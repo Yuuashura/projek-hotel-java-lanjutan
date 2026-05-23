@@ -4,10 +4,12 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import PaginationControls from '../../components/admin/PaginationControls';
 import api from '../../utils/api';
 import { getErrorMessage, unwrapList } from '../../utils/response';
+import { usePreferences } from '../../context/PreferencesContext';
 
 const PAGE_SIZE = 25;
 
 const AdminVisitors = () => {
+  const { t } = usePreferences();
   const [users, setUsers] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [cities, setCities] = useState([]);
@@ -28,7 +30,7 @@ const AdminVisitors = () => {
       setUsers(data);
       setFiltered(data);
       setCities(unwrapList(resCities.data));
-    }).catch((err) => setError(getErrorMessage(err, 'Gagal memuat data pengunjung'))).finally(() => setLoading(false));
+    }).catch((err) => setError(getErrorMessage(err, t('admin.errors.loadVisitors')))).finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);
@@ -52,7 +54,7 @@ const AdminVisitors = () => {
       await api.patch(endpoint);
       load();
     } catch (err) {
-      setError(err.response?.data?.message || 'Gagal mengubah status user');
+      setError(err.response?.data?.message || t('admin.errors.updateUserStatusFailed'));
     } finally { setActionLoading(null); }
   };
 
@@ -60,29 +62,29 @@ const AdminVisitors = () => {
     <AdminLayout>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.75rem', textTransform: 'uppercase', letterSpacing: '1px', margin: 0, color: 'var(--color-text)' }}>Kelola Pengunjung</h2>
-          <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', margin: '0.25rem 0 0' }}>{filtered.length} user terdaftar</p>
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.75rem', textTransform: 'uppercase', letterSpacing: '1px', margin: 0, color: 'var(--color-text)' }}>{t('admin.visitors.title')}</h2>
+          <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', margin: '0.25rem 0 0' }}>{t('admin.visitors.count', { count: filtered.length })}</p>
         </div>
         <div style={{ position: 'relative', maxWidth: 300, width: '100%' }}>
           <Search size={14} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-muted)' }} />
-          <input className="input" placeholder="Cari nama, email, telepon..." value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: '2.25rem', height: '2.25rem' }} />
+          <input className="input" placeholder={t('admin.visitors.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: '2.25rem', height: '2.25rem' }} />
         </div>
       </div>
 
       {error && (
-        <div style={{ background: '#fff0f3', border: '1px solid #fda4af', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <AlertCircle size={16} style={{ color: '#be123c', flexShrink: 0 }} />
-          <span style={{ fontWeight: 300, color: '#be123c', fontSize: '0.85rem' }}>{error}</span>
+        <div className="alert-danger" style={{ borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <AlertCircle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
+          <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.85rem' }}>{error}</span>
         </div>
       )}
 
       {loading ? (
-        <div className="card" style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>Memuat data pengunjung...</div>
+        <div className="card" style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>{t('admin.visitors.loading')}</div>
       ) : (
         <div style={{ overflowX: 'auto' }}>
           <table className="neo-table">
             <thead>
-              <tr>{['#', 'Nama', 'Email', 'Telepon', 'Kota', 'Status', 'Aksi'].map(h => <th key={h}>{h}</th>)}</tr>
+              <tr>{[t('admin.table.number'), t('admin.table.name'), t('admin.table.email'), t('admin.table.phone'), t('admin.table.city'), t('admin.table.status'), t('admin.table.actions')].map(h => <th key={h}>{h}</th>)}</tr>
             </thead>
             <tbody>
               {paginated.map(u => (
@@ -95,7 +97,7 @@ const AdminVisitors = () => {
                       </div>
                       <div>
                         <div style={{ fontWeight: 400, fontSize: '0.9rem', color: 'var(--color-text)' }}>{u.first_name} {u.last_name}</div>
-                        <div style={{ fontSize: '0.75rem', fontWeight: 300, color: 'var(--color-muted)', marginTop: '0.1rem' }}>Umur: {u.age || '-'}</div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 300, color: 'var(--color-muted)', marginTop: '0.1rem' }}>{t('admin.visitors.age')}: {u.age || '-'}</div>
                       </div>
                     </div>
                   </td>
@@ -104,11 +106,11 @@ const AdminVisitors = () => {
                   <td><span className="badge badge-gray">{cities.find(c => c.id_city === u.city_id)?.name || '-'}</span></td>
                   <td>
                     {u.is_banned ? (
-                      <span className="badge badge-red">BANNED</span>
+                      <span className="badge badge-red">{t('admin.visitors.banned')}</span>
                     ) : u.is_verified ? (
-                      <span className="badge badge-green">AKTIF</span>
+                      <span className="badge badge-green">{t('admin.visitors.active')}</span>
                     ) : (
-                      <span className="badge badge-orange">BELUM VERIF.</span>
+                      <span className="badge badge-orange">{t('admin.visitors.unverified')}</span>
                     )}
                   </td>
                   <td>
@@ -116,7 +118,7 @@ const AdminVisitors = () => {
                       onClick={() => handleToggleBan(u.id_customer || u.id, u.is_banned)}
                       disabled={actionLoading === (u.id_customer || u.id)}
                       className="btn btn-white btn-sm"
-                      style={{ padding: '0.4rem 0.8rem', color: u.is_banned ? '#276749' : '#be123c' }}
+                      style={{ padding: '0.4rem 0.8rem', color: u.is_banned ? 'var(--color-success)' : 'var(--color-danger)' }}
                     >
                       {actionLoading === (u.id_customer || u.id) ? '...' : u.is_banned ? <><ShieldOff size={12} style={{ marginRight: '0.25rem' }} /> Unban</> : <><Shield size={12} style={{ marginRight: '0.25rem' }} /> Ban</>}
                     </button>
@@ -125,7 +127,7 @@ const AdminVisitors = () => {
               ))}
             </tbody>
           </table>
-          {filtered.length === 0 && <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>Tidak ada pengunjung ditemukan</div>}
+          {filtered.length === 0 && <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>{t('admin.visitors.empty')}</div>}
           <PaginationControls
             page={currentPage}
             totalPages={totalPages}

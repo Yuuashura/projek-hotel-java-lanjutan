@@ -1,5 +1,5 @@
-import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { usePreferences } from '../../context/PreferencesContext';
 
 const buildPageNumbers = (page, totalPages) => {
   const maxButtons = 5;
@@ -15,6 +15,8 @@ const buildPageNumbers = (page, totalPages) => {
 };
 
 const PaginationControls = ({ page, totalPages, totalItems, pageSize, onPageChange }) => {
+  const { t } = usePreferences();
+
   if (totalPages <= 1) return null;
 
   const pageNumbers = buildPageNumbers(page, totalPages);
@@ -27,7 +29,7 @@ const PaginationControls = ({ page, totalPages, totalItems, pageSize, onPageChan
     padding: '0 0.7rem',
     border: active ? '1px solid var(--color-primary)' : '1px solid var(--color-accent)',
     borderRadius: 'var(--radius-sm)',
-    background: active ? 'var(--color-primary)' : 'white',
+    background: active ? 'var(--color-primary)' : 'var(--color-surface)',
     color: active ? 'white' : disabled ? 'var(--color-muted)' : 'var(--color-text)',
     cursor: disabled ? 'not-allowed' : 'pointer',
     opacity: disabled ? 0.45 : 1,
@@ -43,7 +45,7 @@ const PaginationControls = ({ page, totalPages, totalItems, pageSize, onPageChan
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', marginTop: '1rem' }}>
       <div style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.82rem' }}>
-        Halaman {page + 1} dari {totalPages} · Menampilkan {firstItem}-{lastItem} dari {totalItems} data · {pageSize} per halaman
+        {t('admin.pagination.page', { page: page + 1, totalPages })} · {t('admin.pagination.showing', { first: firstItem, last: lastItem, total: totalItems })} · {t('admin.pagination.perPage', { pageSize })}
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
@@ -51,10 +53,10 @@ const PaginationControls = ({ page, totalPages, totalItems, pageSize, onPageChan
           type="button"
           onClick={() => onPageChange(page - 1)}
           disabled={page === 0}
-          title="Halaman sebelumnya"
+          title={t('admin.pagination.previous')}
           style={buttonStyle(false, page === 0)}
         >
-          <ChevronLeft size={14} /> Prev
+          <ChevronLeft size={14} /> {t('admin.pagination.prevShort')}
         </button>
 
         {pageNumbers[0] > 0 && (
@@ -86,10 +88,10 @@ const PaginationControls = ({ page, totalPages, totalItems, pageSize, onPageChan
           type="button"
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages - 1}
-          title="Halaman berikutnya"
+          title={t('admin.pagination.next')}
           style={buttonStyle(false, page >= totalPages - 1)}
         >
-          Next <ChevronRight size={14} />
+          {t('admin.pagination.nextShort')} <ChevronRight size={14} />
         </button>
       </div>
     </div>

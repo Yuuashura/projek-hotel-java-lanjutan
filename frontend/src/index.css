@@ -12,10 +12,19 @@
   --color-background: #F4F7FA;    /* Soft Coastal Ice Blue */
   --color-surface: #FFFFFF;       /* White */
   --color-text: #1E2D4A;          /* Slate Navy */
-  --color-muted: #64748B;         /* Slate Gray */
+  --color-muted: #475569;         /* Slate Gray */
   --color-accent: #E2E8F0;        /* Soft Blue-Grey */
   --color-gold: #F6D365;
   --color-danger: #C53030;
+  --color-danger-soft: #FFF5F5;
+  --color-danger-border: #FEB2B2;
+  --color-success: #2F855A;
+  --color-success-soft: rgba(72, 187, 120, 0.12);
+  --color-success-border: rgba(72, 187, 120, 0.22);
+  --color-warning: #B7791F;
+  --color-warning-soft: rgba(237, 137, 54, 0.12);
+  --color-warning-border: rgba(237, 137, 54, 0.24);
+  --color-surface-glass: rgba(255, 255, 255, 0.85);
   
   --font-heading: 'Cormorant Garamond', serif;
   --font-body: 'Outfit', sans-serif;
@@ -48,10 +57,19 @@
   --color-background: #071626;
   --color-surface: #0E2238;
   --color-text: #EEF6FF;
-  --color-muted: #A9BCD2;
+  --color-muted: #C5D3E3;
   --color-accent: #213A55;
   --color-gold: #F6D365;
   --color-danger: #FCA5A5;
+  --color-danger-soft: rgba(190, 18, 60, 0.16);
+  --color-danger-border: rgba(252, 165, 165, 0.32);
+  --color-success: #86EFAC;
+  --color-success-soft: rgba(34, 197, 94, 0.16);
+  --color-success-border: rgba(134, 239, 172, 0.28);
+  --color-warning: #FBBF24;
+  --color-warning-soft: rgba(251, 191, 36, 0.16);
+  --color-warning-border: rgba(251, 191, 36, 0.28);
+  --color-surface-glass: rgba(14, 34, 56, 0.88);
   --shadow-float: 0 18px 45px -18px rgba(0, 0, 0, 0.55);
   --shadow-hover: 0 25px 55px -18px rgba(0, 0, 0, 0.7);
 }
@@ -68,6 +86,18 @@ body {
   margin: 0;
   overflow-x: hidden;
   transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    color 0.35s ease,
+    box-shadow 0.35s ease,
+    fill 0.35s ease,
+    stroke 0.35s ease;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -191,7 +221,16 @@ h1, h2, h3, h4, h5, h6 {
 }
 .input::placeholder { 
   color: var(--color-muted); 
-  opacity: 0.7;
+  opacity: 0.9;
+}
+.input:disabled {
+  opacity: 0.78;
+  cursor: not-allowed;
+  background: color-mix(in srgb, var(--color-surface) 72%, var(--color-background));
+}
+.input option {
+  color: var(--color-text);
+  background: var(--color-surface);
 }
 
 .label {
@@ -224,8 +263,9 @@ h1, h2, h3, h4, h5, h6 {
 .badge-yellow { background: var(--color-primary-soft); color: var(--color-primary); border-color: var(--color-primary-soft); }
 .badge-dark { background: var(--color-text); color: white; }
 .badge-gray { background: var(--color-accent); color: var(--color-muted); }
-.badge-green { background: rgba(72, 187, 120, 0.1); color: #2F855A; border-color: rgba(72, 187, 120, 0.2); }
-.badge-red { background: rgba(229, 62, 62, 0.1); color: #C53030; border-color: rgba(229, 62, 62, 0.2); }
+.badge-green { background: var(--color-success-soft); color: var(--color-success); border-color: var(--color-success-border); }
+.badge-red { background: var(--color-danger-soft); color: var(--color-danger); border-color: var(--color-danger-border); }
+.badge-orange { background: var(--color-warning-soft); color: var(--color-warning); border-color: var(--color-warning-border); }
 
 /* ============================================
    TABLE
@@ -288,6 +328,31 @@ h1, h2, h3, h4, h5, h6 {
   border-left-color: var(--color-primary); 
 }
 
+.alert-danger {
+  background: var(--color-danger-soft);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger);
+}
+
+.alert-success {
+  background: var(--color-success-soft);
+  border: 1px solid var(--color-success-border);
+  color: var(--color-success);
+}
+
+.brand-logo {
+  display: inline-block;
+  transform-origin: center;
+}
+
+.brand-logo.is-rotating {
+  animation: logoThemeRotate 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.theme-icon-rotate {
+  animation: logoThemeRotate 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 /* ============================================
    MISC & SCROLLBAR
    ============================================ */
@@ -324,6 +389,12 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
+}
+
+@keyframes logoThemeRotate {
+  from { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.08); }
+  to { transform: rotate(360deg) scale(1); }
 }
 
 .animate-slide-in { 

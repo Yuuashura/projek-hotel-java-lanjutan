@@ -79,9 +79,9 @@ const Register = () => {
           <AlertCircle size={48} style={{ color: 'var(--color-primary)', marginBottom: '1.5rem' }} />
           <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.8rem', marginBottom: '0.75rem' }}>Akun Belum Diverifikasi</h2>
           {error && (
-            <div style={{ background: '#FFF5F5', border: '1px solid #FEB2B2', padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
-              <AlertCircle size={16} style={{ color: '#E53E3E', flexShrink: 0 }} />
-              <span style={{ fontWeight: 300, color: '#C53030', fontSize: '0.85rem', textAlign: 'left' }}>{error}</span>
+            <div className="alert-danger" style={{ padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
+              <AlertCircle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
+              <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.85rem', textAlign: 'left' }}>{error}</span>
             </div>
           )}
           <p style={{ color: 'var(--color-muted)', fontWeight: 300, lineHeight: 1.6, marginBottom: '2rem', fontSize: '0.9rem' }}>
@@ -111,14 +111,14 @@ const Register = () => {
           <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>Sudah punya akun? <Link to="/login" style={{ color: 'var(--color-primary)', fontWeight: 400, textDecoration: 'none' }}>Masuk di sini</Link></p>
         </div>
 
-        <div className="card" style={{ padding: '2.5rem 2.5rem', border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-float)', background: 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(10px)', position: 'relative', overflow: 'hidden' }}>
+        <div className="card" style={{ padding: '2.5rem 2.5rem', border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-float)', background: 'var(--color-surface-glass)', backdropFilter: 'blur(10px)', position: 'relative', overflow: 'hidden' }}>
           {/* Card Top Accent Line */}
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, var(--color-primary), #3182ce)' }} />
 
           {error && (
-            <div style={{ background: '#FFF5F5', border: '1px solid #FEB2B2', padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
-              <AlertCircle size={16} style={{ color: '#E53E3E', flexShrink: 0 }} />
-              <span style={{ fontWeight: 300, color: '#C53030', fontSize: '0.85rem' }}>{error}</span>
+            <div className="alert-danger" style={{ padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
+              <AlertCircle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
+              <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.85rem' }}>{error}</span>
             </div>
           )}
 
@@ -176,9 +176,9 @@ const Register = () => {
               </div>
             </div>
 
-            <div style={{ background: 'rgba(72,187,120,0.05)', border: '1px solid rgba(72,187,120,0.2)', padding: '0.875rem 1rem', marginBottom: '2rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
-              <CheckCircle size={16} style={{ color: '#38A169', flexShrink: 0 }} />
-              <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: 300, color: '#276749' }}>
+            <div className="alert-success" style={{ padding: '0.875rem 1rem', marginBottom: '2rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
+              <CheckCircle size={16} style={{ color: 'var(--color-success)', flexShrink: 0 }} />
+              <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: 300, color: 'var(--color-success)' }}>
                 Setelah mendaftar, kami akan mengirimkan <strong>kode OTP 6 digit</strong> ke email Anda untuk verifikasi akun.
               </p>
             </div>

@@ -8,11 +8,13 @@ import api from '../../utils/api';
 import CitySearchSelect from '../../components/CitySearchSelect';
 import { getErrorMessage, unwrapList } from '../../utils/response';
 import { uploadFile, validateImageFile } from '../../utils/uploads';
+import { usePreferences } from '../../context/PreferencesContext';
 
 const EMPTY_FORM = { name: '', city_id: '', address: '', type: '', description: '', is_featured: false, is_on_sale: false, discount_percent: 0, rating: 0, image_url: '' };
 const PAGE_SIZE = 25;
 
 const AdminHotels = () => {
+  const { t } = usePreferences();
   const [hotels, setHotels] = useState([]);
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +39,7 @@ const AdminHotels = () => {
     ]).then(([h, c]) => {
       setHotels(unwrapList(h.data));
       setCities(unwrapList(c.data));
-    }).catch((err) => setError(getErrorMessage(err, 'Gagal memuat data hotel'))).finally(() => setLoading(false));
+    }).catch((err) => setError(getErrorMessage(err, t('admin.errors.loadHotels')))).finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);
@@ -94,7 +96,7 @@ const AdminHotels = () => {
       closeModal();
       load();
     } catch (err) {
-      setError(err.response?.data?.message || 'Operasi gagal');
+      setError(err.response?.data?.message || t('admin.errors.operationFailed'));
     } finally { setSubmitting(false); }
   };
 
@@ -105,7 +107,7 @@ const AdminHotels = () => {
       closeModal();
       load();
     } catch (err) {
-      setError(err.response?.data?.message || 'Gagal menghapus hotel');
+      setError(err.response?.data?.message || t('admin.errors.deleteHotelFailed'));
     } finally { setSubmitting(false); }
   };
 
@@ -125,7 +127,7 @@ const AdminHotels = () => {
       const uploadedUrls = await Promise.all(files.map(file => uploadFile('/api/hotels/upload-image', file)));
       setImagesList(list => [...list, ...uploadedUrls.filter(Boolean)]);
     } catch (err) {
-      setError(err.response?.data?.message || 'Gagal mengunggah gambar hotel');
+      setError(err.response?.data?.message || t('admin.errors.uploadHotelImageFailed'));
     } finally {
       setImageUploading(false);
       if (fileRef.current) fileRef.current.value = '';
@@ -136,7 +138,7 @@ const AdminHotels = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.name.toLowerCase().endsWith('.xlsx')) {
-      setError('File harus berformat .xlsx');
+      setError(t('admin.errors.uploadExcelFormat'));
       return;
     }
 
@@ -148,7 +150,7 @@ const AdminHotels = () => {
       await api.post('/api/hotels/upload-excel', formData);
       load();
     } catch (err) {
-      setError(err.response?.data?.message || 'Gagal mengunggah file Excel');
+      setError(err.response?.data?.message || t('admin.errors.uploadExcelFailed'));
     } finally {
       setExcelUploading(false);
       if (excelRef.current) excelRef.current.value = '';
@@ -163,32 +165,32 @@ const AdminHotels = () => {
     <AdminLayout>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.75rem', textTransform: 'uppercase', letterSpacing: '1px', margin: 0, color: 'var(--color-text)' }}>Kelola Hotel</h2>
-          <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', margin: '0.25rem 0 0' }}>{hotels.length} hotel terdaftar</p>
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.75rem', textTransform: 'uppercase', letterSpacing: '1px', margin: 0, color: 'var(--color-text)' }}>{t('admin.hotels.title')}</h2>
+          <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', margin: '0.25rem 0 0' }}>{t('admin.hotels.count', { count: hotels.length })}</p>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
           <button onClick={() => excelRef.current?.click()} className="btn btn-white btn-sm" disabled={excelUploading}>
-            <Upload size={14} /> {excelUploading ? 'Mengunggah...' : 'Upload Excel'}
+            <Upload size={14} /> {excelUploading ? t('admin.actions.uploading') : t('admin.actions.uploadExcel')}
           </button>
-          <button onClick={openCreate} className="btn btn-primary btn-sm"><Plus size={14} /> Tambah Hotel</button>
+          <button onClick={openCreate} className="btn btn-primary btn-sm"><Plus size={14} /> {t('admin.actions.addHotel')}</button>
           <input ref={excelRef} type="file" accept=".xlsx" style={{ display: 'none' }} onChange={handleExcelUpload} />
         </div>
       </div>
 
       {error && (
-        <div style={{ background: '#fff0f3', border: '1px solid #fda4af', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <AlertCircle size={16} style={{ color: '#be123c', flexShrink: 0 }} />
-          <span style={{ fontWeight: 300, color: '#be123c', fontSize: '0.85rem' }}>{error}</span>
+        <div className="alert-danger" style={{ borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <AlertCircle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
+          <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.85rem' }}>{error}</span>
         </div>
       )}
 
       {loading ? (
-        <div className="card" style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>Memuat data hotel...</div>
+        <div className="card" style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>{t('admin.hotels.loading')}</div>
       ) : (
         <div style={{ overflowX: 'auto' }}>
           <table className="neo-table">
             <thead>
-              <tr>{['#', 'Hotel', 'Kota', 'Tipe', 'Rating', 'Status', 'Aksi'].map(h => <th key={h}>{h}</th>)}</tr>
+              <tr>{[t('admin.table.number'), t('admin.table.hotel'), t('admin.table.city'), t('admin.table.type'), t('admin.table.rating'), t('admin.table.status'), t('admin.table.actions')].map(h => <th key={h}>{h}</th>)}</tr>
             </thead>
             <tbody>
               {paginatedHotels.map(h => (
@@ -214,16 +216,16 @@ const AdminHotels = () => {
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <Link to={`/admin/hotels/${h.id_hotel}/rooms`} className="btn btn-white btn-sm" style={{ padding: '0.4rem 0.8rem' }} title="Kelola Kamar"><Bed size={13} /></Link>
-                      <button onClick={() => openEdit(h)} className="btn btn-white btn-sm" style={{ padding: '0.4rem 0.8rem' }} title="Edit Hotel"><Pencil size={13} /></button>
-                      <button onClick={() => openDelete(h)} className="btn btn-white btn-sm" style={{ padding: '0.4rem 0.8rem', color: '#be123c' }} title="Hapus Hotel"><Trash2 size={13} /></button>
+                      <Link to={`/admin/hotels/${h.id_hotel}/rooms`} className="btn btn-white btn-sm" style={{ padding: '0.4rem 0.8rem' }} title={t('admin.hotels.manageRooms')}><Bed size={13} /></Link>
+                      <button onClick={() => openEdit(h)} className="btn btn-white btn-sm" style={{ padding: '0.4rem 0.8rem' }} title={t('admin.hotels.editHotel')}><Pencil size={13} /></button>
+                      <button onClick={() => openDelete(h)} className="btn btn-white btn-sm" style={{ padding: '0.4rem 0.8rem', color: 'var(--color-danger)' }} title={t('admin.hotels.deleteHotel')}><Trash2 size={13} /></button>
                     </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {hotels.length === 0 && <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>Belum ada data hotel</div>}
+          {hotels.length === 0 && <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>{t('admin.hotels.empty')}</div>}
           <PaginationControls
             page={currentPage}
             totalPages={totalPages}
@@ -238,26 +240,26 @@ const AdminHotels = () => {
       {(modal === 'create' || modal === 'edit') && (
         <ModalOverlay onClose={closeModal}>
           <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, textTransform: 'uppercase', letterSpacing: '1px', fontSize: '1.2rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--color-text)' }}>
-            {modal === 'create' ? 'Tambah Hotel Baru' : 'Edit Hotel'}
+            {modal === 'create' ? t('admin.hotels.createTitle') : t('admin.hotels.editTitle')}
             <button onClick={closeModal} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)' }}><X size={18} /></button>
           </div>
-          {error && <div style={{ background: '#fff0f3', border: '1px solid #fda4af', borderRadius: 'var(--radius-sm)', padding: '0.75rem', marginBottom: '1.25rem', fontWeight: 300, color: '#be123c', fontSize: '0.85rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}><AlertCircle size={16} />{error}</div>}
+          {error && <div className="alert-danger" style={{ borderRadius: 'var(--radius-sm)', padding: '0.75rem', marginBottom: '1.25rem', fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.85rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}><AlertCircle size={16} />{error}</div>}
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
-                <div><label className="label">Nama Hotel *</label><input className="input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required /></div>
-                <div><label className="label">Kota *</label><CitySearchSelect cities={cities} value={form.city_id} onChange={val => setForm(f => ({ ...f, city_id: val }))} placeholder="Pilih Kota" /></div>
+                <div><label className="label">{t('admin.hotels.name')}</label><input className="input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required /></div>
+                <div><label className="label">{t('common.city')} *</label><CitySearchSelect cities={cities} value={form.city_id} onChange={val => setForm(f => ({ ...f, city_id: val }))} placeholder={t('home.allCities')} /></div>
               </div>
               <div><label className="label">Alamat</label><input className="input" value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} /></div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
-                <div><label className="label">Tipe Hotel</label><select className="input" value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}><option value="">Pilih Tipe</option>{['Budget', 'Bintang 2', 'Bintang 3', 'Bintang 4', 'Bintang 5', 'Resort', 'Boutique'].map(t => <option key={t}>{t}</option>)}</select></div>
+                <div><label className="label">{t('admin.hotels.type')}</label><select className="input" value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}><option value="">{t('admin.hotels.chooseType')}</option>{['Budget', 'Bintang 2', 'Bintang 3', 'Bintang 4', 'Bintang 5', 'Resort', 'Boutique'].map(t => <option key={t}>{t}</option>)}</select></div>
                 <div><label className="label">Rating (0-5)</label><input type="number" className="input" min={0} max={5} step={0.1} value={form.rating} onChange={e => setForm(f => ({ ...f, rating: e.target.value }))} /></div>
               </div>
-              <div><label className="label">Deskripsi</label><textarea className="input" rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} style={{ resize: 'vertical' }} /></div>
+              <div><label className="label">{t('admin.rooms.description')}</label><textarea className="input" rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} style={{ resize: 'vertical' }} /></div>
               
               {/* Multiple Images Upload Section */}
               <div>
-                <label className="label"><ImageIcon size={12} style={{ display: 'inline', marginRight: '0.4rem', verticalAlign: 'middle' }} />Galeri Foto Hotel</label>
+                <label className="label"><ImageIcon size={12} style={{ display: 'inline', marginRight: '0.4rem', verticalAlign: 'middle' }} />{t('admin.hotels.gallery')}</label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: '0.75rem', marginBottom: '0.5rem' }}>
                   {imagesList.map((img, idx) => (
                     <div key={idx} style={{ position: 'relative', height: 75, border: '1px solid var(--color-accent)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
@@ -280,18 +282,18 @@ const AdminHotels = () => {
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', border: '1px solid var(--color-accent)', background: form.is_featured ? 'rgba(212,175,55,0.03)' : 'white', cursor: 'pointer', borderRadius: 'var(--radius-sm)', transition: 'all 0.3s ease' }} onClick={() => setForm(f => ({ ...f, is_featured: !f.is_featured }))}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', border: '1px solid var(--color-accent)', background: form.is_featured ? 'var(--color-primary-soft)' : 'var(--color-surface)', cursor: 'pointer', borderRadius: 'var(--radius-sm)', transition: 'all 0.3s ease' }} onClick={() => setForm(f => ({ ...f, is_featured: !f.is_featured }))}>
                   <input type="checkbox" checked={form.is_featured} readOnly style={{ width: 15, height: 15, accentColor: 'var(--color-primary)' }} />
                   <label className="label" style={{ margin: 0, cursor: 'pointer', color: 'var(--color-text)' }}>Is Featured</label>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', border: '1px solid var(--color-accent)', background: form.is_on_sale ? 'rgba(229,62,62,0.03)' : 'white', cursor: 'pointer', borderRadius: 'var(--radius-sm)', transition: 'all 0.3s ease' }} onClick={() => setForm(f => ({ ...f, is_on_sale: !f.is_on_sale }))}>
-                  <input type="checkbox" checked={form.is_on_sale} readOnly style={{ width: 15, height: 15, accentColor: '#E53E3E' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', border: '1px solid var(--color-accent)', background: form.is_on_sale ? 'var(--color-danger-soft)' : 'var(--color-surface)', cursor: 'pointer', borderRadius: 'var(--radius-sm)', transition: 'all 0.3s ease' }} onClick={() => setForm(f => ({ ...f, is_on_sale: !f.is_on_sale }))}>
+                  <input type="checkbox" checked={form.is_on_sale} readOnly style={{ width: 15, height: 15, accentColor: 'var(--color-danger)' }} />
                   <label className="label" style={{ margin: 0, cursor: 'pointer', color: 'var(--color-text)' }}>On Sale</label>
                 </div>
               </div>
               {form.is_on_sale && <div><label className="label">Persen Diskon (%)</label><input type="number" className="input" min={0} max={100} value={form.discount_percent} onChange={e => setForm(f => ({ ...f, discount_percent: e.target.value }))} /></div>}
               <button type="submit" className="btn btn-primary btn-full" disabled={submitting} style={{ marginTop: '0.5rem', justifyContent: 'center' }}>
-                {submitting ? 'Menyimpan...' : <><Check size={14} /> {modal === 'create' ? 'Tambah Hotel' : 'Simpan Perubahan'}</>}
+                {submitting ? t('admin.actions.saving') : <><Check size={14} /> {modal === 'create' ? t('admin.actions.addHotel') : t('admin.actions.saveChanges')}</>}
               </button>
             </div>
           </form>
@@ -303,12 +305,12 @@ const AdminHotels = () => {
         <ModalOverlay onClose={closeModal} maxWidth={400}>
           <div style={{ textAlign: 'center', padding: '1rem 0' }}>
             <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🗑️</div>
-            <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, textTransform: 'uppercase', letterSpacing: '1px', fontSize: '1.25rem', marginBottom: '0.75rem', color: 'var(--color-text)' }}>Hapus Hotel?</h3>
-            <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem', lineHeight: 1.5, marginBottom: '1.75rem' }}>Hotel <strong>"{selected.name}"</strong> akan dihapus permanen beserta seluruh tipe kamar dan data pemesanan di dalamnya.</p>
-            {error && <div style={{ color: '#be123c', fontWeight: 400, marginBottom: '1rem', fontSize: '0.85rem' }}>{error}</div>}
+            <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, textTransform: 'uppercase', letterSpacing: '1px', fontSize: '1.25rem', marginBottom: '0.75rem', color: 'var(--color-text)' }}>{t('admin.hotels.deleteTitle')}</h3>
+            <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem', lineHeight: 1.5, marginBottom: '1.75rem' }}>{t('admin.hotels.deleteMessage', { name: selected.name })}</p>
+            {error && <div style={{ color: 'var(--color-danger)', fontWeight: 400, marginBottom: '1rem', fontSize: '0.85rem' }}>{error}</div>}
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
-              <button onClick={closeModal} className="btn btn-white btn-sm">Batalkan</button>
-              <button onClick={handleDelete} className="btn btn-primary btn-sm" style={{ background: '#be123c', color: 'white' }} disabled={submitting}>{submitting ? 'Menghapus...' : 'Hapus'}</button>
+              <button onClick={closeModal} className="btn btn-white btn-sm">{t('admin.actions.cancel')}</button>
+              <button onClick={handleDelete} className="btn btn-primary btn-sm" style={{ background: 'var(--color-danger)', color: '#FFFFFF' }} disabled={submitting}>{submitting ? t('admin.actions.deleting') : t('admin.actions.delete')}</button>
             </div>
           </div>
         </ModalOverlay>
@@ -319,7 +321,7 @@ const AdminHotels = () => {
 
 const ModalOverlay = ({ children, onClose, maxWidth = 550 }) => (
   <div style={{ position: 'fixed', inset: 0, background: 'rgba(26,54,93,0.3)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: '1rem' }} onClick={e => e.target === e.currentTarget && onClose()}>
-    <div style={{ background: 'white', border: '1px solid var(--color-accent)', borderRadius: 'var(--radius-sm)', padding: '2rem', width: '100%', maxWidth, maxHeight: '90vh', overflowY: 'auto', boxShadow: 'var(--shadow-hover)', animation: 'fadeIn 0.2s ease-out' }}>
+    <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-accent)', borderRadius: 'var(--radius-sm)', padding: '2rem', width: '100%', maxWidth, maxHeight: '90vh', overflowY: 'auto', boxShadow: 'var(--shadow-hover)', animation: 'fadeIn 0.2s ease-out' }}>
       {children}
     </div>
   </div>
