@@ -7,7 +7,7 @@ import PaginationControls from '../../components/admin/PaginationControls';
 import api from '../../utils/api';
 import CitySearchSelect from '../../components/CitySearchSelect';
 import { getErrorMessage, unwrapList } from '../../utils/response';
-import { uploadFile, validateImageFile } from '../../utils/uploads';
+import { uploadFile, validateImageFile, getImageUrl } from '../../utils/uploads';
 import { usePreferences } from '../../context/PreferencesContext';
 
 const EMPTY_FORM = { name: '', city_id: '', address: '', type: '', description: '', is_featured: false, is_on_sale: false, discount_percent: 0, rating: 0, image_url: '' };
@@ -263,7 +263,7 @@ const AdminHotels = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: '0.75rem', marginBottom: '0.5rem' }}>
                   {imagesList.map((img, idx) => (
                     <div key={idx} style={{ position: 'relative', height: 75, border: '1px solid var(--color-accent)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
-                      <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <img src={getImageUrl(img)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       <button type="button" onClick={() => setImagesList(list => list.filter((_, i) => i !== idx))}
                         style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,0.6)', color: 'white', border: 'none', borderRadius: '50%', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '10px' }}>
                         <X size={10} />

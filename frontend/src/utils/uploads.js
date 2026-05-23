@@ -17,3 +17,14 @@ export const uploadFile = async (url, file, fieldName = 'file') => {
   const response = await api.post(url, formData);
   return response.data?.data?.url || response.data?.url;
 };
+
+export const getImageUrl = (path, fallback = '') => {
+  if (!path) return fallback;
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+    return path;
+  }
+  const apiBase = import.meta.env.VITE_API_URL || '';
+  const cleanApiBase = apiBase.endsWith('/') ? apiBase.slice(0, -1) : apiBase;
+  const cleanPath = path.startsWith('/') ? path : '/' + path;
+  return cleanApiBase + cleanPath;
+};

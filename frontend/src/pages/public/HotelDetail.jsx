@@ -27,8 +27,15 @@ const ROOM_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1590490360182-c33
 
 const getImageUrl = (image) => {
   if (!image) return '';
-  if (typeof image === 'string') return image;
-  return image.image_url || image.imageUrl || image.url || '';
+  const path = typeof image === 'string' ? image : (image.image_url || image.imageUrl || image.url || '');
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+    return path;
+  }
+  const apiBase = import.meta.env.VITE_API_URL || '';
+  const cleanApiBase = apiBase.endsWith('/') ? apiBase.slice(0, -1) : apiBase;
+  const cleanPath = path.startsWith('/') ? path : '/' + path;
+  return cleanApiBase + cleanPath;
 };
 
 const facilityIconMap = {

@@ -5,6 +5,7 @@ import { formatCurrency } from '../../utils/formatters';
 import api from '../../utils/api';
 import CitySearchSelect from '../../components/CitySearchSelect';
 import { usePreferences } from '../../context/PreferencesContext';
+import { getImageUrl } from '../../utils/uploads';
 
 const DEFAULT_FILTERS = {
   keyword: '',
@@ -27,7 +28,8 @@ const getMinPrice = (hotel) => {
 
 const getPrimaryImage = (hotel) => {
   const firstImage = hotel.images?.[0];
-  return firstImage?.image_url || firstImage?.imageUrl || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=400';
+  const url = firstImage?.image_url || firstImage?.imageUrl;
+  return getImageUrl(url, 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=400');
 };
 
 const isFeaturedHotel = (hotel) => Boolean(hotel.featured ?? hotel.is_featured ?? hotel.isFeatured);
