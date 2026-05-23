@@ -1,0 +1,5 @@
+Nama Hotel,ID Kota,Alamat,Tipe,Deskripsi,ID Admin Hotel,Featured (TRUE/FALSE),On Sale (TRUE/FALSE),Discount Percent,Rating
+Hotel Grand Preanger,1,"Jl. Asia Afrika No. 81, Bandung",Bintang 5,Hotel bersejarah di pusat kota Bandung,2,TRUE,FALSE,0,4.5
+Hotel Santika Premiere,1,"Jl. Sumatra No. 52-54, Bandung",Bintang 4,Hotel nyaman dekat pusat perbelanjaan,2,FALSE,TRUE,10,4.2
+Aston Pluit Hotel,2,"Jl. Pluit Selatan Raya No. 1, Jakarta",Bintang 4,Hotel bisnis strategis di Jakarta Utara,3,TRUE,FALSE,0,4.0
+Favehotel Kartika Plaza,3,"Jl. Kartika Plaza, Kuta, Bali",Budget,Hotel terjangkau dekat pantai Kuta,4,TRUE,TRUE,15,4.3

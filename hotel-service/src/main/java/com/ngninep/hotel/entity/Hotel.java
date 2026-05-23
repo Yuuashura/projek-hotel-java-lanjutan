@@ -22,19 +22,18 @@ public class Hotel {
     @Column(nullable = false)
     private String name;
 
-    // ✅ Relasi dalam satu DB — boleh @JoinColumn
     @ManyToOne
     @JoinColumn(name = "city_id", nullable = false)
     private City city;
 
     private String address;
 
-    private String type;    // "Bintang 3", "Budget", "Resort"
+    private String type;  
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    // ✅ Plain int — FK ke User Service (beda database, BUKAN @JoinColumn)
+
     private int admin_hotel_id;
 
     @Column(name = "is_featured")
@@ -47,17 +46,14 @@ public class Hotel {
 
     private float rating;
 
-    // Relasi ke gambar hotel
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     @com.fasterxml.jackson.annotation.JsonIgnoreProperties("hotel")
     private List<HotelImage> images;
 
-    // Relasi ke fasilitas hotel
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     @com.fasterxml.jackson.annotation.JsonIgnoreProperties("hotel")
     private List<HotelFacility> facilities;
 
-    // Relasi ke tipe kamar
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     @com.fasterxml.jackson.annotation.JsonIgnoreProperties("hotel")
     private List<RoomType> roomTypes;

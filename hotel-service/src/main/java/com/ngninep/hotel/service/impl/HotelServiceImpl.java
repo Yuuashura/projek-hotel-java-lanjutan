@@ -14,11 +14,22 @@ import com.ngninep.hotel.repository.HotelImageRepository;
 import com.ngninep.hotel.repository.HotelRepository;
 import com.ngninep.hotel.service.HotelService;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
+
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,13 +54,11 @@ public class HotelServiceImpl implements HotelService {
 
         List<Object> imagesResponse = new ArrayList<>();
         if (hotel.getImages() != null) {
-            imagesResponse = hotel.getImages().stream().map(img -> 
-                HotelImageResponse.builder()
+            imagesResponse = hotel.getImages().stream().map(img -> HotelImageResponse.builder()
                     .idImage(img.getIdImage())
                     .imageUrl(img.getImage_url())
                     .sortOrder(img.getSort_order())
-                    .build()
-            ).collect(Collectors.toList());
+                    .build()).collect(Collectors.toList());
         }
 
         List<Object> facilitiesResponse = new ArrayList<>();
@@ -68,8 +77,8 @@ public class HotelServiceImpl implements HotelService {
 
         List<com.ngninep.hotel.dto.res.RoomTypeResponse> roomTypesResponse = new ArrayList<>();
         if (hotel.getRoomTypes() != null) {
-            roomTypesResponse = hotel.getRoomTypes().stream().map(rt -> 
-                com.ngninep.hotel.dto.res.RoomTypeResponse.builder()
+            roomTypesResponse = hotel.getRoomTypes().stream().map(rt -> com.ngninep.hotel.dto.res.RoomTypeResponse
+                    .builder()
                     .idRoomType(rt.getIdRoomType())
                     .name(rt.getName())
                     .hotelId(hotel.getIdHotel())
@@ -78,16 +87,13 @@ public class HotelServiceImpl implements HotelService {
                     .maxGuest(rt.getMax_guest())
                     .smoking(rt.isSmoking())
                     .roomAvailable(rt.getRoom_available())
-                    .images(rt.getImages() != null ? rt.getImages().stream().map(img -> 
-                        RoomTypeImageResponse.builder()
+                    .images(rt.getImages() != null ? rt.getImages().stream().map(img -> RoomTypeImageResponse.builder()
                             .idImage(img.getIdImage())
                             .imageUrl(img.getImage_url())
                             .sortOrder(img.getSort_order())
-                            .build()
-                    ).collect(Collectors.toList()) : new ArrayList<>())
+                            .build()).collect(Collectors.toList()) : new ArrayList<>())
                     .facilities(new ArrayList<>()) // Can be mapped later if needed
-                    .build()
-            ).collect(Collectors.toList());
+                    .build()).collect(Collectors.toList());
         }
 
         return HotelResponse.builder()
@@ -125,7 +131,7 @@ public class HotelServiceImpl implements HotelService {
         } else {
             hotels = hotelRepository.findAll();
         }
-        
+
         return hotels.stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
@@ -148,7 +154,7 @@ public class HotelServiceImpl implements HotelService {
     public HotelResponse create(HotelRequest request) {
         City city = cityRepository.findById(request.getCityId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kota tidak valid"));
-                
+
         Hotel hotel = Hotel.builder()
                 .name(request.getName())
                 .city(city)
@@ -161,7 +167,7 @@ public class HotelServiceImpl implements HotelService {
                 .discount_percent(request.getDiscountPercent())
                 .rating(request.getRating())
                 .build();
-        
+
         Hotel saved = hotelRepository.save(hotel);
 
         // Simpan gambar jika ada
@@ -187,10 +193,10 @@ public class HotelServiceImpl implements HotelService {
     public HotelResponse update(int id, HotelRequest request) {
         Hotel hotel = hotelRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotel tidak ditemukan"));
-                
+
         City city = cityRepository.findById(request.getCityId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kota tidak valid"));
-        
+
         hotel.setName(request.getName());
         hotel.setCity(city);
         hotel.setAddress(request.getAddress());
@@ -201,7 +207,7 @@ public class HotelServiceImpl implements HotelService {
         hotel.setOnSale(request.isOnSale());
         hotel.setDiscount_percent(request.getDiscountPercent());
         hotel.setRating(request.getRating());
-        
+
         Hotel saved = hotelRepository.save(hotel);
 
         // Update gambar jika ada yang baru
@@ -230,4 +236,120 @@ public class HotelServiceImpl implements HotelService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotel tidak ditemukan"));
         hotelRepository.delete(hotel);
     }
+
+    // E X C E L H A N D L I N G B A G I A N I N I
+    @org.springframework.beans.factory.annotation.Value("${app.file.upload-path}")
+    private String uploadPath;
+
+    @Override
+    public void uploadExcel(MultipartFile file) throws Exception {
+        // validasi file kosong
+        if (file.isEmpty()) {
+            throw new RuntimeException("File kosong");
+        }
+
+        String fileName = file.getOriginalFilename();
+        if (fileName == null || !fileName.endsWith(".xlsx")) {
+            throw new RuntimeException("File harus berupa excel");
+        }
+
+        // create folder jika belum ada
+        Path folderPath = Paths.get(uploadPath);
+        if (!Files.exists(folderPath)) {
+            Files.createDirectories(folderPath);
+        }
+
+        String savedFileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+
+        // lokasi final file
+        Path filePath = folderPath.resolve(savedFileName);
+
+        // save file fisik
+        Files.copy(file.getInputStream(), filePath);
+
+        // baca excel
+        InputStream inputStream = file.getInputStream();
+        Workbook workbook = new XSSFWorkbook(inputStream);
+
+        // posisi sheet / tab di Excel dimulai dari index 0
+        Sheet sheet = workbook.getSheetAt(0);
+
+        // upload mulai dari row ke-2
+        // karena row ke-1 (index 0) adalah header
+
+        // TIPS: tambahkan validasi / kondisi IF, misal jika ada row atau kolom yang kosong
+
+        for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+
+            
+            Row row = sheet.getRow(i);
+            if (row == null) {
+                continue;
+            }
+
+            // validasi jika baris/kolom nama kosong
+            if (row.getCell(0) == null || row.getCell(0).getStringCellValue().trim().isEmpty()) {
+                continue;
+            }
+
+            Hotel newHotel = new Hotel();
+            newHotel.setName(row.getCell(0).getStringCellValue());
+
+            // set city
+            if (row.getCell(1) != null) {
+                int cityId = (int) row.getCell(1).getNumericCellValue();
+                City city = cityRepository.findById(cityId)
+                        .orElseThrow(() -> new RuntimeException("Kota dengan ID " + cityId + " tidak ditemukan"));
+                newHotel.setCity(city);
+            }
+
+            if (row.getCell(2) != null) {
+                newHotel.setAddress(row.getCell(2).getStringCellValue());
+            }
+
+            if (row.getCell(3) != null) {
+                newHotel.setType(row.getCell(3).getStringCellValue());
+            }
+
+            if (row.getCell(4) != null) {
+                newHotel.setDescription(row.getCell(4).getStringCellValue());
+            }
+
+            if (row.getCell(5) != null) {
+                newHotel.setAdmin_hotel_id((int) row.getCell(5).getNumericCellValue());
+            }
+
+            if (row.getCell(6) != null) {
+                newHotel.setFeatured(row.getCell(6).getBooleanCellValue());
+            }
+
+            if (row.getCell(7) != null) {
+                newHotel.setOnSale(row.getCell(7).getBooleanCellValue());
+            }
+
+            if (row.getCell(8) != null) {
+                newHotel.setDiscount_percent((int) row.getCell(8).getNumericCellValue());
+            }
+
+            if (row.getCell(9) != null) {
+                newHotel.setRating((float) row.getCell(9).getNumericCellValue());
+            }
+
+            hotelRepository.save(newHotel);
+        }
+
+        // workbook Excel harus ditutup setelah digunakan, agar tidak menghabiskan memory
+        workbook.close();
+    }
+
+    @Override
+    public java.io.ByteArrayInputStream downloadExcel() throws Exception {
+        return null;
+    }
+
+    @Override
+    public java.io.ByteArrayInputStream generateUploadTemplate() throws Exception {
+        return null;
+    }
+
 }
