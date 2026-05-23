@@ -4,7 +4,10 @@ import axios from 'axios';
 // Saat production build, ubah ke URL gateway langsung: 'http://localhost:8080'
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/',
-  headers: { 'Content-Type': 'application/json' },
+  headers: { 
+    'Content-Type': 'application/json',
+    'Bypass-Tunnel-Reminder': 'true'
+  },
 });
 
 // Sisipkan Bearer Token secara otomatis pada setiap request
