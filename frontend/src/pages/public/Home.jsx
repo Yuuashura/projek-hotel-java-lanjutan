@@ -5,6 +5,7 @@ import { formatCurrency } from '../../utils/formatters';
 import api from '../../utils/api';
 import CitySearchSelect from '../../components/CitySearchSelect';
 import { usePreferences } from '../../context/PreferencesContext';
+import { getImageUrl } from '../../utils/uploads';
 
 // Slide Banner Data (Luxury resorts photography)
 const slides = [
@@ -246,7 +247,7 @@ export const HotelCard = ({ hotel, showDiscount }) => {
     <div className="card card-hover" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', border: '1px solid var(--color-accent)' }}>
       <div style={{ height: 220, overflow: 'hidden', position: 'relative' }}>
         <img
-          src={hotel.images?.[0]?.image_url || `https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=400`}
+          src={getImageUrl(hotel.images?.[0]?.image_url, `https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=400`)}
           alt={hotel.name}
           style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)' }}
           onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}

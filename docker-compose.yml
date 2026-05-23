@@ -19,6 +19,8 @@ services:
       - SPRING_MAIL_PASSWORD=lhcu waxx rifj thta
       - JWT_SECRET=ngninep-user-service-super-secret-key-yang-sangat-panjang-untuk-keamanan-jwt-2025
       - JWT_EXPIRATION=3600000
+    volumes:
+      - ./user-service/uploads:/app/uploads/user-service
     restart: always
 
   hotel-service:
@@ -37,6 +39,8 @@ services:
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - JWT_SECRET=ngninep-user-service-super-secret-key-yang-sangat-panjang-untuk-keamanan-jwt-2025
       - JWT_EXPIRATION=3600000
+    volumes:
+      - ./hotel-service/uploads:/app/uploads/hotel-service
     restart: always
 
   booking-service:
@@ -55,6 +59,8 @@ services:
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - JWT_SECRET=ngninep-user-service-super-secret-key-yang-sangat-panjang-untuk-keamanan-jwt-2025
       - JWT_EXPIRATION=3600000
+    volumes:
+      - ./booking-service/uploads:/app/uploads/booking-service
     restart: always
 
   api-gateway:
