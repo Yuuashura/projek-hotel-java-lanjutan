@@ -7,11 +7,15 @@
 
 :root {
   --color-primary: #2C5282;       /* Elegant Slate Blue */
+  --color-primary-hover: #2A4365;
+  --color-primary-soft: rgba(44, 82, 130, 0.1);
   --color-background: #F4F7FA;    /* Soft Coastal Ice Blue */
   --color-surface: #FFFFFF;       /* White */
   --color-text: #1E2D4A;          /* Slate Navy */
   --color-muted: #64748B;         /* Slate Gray */
   --color-accent: #E2E8F0;        /* Soft Blue-Grey */
+  --color-gold: #F6D365;
+  --color-danger: #C53030;
   
   --font-heading: 'Cormorant Garamond', serif;
   --font-body: 'Outfit', sans-serif;
@@ -37,6 +41,21 @@
   --neo-shadow-sm: 0 4px 12px rgba(26, 54, 93, 0.05);
 }
 
+:root[data-theme="dark"] {
+  --color-primary: #7AB7F0;
+  --color-primary-hover: #9CCAF3;
+  --color-primary-soft: rgba(122, 183, 240, 0.14);
+  --color-background: #071626;
+  --color-surface: #0E2238;
+  --color-text: #EEF6FF;
+  --color-muted: #A9BCD2;
+  --color-accent: #213A55;
+  --color-gold: #F6D365;
+  --color-danger: #FCA5A5;
+  --shadow-float: 0 18px 45px -18px rgba(0, 0, 0, 0.55);
+  --shadow-hover: 0 25px 55px -18px rgba(0, 0, 0, 0.7);
+}
+
 * { 
   box-sizing: border-box; 
 }
@@ -48,6 +67,7 @@ body {
   font-weight: 300;
   margin: 0;
   overflow-x: hidden;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -93,7 +113,7 @@ h1, h2, h3, h4, h5, h6 {
   color: #FFFFFF; 
 }
 .btn-primary:hover {
-  background: #2A4365;
+  background: var(--color-primary-hover);
 }
 
 .btn-dark { 
@@ -101,7 +121,7 @@ h1, h2, h3, h4, h5, h6 {
   color: #FFFFFF; 
 }
 .btn-dark:hover {
-  background: #10223b;
+  background: var(--color-primary-hover);
 }
 
 .btn-white { 
@@ -201,7 +221,7 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--color-background);
   color: var(--color-text);
 }
-.badge-yellow { background: rgba(44, 82, 130, 0.1); color: var(--color-primary); border-color: rgba(44, 82, 130, 0.2); }
+.badge-yellow { background: var(--color-primary-soft); color: var(--color-primary); border-color: var(--color-primary-soft); }
 .badge-dark { background: var(--color-text); color: white; }
 .badge-gray { background: var(--color-accent); color: var(--color-muted); }
 .badge-green { background: rgba(72, 187, 120, 0.1); color: #2F855A; border-color: rgba(72, 187, 120, 0.2); }
@@ -216,8 +236,8 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--color-surface);
   border: 1px solid var(--color-accent);
 }
-.neo-table th { 
-  background: #F7FAFC; 
+.neo-table th {
+  background: var(--color-background);
   color: var(--color-text); 
   padding: 1rem; 
   font-family: var(--font-body); 

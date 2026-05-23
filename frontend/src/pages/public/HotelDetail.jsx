@@ -1,13 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Star, MapPin, Users, Wifi, ArrowLeft, Calendar, Check, X } from 'lucide-react';
+import { Star, MapPin, Users, ArrowLeft, Check, X } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 import { useAuth } from '../../context/AuthContext';
+import { usePreferences } from '../../context/PreferencesContext';
 import api from '../../utils/api';
+
+const HOTEL_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1200';
+const ROOM_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=600';
+
+const getImageUrl = (image) => {
+  if (!image) return '';
+  if (typeof image === 'string') return image;
+  return image.image_url || image.imageUrl || image.url || '';
+};
 
 const HotelDetail = () => {
   const { id } = useParams();
   const { user } = useAuth();
+  const { t } = usePreferences();
   const navigate = useNavigate();
   const [hotel, setHotel] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -25,12 +36,12 @@ const HotelDetail = () => {
       })
       .catch(() => navigate('/hotels'))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, navigate]);
 
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-        <span style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--color-muted)' }}>Memuat data hotel...</span>
+        <span style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--color-muted)' }}>{t('common.loadingHotel')}</span>
       </div>
     );
   }
@@ -38,10 +49,8 @@ const HotelDetail = () => {
 
   const selectedRoom = hotel.roomTypes?.find(r => r.id_room_type === activeRoom);
 
-  // Setup gallery images (must support up to 5 for masonry)
-  const images = hotel.images?.length > 0 
-    ? hotel.images 
-    : [{ image_url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800' }];
+  const uploadedImages = hotel.images?.map(getImageUrl).filter(Boolean) || [];
+  const images = uploadedImages.length > 0 ? uploadedImages : [HOTEL_FALLBACK_IMAGE];
 
   return (
     <div style={{ background: 'var(--color-background)', minHeight: '100vh', padding: '4rem 1.5rem' }}>
@@ -49,31 +58,39 @@ const HotelDetail = () => {
         
         {/* Back Link */}
         <Link to="/hotels" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontFamily: 'var(--font-body)', fontWeight: 400, textDecoration: 'none', color: 'var(--color-text)', marginBottom: '2.5rem', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>
-          <ArrowLeft size={14} /> Back to Sanctuaries
+          <ArrowLeft size={14} /> {t('hotelDetail.back')}
         </Link>
 
-        {/* MASONRY GALLERY */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem', height: 480, marginBottom: '2.5rem', overflow: 'hidden', borderRadius: 'var(--radius-sm)' }}>
-          {/* Main feature image */}
-          <div style={{ position: 'relative', cursor: 'zoom-in', overflow: 'hidden' }} onClick={() => { setActiveImg(0); setLightboxOpen(true); }}>
-            <img src={images[0]?.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.8s ease' }} 
-              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
-              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
-          </div>
-          {/* Grid of smaller images */}
-          <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: '1rem' }}>
-            <div style={{ position: 'relative', cursor: 'zoom-in', overflow: 'hidden' }} onClick={() => { setActiveImg(Math.min(1, images.length - 1)); setLightboxOpen(true); }}>
-              <img src={images[1]?.image_url || images[0]?.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.8s ease' }} 
-                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
+        <section className={`hotel-gallery ${images.length === 1 ? 'single' : ''}`} aria-label={t('hotelDetail.gallery')}>
+          <button type="button" className="hotel-gallery-main" onClick={() => { setActiveImg(0); setLightboxOpen(true); }}>
+            <img src={images[0]} alt={`${hotel.name} - foto utama`} />
+            <span className="hotel-gallery-shade" />
+            <span className="hotel-gallery-caption">
+              <span>{t('hotelDetail.gallery')}</span>
+              <strong>{hotel.name}</strong>
+            </span>
+          </button>
+
+          {images.length > 1 && (
+            <div className="hotel-gallery-thumbs">
+              {[1, 2, 3, 4].map((slot) => {
+                const imageIndex = Math.min(slot, images.length - 1);
+                const showMore = slot === 4 && images.length > 5;
+                return (
+                  <button
+                    type="button"
+                    key={slot}
+                    className="hotel-gallery-thumb"
+                    onClick={() => { setActiveImg(imageIndex); setLightboxOpen(true); }}
+                  >
+                    <img src={images[imageIndex]} alt={`${hotel.name} - foto ${imageIndex + 1}`} />
+                    {showMore && <span className="hotel-gallery-more">{t('hotelDetail.morePhotos', { count: images.length - 4 })}</span>}
+                  </button>
+                );
+              })}
             </div>
-            <div style={{ position: 'relative', cursor: 'zoom-in', overflow: 'hidden' }} onClick={() => { setActiveImg(Math.min(2, images.length - 1)); setLightboxOpen(true); }}>
-              <img src={images[2]?.image_url || images[0]?.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.8s ease' }} 
-                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
-              </div>
-          </div>
-        </div>
+          )}
+        </section>
 
         {/* SPLIT LAYOUT */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '3.5rem', alignItems: 'flex-start' }}>
@@ -82,15 +99,15 @@ const HotelDetail = () => {
           <div>
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
               <span className="badge badge-yellow">{hotel.city?.name}</span>
-              <span className="badge badge-gray">{hotel.type || 'Luxury Resort'}</span>
-              {hotel.featured && <span className="badge badge-yellow" style={{ background: 'var(--color-primary)', color: 'white' }}>Featured</span>}
+              <span className="badge badge-gray">{hotel.type || t('hotelDetail.luxuryResort')}</span>
+              {hotel.featured && <span className="badge badge-yellow" style={{ background: 'var(--color-primary)', color: 'white' }}>{t('common.featured')}</span>}
             </div>
             
             <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '3rem', margin: '0 0 1rem', color: 'var(--color-text)', lineHeight: 1.1 }}>{hotel.name}</h1>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap', marginBottom: '2rem', borderBottom: '1px solid var(--color-accent)', paddingBottom: '1.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--color-primary)', fontWeight: 400 }}>
-                <Star size={14} fill="var(--color-primary)" /> {hotel.rating?.toFixed(1) || '4.5'} Rating
+                <Star size={14} fill="var(--color-primary)" /> {hotel.rating?.toFixed(1) || '4.5'} {t('common.rating')}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--color-muted)', fontSize: '0.9rem', fontWeight: 300 }}>
                 <MapPin size={14} /> {hotel.address}
@@ -98,13 +115,13 @@ const HotelDetail = () => {
             </div>
 
             <p style={{ color: 'var(--color-text)', lineHeight: 1.8, fontWeight: 300, fontSize: '1rem', marginBottom: '3rem' }}>
-              {hotel.description || 'Nikmati keindahan peristirahatan terpencil di kelilingi lanskap alam memukau. Properti kami menawarkan paduan keanggunan desain arsitektur kontemporer dengan keramahtamahan lokal yang hangat.'}
+              {hotel.description || t('hotelDetail.defaultDescription')}
             </p>
 
             {/* AMENITIES */}
             {hotel.facilities?.length > 0 && (
               <div style={{ marginBottom: '4rem' }}>
-                <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.8rem', marginBottom: '1.5rem', color: 'var(--color-text)' }}>Fasilitas Sanctuari</h3>
+                <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.8rem', marginBottom: '1.5rem', color: 'var(--color-text)' }}>{t('hotelDetail.facilities')}</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
                   {hotel.facilities.map(f => (
                     <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--color-text)', fontSize: '0.9rem', fontWeight: 300 }}>
@@ -121,7 +138,7 @@ const HotelDetail = () => {
             {/* ROOM MATRIX */}
             {hotel.roomTypes?.length > 0 && (
               <div>
-                <h3 id="room-matrix" style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.8rem', marginBottom: '1.5rem', color: 'var(--color-text)' }}>Pilih Suite & Kamar</h3>
+                <h3 id="room-matrix" style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.8rem', marginBottom: '1.5rem', color: 'var(--color-text)' }}>{t('hotelDetail.rooms')}</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                   {hotel.roomTypes.map(room => {
                     const isSelected = activeRoom === room.id_room_type;
@@ -135,7 +152,7 @@ const HotelDetail = () => {
                           transition: 'all 0.3s ease'
                         }}>
                         <div style={{ width: 220, height: '100%', flexShrink: 0, overflow: 'hidden' }}>
-                          <img src={room.images?.[0]?.imageUrl || 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=400'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          <img src={getImageUrl(room.images?.[0]) || ROOM_FALLBACK_IMAGE} alt={room.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
                         {/* Room description */}
                         <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -144,21 +161,21 @@ const HotelDetail = () => {
                               <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', margin: 0, fontWeight: 300, color: 'var(--color-text)' }}>{room.name}</h4>
                               <div style={{ display: 'flex', gap: '0.5rem' }}>
                                 <span className="badge" style={{ fontSize: '0.65rem', background: room.room_available > 3 ? 'rgba(72,187,120,0.1)' : 'rgba(237,137,54,0.1)', color: room.room_available > 3 ? '#276749' : '#DD6B20', borderColor: 'transparent' }}>
-                                  {room.room_available} Available
+                                  {t('hotelDetail.available', { count: room.room_available })}
                                 </span>
                               </div>
                             </div>
                             <p style={{ color: 'var(--color-muted)', fontSize: '0.8rem', fontWeight: 300, marginTop: '0.5rem', display: 'flex', gap: '1rem' }}>
-                              <span>📐 45 sqm</span>
-                              <span>•</span>
-                              <span>🛏️ King Bed</span>
+                              <span>{t('hotelDetail.roomSize')}</span>
+                              <span>-</span>
+                              <span>{t('hotelDetail.bed')}</span>
                             </p>
                           </div>
 
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid var(--color-accent)', paddingTop: '0.75rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: 'var(--color-muted)', fontWeight: 300 }}><Users size={12} /> Max. {room.max_guest} Guests</div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: 'var(--color-muted)', fontWeight: 300 }}><Users size={12} /> {t('hotelDetail.maxGuests', { count: room.max_guest })}</div>
                             <div style={{ textAlign: 'right' }}>
-                              <div style={{ fontSize: '0.95rem', fontWeight: 400, color: 'var(--color-primary)' }}>{formatCurrency(room.price_per_night)}<span style={{ fontSize: '0.7rem', color: 'var(--color-muted)' }}>/night</span></div>
+                              <div style={{ fontSize: '0.95rem', fontWeight: 400, color: 'var(--color-primary)' }}>{formatCurrency(room.price_per_night)}<span style={{ fontSize: '0.7rem', color: 'var(--color-muted)' }}>{t('home.perNight')}</span></div>
                             </div>
                           </div>
                         </div>
@@ -174,48 +191,48 @@ const HotelDetail = () => {
           {/* RIGHT COLUMN: Sticky Reserve Summary */}
           <div style={{ position: 'sticky', top: 120 }}>
             <div className="card" style={{ padding: '2rem', border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-float)' }}>
-              <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--color-text)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.75rem', fontWeight: 300 }}>Reservasi</h3>
+              <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--color-text)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.75rem', fontWeight: 300 }}>{t('hotelDetail.reservation')}</h3>
               
               {selectedRoom ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '2rem' }}>
                   <div>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Tipe Kamar</span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('hotelDetail.roomType')}</span>
                     <div style={{ fontWeight: 400, color: 'var(--color-text)', fontSize: '1rem', marginTop: '0.25rem' }}>{selectedRoom.name}</div>
                   </div>
                   
                   <div style={{ background: 'var(--color-background)', border: '1px solid var(--color-accent)', padding: '1rem', borderRadius: 'var(--radius-sm)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--color-text)', marginBottom: '0.5rem' }}>
-                      <span>Price / night</span>
+                      <span>{t('hotelDetail.priceNight')}</span>
                       <span>{formatCurrency(selectedRoom.price_per_night)}</span>
                     </div>
                     {hotel.onSale && hotel.discountPercent > 0 && (
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#C53030' }}>
-                        <span>Discount {hotel.discountPercent}%</span>
+                        <span>{t('hotelDetail.discount', { percent: hotel.discountPercent })}</span>
                         <span>-{formatCurrency(selectedRoom.price_per_night * hotel.discountPercent / 100)}</span>
                       </div>
                     )}
                   </div>
                 </div>
               ) : (
-                <p style={{ color: 'var(--color-muted)', fontSize: '0.85rem', marginBottom: '2rem', fontWeight: 300 }}>Silakan pilih salah satu tipe kamar untuk memesan.</p>
+                <p style={{ color: 'var(--color-muted)', fontSize: '0.85rem', marginBottom: '2rem', fontWeight: 300 }}>{t('hotelDetail.chooseRoom')}</p>
               )}
 
               {user?.role === 'ROLE_USER' ? (
                 <Link to={`/booking/${hotel.id_hotel}?roomTypeId=${activeRoom}`} className="btn btn-primary btn-full" style={{ justifyContent: 'center', height: 50, background: 'var(--color-primary)' }}>
-                  Reserve Suite
+                  {t('hotelDetail.reserve')}
                 </Link>
               ) : !user ? (
                 <Link to={`/login?redirect=/hotels/${hotel.id_hotel}`} className="btn btn-dark btn-full" style={{ justifyContent: 'center', height: 50 }}>
-                  Sign In to Book
+                  {t('hotelDetail.signInToBook')}
                 </Link>
               ) : (
                 <div style={{ background: 'var(--color-background)', border: '1px solid var(--color-accent)', padding: '1rem', textAlign: 'center', fontSize: '0.8rem', color: 'var(--color-muted)', fontWeight: 300 }}>
-                  Admin cannot book rooms
+                  {t('hotelDetail.adminCannotBook')}
                 </div>
               )}
 
               <p style={{ textAlign: 'center', color: 'var(--color-muted)', fontSize: '0.75rem', marginTop: '1rem', fontWeight: 300 }}>
-                🔒 Secure checkout powered by NgiNep
+                {t('hotelDetail.secureCheckout')}
               </p>
             </div>
           </div>
@@ -236,7 +253,7 @@ const HotelDetail = () => {
           </button>
 
           <div style={{ maxWidth: '80%', maxHeight: '80%', overflow: 'hidden' }}>
-            <img src={images[activeImg]?.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            <img src={images[activeImg]} alt={`${hotel.name} - foto ${activeImg + 1}`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
 
           <button onClick={() => setActiveImg(c => (c + 1) % images.length)} style={{ position: 'absolute', right: 40, background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', padding: '0.75rem', cursor: 'pointer', color: 'white' }}>
@@ -244,6 +261,134 @@ const HotelDetail = () => {
           </button>
         </div>
       )}
+
+      <style>{`
+        .hotel-gallery {
+          display: grid;
+          grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.75fr);
+          gap: 0.85rem;
+          height: clamp(360px, 45vw, 560px);
+          margin-bottom: 2.75rem;
+        }
+
+        .hotel-gallery.single {
+          grid-template-columns: 1fr;
+          height: clamp(360px, 48vw, 620px);
+        }
+
+        .hotel-gallery-main,
+        .hotel-gallery-thumb {
+          position: relative;
+          display: block;
+          width: 100%;
+          height: 100%;
+          padding: 0;
+          border: 0;
+          background: var(--color-background);
+          overflow: hidden;
+          cursor: zoom-in;
+          border-radius: var(--radius-sm);
+        }
+
+        .hotel-gallery-main img,
+        .hotel-gallery-thumb img {
+          width: 100%;
+          height: 100%;
+          display: block;
+          object-fit: cover;
+          transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .hotel-gallery-main:hover img,
+        .hotel-gallery-thumb:hover img {
+          transform: scale(1.035);
+        }
+
+        .hotel-gallery-shade {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, rgba(0,0,0,0.02) 35%, rgba(0,0,0,0.48) 100%);
+          pointer-events: none;
+        }
+
+        .hotel-gallery-caption {
+          position: absolute;
+          left: 1.25rem;
+          right: 1.25rem;
+          bottom: 1.1rem;
+          color: white;
+          text-align: left;
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+          text-shadow: 0 2px 12px rgba(0,0,0,0.35);
+        }
+
+        .hotel-gallery-caption span {
+          font-size: 0.72rem;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          opacity: 0.84;
+        }
+
+        .hotel-gallery-caption strong {
+          font-family: var(--font-heading);
+          font-size: clamp(1.5rem, 3vw, 2.6rem);
+          font-weight: 300;
+          line-height: 1.05;
+        }
+
+        .hotel-gallery-thumbs {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          grid-template-rows: 1fr 1fr;
+          gap: 0.85rem;
+          min-height: 0;
+        }
+
+        .hotel-gallery-more {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(26,54,93,0.64);
+          color: white;
+          font-size: 0.78rem;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+
+        @media (max-width: 900px) {
+          .hotel-gallery {
+            grid-template-columns: 1fr;
+            height: auto;
+          }
+
+          .hotel-gallery-main {
+            aspect-ratio: 16 / 10;
+          }
+
+          .hotel-gallery-thumbs {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-rows: none;
+          }
+
+          .hotel-gallery-thumb {
+            aspect-ratio: 1 / 1;
+          }
+        }
+
+        @media (max-width: 560px) {
+          .hotel-gallery-main {
+            aspect-ratio: 4 / 3;
+          }
+
+          .hotel-gallery-thumbs {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+        }
+      `}</style>
 
     </div>
   );

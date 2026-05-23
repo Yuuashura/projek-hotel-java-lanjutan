@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { PreferencesProvider } from './context/PreferencesContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
@@ -122,12 +123,14 @@ const ScrollRevealManager = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <ScrollRevealManager />
-        <AppRoutes />
-      </Router>
-    </AuthProvider>
+    <PreferencesProvider>
+      <AuthProvider>
+        <Router>
+          <ScrollRevealManager />
+          <AppRoutes />
+        </Router>
+      </AuthProvider>
+    </PreferencesProvider>
   );
 }
 
