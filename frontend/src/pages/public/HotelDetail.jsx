@@ -1,6 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Star, MapPin, Users, ArrowLeft, Check, X } from 'lucide-react';
+import {
+  Star,
+  MapPin,
+  Users,
+  ArrowLeft,
+  Check,
+  X,
+  Wifi,
+  Snowflake,
+  ShowerHead,
+  Armchair,
+  Waves,
+  Car,
+  Coffee,
+  Utensils,
+  WashingMachine,
+} from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 import { useAuth } from '../../context/AuthContext';
 import { usePreferences } from '../../context/PreferencesContext';
@@ -15,6 +31,32 @@ const getImageUrl = (image) => {
   return image.image_url || image.imageUrl || image.url || '';
 };
 
+const facilityIconMap = {
+  wifi: Wifi,
+  snowflake: Snowflake,
+  shower: ShowerHead,
+  armchair: Armchair,
+  pool: Waves,
+  car: Car,
+  coffee: Coffee,
+  elevator: Check,
+  utensils: Utensils,
+  'washing-machine': WashingMachine,
+};
+
+const normalizeFacility = (item) => {
+  if (!item) return null;
+  const source = item.facility || item;
+  const name = source.name || source.facility_name || source.facilityName || item.name;
+  if (!name) return null;
+
+  return {
+    id: source.id_facility || source.idFacility || source.id || item.facility_id || item.facilityId || name,
+    name,
+    icon: source.icon || item.icon || 'check',
+  };
+};
+
 const HotelDetail = () => {
   const { id } = useParams();
   const { user } = useAuth();
@@ -25,17 +67,39 @@ const HotelDetail = () => {
   const [activeImg, setActiveImg] = useState(0);
   const [activeRoom, setActiveRoom] = useState(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [allFacilities, setAllFacilities] = useState([]);
 
   useEffect(() => {
-    api.get(`/api/hotels/${id}`)
-      .then(r => { 
-        setHotel(r.data.data); 
-        if (r.data.data?.roomTypes?.length > 0) {
-          setActiveRoom(r.data.data.roomTypes[0].id_room_type); 
+    const fetchDetail = async () => {
+      setLoading(true);
+      const [hotelResult, facilitiesResult] = await Promise.allSettled([
+        api.get(`/api/hotels/${id}`),
+        api.get('/api/facilities'),
+      ]);
+
+      if (hotelResult.status !== 'fulfilled') {
+        navigate('/hotels');
+        return;
+      }
+
+      const hotelData = hotelResult.value.data.data;
+      const roomTypes = hotelData?.roomTypes || hotelData?.room_types || [];
+      setHotel(hotelData);
+      if (roomTypes.length > 0) {
+        setActiveRoom(roomTypes[0].id_room_type || roomTypes[0].idRoomType);
+      }
+
+      if (facilitiesResult.status === 'fulfilled') {
+        const facilityData = facilitiesResult.value.data.data || facilitiesResult.value.data || [];
+        if (Array.isArray(facilityData)) {
+          setAllFacilities(facilityData.map(normalizeFacility).filter(Boolean));
         }
-      })
-      .catch(() => navigate('/hotels'))
-      .finally(() => setLoading(false));
+      }
+
+      setLoading(false);
+    };
+
+    fetchDetail();
   }, [id, navigate]);
 
   if (loading) {
@@ -47,7 +111,13 @@ const HotelDetail = () => {
   }
   if (!hotel) return null;
 
-  const selectedRoom = hotel.roomTypes?.find(r => r.id_room_type === activeRoom);
+  const roomTypes = hotel.roomTypes || hotel.room_types || [];
+  const selectedRoom = roomTypes.find(r => (r.id_room_type || r.idRoomType) === activeRoom);
+  const hotelFacilities = (hotel.facilities || hotel.hotelFacilities || [])
+    .map(normalizeFacility)
+    .filter(Boolean);
+  const displayFacilities = hotelFacilities.length > 0 ? hotelFacilities : allFacilities;
+  const usingFacilityFallback = hotelFacilities.length === 0 && displayFacilities.length > 0;
 
   const uploadedImages = hotel.images?.map(getImageUrl).filter(Boolean) || [];
   const images = uploadedImages.length > 0 ? uploadedImages : [HOTEL_FALLBACK_IMAGE];
@@ -119,31 +189,41 @@ const HotelDetail = () => {
             </p>
 
             {/* AMENITIES */}
-            {hotel.facilities?.length > 0 && (
+            {displayFacilities.length > 0 && (
               <div style={{ marginBottom: '4rem' }}>
                 <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.8rem', marginBottom: '1.5rem', color: 'var(--color-text)' }}>{t('hotelDetail.facilities')}</h3>
+                {usingFacilityFallback && (
+                  <p style={{ color: 'var(--color-muted)', fontSize: '0.85rem', fontWeight: 400, lineHeight: 1.6, margin: '-0.75rem 0 1.5rem' }}>
+                    {t('hotelDetail.facilityFallbackNote')}
+                  </p>
+                )}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
-                  {hotel.facilities.map(f => (
+                  {displayFacilities.map(f => {
+                    const iconKey = String(f.icon || '').toLowerCase();
+                    const FacilityIcon = facilityIconMap[iconKey] || Check;
+                    return (
                     <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--color-text)', fontSize: '0.9rem', fontWeight: 300 }}>
                       <div style={{ background: 'var(--color-background)', width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--color-accent)' }}>
-                        <Check size={14} style={{ color: 'var(--color-primary)' }} />
+                        <FacilityIcon size={14} style={{ color: 'var(--color-primary)' }} />
                       </div>
-                      <span>{f.facility?.name || f.name}</span>
+                      <span>{f.name}</span>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
 
             {/* ROOM MATRIX */}
-            {hotel.roomTypes?.length > 0 && (
+            {roomTypes.length > 0 && (
               <div>
                 <h3 id="room-matrix" style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.8rem', marginBottom: '1.5rem', color: 'var(--color-text)' }}>{t('hotelDetail.rooms')}</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                  {hotel.roomTypes.map(room => {
-                    const isSelected = activeRoom === room.id_room_type;
+                  {roomTypes.map(room => {
+                    const roomId = room.id_room_type || room.idRoomType;
+                    const isSelected = activeRoom === roomId;
                     return (
-                      <div key={room.id_room_type} onClick={() => setActiveRoom(room.id_room_type)}
+                      <div key={roomId} onClick={() => setActiveRoom(roomId)}
                         style={{
                           display: 'flex', height: 180, cursor: 'pointer', borderRadius: 'var(--radius-sm)', overflow: 'hidden',
                           border: isSelected ? '1px solid var(--color-primary)' : '1px solid var(--color-accent)',
@@ -160,8 +240,8 @@ const HotelDetail = () => {
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                               <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', margin: 0, fontWeight: 300, color: 'var(--color-text)' }}>{room.name}</h4>
                               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <span className="badge" style={{ fontSize: '0.65rem', background: room.room_available > 3 ? 'rgba(72,187,120,0.1)' : 'rgba(237,137,54,0.1)', color: room.room_available > 3 ? '#276749' : '#DD6B20', borderColor: 'transparent' }}>
-                                  {t('hotelDetail.available', { count: room.room_available })}
+                                <span className="badge" style={{ fontSize: '0.65rem', background: (room.room_available ?? room.roomAvailable) > 3 ? 'rgba(72,187,120,0.1)' : 'rgba(237,137,54,0.1)', color: (room.room_available ?? room.roomAvailable) > 3 ? '#276749' : '#DD6B20', borderColor: 'transparent' }}>
+                                  {t('hotelDetail.available', { count: room.room_available ?? room.roomAvailable })}
                                 </span>
                               </div>
                             </div>
@@ -173,9 +253,9 @@ const HotelDetail = () => {
                           </div>
 
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid var(--color-accent)', paddingTop: '0.75rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: 'var(--color-muted)', fontWeight: 300 }}><Users size={12} /> {t('hotelDetail.maxGuests', { count: room.max_guest })}</div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: 'var(--color-muted)', fontWeight: 300 }}><Users size={12} /> {t('hotelDetail.maxGuests', { count: room.max_guest ?? room.maxGuest })}</div>
                             <div style={{ textAlign: 'right' }}>
-                              <div style={{ fontSize: '0.95rem', fontWeight: 400, color: 'var(--color-primary)' }}>{formatCurrency(room.price_per_night)}<span style={{ fontSize: '0.7rem', color: 'var(--color-muted)' }}>{t('home.perNight')}</span></div>
+                              <div style={{ fontSize: '0.95rem', fontWeight: 400, color: 'var(--color-primary)' }}>{formatCurrency(room.price_per_night ?? room.pricePerNight)}<span style={{ fontSize: '0.7rem', color: 'var(--color-muted)' }}>{t('home.perNight')}</span></div>
                             </div>
                           </div>
                         </div>
@@ -203,12 +283,12 @@ const HotelDetail = () => {
                   <div style={{ background: 'var(--color-background)', border: '1px solid var(--color-accent)', padding: '1rem', borderRadius: 'var(--radius-sm)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--color-text)', marginBottom: '0.5rem' }}>
                       <span>{t('hotelDetail.priceNight')}</span>
-                      <span>{formatCurrency(selectedRoom.price_per_night)}</span>
+                      <span>{formatCurrency(selectedRoom.price_per_night ?? selectedRoom.pricePerNight)}</span>
                     </div>
                     {hotel.onSale && hotel.discountPercent > 0 && (
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#C53030' }}>
                         <span>{t('hotelDetail.discount', { percent: hotel.discountPercent })}</span>
-                        <span>-{formatCurrency(selectedRoom.price_per_night * hotel.discountPercent / 100)}</span>
+                        <span>-{formatCurrency((selectedRoom.price_per_night ?? selectedRoom.pricePerNight) * hotel.discountPercent / 100)}</span>
                       </div>
                     )}
                   </div>

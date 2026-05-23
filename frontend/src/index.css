@@ -9,10 +9,10 @@
   --color-primary: #2C5282;       /* Elegant Slate Blue */
   --color-primary-hover: #2A4365;
   --color-primary-soft: rgba(44, 82, 130, 0.1);
-  --color-background: #F4F7FA;    /* Soft Coastal Ice Blue */
+  --color-background: #EEF3F8;    /* Soft Coastal Ice Blue */
   --color-surface: #FFFFFF;       /* White */
   --color-text: #1E2D4A;          /* Slate Navy */
-  --color-muted: #475569;         /* Slate Gray */
+  --color-muted: #334155;         /* Slate Gray */
   --color-accent: #E2E8F0;        /* Soft Blue-Grey */
   --color-gold: #F6D365;
   --color-danger: #C53030;
@@ -25,6 +25,16 @@
   --color-warning-soft: rgba(237, 137, 54, 0.12);
   --color-warning-border: rgba(237, 137, 54, 0.24);
   --color-surface-glass: rgba(255, 255, 255, 0.85);
+  --background-luxury:
+    linear-gradient(115deg, rgba(255,255,255,0.78) 0 18%, rgba(238,243,248,0) 18% 100%),
+    linear-gradient(145deg, rgba(246, 211, 101, 0.18) 0%, rgba(246, 211, 101, 0) 32%),
+    linear-gradient(165deg, rgba(44, 82, 130, 0.13) 0%, rgba(44, 82, 130, 0) 52%),
+    repeating-linear-gradient(90deg, rgba(44, 82, 130, 0.055) 0 1px, transparent 1px 104px),
+    repeating-linear-gradient(0deg, rgba(44, 82, 130, 0.04) 0 1px, transparent 1px 104px),
+    var(--color-background);
+  --background-luxury-overlay:
+    linear-gradient(180deg, rgba(255,255,255,0.36), rgba(255,255,255,0) 34%),
+    linear-gradient(90deg, rgba(255,255,255,0.22), rgba(255,255,255,0) 42%);
   
   --font-heading: 'Cormorant Garamond', serif;
   --font-body: 'Outfit', sans-serif;
@@ -57,7 +67,7 @@
   --color-background: #071626;
   --color-surface: #0E2238;
   --color-text: #EEF6FF;
-  --color-muted: #C5D3E3;
+  --color-muted: #D8E5F3;
   --color-accent: #213A55;
   --color-gold: #F6D365;
   --color-danger: #FCA5A5;
@@ -70,6 +80,15 @@
   --color-warning-soft: rgba(251, 191, 36, 0.16);
   --color-warning-border: rgba(251, 191, 36, 0.28);
   --color-surface-glass: rgba(14, 34, 56, 0.88);
+  --background-luxury:
+    linear-gradient(135deg, rgba(246, 211, 101, 0.08) 0%, rgba(246, 211, 101, 0) 30%),
+    linear-gradient(165deg, rgba(122, 183, 240, 0.12) 0%, rgba(122, 183, 240, 0) 48%),
+    repeating-linear-gradient(90deg, rgba(216, 229, 243, 0.04) 0 1px, transparent 1px 118px),
+    repeating-linear-gradient(0deg, rgba(216, 229, 243, 0.03) 0 1px, transparent 1px 118px),
+    var(--color-background);
+  --background-luxury-overlay:
+    linear-gradient(180deg, rgba(14,34,56,0.24), rgba(14,34,56,0) 34%),
+    linear-gradient(90deg, rgba(14,34,56,0.2), rgba(14,34,56,0) 42%);
   --shadow-float: 0 18px 45px -18px rgba(0, 0, 0, 0.55);
   --shadow-hover: 0 25px 55px -18px rgba(0, 0, 0, 0.7);
 }
@@ -80,12 +99,39 @@
 
 body {
   background-color: var(--color-background);
+  background-image: var(--background-luxury);
+  background-attachment: fixed;
   color: var(--color-text);
   font-family: var(--font-body);
   font-weight: 300;
   margin: 0;
   overflow-x: hidden;
   transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+#root {
+  min-height: 100vh;
+  background: var(--background-luxury);
+  background-attachment: fixed;
+}
+
+#root > div {
+  position: relative;
+}
+
+#root > div::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: var(--background-luxury-overlay);
+  opacity: 0.8;
+  z-index: 0;
+}
+
+#root > div > * {
+  position: relative;
+  z-index: 1;
 }
 
 html.theme-transitioning *,
@@ -309,11 +355,11 @@ h1, h2, h3, h4, h5, h6 {
   gap: 0.75rem;
   padding: 1rem 1.5rem;
   font-family: var(--font-body);
-  font-weight: 400;
+  font-weight: 500;
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  color: var(--color-muted);
+  color: var(--color-text);
   text-decoration: none;
   border-left: 3px solid transparent;
   transition: all 0.3s ease;
@@ -328,6 +374,53 @@ h1, h2, h3, h4, h5, h6 {
   border-left-color: var(--color-primary); 
 }
 
+.admin-content,
+.sidebar-fixed {
+  color: var(--color-text);
+}
+
+.admin-content p,
+.admin-content td,
+.admin-content label,
+.admin-content input,
+.admin-content select,
+.admin-content textarea,
+.admin-content .badge,
+.sidebar-fixed p,
+.sidebar-fixed span,
+.sidebar-fixed button {
+  font-weight: 400 !important;
+}
+
+.admin-content h1,
+.admin-content h2,
+.admin-content h3,
+.admin-content h4 {
+  font-weight: 500 !important;
+}
+
+.admin-content .neo-table td {
+  color: var(--color-text);
+}
+
+.admin-content .neo-table th {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.admin-content .label,
+.sidebar-fixed .label {
+  color: var(--color-text);
+  opacity: 0.92;
+}
+
+.admin-content .card,
+.admin-content .neo-table,
+.admin-content .input,
+.sidebar-fixed {
+  border-color: color-mix(in srgb, var(--color-accent) 72%, var(--color-text));
+}
+
 .alert-danger {
   background: var(--color-danger-soft);
   border: 1px solid var(--color-danger-border);
@@ -338,6 +431,127 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--color-success-soft);
   border: 1px solid var(--color-success-border);
   color: var(--color-success);
+}
+
+.flash-toast {
+  position: fixed;
+  top: 5.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  width: min(360px, calc(100vw - 2rem));
+  padding: 1rem 1.1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-success-border);
+  border-left: 4px solid var(--color-success);
+  color: var(--color-text);
+  box-shadow: var(--shadow-hover);
+  border-radius: var(--radius-sm);
+  animation: toastDropIn 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.flash-toast.danger {
+  border-color: var(--color-danger-border);
+  border-left-color: var(--color-danger);
+}
+
+.flash-toast-title {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--color-text);
+}
+
+.flash-toast-message {
+  margin: 0.25rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.86rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.btn-spinner {
+  width: 15px;
+  height: 15px;
+  border-radius: 999px;
+  border: 2px solid rgba(255,255,255,0.42);
+  border-top-color: #FFFFFF;
+  animation: spin 0.75s linear infinite;
+}
+
+.loading-luxury {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  min-height: 210px;
+  padding: 3rem 2rem;
+  background:
+    linear-gradient(135deg, rgba(246,211,101,0.12), transparent 38%),
+    linear-gradient(160deg, rgba(44,82,130,0.08), transparent 52%),
+    var(--color-surface);
+}
+
+.loading-luxury::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.34), transparent);
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+.loading-luxury-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.loading-luxury-spinner {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid var(--color-accent);
+  border-top-color: var(--color-primary);
+  border-right-color: var(--color-gold);
+  animation: spin 0.9s linear infinite;
+  box-shadow: 0 0 0 8px var(--color-primary-soft);
+}
+
+.loading-luxury-text {
+  color: var(--color-text);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+}
+
+.loading-luxury-bars {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.loading-luxury-bars span {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  opacity: 0.35;
+  animation: pulseDot 1s ease-in-out infinite;
+}
+
+.loading-luxury-bars span:nth-child(2) {
+  animation-delay: 0.14s;
+}
+
+.loading-luxury-bars span:nth-child(3) {
+  animation-delay: 0.28s;
 }
 
 .brand-logo {
@@ -351,6 +565,491 @@ h1, h2, h3, h4, h5, h6 {
 
 .theme-icon-rotate {
   animation: logoThemeRotate 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hotels-page-main {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.hotels-results-layout {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.hotel-filter-panel {
+  position: sticky;
+  top: 96px;
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hotel-filter-panel-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-accent);
+}
+
+.hotel-filter-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--color-primary);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+}
+
+.hotel-filter-panel h2 {
+  margin: 0.45rem 0 0.25rem;
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.hotel-filter-panel p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.82rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.hotel-filter-reset {
+  border: 0;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  padding: 0.45rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.hotel-filter-group {
+  padding-top: 0.15rem;
+}
+
+.hotel-filter-group-title {
+  display: block;
+  margin-bottom: 0.7rem;
+  color: var(--color-text);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+.hotel-filter-price-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.8rem;
+}
+
+.hotel-filter-panel .input {
+  height: 42px;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.86rem;
+  font-weight: 400;
+}
+
+.hotel-filter-choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.hotel-filter-choice {
+  width: 100%;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--color-accent);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.83rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.22s ease, border-color 0.22s ease, background-color 0.22s ease, color 0.22s ease;
+}
+
+.hotel-filter-choice:hover {
+  transform: translateY(-1px);
+  border-color: var(--color-primary);
+}
+
+.hotel-filter-choice.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 10px 22px -16px var(--color-primary);
+}
+
+.hotel-results-column {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.hotel-results-toolbar {
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+  border: 1px solid var(--color-accent);
+  box-shadow: var(--shadow-float);
+}
+
+.hotel-results-toolbar span {
+  display: block;
+  color: var(--color-primary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+.hotel-results-toolbar strong {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--color-text);
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.booking-page {
+  min-height: 100vh;
+  padding: 6rem 1.5rem;
+  background: transparent;
+}
+
+.booking-shell {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.booking-heading {
+  max-width: 680px;
+  margin-bottom: 2.5rem;
+}
+
+.booking-heading span {
+  display: inline-block;
+  color: var(--color-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  margin-bottom: 0.45rem;
+}
+
+.booking-heading h1 {
+  margin: 0;
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-weight: 300;
+  line-height: 1;
+}
+
+.booking-heading p {
+  margin: 0.85rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.96rem;
+  font-weight: 400;
+  line-height: 1.7;
+}
+
+.booking-form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 390px;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.booking-main-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+.booking-panel,
+.booking-summary-card {
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--color-primary-soft) 55%, transparent), transparent 34%),
+    var(--color-surface);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-float);
+}
+
+.booking-panel {
+  padding: 1.5rem;
+}
+
+.booking-section-title,
+.booking-summary-title {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1.35rem;
+  border-bottom: 1px solid var(--color-accent);
+}
+
+.booking-section-title > svg,
+.booking-summary-title > svg {
+  width: 38px;
+  height: 38px;
+  padding: 0.58rem;
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+  border: 1px solid var(--color-accent);
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.booking-section-title span {
+  display: block;
+  color: var(--color-primary);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+}
+
+.booking-section-title h3,
+.booking-summary-title h3 {
+  margin: 0.12rem 0 0;
+  font-size: 1.55rem;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.booking-date-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.booking-date-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 0.85rem;
+  align-items: center;
+  min-height: 118px;
+  padding: 1rem;
+  background: color-mix(in srgb, var(--color-surface) 78%, var(--color-background));
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.booking-date-card:hover,
+.booking-date-card:focus-within {
+  transform: translateY(-2px);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-hover);
+}
+
+.booking-date-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+  border-radius: 999px;
+}
+
+.booking-date-body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.booking-date-body label {
+  color: var(--color-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.booking-date-body input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 1.02rem;
+  font-weight: 600;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] .booking-date-body input {
+  color-scheme: dark;
+}
+
+.booking-date-body span {
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.booking-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.booking-solid-input {
+  height: 48px;
+  font-weight: 400;
+  background: color-mix(in srgb, var(--color-surface) 80%, var(--color-background));
+}
+
+.booking-guest-toggle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.booking-guest-toggle label {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 0.9rem;
+  color: var(--color-text);
+  background: color-mix(in srgb, var(--color-surface) 84%, var(--color-background));
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  font-size: 0.86rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.24s ease, color 0.24s ease, border-color 0.24s ease;
+}
+
+.booking-guest-toggle label.active {
+  color: #fff;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.booking-guest-toggle input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+}
+
+.booking-summary-sticky {
+  position: sticky;
+  top: 120px;
+}
+
+.booking-summary-card {
+  padding: 1.6rem;
+}
+
+.booking-summary-title {
+  margin-bottom: 1.5rem;
+}
+
+.booking-secure-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.85rem;
+  color: var(--color-muted);
+  background: var(--color-primary-soft);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.booking-secure-note svg {
+  color: var(--color-primary);
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+@media (max-width: 980px) {
+  .hotels-results-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-summary-sticky {
+    position: static;
+  }
+
+  .hotel-filter-panel {
+    position: static;
+  }
+
+  .hotel-filter-price-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hotel-filter-choice-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .hotels-page-main {
+    padding: 1.25rem 1rem;
+  }
+
+  .hotel-filter-panel-head,
+  .hotel-results-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .hotel-filter-price-grid,
+  .hotel-filter-choice-list,
+  .booking-date-grid,
+  .booking-field-grid,
+  .booking-guest-toggle {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ============================================
@@ -395,6 +1094,24 @@ h1, h2, h3, h4, h5, h6 {
   from { transform: rotate(0deg) scale(1); }
   50% { transform: rotate(180deg) scale(1.08); }
   to { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+  to { transform: translateX(100%); }
+}
+
+@keyframes pulseDot {
+  0%, 100% { transform: translateY(0); opacity: 0.35; }
+  50% { transform: translateY(-5px); opacity: 1; }
+}
+
+@keyframes toastDropIn {
+  from { opacity: 0; transform: translate3d(-50%, -14px, 0) scale(0.97); }
+  to { opacity: 1; transform: translate3d(-50%, 0, 0) scale(1); }
 }
 
 .animate-slide-in { 

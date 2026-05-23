@@ -1,9 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { Calendar, Users, User, Phone, Mail, ArrowRight, AlertCircle } from 'lucide-react';
+import { CalendarDays, User, AlertCircle, BedDouble, ShieldCheck } from 'lucide-react';
 import { formatCurrency, formatDate, diffDays } from '../../utils/formatters';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
+
+const toDateInputValue = (date) => {
+  const localDate = new Date(date);
+  localDate.setMinutes(localDate.getMinutes() - localDate.getTimezoneOffset());
+  return localDate.toISOString().split('T')[0];
+};
+
+const addDays = (dateString, days) => {
+  if (!dateString) return '';
+  const date = new Date(`${dateString}T00:00:00`);
+  date.setDate(date.getDate() + days);
+  return toDateInputValue(date);
+};
 
 const Booking = () => {
   const { hotelId } = useParams();
@@ -17,13 +30,15 @@ const Booking = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  const today = new Date().toISOString().split('T')[0];
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+  const today = toDateInputValue(new Date());
+  const tomorrow = addDays(today, 1);
+  const initialCheckIn = searchParams.get('checkIn') || tomorrow;
+  const initialCheckOut = searchParams.get('checkOut') || addDays(initialCheckIn, 1);
 
   const [form, setForm] = useState({
     room_type_id: parseInt(searchParams.get('roomTypeId')) || '',
-    check_in: searchParams.get('checkIn') || tomorrow,
-    check_out: searchParams.get('checkOut') || '',
+    check_in: initialCheckIn,
+    check_out: initialCheckOut,
     number_of_guest: parseInt(searchParams.get('guests')) || 1,
     for_self: true,
     orderer_name: '',
@@ -68,6 +83,22 @@ const Booking = () => {
   const selectedRoom = rooms.find(r => r.id_room_type === parseInt(form.room_type_id));
   const nights = form.check_in && form.check_out ? diffDays(form.check_in, form.check_out) : 0;
   const totalPrice = selectedRoom ? selectedRoom.price_per_night * Math.max(nights, 1) : 0;
+  const checkOutMin = form.check_in ? addDays(form.check_in, 1) : tomorrow;
+
+  const handleCheckInChange = (value) => {
+    setForm(f => ({
+      ...f,
+      check_in: value,
+      check_out: value ? addDays(value, 1) : '',
+    }));
+  };
+
+  const handleCheckOutChange = (value) => {
+    setForm(f => ({
+      ...f,
+      check_out: value <= f.check_in ? addDays(f.check_in, 1) : value,
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -133,9 +164,13 @@ const Booking = () => {
   });
 
   return (
-    <div style={{ background: 'var(--color-background)', minHeight: '100vh', padding: '6rem 1.5rem' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-        <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '2.5rem', marginBottom: '3rem', color: 'var(--color-text)' }}>Checkout</h1>
+    <div className="booking-page">
+      <div className="booking-shell">
+        <div className="booking-heading">
+          <span>Reservation</span>
+          <h1>Lengkapi Data Booking</h1>
+          <p>Pastikan tanggal, tipe kamar, dan data tamu sudah benar sebelum melanjutkan pembayaran.</p>
+        </div>
 
         {error && (
           <div className="alert-danger" style={{ padding: '1rem', marginBottom: '2.5rem', display: 'flex', gap: '0.6rem', borderRadius: 'var(--radius-sm)' }}>
@@ -144,49 +179,69 @@ const Booking = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '65% 35%', gap: '4rem', alignItems: 'flex-start' }}>
+        <form onSubmit={handleSubmit} className="booking-form-grid">
           
           {/* Left Column (65%): Form */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+          <div className="booking-main-column">
             
             {/* Stay Details */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.6rem', color: 'var(--color-text)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.5rem' }}>Stay Details</h3>
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                <div style={{ position: 'relative' }}>
-                  <label style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-muted)', letterSpacing: '1px', display: 'block', marginBottom: '0.25rem' }}>Check-In Date *</label>
-                  <input type="date" className="input" min={today} value={form.check_in} onChange={e => setForm(f => ({ ...f, check_in: e.target.value, check_out: f.check_out && f.check_out <= e.target.value ? '' : f.check_out }))} required style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', background: 'transparent', borderRadius: 0, paddingLeft: 0 }} />
+            <div className="booking-panel">
+              <div className="booking-section-title">
+                <CalendarDays size={18} />
+                <div>
+                  <span>Langkah 1</span>
+                  <h3>Detail Menginap</h3>
                 </div>
-                <div style={{ position: 'relative' }}>
-                  <label style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-muted)', letterSpacing: '1px', display: 'block', marginBottom: '0.25rem' }}>Check-Out Date *</label>
-                  <input type="date" className="input" min={form.check_in || today} value={form.check_out} onChange={e => setForm(f => ({ ...f, check_out: e.target.value }))} required style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', background: 'transparent', borderRadius: 0, paddingLeft: 0 }} />
+              </div>
+              
+              <div className="booking-date-grid">
+                <div className="booking-date-card">
+                  <div className="booking-date-icon"><CalendarDays size={18} /></div>
+                  <div className="booking-date-body">
+                    <label>Check-In</label>
+                    <input type="date" min={today} value={form.check_in} onChange={e => handleCheckInChange(e.target.value)} required />
+                    <span>{form.check_in ? formatDate(form.check_in) : 'Pilih tanggal datang'}</span>
+                  </div>
+                </div>
+                <div className="booking-date-card">
+                  <div className="booking-date-icon"><CalendarDays size={18} /></div>
+                  <div className="booking-date-body">
+                    <label>Check-Out</label>
+                    <input type="date" min={checkOutMin} value={form.check_out} onChange={e => handleCheckOutChange(e.target.value)} required />
+                    <span>{form.check_out ? formatDate(form.check_out) : 'Otomatis esok hari'}</span>
+                  </div>
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1rem' }}>
+              <div className="booking-field-grid">
                 <div>
-                  <label style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-muted)', letterSpacing: '1px', display: 'block', marginBottom: '0.25rem' }}>Suite Type *</label>
-                  <select className="input" value={form.room_type_id} onChange={e => setForm(f => ({ ...f, room_type_id: parseInt(e.target.value) }))} required style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', background: 'transparent', borderRadius: 0, paddingLeft: 0 }}>
+                  <label className="label">Tipe Kamar *</label>
+                  <select className="input booking-solid-input" value={form.room_type_id} onChange={e => setForm(f => ({ ...f, room_type_id: parseInt(e.target.value) }))} required>
                     {rooms.map(r => <option key={r.id_room_type} value={r.id_room_type}>{r.name}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-muted)', letterSpacing: '1px', display: 'block', marginBottom: '0.25rem' }}>Number of Guests *</label>
-                  <input type="number" className="input" min={1} max={selectedRoom?.max_guest || 10} value={form.number_of_guest} onChange={e => setForm(f => ({ ...f, number_of_guest: parseInt(e.target.value) }))} required style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', background: 'transparent', borderRadius: 0, paddingLeft: 0 }} />
+                  <label className="label">Jumlah Tamu *</label>
+                  <input type="number" className="input booking-solid-input" min={1} max={selectedRoom?.max_guest || 10} value={form.number_of_guest} onChange={e => setForm(f => ({ ...f, number_of_guest: parseInt(e.target.value) }))} required />
                 </div>
               </div>
             </div>
 
             {/* Guest Details */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.6rem', color: 'var(--color-text)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.5rem' }}>Guest Details</h3>
+            <div className="booking-panel">
+              <div className="booking-section-title">
+                <User size={18} />
+                <div>
+                  <span>Langkah 2</span>
+                  <h3>Data Tamu</h3>
+                </div>
+              </div>
 
               {/* Toggle option for self booking */}
-              <div style={{ display: 'flex', gap: '2rem', marginBottom: '1rem' }}>
-                {[{ val: true, label: 'I am the guest' }, { val: false, label: 'Booking for someone else' }].map(({ val, label }) => (
-                  <label key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 300, fontSize: '0.9rem', color: 'var(--color-text)' }}>
-                    <input type="radio" checked={form.for_self === val} onChange={() => setForm(f => ({ ...f, for_self: val }))} style={{ accentColor: 'var(--color-primary)', width: 16, height: 16 }} />
+              <div className="booking-guest-toggle">
+                {[{ val: true, label: 'Saya tamunya' }, { val: false, label: 'Pesan untuk orang lain' }].map(({ val, label }) => (
+                  <label key={label} className={form.for_self === val ? 'active' : ''}>
+                    <input type="radio" checked={form.for_self === val} onChange={() => setForm(f => ({ ...f, for_self: val }))} />
                     {label}
                   </label>
                 ))}
@@ -194,7 +249,7 @@ const Booking = () => {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                 <div style={{ position: 'relative' }}>
-                  <span style={getLabelStyle('orderer_name')}>Full Name *</span>
+                  <span style={getLabelStyle('orderer_name')}>Nama Lengkap *</span>
                   <input className="input" style={getInputStyle('orderer_name')} value={form.orderer_name} 
                     onFocus={() => setFocusedField('orderer_name')}
                     onBlur={() => setFocusedField(null)}
@@ -204,7 +259,7 @@ const Booking = () => {
                 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                   <div style={{ position: 'relative' }}>
-                    <span style={getLabelStyle('orderer_phone')}>Phone Number *</span>
+                    <span style={getLabelStyle('orderer_phone')}>Nomor Telepon *</span>
                     <input type="tel" className="input" style={getInputStyle('orderer_phone')} value={form.orderer_phone} 
                       onFocus={() => setFocusedField('orderer_phone')}
                       onBlur={() => setFocusedField(null)}
@@ -212,7 +267,7 @@ const Booking = () => {
                       required disabled={form.for_self} />
                   </div>
                   <div style={{ position: 'relative' }}>
-                    <span style={getLabelStyle('orderer_email')}>Email Address *</span>
+                    <span style={getLabelStyle('orderer_email')}>Alamat Email *</span>
                     <input type="email" className="input" style={getInputStyle('orderer_email')} value={form.orderer_email} 
                       onFocus={() => setFocusedField('orderer_email')}
                       onBlur={() => setFocusedField(null)}
@@ -226,9 +281,12 @@ const Booking = () => {
           </div>
 
           {/* Right Column (35%): Order Summary */}
-          <div style={{ position: 'sticky', top: 120 }}>
-            <div className="card" style={{ background: 'var(--color-surface)', border: '1px solid var(--color-accent)', padding: '2.5rem 2rem', borderRadius: 'var(--radius-sm)' }}>
-              <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--color-text)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.75rem', fontWeight: 300 }}>Order Summary</h3>
+          <div className="booking-summary-sticky">
+            <div className="booking-summary-card card">
+              <div className="booking-summary-title">
+                <BedDouble size={18} />
+                <h3>Ringkasan Pesanan</h3>
+              </div>
               
               <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
                 <div style={{ width: 64, height: 64, overflow: 'hidden', borderRadius: 2 }}>
@@ -243,24 +301,24 @@ const Booking = () => {
               {selectedRoom && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.85rem', color: 'var(--color-muted)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--color-text)', fontWeight: 400 }}>
-                    <span>Suite Type</span>
+                    <span>Tipe Kamar</span>
                     <span>{selectedRoom.name}</span>
                   </div>
                   {form.check_in && (
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span>Dates</span>
+                      <span>Tanggal</span>
                       <span>{formatDate(form.check_in)} - {form.check_out ? formatDate(form.check_out) : '?'}</span>
                     </div>
                   )}
                   {nights > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span>Nights</span>
-                      <span>{nights} night{nights > 1 ? 's' : ''}</span>
+                      <span>Malam</span>
+                      <span>{nights} malam</span>
                     </div>
                   )}
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Guests</span>
-                    <span>{form.number_of_guest} Guest{form.number_of_guest > 1 ? 's' : ''}</span>
+                    <span>Tamu</span>
+                    <span>{form.number_of_guest} tamu</span>
                   </div>
                 </div>
               )}
@@ -268,15 +326,15 @@ const Booking = () => {
               {nights > 0 && selectedRoom && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--color-muted)' }}>
-                    <span>Base Fare</span>
+                    <span>Harga Kamar</span>
                     <span>{formatCurrency(selectedRoom.price_per_night)} × {nights}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--color-muted)' }}>
-                    <span>Taxes & Fees</span>
-                    <span>Included</span>
+                    <span>Pajak & Biaya</span>
+                    <span>Termasuk</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-heading)', fontSize: '1.6rem', color: 'var(--color-text)', borderTop: '1px solid var(--color-accent)', paddingTop: '1rem', marginTop: '0.5rem', fontWeight: 300 }}>
-                    <span>Total Price</span>
+                    <span>Total</span>
                     <span style={{ color: 'var(--color-primary)' }}>{formatCurrency(totalPrice)}</span>
                   </div>
                 </div>
@@ -291,8 +349,12 @@ const Booking = () => {
                   opacity: submitting ? 0.7 : 1,
                   animation: 'none'
                 }}>
-                {submitting ? 'Processing...' : 'Complete Reservation'}
+                {submitting ? 'Processing...' : 'Lanjutkan Pembayaran'}
               </button>
+              <div className="booking-secure-note">
+                <ShieldCheck size={14} />
+                <span>Data reservasi dilindungi dan akan diverifikasi sebelum pembayaran.</span>
+              </div>
             </div>
           </div>
           

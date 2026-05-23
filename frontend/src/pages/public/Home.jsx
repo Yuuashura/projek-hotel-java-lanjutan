@@ -38,6 +38,7 @@ const Home = () => {
   const [cities, setCities] = useState([]);
   const [featuredHotels, setFeaturedHotels] = useState([]);
   const [saleHotels, setSaleHotels] = useState([]);
+  const [featuredLoading, setFeaturedLoading] = useState(true);
   const [search, setSearch] = useState({ city: '', keyword: '' });
   const timerRef = useRef(null);
 
@@ -52,7 +53,11 @@ const Home = () => {
   // Fetch initial data
   useEffect(() => {
     api.get('/api/cities').then(r => setCities(r.data.data || [])).catch(() => {});
-    api.get('/api/hotels/featured').then(r => setFeaturedHotels((r.data.data || []).slice(0, 3))).catch(() => {});
+    setFeaturedLoading(true);
+    api.get('/api/hotels/featured')
+      .then(r => setFeaturedHotels((r.data.data || []).slice(0, 3)))
+      .catch(() => setFeaturedHotels([]))
+      .finally(() => setFeaturedLoading(false));
     api.get('/api/hotels?keyword=sale').then(r => setSaleHotels((r.data.data || []).filter(h => h.is_on_sale).slice(0, 3))).catch(() => {});
   }, []);
 
@@ -65,7 +70,7 @@ const Home = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-background)' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--background-luxury)', backgroundAttachment: 'fixed' }}>
 
       {/* ====== HERO SLIDER (FULL-BLEED 100VH) ====== */}
       <section
@@ -156,36 +161,26 @@ const Home = () => {
           <Link to="/hotels" className="btn btn-white btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>{t('home.viewAll')} <ArrowRight size={14} /></Link>
         </div>
 
-        {featuredHotels.length > 0 ? (
+        {featuredLoading ? (
+          <div className="card loading-luxury">
+            <div className="loading-luxury-content">
+              <div className="loading-luxury-spinner" />
+              <div className="loading-luxury-text">{t('common.loadingHotel')}</div>
+              <div className="loading-luxury-bars" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </div>
+            </div>
+          </div>
+        ) : featuredHotels.length > 0 ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
             {featuredHotels.map(hotel => <HotelCard key={hotel.id_hotel} hotel={hotel} />)}
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
-            {slides.map(s => (
-              <div key={s.id} className="card card-hover" style={{ overflow: 'hidden', border: '1px solid var(--color-accent)' }}>
-                <div style={{ height: 220, overflow: 'hidden', position: 'relative' }}>
-                  <img src={s.image} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }}
-                    onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
-                    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
-                </div>
-                <div style={{ padding: '1.5rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', alignItems: 'center' }}>
-                    <span className="badge badge-yellow">{s.city}</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--color-primary)', fontWeight: 400, fontSize: '0.85rem' }}><Star size={13} fill="var(--color-primary)" />4.8</span>
-                  </div>
-                  <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.4rem', margin: '0.5rem 0' }}>{s.title}</h3>
-                  <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>{s.desc}</p>
-                  <div style={{ borderTop: '1px solid var(--color-accent)', paddingTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>{t('home.from')}</div>
-                      <div style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '1.1rem', color: 'var(--color-text)' }}>{formatCurrency(s.price)}<span style={{ fontSize: '0.75rem', color: 'var(--color-muted)' }}>{t('home.perNight')}</span></div>
-                    </div>
-                    <Link to={`/hotels/${s.id}`} className="btn btn-primary btn-sm" style={{ background: 'var(--color-primary)' }}>{t('common.details')}</Link>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="card" style={{ padding: '3rem 2rem', textAlign: 'center' }}>
+            <h3 style={{ margin: 0, fontSize: '1.35rem', color: 'var(--color-text)' }}>{t('hotels.emptyTitle')}</h3>
+            <p style={{ margin: '0.75rem auto 0', maxWidth: 520, color: 'var(--color-muted)', fontWeight: 400, lineHeight: 1.6 }}>{t('hotels.emptyText')}</p>
           </div>
         )}
       </div>

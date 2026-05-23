@@ -54,6 +54,8 @@ const Navbar = () => {
   }, [theme]);
 
   const handleLogout = () => {
+    sessionStorage.setItem('ngninep-flash', JSON.stringify({ type: 'success', key: 'flash.logoutSuccess' }));
+    window.dispatchEvent(new Event('ngninep-flash'));
     logout();
     navigate('/');
   };

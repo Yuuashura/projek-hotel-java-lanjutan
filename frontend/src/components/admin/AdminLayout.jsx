@@ -22,7 +22,12 @@ const AdminLayout = ({ children }) => {
   const ThemeIcon = theme === 'dark' ? Sun : Moon;
   const activeMenu = adminMenu.find(m => m.path === location.pathname);
 
-  const handleLogout = () => { logout(); navigate('/'); };
+  const handleLogout = () => {
+    sessionStorage.setItem('ngninep-flash', JSON.stringify({ type: 'success', key: 'flash.logoutSuccess' }));
+    window.dispatchEvent(new Event('ngninep-flash'));
+    logout();
+    navigate('/');
+  };
 
   React.useEffect(() => {
     if (!didMountTheme.current) {

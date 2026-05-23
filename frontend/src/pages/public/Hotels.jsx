@@ -187,80 +187,117 @@ const Hotels = () => {
         </div>
       </div>
 
-      <main style={{ width: '100%', maxWidth: 1400, margin: '0 auto', padding: '2rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        <section style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '1rem', flexWrap: 'wrap', borderBottom: '1px solid var(--color-accent)', paddingBottom: '1rem' }}>
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
-            <div>
-              <label className="label" style={{ fontSize: '0.7rem' }}>{t('hotels.minPrice')}</label>
-              <input
-                className="input"
-                type="number"
-                min="0"
-                placeholder={t('hotels.minPlaceholder')}
-                value={filters.minPrice}
-                onChange={e => updateFilter('minPrice', e.target.value)}
-                style={{ width: 150, height: 38, padding: '0.4rem 0.75rem' }}
-              />
+      <main className="hotels-page-main">
+        <div className="hotels-results-layout">
+          <aside className="hotel-filter-panel card" aria-label={t('hotels.filterTitle')}>
+            <div className="hotel-filter-panel-head">
+              <div>
+                <span className="hotel-filter-kicker">
+                  <SlidersHorizontal size={14} /> {t('hotels.localFilter')}
+                </span>
+                <h2>{t('hotels.filterTitle')}</h2>
+                <p>{t('hotels.filterSubtitle')}</p>
+              </div>
+              {hasActiveFilters && (
+                <button type="button" className="hotel-filter-reset" onClick={clearAllFilters}>
+                  {t('common.reset')}
+                </button>
+              )}
             </div>
-            <div>
-              <label className="label" style={{ fontSize: '0.7rem' }}>{t('hotels.maxPrice')}</label>
-              <input
-                className="input"
-                type="number"
-                min="0"
-                placeholder={t('hotels.maxPlaceholder')}
-                value={filters.maxPrice}
-                onChange={e => updateFilter('maxPrice', e.target.value)}
-                style={{ width: 150, height: 38, padding: '0.4rem 0.75rem' }}
-              />
-            </div>
-            <div>
-              <label className="label" style={{ fontSize: '0.7rem' }}>{t('common.rating')}</label>
-              <select
-                className="input"
-                value={filters.minRating}
-                onChange={e => updateFilter('minRating', e.target.value)}
-                style={{ width: 150, height: 38, padding: '0.4rem 0.75rem' }}
-              >
-                <option value="">{t('hotels.allRatings')}</option>
-                <option value="3">{t('hotels.starsPlus', { rating: 3 })}</option>
-                <option value="4">{t('hotels.starsPlus', { rating: 4 })}</option>
-                <option value="4.5">{t('hotels.starsPlus', { rating: 4.5 })}</option>
-                <option value="5">{t('hotels.fiveStars')}</option>
-              </select>
-            </div>
-            <div>
-              <label className="label" style={{ fontSize: '0.7rem' }}>{t('hotels.featuredLabel')}</label>
-              <select
-                className="input"
-                value={filters.featured}
-                onChange={e => updateFilter('featured', e.target.value)}
-                style={{ width: 150, height: 38, padding: '0.4rem 0.75rem' }}
-              >
-                <option value="all">{t('hotels.allHotels')}</option>
-                <option value="featured">{t('common.featured')}</option>
-                <option value="regular">{t('common.nonFeatured')}</option>
-              </select>
-            </div>
-          </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-            <div style={{ color: 'var(--color-muted)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-              <SlidersHorizontal size={13} /> {t('hotels.localFilter')}
+            <div className="hotel-filter-group">
+              <span className="hotel-filter-group-title">{t('hotels.priceRange')}</span>
+              <div className="hotel-filter-price-grid">
+                <div>
+                  <label className="label">{t('hotels.minPrice')}</label>
+                  <input
+                    className="input"
+                    type="number"
+                    min="0"
+                    placeholder={t('hotels.minPlaceholder')}
+                    value={filters.minPrice}
+                    onChange={e => updateFilter('minPrice', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="label">{t('hotels.maxPrice')}</label>
+                  <input
+                    className="input"
+                    type="number"
+                    min="0"
+                    placeholder={t('hotels.maxPlaceholder')}
+                    value={filters.maxPrice}
+                    onChange={e => updateFilter('maxPrice', e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
-            <select
-              className="input"
-              style={{ width: 'auto', minWidth: 180, padding: '0.4rem 1rem', height: 38, fontSize: '0.8rem' }}
-              value={filters.sortBy}
-              onChange={e => updateFilter('sortBy', e.target.value)}
-            >
-              <option value="default">{t('hotels.sortDefault')}</option>
-              <option value="price_asc">{t('hotels.sortPriceAsc')}</option>
-              <option value="price_desc">{t('hotels.sortPriceDesc')}</option>
-              <option value="rating">{t('hotels.sortRating')}</option>
-            </select>
-          </div>
-        </section>
+
+            <div className="hotel-filter-group">
+              <span className="hotel-filter-group-title">{t('common.rating')}</span>
+              <div className="hotel-filter-choice-list">
+                {[
+                  ['', t('hotels.allRatings')],
+                  ['3', t('hotels.starsPlus', { rating: 3 })],
+                  ['4', t('hotels.starsPlus', { rating: 4 })],
+                  ['4.5', t('hotels.starsPlus', { rating: 4.5 })],
+                  ['5', t('hotels.fiveStars')],
+                ].map(([value, label]) => (
+                  <button
+                    key={value || 'all'}
+                    type="button"
+                    className={`hotel-filter-choice ${filters.minRating === value ? 'active' : ''}`}
+                    onClick={() => updateFilter('minRating', value)}
+                  >
+                    <span>{label}</span>
+                    {value && <Star size={13} fill="currentColor" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="hotel-filter-group">
+              <span className="hotel-filter-group-title">{t('hotels.stayType')}</span>
+              <div className="hotel-filter-choice-list">
+                {[
+                  ['all', t('hotels.allHotels')],
+                  ['featured', t('common.featured')],
+                  ['regular', t('common.nonFeatured')],
+                ].map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={`hotel-filter-choice ${filters.featured === value ? 'active' : ''}`}
+                    onClick={() => updateFilter('featured', value)}
+                  >
+                    <span>{label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="hotel-filter-group">
+              <label className="label">{t('hotels.sortTitle')}</label>
+              <select
+                className="input"
+                value={filters.sortBy}
+                onChange={e => updateFilter('sortBy', e.target.value)}
+              >
+                <option value="default">{t('hotels.sortDefault')}</option>
+                <option value="price_asc">{t('hotels.sortPriceAsc')}</option>
+                <option value="price_desc">{t('hotels.sortPriceDesc')}</option>
+                <option value="rating">{t('hotels.sortRating')}</option>
+              </select>
+            </div>
+          </aside>
+
+          <section className="hotel-results-column">
+            <div className="hotel-results-toolbar">
+              <div>
+                <span>{t('hotels.resultsTitle')}</span>
+                <strong>{t('hotels.count', { shown: visibleHotels.length, total: hotels.length })}</strong>
+              </div>
+            </div>
 
         {hasActiveFilters && (
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -296,6 +333,8 @@ const Hotels = () => {
             ))}
           </div>
         )}
+          </section>
+        </div>
       </main>
 
       <style>{`

@@ -1,9 +1,11 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { PreferencesProvider } from './context/PreferencesContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import { usePreferences } from './context/PreferencesContext';
 
 // === Public Pages ===
 import Home from './pages/public/Home';
@@ -121,12 +123,54 @@ const ScrollRevealManager = () => {
   return null;
 };
 
+const FlashToast = () => {
+  const { t } = usePreferences();
+  const { pathname } = useLocation();
+  const [flash, setFlash] = React.useState(null);
+
+  React.useEffect(() => {
+    const readFlash = () => {
+      const raw = sessionStorage.getItem('ngninep-flash');
+      if (!raw) return;
+      sessionStorage.removeItem('ngninep-flash');
+      try {
+        setFlash(JSON.parse(raw));
+      } catch {
+        setFlash({ type: 'success', message: raw });
+      }
+    };
+
+    readFlash();
+    window.addEventListener('ngninep-flash', readFlash);
+    return () => window.removeEventListener('ngninep-flash', readFlash);
+  }, [pathname]);
+
+  React.useEffect(() => {
+    if (!flash) return undefined;
+    const timer = window.setTimeout(() => setFlash(null), 3200);
+    return () => window.clearTimeout(timer);
+  }, [flash]);
+
+  if (!flash) return null;
+
+  const message = flash.key ? t(flash.key) : flash.message;
+
+  return createPortal(
+    <div className={`flash-toast ${flash.type === 'danger' ? 'danger' : ''}`} role="status" aria-live="polite">
+      <p className="flash-toast-title">NgiNep</p>
+      <p className="flash-toast-message">{message}</p>
+    </div>,
+    document.body
+  );
+};
+
 function App() {
   return (
     <PreferencesProvider>
       <AuthProvider>
         <Router>
           <ScrollRevealManager />
+          <FlashToast />
           <AppRoutes />
         </Router>
       </AuthProvider>

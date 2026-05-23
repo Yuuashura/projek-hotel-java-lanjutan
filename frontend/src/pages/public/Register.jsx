@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, UserPlus, AlertCircle, CheckCircle } from 'lucide-react';
+import { Eye, EyeOff, UserPlus, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
 import api from '../../utils/api';
 import CitySearchSelect from '../../components/CitySearchSelect';
 import { useAuth } from '../../context/AuthContext';
@@ -89,6 +89,9 @@ const Register = () => {
           </p>
           <button onClick={resendOtp} className="btn btn-primary btn-full" disabled={loading} style={{ background: 'var(--color-primary)', height: 48 }}>{loading ? 'Mengirim...' : 'Kirim Ulang OTP'}</button>
           <button onClick={() => setStep('form')} className="btn btn-white btn-full" style={{ marginTop: '0.75rem', height: 48 }}>Kembali ke Form</button>
+          <Link to="/" className="btn btn-white btn-full" style={{ marginTop: '0.75rem', height: 48 }}>
+            <ArrowLeft size={14} /> Kembali ke Home
+          </Link>
         </div>
       </div>
     );
@@ -101,6 +104,10 @@ const Register = () => {
       <div style={{ position: 'absolute', width: 450, height: 450, borderRadius: '50%', background: 'radial-gradient(circle, rgba(49, 130, 206, 0.08) 0%, rgba(49, 130, 206, 0) 70%)', bottom: '-10%', right: '-10%', pointerEvents: 'none', filter: 'blur(60px)' }} />
       
       <div style={{ maxWidth: 560, margin: '0 auto', position: 'relative', zIndex: 1 }} className="animate-slide-in">
+        <Link to="/" className="btn btn-white btn-sm" style={{ display: 'inline-flex', alignItems: 'center', marginBottom: '1.5rem', background: 'var(--color-surface-glass)' }}>
+          <ArrowLeft size={14} /> Kembali ke Home
+        </Link>
+
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <Link to="/" style={{ textDecoration: 'none' }}>
             <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '2.5rem', color: 'var(--color-text)', letterSpacing: '1px' }}>
@@ -184,7 +191,7 @@ const Register = () => {
             </div>
 
             <button type="submit" className="btn btn-primary btn-full" disabled={loading} style={{ height: 50, background: 'var(--color-primary)', opacity: loading ? 0.7 : 1 }}>
-              {loading ? 'Mendaftarkan...' : 'Daftar & Kirim OTP'}
+              {loading ? <><span className="btn-spinner" /> Mendaftarkan...</> : 'Daftar & Kirim OTP'}
             </button>
           </form>
         </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle, ArrowLeft } from 'lucide-react';
 import api from '../../utils/api';
 
 const Login = () => {
@@ -44,6 +44,7 @@ const Login = () => {
           role: data.role
         };
       }
+      sessionStorage.setItem('ngninep-flash', JSON.stringify({ type: 'success', key: 'flash.loginSuccess' }));
       login(data.token, userData);
       if (userData.role === 'ROLE_ADMIN_HOTEL' || userData.role === 'ROLE_ADMIN_APP') {
         navigate('/admin/dashboard');
@@ -69,6 +70,10 @@ const Login = () => {
       <div style={{ position: 'absolute', width: 450, height: 450, borderRadius: '50%', background: 'radial-gradient(circle, rgba(49, 130, 206, 0.08) 0%, rgba(49, 130, 206, 0) 70%)', bottom: '-15%', right: '-5%', pointerEvents: 'none', filter: 'blur(60px)' }} />
       
       <div style={{ width: '100%', maxWidth: 440, position: 'relative', zIndex: 1 }} className="animate-slide-in">
+        <Link to="/" className="btn btn-white btn-sm" style={{ display: 'inline-flex', alignItems: 'center', marginBottom: '1.5rem', background: 'var(--color-surface-glass)' }}>
+          <ArrowLeft size={14} /> Kembali ke Home
+        </Link>
+
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <Link to="/" style={{ textDecoration: 'none' }}>
@@ -108,7 +113,7 @@ const Login = () => {
             </div>
 
             <button type="submit" className="btn btn-primary btn-full" disabled={loading} style={{ height: 50, marginTop: '0.5rem', background: 'var(--color-primary)', opacity: loading ? 0.7 : 1 }}>
-              {loading ? 'Memproses...' : 'Masuk Sekarang'}
+              {loading ? <><span className="btn-spinner" /> Memproses...</> : 'Masuk Sekarang'}
             </button>
           </form>
         </div>
