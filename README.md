@@ -22,6 +22,7 @@
 | Spring Scheduler | Scheduled tasks (auto-update status booking, dll.) |
 | JavaMailSender + App Password Gmail | OTP via email saat registrasi |
 | Spring Data JPA + Hibernate | ORM untuk akses database |
+| Apache POI | Framework pengolah dokumen Microsoft Excel (.xlsx) untuk upload/download data |
 
 ### Frontend
 | Teknologi | Keterangan |
@@ -35,7 +36,7 @@
 ### Database & Tools
 | Teknologi | Keterangan |
 |---|---|
-| MySQL + XAMPP | Database relasional & local server |
+| PostgreSQL (Supabase Cloud) | Database relasional cloud dengan connection pooling port 6543 |
 | Antigravity | Tools deployment / tunneling lokal |
 | Google Chrome | Browser utama testing |
 | Postman | Testing REST API |
@@ -1002,11 +1003,11 @@ Halaman profil dibagi menjadi beberapa tab/section:
 | Halaman | Route | Deskripsi |
 |---|---|---|
 | **Dashboard Admin** | `/admin/dashboard` | Statistik: hotel, pengunjung, booking, pemasukan |
-| **Hotel Admin** | `/admin/hotels` | CRUD Hotel dengan popup form |
+| **Hotel Admin** | `/admin/hotels` | CRUD Hotel dengan popup form, dilengkapi fitur Import/Upload Hotel via Excel (`POST /api/hotels/uploadHotel`) & Export/Download data Hotel ke Excel |
 | **Visitor Admin** | `/admin/visitors` | Daftar User (non-admin), aksi Ban |
 | **Booking Admin** | `/admin/bookings` | Kelola semua pemesanan, update status |
 
-> ✅ Semua halaman admin menggunakan **Sidebar Navbar** di kiri dengan menu: Dashboard, Hotel, Visitor, Booking.
+> ✅ Semua halaman admin menggunakan **Sidebar Navbar** di kiri dengan menu: Dashboard, Hotel, Visitor, Booking. Halaman **Hotel Admin** mendukung pengelolaan data massal menggunakan file format Excel (.xlsx).
 
 ---
 
@@ -1068,6 +1069,8 @@ User pilih hotel → Isi form booking (check_in, check_out, guests)
 | **Feign Client** | Komunikasi antar-service (Booking ↔ Hotel) |
 | **Spring Validation** | Validasi input request body (`@Valid`) |
 | **CORS Config** | Izinkan request dari React frontend |
+| **Apache POI (Excel)** | Mengunggah data hotel secara massal (Upload Excel) & mengunduh rekapitulasi data (Download Excel) |
+| **Supabase Transaction Pooling** | Menggunakan PostgreSQL dengan `sslmode=require` dan `prepareThreshold=0` untuk kestabilan pooling |
 
 ---
 
@@ -1158,77 +1161,85 @@ Setiap service wajib mengimplementasikan `@RestControllerAdvice` yang menangkap 
 
 ---
 
-## 🗄️ Setup Database Awal (MySQL via XAMPP)
+## 🗄️ Setup Database Awal (PostgreSQL Supabase)
 
-```sql
-CREATE DATABASE ngninep_user;
-CREATE DATABASE ngninep_hotel;
-CREATE DATABASE ngninep_booking;
-```
+Proyek ini telah dimigrasikan menggunakan satu database PostgreSQL terpusat di Supabase. Tabel dari masing-masing microservices (`user-service`, `hotel-service`, dan `booking-service`) berada dalam skema/database yang sama (`postgres`), namun dipisahkan berdasarkan penamaan tabel.
+
+### Penting untuk Connection Pooling (Supabase Transaction Mode)
+Karena menggunakan Transaction Pooler Supabase pada port `6543`, pastikan parameter `prepareThreshold=0` dan `sslmode=require` ditambahkan pada JDBC connection URL untuk mencegah error prepared statement conflict (`prepared statement already exists`).
 
 Konfigurasi `application.properties` di user-service:
-```yaml
+```properties
+spring.application.name=user-service
 server.port=8081
 
-# Database Configuration
-spring.datasource.url=jdbc:mysql://localhost:3306/ngninep_user?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
-spring.datasource.username=root
-spring.datasource.password=
+# Database Configuration (Supabase PostgreSQL)
+spring.datasource.url=jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0
+spring.datasource.username=postgres.yksjudnbzkpgmzbtksad
+spring.datasource.password=yuuashura12
+spring.datasource.driver-class-name=org.postgresql.Driver
 
 # Hibernate / JPA
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.properties.hibernate.format_sql=true
 
-# JWT Secret (HARUS SAMA dengan hotel-service)
-# Dalam production, pindahkan ke environment variable
+# JWT Secret (HARUS SAMA dengan service lainnya)
 jwt.secret=ngninep-user-service-super-secret-key-yang-sangat-panjang-untuk-keamanan-jwt-2025
 jwt.expiration=3600000
 
-# Email Configuration
+# Email Configuration (OTP Verification)
 spring.mail.host=smtp.gmail.com
 spring.mail.port=587
-spring.mail.username=ngninep.app@gmail.com # Gamti Email anda
-spring.mail.password=abcd efgh asds awsd  # Gmail App Password
+spring.mail.username=tzyudistira@gmail.com
+spring.mail.password=lhcu waxx rifj thta
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.starttls.required=true
 ```
 
-
 Konfigurasi `application.properties` di hotel-service:
-```yaml
+```properties
 server.port=8082
 
-# Database Configuration
-spring.datasource.url=jdbc:mysql://localhost:3306/ngninep_hotel?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
-spring.datasource.username=root
-spring.datasource.password=
+# Database Configuration (Supabase PostgreSQL)
+spring.datasource.url=jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0
+spring.datasource.username=postgres.yksjudnbzkpgmzbtksad
+spring.datasource.password=yuuashura12
+spring.datasource.driver-class-name=org.postgresql.Driver
 
 # Hibernate / JPA
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.properties.hibernate.format_sql=true
 
-# JWT Secret (HARUS SAMA dengan user-service)
-# Dalam production, pindahkan ke environment variable
+# JWT Secret (HARUS SAMA dengan service lainnya)
 jwt.secret=ngninep-user-service-super-secret-key-yang-sangat-panjang-untuk-keamanan-jwt-2025
 jwt.expiration=3600000
 
+# Path Penyimpanan File Excel
+app.file.upload-path=C:\\Users\\ThinkPad\\Documents\\doc
+```
+
 Konfigurasi `application.properties` di booking-service:
-```yaml
+```properties
 server.port=8083
 
-# Database Configuration
-spring.datasource.url=jdbc:mysql://localhost:3306/ngninep_booking?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
-spring.datasource.username=root
-spring.datasource.password=
+# Database Configuration (Supabase PostgreSQL)
+spring.datasource.url=jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0
+spring.datasource.username=postgres.yksjudnbzkpgmzbtksad
+spring.datasource.password=yuuashura12
+spring.datasource.driver-class-name=org.postgresql.Driver
 
 # Hibernate / JPA
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.properties.hibernate.format_sql=true
 
-# JWT Secret (HARUS SAMA)
+# JWT Secret (HARUS SAMA dengan service lainnya)
 jwt.secret=ngninep-user-service-super-secret-key-yang-sangat-panjang-untuk-keamanan-jwt-2025
 jwt.expiration=3600000
 ```
@@ -1272,9 +1283,9 @@ pnpm run dev
 | Hotel Service | 8082 |
 | Booking Service | 8083 |
 | React Frontend | 5173 |
-| MySQL (XAMPP) | 3306 |
+| PostgreSQL (Supabase) | 6543 / 5432 |
 
 ---
 
 *Dibuat untuk proyek NgiNep — Hotel Booking Website*
-*Stack: Java Spring Boot (Microservices) + React JS + MySQL*
+*Stack: Java Spring Boot (Microservices) + React JS + PostgreSQL (Supabase)*
