@@ -23,8 +23,8 @@ const Payment = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [form, setForm] = useState({ payment_method: '', payment_proof: '' });
-  const [previewFile, setPreviewFile] = useState(null); // file object untuk preview
-  const [previewUrl, setPreviewUrl] = useState('');   // data URL untuk preview
+  const [previewFile, setPreviewFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState('');
   const [timeLeft, setTimeLeft] = useState(0);
 
   useEffect(() => {
@@ -38,7 +38,6 @@ const Payment = () => {
         if (!b) { navigate('/my-bookings'); return; }
         if (b.status !== 'PENDING') { navigate('/my-bookings'); return; }
         setBooking(b);
-        // Jika sudah ada bukti sebelumnya, tampilkan
         if (b.payment_proof) {
           setPreviewUrl(b.payment_proof);
           setForm(f => ({ ...f, payment_method: b.payment_method || '', payment_proof: b.payment_proof }));
@@ -52,7 +51,6 @@ const Payment = () => {
       .finally(() => setLoading(false));
   }, [bookingId]);
 
-  // Countdown
   useEffect(() => {
     if (timeLeft <= 0) return;
     const t = setInterval(() => setTimeLeft(l => { if (l <= 1) { clearInterval(t); return 0; } return l - 1; }), 1000);
@@ -80,7 +78,7 @@ const Payment = () => {
     const reader = new FileReader();
     reader.onloadend = () => {
       setPreviewUrl(reader.result);
-      setForm(f => ({ ...f, payment_proof: reader.result })); // simpan base64 / bisa diganti upload ke server
+      setForm(f => ({ ...f, payment_proof: reader.result }));
     };
     reader.readAsDataURL(file);
   };
@@ -104,151 +102,185 @@ const Payment = () => {
     }
   };
 
-  if (loading) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', fontFamily: 'Space Grotesk', fontWeight: 700 }}>Memuat detail pembayaran...</div>;
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <span style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--color-muted)' }}>Memuat detail pembayaran...</span>
+      </div>
+    );
+  }
   if (!booking) return null;
 
-  if (success) return (
-    <div style={{ maxWidth: 520, margin: '4rem auto', padding: '0 1.5rem', textAlign: 'center' }}>
-      <div className="card" style={{ padding: '3rem 2rem' }}>
-        <div style={{ width: 80, height: 80, background: 'var(--neo-green)', border: '4px solid var(--neo-dark)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', boxShadow: 'var(--neo-shadow)' }}>
-          <Check size={40} style={{ color: 'var(--neo-dark)' }} />
+  if (success) {
+    return (
+      <div style={{ maxWidth: 520, margin: '6rem auto', padding: '0 1.5rem', textAlign: 'center' }}>
+        <div className="card" style={{ padding: '3.5rem 2.5rem', border: '1px solid var(--color-accent)' }}>
+          <div style={{ width: 64, height: 64, background: 'rgba(72,187,120,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+            <Check size={32} style={{ color: '#38A169' }} />
+          </div>
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '2rem', marginBottom: '0.75rem', fontWeight: 300 }}>Pembayaran Dikirim</h2>
+          <p style={{ color: 'var(--color-muted)', fontWeight: 300, lineHeight: 1.7, marginBottom: '2.5rem', fontSize: '0.9rem' }}>
+            Bukti transfer Anda telah kami terima dan sedang dalam proses verifikasi oleh Admin Hotel. Voucher menginap Anda akan aktif dalam 1×24 jam.
+          </p>
+          <Link to="/my-bookings" className="btn btn-dark btn-full" style={{ justifyContent: 'center', height: 50 }}>Lihat Pesanan Saya</Link>
         </div>
-        <h2 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', fontSize: '1.5rem', marginBottom: '0.75rem' }}>Pembayaran Dikirim!</h2>
-        <p style={{ color: '#6b7280', fontWeight: 500, lineHeight: 1.6, marginBottom: '2rem' }}>Bukti pembayaran Anda sedang diverifikasi oleh Admin Hotel. Pesanan akan dikonfirmasi dalam 1×24 jam.</p>
-        <Link to="/my-bookings" className="btn btn-dark btn-full" style={{ justifyContent: 'center' }}>Lihat Pesanan Saya</Link>
       </div>
-    </div>
-  );
+    );
+  }
 
   const nights = diffDays(booking.check_in, booking.check_out);
 
   return (
-    <div style={{ maxWidth: 900, margin: '0 auto', padding: '2rem 1.5rem' }}>
-      <h1 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', fontSize: 'clamp(1.25rem, 2.5vw, 1.75rem)', marginBottom: '2rem' }}>Informasi Pembayaran</h1>
+    <div style={{ background: 'var(--color-background)', minHeight: '100vh', padding: '6rem 1.5rem' }}>
+      <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+        <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '2.5rem', marginBottom: '3rem', color: 'var(--color-text)' }}>Informasi Pembayaran</h1>
 
-      {/* Countdown */}
-      {timeLeft > 0 && (
-        <div style={{ background: timeLeft < 3600 ? '#fff0f3' : '#fff8e1', border: `3px solid ${timeLeft < 3600 ? 'var(--neo-pink)' : 'var(--neo-orange)'}`, padding: '1rem 1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', boxShadow: `4px 4px 0px 0px ${timeLeft < 3600 ? 'var(--neo-pink)' : 'var(--neo-orange)'}` }}>
-          <Clock size={20} style={{ color: timeLeft < 3600 ? 'var(--neo-pink)' : 'var(--neo-orange)', flexShrink: 0 }} />
-          <div>
-            <div style={{ fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: '0.85rem', textTransform: 'uppercase', color: '#374151' }}>Batas Waktu Pembayaran</div>
-            <div style={{ fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '1.5rem', color: timeLeft < 3600 ? 'var(--neo-pink)' : 'var(--neo-orange)' }}>{formatCountdown(timeLeft)}</div>
-            <div style={{ fontWeight: 500, fontSize: '0.8rem', color: '#6b7280' }}>Pesanan otomatis dibatalkan jika melewati batas waktu</div>
-          </div>
-        </div>
-      )}
-      {timeLeft === 0 && (
-        <div style={{ background: '#fff0f3', border: '3px solid var(--neo-pink)', padding: '1rem', marginBottom: '1.5rem', boxShadow: '4px 4px 0px 0px var(--neo-pink)', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <X size={18} style={{ color: 'var(--neo-pink)', flexShrink: 0 }} />
-          <span style={{ fontWeight: 700, color: '#be123c', fontSize: '0.875rem' }}>Batas waktu pembayaran telah habis. Pesanan mungkin sudah dibatalkan otomatis oleh sistem.</span>
-        </div>
-      )}
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '2rem', alignItems: 'flex-start' }}>
-        {/* Left */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* Ringkasan */}
-          <div className="card" style={{ padding: '1.5rem' }}>
-            <h3 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.95rem', marginBottom: '1.25rem', borderBottom: '2px solid var(--neo-dark)', paddingBottom: '0.75rem' }}>Ringkasan Pesanan</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.875rem' }}>
-              {[
-                { label: 'Pemesan', val: booking.orderer_name },
-                { label: 'Email', val: booking.orderer_email },
-                { label: 'Telepon', val: booking.orderer_phone },
-                { label: 'Check-In', val: formatDate(booking.check_in) },
-                { label: 'Check-Out', val: formatDate(booking.check_out) },
-                { label: 'Durasi', val: `${nights} malam` },
-                { label: 'Jumlah Tamu', val: `${booking.number_of_guest} orang` },
-              ].map(({ label, val }) => (
-                <div key={label}>
-                  <div style={{ color: '#9ca3af', fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', marginBottom: '0.25rem' }}>{label}</div>
-                  <div style={{ fontWeight: 700 }}>{val}</div>
-                </div>
-              ))}
+        {/* Countdown timer banner */}
+        {timeLeft > 0 && (
+          <div style={{ background: timeLeft < 3600 ? '#FFF5F5' : '#FFFDF3', border: `1px solid ${timeLeft < 3600 ? '#FEB2B2' : '#FEEBC8'}`, padding: '1.25rem 1.5rem', marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '1rem', borderRadius: 'var(--radius-sm)' }}>
+            <Clock size={24} style={{ color: timeLeft < 3600 ? '#E53E3E' : '#DD6B20', flexShrink: 0 }} />
+            <div>
+              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-muted)', letterSpacing: '1px' }}>Sisa Waktu Pembayaran</div>
+              <div style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '1.5rem', color: timeLeft < 3600 ? '#E53E3E' : '#DD6B20', marginTop: '0.15rem' }}>{formatCountdown(timeLeft)}</div>
             </div>
           </div>
+        )}
 
-          {/* Metode Pembayaran + Upload Bukti */}
-          <div className="card" style={{ padding: '1.5rem' }}>
-            <h3 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.95rem', marginBottom: '1.25rem', borderBottom: '2px solid var(--neo-dark)', paddingBottom: '0.75rem' }}>Pilih Metode & Upload Bukti</h3>
-            <form onSubmit={handleSubmit}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                {PAYMENT_METHODS.map(m => (
-                  <label key={m.id} style={{ display: 'flex', gap: '1rem', padding: '1rem', border: `3px solid ${form.payment_method === m.id ? 'var(--neo-orange)' : 'var(--neo-dark)'}`, background: form.payment_method === m.id ? '#fff8f0' : 'white', cursor: 'pointer', boxShadow: form.payment_method === m.id ? '4px 4px 0px 0px var(--neo-orange)' : 'var(--neo-shadow-sm)', transition: 'all 0.15s' }}>
-                    <input type="radio" name="payment" value={m.id} checked={form.payment_method === m.id} onChange={() => setForm(f => ({ ...f, payment_method: m.id }))} style={{ accentColor: 'var(--neo-orange)', marginTop: 2, width: 18, height: 18, flexShrink: 0 }} />
-                    <div>
-                      <div style={{ fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '0.9rem' }}>{m.emoji} {m.label}</div>
-                      <div style={{ color: '#6b7280', fontWeight: 500, fontSize: '0.8rem', marginTop: '0.25rem' }}>{m.info}</div>
-                    </div>
-                  </label>
+        {timeLeft === 0 && (
+          <div style={{ background: '#FFF5F5', border: '1px solid #FEB2B2', padding: '1.25rem 1.5rem', marginBottom: '2.5rem', display: 'flex', gap: '0.75rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
+            <X size={20} style={{ color: '#E53E3E', flexShrink: 0 }} />
+            <span style={{ fontWeight: 300, color: '#C53030', fontSize: '0.9rem' }}>Batas waktu pembayaran telah habis. Silakan buat pesanan baru.</span>
+          </div>
+        )}
+
+        <div style={{ display: 'grid', gridTemplateColumns: '62% 38%', gap: '3.5rem', alignItems: 'flex-start' }}>
+          {/* Left Column */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+            
+            {/* Order Details */}
+            <div className="card" style={{ padding: '2rem', border: '1px solid var(--color-accent)' }}>
+              <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--color-text)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.5rem' }}>Detail Reservasi</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', fontSize: '0.85rem' }}>
+                {[
+                  { label: 'Pemesan', val: booking.orderer_name },
+                  { label: 'Email', val: booking.orderer_email },
+                  { label: 'No. Telepon', val: booking.orderer_phone },
+                  { label: 'Check-In', val: formatDate(booking.check_in) },
+                  { label: 'Check-Out', val: formatDate(booking.check_out) },
+                  { label: 'Durasi menginap', val: `${nights} malam` },
+                ].map(({ label, val }) => (
+                  <div key={label}>
+                    <div style={{ color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem', fontSize: '0.7rem' }}>{label}</div>
+                    <div style={{ fontWeight: 400, color: 'var(--color-text)' }}>{val}</div>
+                  </div>
                 ))}
               </div>
+            </div>
 
-              {/* Upload Bukti Pembayaran */}
-              <div style={{ marginBottom: '1.25rem' }}>
-                <label className="label"><Upload size={14} style={{ display: 'inline', marginRight: '0.4rem' }} />Upload Bukti Pembayaran *</label>
+            {/* Payment Method Selector & File Upload */}
+            <div className="card" style={{ padding: '2rem', border: '1px solid var(--color-accent)' }}>
+              <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--color-text)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.5rem' }}>Metode Pembayaran</h3>
+              
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                
+                {/* Bank selection cards */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {PAYMENT_METHODS.map(m => {
+                    const isChecked = form.payment_method === m.id;
+                    return (
+                      <label key={m.id} 
+                        style={{ 
+                          display: 'flex', gap: '1rem', padding: '1.25rem', cursor: 'pointer', borderRadius: 'var(--radius-sm)',
+                          border: isChecked ? '1px solid var(--color-primary)' : '1px solid var(--color-accent)', 
+                          background: isChecked ? 'rgba(212,175,55,0.02)' : 'var(--color-surface)', 
+                          transition: 'all 0.3s ease' 
+                        }}>
+                        <input type="radio" name="payment" value={m.id} checked={isChecked} onChange={() => setForm(f => ({ ...f, payment_method: m.id }))} style={{ accentColor: 'var(--color-primary)', marginTop: 3, width: 16, height: 16, flexShrink: 0 }} />
+                        <div>
+                          <div style={{ fontWeight: 400, fontSize: '0.9rem', color: 'var(--color-text)' }}>{m.emoji} {m.label}</div>
+                          <div style={{ color: 'var(--color-muted)', fontSize: '0.8rem', marginTop: '0.25rem', fontWeight: 300 }}>{m.info}</div>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
 
-                {/* Preview area */}
-                <div
-                  onClick={() => fileRef.current?.click()}
-                  style={{
-                    border: `3px dashed ${previewUrl ? 'var(--neo-green)' : 'var(--neo-dark)'}`,
-                    padding: '1.5rem',
-                    textAlign: 'center',
-                    cursor: 'pointer',
-                    background: previewUrl ? '#f0fdf4' : '#fafafa',
-                    transition: 'all 0.2s',
-                    marginBottom: '0.5rem'
-                  }}
-                >
-                  {previewUrl ? (
-                    <div>
-                      <img src={previewUrl} alt="Bukti bayar" style={{ maxHeight: 200, maxWidth: '100%', objectFit: 'contain', border: '3px solid var(--neo-dark)', marginBottom: '0.5rem' }} />
-                      <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#16a34a' }}>
-                        {previewFile ? previewFile.name : 'Bukti pembayaran sebelumnya'} — Klik untuk ganti
+                {/* Upload Proof */}
+                <div>
+                  <label className="label" style={{ display: 'block', marginBottom: '0.5rem' }}>Bukti Pembayaran *</label>
+                  <div
+                    onClick={() => fileRef.current?.click()}
+                    style={{
+                      border: previewUrl ? '1px solid #38A169' : '1px dashed var(--color-muted)',
+                      padding: '2rem',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      background: previewUrl ? 'rgba(72,187,120,0.02)' : 'transparent',
+                      transition: 'all 0.3s ease',
+                      borderRadius: 'var(--radius-sm)',
+                      marginBottom: '0.5rem'
+                    }}
+                  >
+                    {previewUrl ? (
+                      <div>
+                        <img src={previewUrl} alt="Bukti bayar" style={{ maxHeight: 180, maxWidth: '100%', objectFit: 'contain', borderRadius: 2, marginBottom: '1rem', border: '1px solid var(--color-accent)' }} />
+                        <div style={{ fontSize: '0.8rem', fontWeight: 400, color: '#38A169' }}>
+                          {previewFile ? previewFile.name : 'Bukti transfer siap kirim'}
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <ImageIcon size={40} style={{ color: '#9ca3af', marginBottom: '0.5rem' }} />
-                      <div style={{ fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: '0.875rem' }}>Klik untuk pilih gambar</div>
-                      <div style={{ fontSize: '0.75rem', color: '#9ca3af', fontWeight: 500, marginTop: '0.25rem' }}>JPG, PNG, WEBP · Maks 5MB</div>
-                    </div>
-                  )}
+                    ) : (
+                      <div>
+                        <ImageIcon size={32} style={{ color: 'var(--color-muted)', marginBottom: '0.5rem' }} />
+                        <div style={{ fontWeight: 400, fontSize: '0.85rem', color: 'var(--color-text)' }}>Klik untuk memilih file bukti bayar</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', fontWeight: 300, marginTop: '0.25rem' }}>Format gambar JPG, PNG, WEBP max 5MB</div>
+                      </div>
+                    )}
+                  </div>
+                  <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
                 </div>
-                <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
+
+                {error && (
+                  <div style={{ background: '#FFF5F5', border: '1px solid #FEB2B2', padding: '0.875rem', display: 'flex', gap: '0.5rem', borderRadius: 'var(--radius-sm)' }}>
+                    <AlertCircle size={16} style={{ color: '#E53E3E', flexShrink: 0 }} />
+                    <span style={{ fontWeight: 300, color: '#C53030', fontSize: '0.8rem' }}>{error}</span>
+                  </div>
+                )}
+
+                <button type="submit" className="btn btn-primary btn-full" disabled={submitting || timeLeft === 0} style={{ justifyContent: 'center', height: 50, background: 'var(--color-primary)', opacity: (submitting || timeLeft === 0) ? 0.65 : 1 }}>
+                  {submitting ? 'Mengirim...' : 'Kirim Bukti Pembayaran'}
+                </button>
+
+              </form>
+            </div>
+
+          </div>
+
+          {/* Right Column: Order Pricing */}
+          <div style={{ position: 'sticky', top: 120 }}>
+            <div style={{ background: '#F7FAFC', border: '1px solid var(--color-accent)', padding: '2rem', borderRadius: 'var(--radius-sm)' }}>
+              <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--color-text)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.75rem', fontWeight: 300 }}>Total Tagihan</h3>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--color-muted)', marginBottom: '1rem' }}>
+                <span>Suite & Nights</span>
+                <span>{nights} malam</span>
               </div>
-
-              {error && (
-                <div style={{ background: '#fff0f3', border: '3px solid var(--neo-pink)', padding: '0.875rem', marginBottom: '1rem', display: 'flex', gap: '0.5rem', boxShadow: '3px 3px 0px 0px var(--neo-pink)' }}>
-                  <AlertCircle size={16} style={{ color: 'var(--neo-pink)', flexShrink: 0 }} />
-                  <span style={{ fontWeight: 600, color: '#be123c', fontSize: '0.85rem' }}>{error}</span>
-                </div>
-              )}
-
-              <button type="submit" className="btn btn-green btn-full" disabled={submitting || timeLeft === 0} style={{ justifyContent: 'center', opacity: (submitting || timeLeft === 0) ? 0.65 : 1 }}>
-                {submitting ? 'Mengirim...' : <><Check size={16} /> Konfirmasi Pembayaran</>}
-              </button>
-            </form>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-heading)', fontSize: '1.6rem', color: 'var(--color-text)', borderTop: '1px solid var(--color-accent)', paddingTop: '1rem', fontWeight: 300 }}>
+                <span>Total</span>
+                <span style={{ color: 'var(--color-primary)' }}>{formatCurrency(booking.total_price)}</span>
+              </div>
+              
+              <div style={{ display: 'block', textAlign: 'center', marginTop: '1.5rem' }}>
+                <span className="badge" style={{ background: 'rgba(212,175,55,0.1)', color: 'var(--color-primary)', borderColor: 'transparent', width: '100%', height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  AWAITING PAYMENT VERIFICATION
+                </span>
+              </div>
+            </div>
           </div>
+
         </div>
 
-        {/* Right: Total */}
-        <div style={{ position: 'sticky', top: 80 }}>
-          <div className="card" style={{ padding: '1.5rem' }}>
-            <h3 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.95rem', marginBottom: '1rem', borderBottom: '2px solid var(--neo-dark)', paddingBottom: '0.75rem' }}>Total Tagihan</h3>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.5rem', paddingBottom: '0.75rem', borderBottom: '2px dashed #e5e7eb' }}>
-              <span style={{ color: '#6b7280' }}>{nights} malam × kamar</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '1.3rem', paddingTop: '0.75rem' }}>
-              <span>TOTAL</span>
-              <span style={{ color: 'var(--neo-orange)' }}>{formatCurrency(booking.total_price)}</span>
-            </div>
-            <span className="badge badge-yellow" style={{ display: 'block', textAlign: 'center', marginTop: '1rem' }}>Status: PENDING</span>
-          </div>
-        </div>
       </div>
-      <style>{`@media(max-width:768px){.grid-pay{grid-template-columns:1fr!important}}`}</style>
     </div>
   );
 };

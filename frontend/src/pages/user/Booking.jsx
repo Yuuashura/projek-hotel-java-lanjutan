@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { Calendar, Users, User, Phone, Mail, Hotel, ArrowRight, AlertCircle } from 'lucide-react';
+import { Calendar, Users, User, Phone, Mail, ArrowRight, AlertCircle } from 'lucide-react';
 import { formatCurrency, formatDate, diffDays } from '../../utils/formatters';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
@@ -31,6 +31,9 @@ const Booking = () => {
     orderer_email: '',
   });
 
+  // Focus states for custom input floating label animation
+  const [focusedField, setFocusedField] = useState(null);
+
   useEffect(() => {
     if (!user || user.role !== 'ROLE_USER') navigate('/login');
   }, [user]);
@@ -51,7 +54,12 @@ const Booking = () => {
   // Auto-fill for self
   useEffect(() => {
     if (form.for_self && user) {
-      setForm(f => ({ ...f, orderer_name: `${user.first_name} ${user.last_name}`.trim(), orderer_phone: user.phone || '', orderer_email: user.email || '' }));
+      setForm(f => ({ 
+        ...f, 
+        orderer_name: `${user.first_name} ${user.last_name}`.trim(), 
+        orderer_phone: user.phone || '', 
+        orderer_email: user.email || '' 
+      }));
     } else if (!form.for_self) {
       setForm(f => ({ ...f, orderer_name: '', orderer_phone: '', orderer_email: '' }));
     }
@@ -89,132 +97,212 @@ const Booking = () => {
     }
   };
 
-  if (loading) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', fontFamily: 'Space Grotesk', fontWeight: 700 }}>Memuat...</div>;
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <span style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--color-muted)' }}>Memuat...</span>
+      </div>
+    );
+  }
+
+  // Helper styles for floating inputs
+  const getInputStyle = (name) => ({
+    width: '100%',
+    height: 56,
+    border: 'none',
+    borderBottom: focusedField === name || form[name] ? '1px solid var(--color-text)' : '1px solid var(--color-muted)',
+    background: 'transparent',
+    color: 'var(--color-text)',
+    outline: 'none',
+    fontSize: '1rem',
+    fontWeight: 300,
+    transition: 'all 0.3s ease',
+    padding: '1.25rem 0 0.25rem'
+  });
+
+  const getLabelStyle = (name) => ({
+    position: 'absolute',
+    left: 0,
+    top: focusedField === name || form[name] ? 0 : 20,
+    fontSize: focusedField === name || form[name] ? '0.75rem' : '0.95rem',
+    color: focusedField === name || form[name] ? 'var(--color-text)' : 'var(--color-muted)',
+    transition: 'all 0.3s ease',
+    pointerEvents: 'none',
+    textTransform: 'uppercase',
+    letterSpacing: '1px'
+  });
 
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto', padding: '2rem 1.5rem' }}>
-      <h1 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', fontSize: 'clamp(1.25rem, 2.5vw, 1.75rem)', marginBottom: '2rem' }}>Form Pemesanan</h1>
+    <div style={{ background: 'var(--color-background)', minHeight: '100vh', padding: '6rem 1.5rem' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '2.5rem', marginBottom: '3rem', color: 'var(--color-text)' }}>Checkout</h1>
 
-      {error && (
-        <div style={{ background: '#fff0f3', border: '3px solid var(--neo-pink)', padding: '1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.6rem', boxShadow: '4px 4px 0px 0px var(--neo-pink)' }}>
-          <AlertCircle size={18} style={{ color: 'var(--neo-pink)', flexShrink: 0 }} />
-          <span style={{ fontWeight: 600, color: '#be123c', fontSize: '0.875rem' }}>{error}</span>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '2rem', alignItems: 'flex-start' }}>
-        {/* Left: Form */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* Tanggal & Tamu */}
-          <div className="card" style={{ padding: '1.5rem' }}>
-            <h3 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.95rem', marginBottom: '1.25rem', borderBottom: '2px solid var(--neo-dark)', paddingBottom: '0.75rem' }}>
-              <Calendar size={16} style={{ display: 'inline', marginRight: '0.5rem' }} />Detail Menginap
-            </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-              <div>
-                <label className="label">Check-In *</label>
-                <input type="date" className="input" min={today} value={form.check_in} onChange={e => setForm(f => ({ ...f, check_in: e.target.value, check_out: f.check_out && f.check_out <= e.target.value ? '' : f.check_out }))} required />
-              </div>
-              <div>
-                <label className="label">Check-Out *</label>
-                <input type="date" className="input" min={form.check_in || today} value={form.check_out} onChange={e => setForm(f => ({ ...f, check_out: e.target.value }))} required />
-              </div>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div>
-                <label className="label">Tipe Kamar *</label>
-                <select className="input" value={form.room_type_id} onChange={e => setForm(f => ({ ...f, room_type_id: parseInt(e.target.value) }))} required>
-                  {rooms.map(r => <option key={r.id_room_type} value={r.id_room_type}>{r.name} — {formatCurrency(r.price_per_night)}/malam</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="label">Jumlah Tamu *</label>
-                <input type="number" className="input" min={1} max={selectedRoom?.max_guest || 10} value={form.number_of_guest} onChange={e => setForm(f => ({ ...f, number_of_guest: parseInt(e.target.value) }))} required />
-              </div>
-            </div>
+        {error && (
+          <div style={{ background: '#fff0f3', border: '1px solid #C53030', padding: '1rem', marginBottom: '2.5rem', display: 'flex', gap: '0.6rem', borderRadius: 'var(--radius-sm)' }}>
+            <AlertCircle size={18} style={{ color: '#C53030', flexShrink: 0 }} />
+            <span style={{ fontWeight: 300, color: '#C53030', fontSize: '0.9rem' }}>{error}</span>
           </div>
+        )}
 
-          {/* Data Pemesan */}
-          <div className="card" style={{ padding: '1.5rem' }}>
-            <h3 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.95rem', marginBottom: '1.25rem', borderBottom: '2px solid var(--neo-dark)', paddingBottom: '0.75rem' }}>
-              <User size={16} style={{ display: 'inline', marginRight: '0.5rem' }} />Data Pemesan
-            </h3>
-
-            {/* Checkbox for self */}
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
-              {[{ val: true, label: 'Pesan untuk diri saya' }, { val: false, label: 'Pesan untuk orang lain' }].map(({ val, label }) => (
-                <label key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 700, fontSize: '0.875rem' }}>
-                  <input type="radio" checked={form.for_self === val} onChange={() => setForm(f => ({ ...f, for_self: val }))} style={{ accentColor: 'var(--neo-orange)', width: 18, height: 18 }} />
-                  {label}
-                </label>
-              ))}
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label className="label">Nama Lengkap Pemesan *</label>
-                <input className="input" placeholder="Nama sesuai identitas" value={form.orderer_name} onChange={e => setForm(f => ({ ...f, orderer_name: e.target.value }))} required disabled={form.for_self} style={{ background: form.for_self ? '#f3f4f6' : 'white' }} />
+        <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '65% 35%', gap: '4rem', alignItems: 'flex-start' }}>
+          
+          {/* Left Column (65%): Form */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+            
+            {/* Stay Details */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.6rem', color: 'var(--color-text)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.5rem' }}>Stay Details</h3>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                <div style={{ position: 'relative' }}>
+                  <label style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-muted)', letterSpacing: '1px', display: 'block', marginBottom: '0.25rem' }}>Check-In Date *</label>
+                  <input type="date" className="input" min={today} value={form.check_in} onChange={e => setForm(f => ({ ...f, check_in: e.target.value, check_out: f.check_out && f.check_out <= e.target.value ? '' : f.check_out }))} required style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', background: 'transparent', borderRadius: 0, paddingLeft: 0 }} />
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <label style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-muted)', letterSpacing: '1px', display: 'block', marginBottom: '0.25rem' }}>Check-Out Date *</label>
+                  <input type="date" className="input" min={form.check_in || today} value={form.check_out} onChange={e => setForm(f => ({ ...f, check_out: e.target.value }))} required style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', background: 'transparent', borderRadius: 0, paddingLeft: 0 }} />
+                </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1rem' }}>
                 <div>
-                  <label className="label">No. Telepon *</label>
-                  <input type="tel" className="input" placeholder="08..." value={form.orderer_phone} onChange={e => setForm(f => ({ ...f, orderer_phone: e.target.value }))} required disabled={form.for_self} style={{ background: form.for_self ? '#f3f4f6' : 'white' }} />
+                  <label style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-muted)', letterSpacing: '1px', display: 'block', marginBottom: '0.25rem' }}>Suite Type *</label>
+                  <select className="input" value={form.room_type_id} onChange={e => setForm(f => ({ ...f, room_type_id: parseInt(e.target.value) }))} required style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', background: 'transparent', borderRadius: 0, paddingLeft: 0 }}>
+                    {rooms.map(r => <option key={r.id_room_type} value={r.id_room_type}>{r.name}</option>)}
+                  </select>
                 </div>
                 <div>
-                  <label className="label">Email *</label>
-                  <input type="email" className="input" placeholder="email@..." value={form.orderer_email} onChange={e => setForm(f => ({ ...f, orderer_email: e.target.value }))} required disabled={form.for_self} style={{ background: form.for_self ? '#f3f4f6' : 'white' }} />
+                  <label style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-muted)', letterSpacing: '1px', display: 'block', marginBottom: '0.25rem' }}>Number of Guests *</label>
+                  <input type="number" className="input" min={1} max={selectedRoom?.max_guest || 10} value={form.number_of_guest} onChange={e => setForm(f => ({ ...f, number_of_guest: parseInt(e.target.value) }))} required style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', background: 'transparent', borderRadius: 0, paddingLeft: 0 }} />
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Right: Summary */}
-        <div style={{ position: 'sticky', top: 80 }}>
-          <div className="card" style={{ padding: '1.5rem' }}>
-            <h3 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.95rem', marginBottom: '1.25rem', borderBottom: '2px solid var(--neo-dark)', paddingBottom: '0.75rem' }}>Ringkasan Pesanan</h3>
-            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
-              <div style={{ width: 56, height: 56, border: '3px solid var(--neo-dark)', overflow: 'hidden', flexShrink: 0 }}>
-                <img src={hotel?.images?.[0]?.image_url || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=100'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            {/* Guest Details */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.6rem', color: 'var(--color-text)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.5rem' }}>Guest Details</h3>
+
+              {/* Toggle option for self booking */}
+              <div style={{ display: 'flex', gap: '2rem', marginBottom: '1rem' }}>
+                {[{ val: true, label: 'I am the guest' }, { val: false, label: 'Booking for someone else' }].map(({ val, label }) => (
+                  <label key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 300, fontSize: '0.9rem', color: 'var(--color-text)' }}>
+                    <input type="radio" checked={form.for_self === val} onChange={() => setForm(f => ({ ...f, for_self: val }))} style={{ accentColor: 'var(--color-primary)', width: 16, height: 16 }} />
+                    {label}
+                  </label>
+                ))}
               </div>
-              <div>
-                <div style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.9rem' }}>{hotel?.name}</div>
-                <div style={{ color: '#6b7280', fontWeight: 500, fontSize: '0.8rem' }}>{hotel?.city?.name}</div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                <div style={{ position: 'relative' }}>
+                  <span style={getLabelStyle('orderer_name')}>Full Name *</span>
+                  <input className="input" style={getInputStyle('orderer_name')} value={form.orderer_name} 
+                    onFocus={() => setFocusedField('orderer_name')}
+                    onBlur={() => setFocusedField(null)}
+                    onChange={e => setForm(f => ({ ...f, orderer_name: e.target.value }))} 
+                    required disabled={form.for_self} />
+                </div>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                  <div style={{ position: 'relative' }}>
+                    <span style={getLabelStyle('orderer_phone')}>Phone Number *</span>
+                    <input type="tel" className="input" style={getInputStyle('orderer_phone')} value={form.orderer_phone} 
+                      onFocus={() => setFocusedField('orderer_phone')}
+                      onBlur={() => setFocusedField(null)}
+                      onChange={e => setForm(f => ({ ...f, orderer_phone: e.target.value }))} 
+                      required disabled={form.for_self} />
+                  </div>
+                  <div style={{ position: 'relative' }}>
+                    <span style={getLabelStyle('orderer_email')}>Email Address *</span>
+                    <input type="email" className="input" style={getInputStyle('orderer_email')} value={form.orderer_email} 
+                      onFocus={() => setFocusedField('orderer_email')}
+                      onBlur={() => setFocusedField(null)}
+                      onChange={e => setForm(f => ({ ...f, orderer_email: e.target.value }))} 
+                      required disabled={form.for_self} />
+                  </div>
+                </div>
               </div>
             </div>
 
-            {selectedRoom && (
-              <div style={{ background: 'var(--neo-light)', border: '2px solid var(--neo-dark)', padding: '1rem', marginBottom: '1rem', fontSize: '0.875rem' }}>
-                <div style={{ fontWeight: 700, display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                  <span>{selectedRoom.name}</span>
-                </div>
-                {form.check_in && <div style={{ color: '#6b7280', fontWeight: 500 }}>📅 {formatDate(form.check_in)} → {form.check_out ? formatDate(form.check_out) : '?'}</div>}
-                {nights > 0 && <div style={{ color: '#6b7280', fontWeight: 500 }}>🌙 {nights} malam</div>}
-                <div style={{ color: '#6b7280', fontWeight: 500 }}>👤 {form.number_of_guest} tamu</div>
-              </div>
-            )}
-
-            {nights > 0 && selectedRoom && (
-              <div style={{ borderTop: '2px dashed var(--neo-dark)', paddingTop: '1rem', marginTop: '0.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.4rem' }}>
-                  <span>{formatCurrency(selectedRoom.price_per_night)} × {nights} malam</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '1.1rem', borderTop: '2px solid var(--neo-dark)', paddingTop: '0.75rem', marginTop: '0.5rem' }}>
-                  <span>TOTAL</span>
-                  <span style={{ color: 'var(--neo-orange)' }}>{formatCurrency(totalPrice)}</span>
-                </div>
-              </div>
-            )}
-
-            <button type="submit" className="btn btn-orange btn-full" disabled={submitting} style={{ marginTop: '1.25rem', justifyContent: 'center', opacity: submitting ? 0.7 : 1 }}>
-              {submitting ? 'Memproses...' : <>Lanjut ke Pembayaran <ArrowRight size={16} /></>}
-            </button>
           </div>
-        </div>
-      </form>
+
+          {/* Right Column (35%): Order Summary */}
+          <div style={{ position: 'sticky', top: 120 }}>
+            <div style={{ background: '#F7FAFC', border: '1px solid var(--color-accent)', padding: '2.5rem 2rem', borderRadius: 'var(--radius-sm)' }}>
+              <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--color-text)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.75rem', fontWeight: 300 }}>Order Summary</h3>
+              
+              <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+                <div style={{ width: 64, height: 64, overflow: 'hidden', borderRadius: 2 }}>
+                  <img src={hotel?.images?.[0]?.image_url || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=150'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', color: 'var(--color-text)', fontWeight: 300 }}>{hotel?.name}</div>
+                  <div style={{ color: 'var(--color-muted)', fontSize: '0.8rem', fontWeight: 300, marginTop: '0.25rem' }}>{hotel?.city?.name}</div>
+                </div>
+              </div>
+
+              {selectedRoom && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.85rem', color: 'var(--color-muted)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--color-text)', fontWeight: 400 }}>
+                    <span>Suite Type</span>
+                    <span>{selectedRoom.name}</span>
+                  </div>
+                  {form.check_in && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Dates</span>
+                      <span>{formatDate(form.check_in)} - {form.check_out ? formatDate(form.check_out) : '?'}</span>
+                    </div>
+                  )}
+                  {nights > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Nights</span>
+                      <span>{nights} night{nights > 1 ? 's' : ''}</span>
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Guests</span>
+                    <span>{form.number_of_guest} Guest{form.number_of_guest > 1 ? 's' : ''}</span>
+                  </div>
+                </div>
+              )}
+
+              {nights > 0 && selectedRoom && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--color-muted)' }}>
+                    <span>Base Fare</span>
+                    <span>{formatCurrency(selectedRoom.price_per_night)} × {nights}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--color-muted)' }}>
+                    <span>Taxes & Fees</span>
+                    <span>Included</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-heading)', fontSize: '1.6rem', color: 'var(--color-text)', borderTop: '1px solid var(--color-accent)', paddingTop: '1rem', marginTop: '0.5rem', fontWeight: 300 }}>
+                    <span>Total Price</span>
+                    <span style={{ color: 'var(--color-primary)' }}>{formatCurrency(totalPrice)}</span>
+                  </div>
+                </div>
+              )}
+
+              <button type="submit" className="btn btn-primary btn-full animate-float" disabled={submitting} 
+                style={{ 
+                  marginTop: '2rem', 
+                  justifyContent: 'center', 
+                  height: 56, 
+                  background: 'var(--color-primary)', 
+                  opacity: submitting ? 0.7 : 1,
+                  animation: 'none'
+                }}>
+                {submitting ? 'Processing...' : 'Complete Reservation'}
+              </button>
+            </div>
+          </div>
+          
+        </form>
+      </div>
 
       <style>{`
-        @media (max-width: 768px) { form { grid-template-columns: 1fr !important; } }
+        @media (max-width: 900px) { 
+          form { grid-template-columns: 1fr !important; gap: 3rem !important; } 
+        }
       `}</style>
     </div>
   );

@@ -13,22 +13,31 @@ const faqs = [
   { q: 'Apakah data pribadi saya aman?', a: 'Ya! Kami menggunakan JWT Token terenkripsi, BCrypt untuk password, dan pola DTO untuk menjaga data Anda tetap aman dan tidak bocor.' },
 ];
 
-// Slide Banner Data
+// Slide Banner Data (Luxury resorts photography)
 const slides = [
-  { id: 1, image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1600&h=600', title: 'Neo Brutalism Palace', city: 'Bandung', desc: 'Pengalaman menginap premium di jantung Kota Kembang', price: 650000 },
-  { id: 2, image: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&q=80&w=1600&h=600', title: 'Retro Modern Resort', city: 'Bali', desc: 'Resort tepi pantai dengan kolam renang infinity yang memukau', price: 1200000 },
-  { id: 3, image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&q=80&w=1600&h=600', title: 'The Angular Inn', city: 'Jakarta', desc: 'Hotel bisnis modern di pusat ibu kota dengan fasilitas lengkap', price: 450000 },
+  { id: 1, image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&q=80&w=1600&h=1000', title: 'Aman Sanctuary Villa', city: 'Bali', desc: 'Sebuah peristirahatan privat berdesain minimalis mewah di tebing laut Uluwatu', price: 1850000 },
+  { id: 2, image: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&q=80&w=1600&h=1000', title: 'Coastal Serenity Resort', city: 'Lombok', desc: 'Paduan keindahan samudera biru dengan kemewahan fasilitas bintang lima privat', price: 2400000 },
+  { id: 3, image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1600&h=1000', title: 'The Heritage Pavilion', city: 'Yogyakarta', desc: 'Ketenteraman arsitektur klasik Jawa berbalut layanan berstandar internasional modern', price: 1200000 },
+];
+
+// Destinations Collections Data
+const collections = [
+  { name: 'Bali', image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&q=80&w=600&h=800', count: '12 Sanctuaries' },
+  { name: 'Yogyakarta', image: 'https://images.unsplash.com/photo-1584810359583-96fc3448beaa?auto=format&fit=crop&q=80&w=600&h=800', count: '8 Sanctuaries' },
+  { name: 'Bandung', image: 'https://images.unsplash.com/photo-1626125353112-9c4c798ca30a?auto=format&fit=crop&q=80&w=600&h=800', count: '15 Sanctuaries' },
 ];
 
 const FAQItem = ({ q, a }) => {
   const [open, setOpen] = useState(false);
   return (
-    <div style={{ border: '3px solid var(--neo-dark)', marginBottom: '0.75rem', background: 'white', boxShadow: open ? 'var(--neo-shadow)' : 'none', transition: 'all 0.15s ease' }}>
-      <button onClick={() => setOpen(!open)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.25rem', background: open ? 'var(--neo-yellow)' : 'white', border: 'none', cursor: 'pointer', textAlign: 'left', borderBottom: open ? '3px solid var(--neo-dark)' : 'none', transition: 'background 0.15s' }}>
-        <span style={{ fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: '0.95rem' }}>{q}</span>
-        <ChevronDown size={18} style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+    <div style={{ borderBottom: '1px solid var(--color-accent)', background: 'transparent', transition: 'all 0.3s ease' }}>
+      <button onClick={() => setOpen(!open)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem 0', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+        <span style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '1rem', color: 'var(--color-text)' }}>{q}</span>
+        <ChevronDown size={18} style={{ flexShrink: 0, color: 'var(--color-muted)', transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }} />
       </button>
-      {open && <div style={{ padding: '1rem 1.25rem', color: '#374151', fontWeight: 500, lineHeight: 1.6, fontSize: '0.9rem' }}>{a}</div>}
+      <div style={{ maxHeight: open ? '200px' : '0px', overflow: 'hidden', transition: 'max-height 0.3s ease-out' }}>
+        <p style={{ paddingBottom: '1.5rem', color: 'var(--color-muted)', fontWeight: 300, lineHeight: 1.7, fontSize: '0.9rem' }}>{a}</p>
+      </div>
     </div>
   );
 };
@@ -46,7 +55,7 @@ const Home = () => {
   // Auto-play slider
   useEffect(() => {
     if (!hovering) {
-      timerRef.current = setInterval(() => setCurrent(c => (c + 1) % slides.length), 3500);
+      timerRef.current = setInterval(() => setCurrent(c => (c + 1) % slides.length), 5000);
     }
     return () => clearInterval(timerRef.current);
   }, [hovering]);
@@ -67,11 +76,11 @@ const Home = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--color-background)' }}>
 
-      {/* ====== HERO SLIDER ====== */}
+      {/* ====== HERO SLIDER (FULL-BLEED 100VH) ====== */}
       <section
-        style={{ position: 'relative', height: 500, overflow: 'hidden', borderBottom: '4px solid var(--neo-dark)' }}
+        style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={() => setHovering(false)}
       >
@@ -79,99 +88,138 @@ const Home = () => {
           <div key={s.id} style={{
             position: 'absolute', inset: 0,
             opacity: i === current ? 1 : 0,
-            transition: 'opacity 0.7s ease',
+            transition: 'opacity 1s cubic-bezier(0.16, 1, 0.3, 1)',
             zIndex: i === current ? 1 : 0
           }}>
-            <img src={s.image} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.75) 40%, rgba(0,0,0,0.15))' }} />
-            <div style={{ position: 'absolute', bottom: '4rem', left: '3rem', zIndex: 2, color: 'white', maxWidth: 500 }} className="animate-slide-in">
-              <span className="badge badge-yellow animate-pop" style={{ marginBottom: '0.75rem', display: 'inline-block', animationDelay: '0.1s' }}>{s.city}</span>
-              <h1 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', textTransform: 'uppercase', margin: '0.5rem 0', lineHeight: 1.1 }}>{s.title}</h1>
-              <p style={{ fontWeight: 500, color: 'rgba(255,255,255,0.8)', marginBottom: '1rem' }}>{s.desc}</p>
-              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                <span style={{ fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '1.2rem' }}>Mulai {formatCurrency(s.price)}/malam</span>
-                <Link to="/hotels" className="btn btn-primary btn-sm">Lihat Hotel <ArrowRight size={14} /></Link>
+            <img src={s.image} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: i === current ? 'scale(1.02)' : 'scale(1)', transition: 'transform 6s ease' }} />
+            {/* Dark luxury navy overlay */}
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(26,54,93,0.7) 10%, rgba(26,54,93,0.2) 100%)' }} />
+            <div style={{ position: 'absolute', bottom: '12rem', left: '5%', right: '5%', zIndex: 2, color: 'white', maxWidth: 800 }}>
+              <span className="badge badge-yellow animate-fade-in" style={{ marginBottom: '1rem', background: 'rgba(212,175,55,0.2)', border: '1px solid var(--color-primary)', color: 'var(--color-primary)', padding: '0.4rem 1rem' }}>{s.city}</span>
+              <h1 className="animate-slide-in" style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: 'clamp(2rem, 6vw, 4.5rem)', textTransform: 'none', margin: '0.5rem 0', lineHeight: 1.1 }}>
+                {s.title}
+              </h1>
+              <p className="animate-slide-in" style={{ fontFamily: 'var(--font-body)', fontWeight: 300, color: 'rgba(255,255,255,0.8)', marginBottom: '2rem', fontSize: 'clamp(1rem, 1.5vw, 1.25rem)', letterSpacing: '0.5px' }}>
+                {s.desc}
+              </p>
+              <div className="animate-slide-in" style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                <span style={{ fontFamily: 'var(--font-body)', fontWeight: 300, fontSize: '1.1rem', letterSpacing: '1px' }}>Mulai {formatCurrency(s.price)}/malam</span>
+                <Link to="/hotels" className="btn btn-primary" style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}>Jelajahi Sanctuari</Link>
               </div>
             </div>
           </div>
         ))}
 
-        {/* Arrows */}
+        {/* Controls */}
         <button onClick={() => setCurrent(c => (c - 1 + slides.length) % slides.length)}
-          style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', zIndex: 10, background: 'white', border: '3px solid var(--neo-dark)', padding: '0.5rem', cursor: 'pointer', boxShadow: 'var(--neo-shadow)' }}>
-          <ChevronLeft size={22} />
+          style={{ position: 'absolute', left: '2rem', top: '50%', transform: 'translateY(-50%)', zIndex: 10, background: 'transparent', border: '1px solid rgba(255,255,255,0.3)', padding: '0.75rem', cursor: 'pointer', borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s' }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = 'var(--color-text)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'white'; }}>
+          <ChevronLeft size={20} />
         </button>
         <button onClick={() => setCurrent(c => (c + 1) % slides.length)}
-          style={{ position: 'absolute', right: '1.5rem', top: '50%', transform: 'translateY(-50%)', zIndex: 10, background: 'white', border: '3px solid var(--neo-dark)', padding: '0.5rem', cursor: 'pointer', boxShadow: 'var(--neo-shadow)' }}>
-          <ChevronRight size={22} />
+          style={{ position: 'absolute', right: '2rem', top: '50%', transform: 'translateY(-50%)', zIndex: 10, background: 'transparent', border: '1px solid rgba(255,255,255,0.3)', padding: '0.75rem', cursor: 'pointer', borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.3s' }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = 'var(--color-text)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'white'; }}>
+          <ChevronRight size={20} />
         </button>
 
         {/* Dots */}
-        <div style={{ position: 'absolute', bottom: '1.5rem', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
+        <div style={{ position: 'absolute', bottom: '9rem', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '0.75rem', zIndex: 10 }}>
           {slides.map((_, i) => (
-            <button key={i} onClick={() => setCurrent(i)} style={{ width: i === current ? 32 : 12, height: 12, background: i === current ? 'var(--neo-yellow)' : 'rgba(255,255,255,0.5)', border: '2px solid white', cursor: 'pointer', transition: 'all 0.3s' }} />
+            <button key={i} onClick={() => setCurrent(i)} style={{ width: i === current ? 24 : 8, height: 8, borderRadius: 4, background: i === current ? 'var(--color-primary)' : 'rgba(255,255,255,0.4)', border: 'none', cursor: 'pointer', transition: 'all 0.3s' }} />
           ))}
         </div>
       </section>
 
-      {/* ====== SEARCH BAR ====== */}
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 1.5rem' }}>
-        <form onSubmit={handleSearch} style={{ background: 'white', border: '4px solid var(--neo-dark)', padding: '1.5rem', marginTop: '-2.5rem', position: 'relative', zIndex: 10, boxShadow: 'var(--neo-shadow-lg)' }}>
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-            <div style={{ flex: 2, minWidth: 180 }}>
-              <label className="label">🔍 Nama Hotel / Kata Kunci</label>
-              <input className="input" placeholder="Cari hotel, fasilitas..." value={search.keyword} onChange={e => setSearch(s => ({ ...s, keyword: e.target.value }))} />
+      {/* ====== FLOATING SEARCH BAR ====== */}
+      <div style={{ maxWidth: 1000, margin: '0 auto', padding: '0 1.5rem', position: 'relative', marginTop: '-5rem', zIndex: 30 }}>
+        <form onSubmit={handleSearch} style={{ background: 'var(--color-surface)', borderRadius: 'var(--radius-sm)', padding: '1.25rem 2rem', boxShadow: 'var(--shadow-float)', border: '1px solid var(--color-accent)' }}>
+          <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ flex: 2, minWidth: 200 }}>
+              <label className="label" style={{ fontSize: '0.7rem', letterSpacing: '1px' }}>Destinasi / Hotel</label>
+              <input className="input" style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', padding: '0.5rem 0', background: 'transparent', borderRadius: 0 }} placeholder="Ke mana Anda ingin pergi?" value={search.keyword} onChange={e => setSearch(s => ({ ...s, keyword: e.target.value }))} />
             </div>
             <div style={{ flex: 1, minWidth: 150 }}>
-              <label className="label">📍 Kota Tujuan</label>
-              <select className="input" value={search.city} onChange={e => setSearch(s => ({ ...s, city: e.target.value }))}>
+              <label className="label" style={{ fontSize: '0.7rem', letterSpacing: '1px' }}>Kota</label>
+              <select className="input" style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', padding: '0.5rem 0', background: 'transparent', borderRadius: 0, color: 'var(--color-text)' }} value={search.city} onChange={e => setSearch(s => ({ ...s, city: e.target.value }))}>
                 <option value="">Semua Kota</option>
                 {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
-            <button type="submit" className="btn btn-orange btn-lg" style={{ flexShrink: 0 }}>
-              <Search size={18} /> Cari Hotel
+            <button type="submit" className="btn btn-primary btn-lg" style={{ height: 56, flexShrink: 0, padding: '0 2.5rem', background: 'var(--color-primary)' }}>
+              Discover
             </button>
           </div>
         </form>
       </div>
 
-      {/* ====== FEATURED HOTELS ====== */}
-      <div style={{ maxWidth: 1280, margin: '4rem auto 0', padding: '0 1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+      {/* ====== EDITORIAL DESTINATIONS GRID ====== */}
+      <div className="reveal" style={{ maxWidth: 1280, margin: '8rem auto 0', padding: '0 1.5rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+          <span style={{ fontFamily: 'var(--font-body)', fontWeight: 400, color: 'var(--color-primary)', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.8rem' }}>Editorial Collection</span>
+          <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', margin: '0.5rem 0 0', fontWeight: 300 }}>Koleksi Destinasi Terkurasi</h2>
+          <p style={{ color: 'var(--color-muted)', fontWeight: 300, maxWidth: 500, margin: '1rem auto 0', fontSize: '0.95rem' }}>Jelajahi berbagai sudut peristirahatan terbaik di nusantara yang memadukan keindahan alam dengan kemewahan desain arsitektur modern.</p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+          {collections.map((col, index) => (
+            <div key={col.name} style={{ position: 'relative', overflow: 'hidden', aspectRatio: '3/4', cursor: 'pointer', borderRadius: 'var(--radius-sm)', boxShadow: 'var(--shadow-float)' }}
+              onMouseEnter={e => {
+                e.currentTarget.querySelector('img').style.transform = 'scale(1.05)';
+                e.currentTarget.querySelector('.overlay').style.background = 'rgba(26,54,93,0.4)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.querySelector('img').style.transform = 'scale(1)';
+                e.currentTarget.querySelector('.overlay').style.background = 'rgba(26,54,93,0.2)';
+              }}>
+              <img src={col.image} alt={col.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)' }} />
+              <div className="overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(26,54,93,0.2)', transition: 'background 0.5s ease', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '2.5rem 2rem', color: 'white' }} />
+              <div style={{ position: 'absolute', bottom: '2rem', left: '2rem', right: '2rem', color: 'white', zIndex: 10 }}>
+                <h3 style={{ fontFamily: 'var(--font-heading)', color: 'white', fontSize: '2rem', margin: 0, fontWeight: 300 }}>{col.name}</h3>
+                <span style={{ fontSize: '0.8rem', opacity: 0.8, letterSpacing: '1px', textTransform: 'uppercase' }}>{col.count}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ====== FEATURED SANCTUARIES ====== */}
+      <div className="reveal" style={{ maxWidth: 1280, margin: '8rem auto 0', padding: '0 1.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem', flexWrap: 'wrap', gap: '1.5rem' }}>
           <div>
-            <span style={{ fontFamily: 'Space Grotesk', fontWeight: 900, color: 'var(--neo-orange)', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.875rem' }}>Pilihan Editor</span>
-            <h2 className="section-title" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', margin: '0.25rem 0 0' }}>Hotel Rekomendasi Terbaik</h2>
+            <span style={{ fontFamily: 'var(--font-body)', fontWeight: 400, color: 'var(--color-primary)', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.8rem' }}>Pilihan Editor</span>
+            <h2 style={{ fontSize: 'clamp(2rem, 3.5vw, 2.8rem)', margin: '0.5rem 0 0', fontWeight: 300 }}>Sanctuari Rekomendasi</h2>
           </div>
           <Link to="/hotels" className="btn btn-white btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>Lihat Semua <ArrowRight size={14} /></Link>
         </div>
 
         {featuredHotels.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
             {featuredHotels.map(hotel => <HotelCard key={hotel.id_hotel} hotel={hotel} />)}
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
             {slides.map(s => (
-              <div key={s.id} className="card card-hover" style={{ overflow: 'hidden' }}>
-                <div style={{ height: 180, overflow: 'hidden', borderBottom: '3px solid var(--neo-dark)' }}>
-                  <img src={s.image} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }}
+              <div key={s.id} className="card card-hover" style={{ overflow: 'hidden', border: '1px solid var(--color-accent)' }}>
+                <div style={{ height: 220, overflow: 'hidden', position: 'relative' }}>
+                  <img src={s.image} alt={s.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }}
                     onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
                     onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
                 </div>
-                <div style={{ padding: '1.25rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <div style={{ padding: '1.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', alignItems: 'center' }}>
                     <span className="badge badge-yellow">{s.city}</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--neo-orange)', fontWeight: 700, fontSize: '0.875rem' }}><Star size={14} fill="var(--neo-orange)" />4.8</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--color-primary)', fontWeight: 400, fontSize: '0.85rem' }}><Star size={13} fill="var(--color-primary)" />4.8</span>
                   </div>
-                  <h3 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '1.1rem', textTransform: 'uppercase', margin: '0.5rem 0' }}>{s.title}</h3>
-                  <p style={{ color: '#6b7280', fontWeight: 500, fontSize: '0.875rem', lineHeight: 1.5, marginBottom: '1rem' }}>{s.desc}</p>
-                  <div style={{ borderTop: '2px dashed #e5e7eb', paddingTop: '0.875rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.4rem', margin: '0.5rem 0' }}>{s.title}</h3>
+                  <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>{s.desc}</p>
+                  <div style={{ borderTop: '1px solid var(--color-accent)', paddingTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <div style={{ fontSize: '0.75rem', color: '#9ca3af', fontWeight: 600 }}>Mulai dari</div>
-                      <div style={{ fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '1.1rem' }}>{formatCurrency(s.price)}<span style={{ fontSize: '0.75rem', fontWeight: 500, color: '#9ca3af' }}>/malam</span></div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>Mulai dari</div>
+                      <div style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '1.1rem', color: 'var(--color-text)' }}>{formatCurrency(s.price)}<span style={{ fontSize: '0.75rem', color: 'var(--color-muted)' }}>/malam</span></div>
                     </div>
-                    <Link to={`/hotels/${s.id}`} className="btn btn-primary btn-sm">Detail</Link>
+                    <Link to={`/hotels/${s.id}`} className="btn btn-primary btn-sm" style={{ background: 'var(--color-primary)' }}>Detail</Link>
                   </div>
                 </div>
               </div>
@@ -182,49 +230,51 @@ const Home = () => {
 
       {/* ====== PROMO SALE HOTELS ====== */}
       {saleHotels.length > 0 && (
-        <div style={{ maxWidth: 1280, margin: '4rem auto 0', padding: '0 1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem' }}>
+        <div className="reveal" style={{ maxWidth: 1280, margin: '8rem auto 0', padding: '0 1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem' }}>
             <div>
-              <span style={{ fontFamily: 'Space Grotesk', fontWeight: 900, color: 'var(--neo-pink)', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.875rem' }}>🔥 Terbatas!</span>
-              <h2 className="section-title" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', margin: '0.25rem 0 0' }}>Hotel Sedang Diskon</h2>
+              <span style={{ fontFamily: 'var(--font-body)', fontWeight: 400, color: '#C53030', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.8rem' }}>🔥 Penawaran Eksklusif</span>
+              <h2 style={{ fontSize: 'clamp(2rem, 3.5vw, 2.8rem)', margin: '0.5rem 0 0', fontWeight: 300 }}>Sanctuari Sedang Diskon</h2>
             </div>
             <Link to="/hotels?sale=true" className="btn btn-white btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>Lihat Semua <ArrowRight size={14} /></Link>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
             {saleHotels.map(hotel => <HotelCard key={hotel.id_hotel} hotel={hotel} showDiscount />)}
           </div>
         </div>
       )}
 
-      {/* ====== FEATURES ====== */}
-      <div style={{ maxWidth: 1280, margin: '5rem auto 0', padding: '0 1.5rem' }}>
-        <h2 className="section-title" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', textAlign: 'center', marginBottom: '3rem' }}>
-          Kenapa Harus <span style={{ background: 'var(--neo-blue)', border: '3px solid var(--neo-dark)', padding: '2px 10px', boxShadow: 'var(--neo-shadow-sm)', display: 'inline-block', transform: 'rotate(-1deg)' }}>NgiNep?</span>
-        </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
+      {/* ====== EXCLUSIVE BENEFITS ====== */}
+      <div className="reveal" style={{ maxWidth: 1280, margin: '10rem auto 0', padding: '0 1.5rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
+          <span style={{ fontFamily: 'var(--font-body)', fontWeight: 400, color: 'var(--color-primary)', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.8rem' }}>Mengapa Memilih Kami</span>
+          <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', margin: '0.5rem 0 0', fontWeight: 300 }}>Layanan Terbaik Untuk Kenyamanan Anda</h2>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '2.5rem' }}>
           {[
-            { emoji: '🏨', color: 'var(--neo-purple)', title: 'Pilihan Hotel Terbaik', desc: 'Menyediakan beragam pilihan kamar dari hotel butik yang estetik hingga resort mewah bintang lima di destinasi favorit Anda.' },
-            { emoji: '🔒', color: 'var(--neo-green)', title: 'Transaksi Aman & Mudah', desc: 'Sistem enkripsi modern menjamin privasi Anda, didukung pilihan pembayaran transfer bank & QRIS yang mudah dan terpercaya.' },
-            { emoji: '⚡', color: 'var(--neo-yellow)', title: 'Konfirmasi Instan', desc: 'Proses verifikasi pembayaran yang cepat oleh pihak hotel memastikan voucher menginap Anda segera terbit tanpa repot.' },
-            { emoji: '💸', color: 'var(--neo-orange)', title: 'Promo Diskon Eksklusif', desc: 'Nikmati potongan harga spesial hingga penawaran menit-menit terakhir (last-minute deals) setiap harinya.' },
+            { emoji: '🏨', color: 'rgba(212, 175, 55, 0.1)', title: 'Koleksi Sanctuari Terpilih', desc: 'Kami mengurasi hotel butik terindah dengan penekanan pada estetika arsitektur dan fasilitas kelas atas.' },
+            { emoji: '🔒', color: 'rgba(72, 187, 120, 0.1)', title: 'Reservasi Instan & Aman', desc: 'Nikmati kemudahan verifikasi pembayaran instan melalui transfer terenkripsi dan standardisasi DTO yang aman.' },
+            { emoji: '⚡', color: 'rgba(66, 153, 225, 0.1)', title: 'Layanan Bantuan 24/7', desc: 'Kami hadir mendampingi seluruh proses perjalanan Anda, mulai dari check-in hingga layanan concierge khusus.' },
+            { emoji: '💸', color: 'rgba(229, 62, 62, 0.1)', title: 'Harga Terbaik Terjamin', desc: 'Nikmati penawaran eksklusif khusus anggota dan diskon musiman tanpa biaya pemesanan tambahan.' },
           ].map((f, i) => (
-            <div key={f.title} className="card card-hover animate-slide-in" style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', animationDelay: `${i * 0.1}s` }}>
-              <div style={{ fontSize: '2rem' }} className="hover-wiggle">{f.emoji}</div>
-              <div style={{ width: 40, height: 4, background: f.color, border: '2px solid var(--neo-dark)' }} />
-              <h3 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', fontSize: '1rem', margin: 0 }}>{f.title}</h3>
-              <p style={{ color: '#6b7280', fontWeight: 500, lineHeight: 1.6, fontSize: '0.875rem', margin: 0 }}>{f.desc}</p>
+            <div key={f.title} className="card-hover" style={{ background: 'var(--color-surface)', padding: '2.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-float)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ fontSize: '2.5rem', width: 64, height: 64, background: f.color, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{f.emoji}</div>
+              <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.25rem', margin: '0.5rem 0 0', color: 'var(--color-text)' }}>{f.title}</h3>
+              <p style={{ color: 'var(--color-muted)', fontWeight: 300, lineHeight: 1.7, fontSize: '0.875rem', margin: 0 }}>{f.desc}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* ====== FAQ ====== */}
-      <div id="faq" style={{ maxWidth: 800, margin: '5rem auto 0', padding: '0 1.5rem' }}>
-        <h2 className="section-title" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', textAlign: 'center', marginBottom: '2.5rem' }}>Pertanyaan yang Sering Diajukan</h2>
-        {faqs.map(f => <FAQItem key={f.q} q={f.q} a={f.a} />)}
+      <div id="faq" className="reveal" style={{ maxWidth: 800, margin: '10rem auto 0', padding: '0 1.5rem' }}>
+        <h2 style={{ fontSize: 'clamp(2rem, 3.5vw, 2.8rem)', textAlign: 'center', marginBottom: '3rem', fontWeight: 300 }}>Pertanyaan Umum</h2>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {faqs.map(f => <FAQItem key={f.q} q={f.q} a={f.a} />)}
+        </div>
       </div>
 
-      <div style={{ height: '4rem' }} />
+      <div style={{ height: '8rem' }} />
     </div>
   );
 };
@@ -240,45 +290,45 @@ export const HotelCard = ({ hotel, showDiscount }) => {
     : 0;
 
   return (
-    <div className="card card-hover" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ height: 180, overflow: 'hidden', borderBottom: '3px solid var(--neo-dark)', position: 'relative' }}>
+    <div className="card card-hover" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', border: '1px solid var(--color-accent)' }}>
+      <div style={{ height: 220, overflow: 'hidden', position: 'relative' }}>
         <img
           src={hotel.images?.[0]?.image_url || `https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=400`}
           alt={hotel.name}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)' }}
           onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
           onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
         />
         {showDiscount && hotel.discount_percent > 0 && (
-          <span className="badge badge-red" style={{ position: 'absolute', top: 10, left: 10 }}>-{hotel.discount_percent}%</span>
+          <span className="badge badge-red" style={{ position: 'absolute', top: 15, left: 15 }}>-{hotel.discount_percent}%</span>
         )}
-        {hotel.featured && <span className="badge badge-yellow" style={{ position: 'absolute', top: 10, right: 10 }}>Featured</span>}
+        {hotel.featured && <span className="badge badge-yellow" style={{ position: 'absolute', top: 15, right: 15 }}>Featured</span>}
         {hotel.roomTypes?.some(r => r.room_available <= 3) && (
-          <span className="badge badge-orange" style={{ position: 'absolute', bottom: 10, left: 10 }}>Terbatas!</span>
+          <span className="badge badge-orange" style={{ position: 'absolute', bottom: 15, left: 15, background: 'rgba(237,137,54,0.1)', color: '#DD6B20', borderColor: 'rgba(237,137,54,0.2)' }}>Terbatas!</span>
         )}
       </div>
-      <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
+      <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span className="badge badge-yellow" style={{ fontSize: '0.7rem' }}>{hotel.city?.name || 'Indonesia'}</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--neo-orange)', fontWeight: 700, fontSize: '0.85rem' }}>
-            <Star size={13} fill="var(--neo-orange)" />{hotel.rating?.toFixed(1) || '4.5'}
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--color-primary)', fontWeight: 400, fontSize: '0.85rem' }}>
+            <Star size={13} fill="var(--color-primary)" />{hotel.rating?.toFixed(1) || '4.5'}
           </span>
         </div>
-        <h3 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '1rem', textTransform: 'uppercase', margin: 0, lineHeight: 1.3 }}>{hotel.name}</h3>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#9ca3af', fontSize: '0.8rem', fontWeight: 500 }}>
+        <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.3rem', margin: '0.25rem 0', lineHeight: 1.3, color: 'var(--color-text)' }}>{hotel.name}</h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--color-muted)', fontSize: '0.8rem', fontWeight: 300 }}>
           <MapPin size={12} />{hotel.address || hotel.city?.name}
         </div>
-        <div style={{ borderTop: '2px dashed #e5e7eb', paddingTop: '0.875rem', marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ borderTop: '1px solid var(--color-accent)', paddingTop: '1rem', marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             {showDiscount && hotel.discount_percent > 0 && (
-              <div style={{ fontSize: '0.75rem', color: '#9ca3af', textDecoration: 'line-through', fontWeight: 500 }}>{formatCurrency(minPrice)}</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', textDecoration: 'line-through', fontWeight: 300 }}>{formatCurrency(minPrice)}</div>
             )}
-            <div style={{ fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '1rem' }}>
+            <div style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '1.05rem', color: 'var(--color-text)' }}>
               {formatCurrency(discountedPrice || minPrice || 0)}
-              <span style={{ fontSize: '0.7rem', color: '#9ca3af', fontWeight: 500 }}>/malam</span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--color-muted)', fontWeight: 300 }}>/malam</span>
             </div>
           </div>
-          <Link to={`/hotels/${hotel.id_hotel}`} className="btn btn-primary btn-sm">Detail</Link>
+          <Link to={`/hotels/${hotel.id_hotel}`} className="btn btn-primary btn-sm" style={{ background: 'var(--color-primary)' }}>Detail</Link>
         </div>
       </div>
     </div>

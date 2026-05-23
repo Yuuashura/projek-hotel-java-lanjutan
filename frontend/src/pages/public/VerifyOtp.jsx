@@ -16,12 +16,10 @@ const VerifyOtp = () => {
   const [canResend, setCanResend] = useState(false);
   const inputRefs = useRef([]);
 
-  // Redirect jika tidak ada email
   useEffect(() => {
     if (!email) navigate('/register');
   }, [email]);
 
-  // Countdown Timer
   useEffect(() => {
     if (timeLeft <= 0) { setCanResend(true); return; }
     const t = setTimeout(() => setTimeLeft(l => l - 1), 1000);
@@ -87,39 +85,36 @@ const VerifyOtp = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--neo-purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', position: 'relative', overflow: 'hidden' }}>
-      {/* Decoratives */}
-      <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, border: '5px solid rgba(255,255,255,0.15)', borderRadius: '50%' }} />
-      <div style={{ position: 'absolute', bottom: -60, left: -60, width: 250, height: 250, border: '5px solid rgba(255,255,255,0.1)', borderRadius: '50%' }} />
-
-      <div style={{ width: '100%', maxWidth: 420, position: 'relative', zIndex: 1 }}>
-        <div style={{ textAlign: 'center', marginBottom: '2rem', color: 'white' }}>
-          <div style={{ width: 72, height: 72, background: 'var(--neo-yellow)', border: '4px solid white', margin: '0 auto 1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '4px 4px 0px 0px rgba(0,0,0,0.3)' }}>
-            <MailCheck size={36} style={{ color: 'var(--neo-dark)' }} />
+    <div style={{ minHeight: '100vh', background: 'var(--color-background)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+      
+      <div style={{ width: '100%', maxWidth: 420 }}>
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <div style={{ width: 64, height: 64, background: 'rgba(212,175,55,0.1)', margin: '0 auto 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>
+            <MailCheck size={32} style={{ color: 'var(--color-primary)' }} />
           </div>
-          <h1 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '1.5rem', textTransform: 'uppercase', margin: '0 0 0.5rem' }}>Verifikasi Email</h1>
-          <p style={{ fontWeight: 500, color: 'rgba(255,255,255,0.85)', fontSize: '0.9rem' }}>
-            Kode OTP 6 digit dikirim ke<br /><strong style={{ color: 'var(--neo-yellow)' }}>{email}</strong>
+          <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '2rem', margin: '0 0 0.5rem', color: 'var(--color-text)' }}>Verifikasi Email</h1>
+          <p style={{ fontWeight: 300, color: 'var(--color-muted)', fontSize: '0.9rem' }}>
+            Kode OTP 6 digit telah dikirim ke <strong style={{ color: 'var(--color-text)', fontWeight: 400 }}>{email}</strong>
           </p>
         </div>
 
-        <div className="card" style={{ padding: '2rem' }}>
+        <div className="card" style={{ padding: '2.5rem 2rem', border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-float)' }}>
           {error && (
-            <div style={{ background: '#fff0f3', border: '3px solid var(--neo-pink)', padding: '0.875rem', marginBottom: '1.25rem', display: 'flex', gap: '0.5rem', alignItems: 'flex-start', boxShadow: '3px 3px 0px 0px var(--neo-pink)' }}>
-              <AlertCircle size={18} style={{ color: 'var(--neo-pink)', flexShrink: 0, marginTop: 1 }} />
-              <span style={{ fontWeight: 600, color: '#be123c', fontSize: '0.875rem' }}>{error}</span>
+            <div style={{ background: '#FFF5F5', border: '1px solid #FEB2B2', padding: '0.875rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
+              <AlertCircle size={16} style={{ color: '#E53E3E', flexShrink: 0 }} />
+              <span style={{ fontWeight: 300, color: '#C53030', fontSize: '0.85rem' }}>{error}</span>
             </div>
           )}
           {success && (
-            <div style={{ background: '#f0fdf4', border: '3px solid #86efac', padding: '0.875rem', marginBottom: '1.25rem', display: 'flex', gap: '0.5rem', alignItems: 'flex-start', boxShadow: '3px 3px 0px 0px #16a34a' }}>
-              <CheckCircle size={18} style={{ color: '#16a34a', flexShrink: 0, marginTop: 1 }} />
-              <span style={{ fontWeight: 600, color: '#166534', fontSize: '0.875rem' }}>{success}</span>
+            <div style={{ background: 'rgba(72,187,120,0.05)', border: '1px solid rgba(72,187,120,0.2)', padding: '0.875rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
+              <CheckCircle size={16} style={{ color: '#38A169', flexShrink: 0 }} />
+              <span style={{ fontWeight: 300, color: '#276749', fontSize: '0.85rem' }}>{success}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit}>
             {/* OTP Input Boxes */}
-            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginBottom: '2rem' }}>
               {otp.map((digit, i) => (
                 <input key={i} ref={el => inputRefs.current[i] = el}
                   type="text" inputMode="numeric" maxLength={1} value={digit}
@@ -127,40 +122,41 @@ const VerifyOtp = () => {
                   onKeyDown={e => handleKeyDown(i, e)}
                   onPaste={handlePaste}
                   style={{
-                    width: 50, height: 60, textAlign: 'center',
-                    fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '1.5rem',
-                    border: `3px solid ${digit ? 'var(--neo-purple)' : 'var(--neo-dark)'}`,
-                    background: digit ? '#f5f0ff' : 'white',
-                    outline: 'none', borderRadius: 0,
-                    boxShadow: digit ? '3px 3px 0px 0px var(--neo-purple)' : 'var(--neo-shadow-sm)',
-                    transition: 'all 0.15s'
+                    width: 48, height: 56, textAlign: 'center',
+                    fontFamily: 'var(--font-body)', fontWeight: 300, fontSize: '1.5rem',
+                    border: 'none',
+                    borderBottom: digit ? '2px solid var(--color-primary)' : '1px solid var(--color-muted)',
+                    background: 'transparent',
+                    color: 'var(--color-text)',
+                    outline: 'none',
+                    transition: 'all 0.3s'
                   }}
                 />
               ))}
             </div>
 
             {/* Timer */}
-            <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
+            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
               {!canResend ? (
-                <p style={{ fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: '0.875rem', color: '#6b7280' }}>
+                <p style={{ fontSize: '0.8rem', color: 'var(--color-muted)', fontWeight: 300 }}>
                   OTP kadaluarsa dalam&nbsp;
-                  <span style={{ color: timeLeft < 60 ? 'var(--neo-pink)' : 'var(--neo-purple)', fontWeight: 900, fontSize: '1rem' }}>{formatTime(timeLeft)}</span>
+                  <span style={{ color: timeLeft < 60 ? '#E53E3E' : 'var(--color-primary)', fontWeight: 400 }}>{formatTime(timeLeft)}</span>
                 </p>
               ) : (
                 <button type="button" onClick={handleResend} disabled={resendLoading}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--neo-purple)', fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'underline' }}>
-                  <RefreshCw size={14} /> {resendLoading ? 'Mengirim...' : 'Kirim Ulang OTP'}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'underline' }}>
+                  <RefreshCw size={12} /> {resendLoading ? 'Mengirim...' : 'Kirim Ulang OTP'}
                 </button>
               )}
             </div>
 
-            <button type="submit" className="btn btn-purple btn-full" disabled={loading || otp.join('').length < 6} style={{ opacity: (loading || otp.join('').length < 6) ? 0.65 : 1, border: '3px solid var(--neo-dark)' }}>
+            <button type="submit" className="btn btn-primary btn-full" disabled={loading || otp.join('').length < 6} style={{ height: 50, background: 'var(--color-primary)', opacity: (loading || otp.join('').length < 6) ? 0.65 : 1 }}>
               {loading ? 'Memverifikasi...' : 'Verifikasi OTP'}
             </button>
           </form>
 
-          <div style={{ textAlign: 'center', marginTop: '1.25rem' }}>
-            <Link to="/register" style={{ fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: '0.875rem', color: '#6b7280', textDecoration: 'none' }}>← Kembali ke Halaman Daftar</Link>
+          <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+            <Link to="/register" style={{ fontFamily: 'var(--font-body)', fontSize: '0.8rem', color: 'var(--color-muted)', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.5px' }}>← Back to Register</Link>
           </div>
         </div>
       </div>

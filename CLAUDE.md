@@ -30,7 +30,7 @@
 | React Router DOM | Routing halaman |
 | Axios | HTTP client ke API |
 | Context API / Redux Toolkit | State management (JWT token, user session) |
-| Tailwind CSS | UI styling dengan gaya desain **Neubrutalism** (Neo-brutalism) |
+| Vanilla CSS | UI styling dengan gaya desain **Elegant Sanctuary** (Minimalist Luxury) |
 
 ### Database & Tools
 | Teknologi | Keterangan |

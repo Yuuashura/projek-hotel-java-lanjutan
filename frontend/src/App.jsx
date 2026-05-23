@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -92,10 +92,39 @@ function AppRoutes() {
   );
 }
 
+const ScrollRevealManager = () => {
+  const { pathname } = useLocation();
+
+  React.useEffect(() => {
+    // Scroll to top on route change
+    window.scrollTo(0, 0);
+
+    const handleReveal = () => {
+      const reveals = document.querySelectorAll('.reveal');
+      reveals.forEach((el) => {
+        const windowHeight = window.innerHeight;
+        const elementTop = el.getBoundingClientRect().top;
+        const elementVisible = 50;
+        if (elementTop < windowHeight - elementVisible) {
+          el.classList.add('active');
+        }
+      });
+    };
+
+    window.addEventListener('scroll', handleReveal);
+    // Initial run to reveal elements already in view
+    setTimeout(handleReveal, 100);
+    return () => window.removeEventListener('scroll', handleReveal);
+  }, [pathname]);
+
+  return null;
+};
+
 function App() {
   return (
     <AuthProvider>
       <Router>
+        <ScrollRevealManager />
         <AppRoutes />
       </Router>
     </AuthProvider>

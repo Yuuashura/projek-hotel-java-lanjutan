@@ -15,10 +15,10 @@ export const diffDays = (checkIn, checkOut) => {
 
 export const statusColor = (status) => {
   switch (status) {
-    case 'PENDING': return { bg: 'var(--neo-yellow)', color: 'var(--neo-dark)', label: 'Menunggu Pembayaran' };
-    case 'CONFIRMED': return { bg: 'var(--neo-green)', color: 'var(--neo-dark)', label: 'Dikonfirmasi' };
-    case 'CANCELLED': return { bg: 'var(--neo-pink)', color: 'white', label: 'Dibatalkan' };
-    case 'COMPLETED': return { bg: '#6b7280', color: 'white', label: 'Selesai' };
-    default: return { bg: '#e5e7eb', color: 'var(--neo-dark)', label: status };
+    case 'PENDING': return { bg: 'rgba(212,175,55,0.1)', color: 'var(--color-primary)', label: 'Menunggu Pembayaran' };
+    case 'CONFIRMED': return { bg: 'rgba(72,187,120,0.1)', color: '#276749', label: 'Dikonfirmasi' };
+    case 'CANCELLED': return { bg: 'rgba(229,62,62,0.1)', color: '#9B2C2C', label: 'Dibatalkan' };
+    case 'COMPLETED': return { bg: 'var(--color-accent)', color: 'var(--color-text)', label: 'Selesai' };
+    default: return { bg: 'var(--color-accent)', color: 'var(--color-text)', label: status };
   }
 };

@@ -37,53 +37,64 @@ const MyBookings = () => {
   };
 
   const tabs = [
-    { key: 'active', label: 'Pesanan Aktif', icon: Clock, color: 'var(--neo-orange)' },
-    { key: 'history', label: 'Riwayat Pesanan', icon: CheckCircle, color: '#6b7280' },
+    { key: 'active', label: 'Pesanan Aktif', icon: Clock },
+    { key: 'history', label: 'Riwayat Pesanan', icon: CheckCircle },
   ];
 
   return (
-    <div style={{ maxWidth: 900, margin: '0 auto', padding: '2rem 1.5rem' }}>
-      <h1 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', fontSize: 'clamp(1.25rem, 2.5vw, 1.75rem)', marginBottom: '0.5rem' }}>Pesanan Saya</h1>
-      <p style={{ color: '#6b7280', fontWeight: 500, marginBottom: '2rem', fontSize: '0.9rem' }}>Kelola dan pantau status semua pemesanan hotel Anda</p>
+    <div style={{ background: 'var(--color-background)', minHeight: '100vh', padding: '6rem 1.5rem' }}>
+      <div style={{ maxWidth: 900, margin: '0 auto' }}>
+        <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '2.5rem', marginBottom: '0.5rem', color: 'var(--color-text)' }}>Pesanan Saya</h1>
+        <p style={{ color: 'var(--color-muted)', fontWeight: 300, marginBottom: '3rem', fontSize: '0.9rem' }}>Kelola dan pantau status semua pemesanan hotel Anda</p>
 
-      {/* Tabs */}
-      <div style={{ display: 'flex', borderBottom: '4px solid var(--neo-dark)', marginBottom: '2rem', gap: '0' }}>
-        {tabs.map(({ key, label, icon: Icon, color }) => (
-          <button key={key} onClick={() => setTab(key)} style={{
-            display: 'flex', alignItems: 'center', gap: '0.5rem',
-            padding: '0.875rem 1.5rem', fontFamily: 'Space Grotesk', fontWeight: 700, fontSize: '0.875rem', textTransform: 'uppercase',
-            background: tab === key ? color : 'white',
-            color: tab === key ? 'white' : '#6b7280',
-            border: '3px solid var(--neo-dark)', borderBottom: tab === key ? `4px solid ${color}` : 'none',
-            cursor: 'pointer', transition: 'all 0.15s',
-            marginBottom: tab === key ? '-4px' : 0,
-          }}>
-            <Icon size={15} /> {label}
-          </button>
-        ))}
+        {/* Tabs */}
+        <div style={{ display: 'flex', borderBottom: '1px solid var(--color-accent)', marginBottom: '2.5rem', gap: '2rem' }}>
+          {tabs.map(({ key, label, icon: Icon }) => (
+            <button key={key} onClick={() => setTab(key)} 
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.5rem',
+                padding: '0.875rem 0', fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '0.875rem', textTransform: 'uppercase',
+                background: 'transparent',
+                color: tab === key ? 'var(--color-primary)' : 'var(--color-muted)',
+                border: 'none',
+                borderBottom: tab === key ? '2px solid var(--color-primary)' : '2px solid transparent',
+                cursor: 'pointer', transition: 'all 0.3s ease',
+                letterSpacing: '1px',
+                marginBottom: '-1px'
+              }}>
+              <Icon size={14} /> {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Content */}
+        {loading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {[1, 2].map(i => (
+              <div key={i} style={{ height: 160, background: 'linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite', borderRadius: 'var(--radius-sm)' }} />
+            ))}
+          </div>
+        ) : bookings.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '5rem 1.5rem', border: '1px dashed var(--color-accent)', borderRadius: 'var(--radius-sm)', background: 'var(--color-surface)' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1.5rem', opacity: 0.6 }}>🗓️</div>
+            <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.5rem', marginBottom: '0.5rem', color: 'var(--color-text)' }}>
+              {tab === 'active' ? 'Tidak Ada Pesanan Aktif' : 'Belum Ada Riwayat'}
+            </h3>
+            <p style={{ color: 'var(--color-muted)', fontWeight: 300, marginBottom: '2rem', fontSize: '0.9rem' }}>
+              {tab === 'active' ? 'Mulai pesan hotel impian Anda sekarang!' : 'Riwayat pemesanan akan muncul di sini.'}
+            </p>
+            <Link to="/hotels" className="btn btn-primary" style={{ background: 'var(--color-primary)' }}>Cari Hotel <ArrowRight size={14} /></Link>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {bookings.map(booking => <BookingCard key={booking.id_booking || booking.id} booking={booking} onCancel={handleCancel} />)}
+          </div>
+        )}
       </div>
 
-      {/* Content */}
-      {loading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {[1, 2].map(i => <div key={i} className="card" style={{ height: 160, background: '#f3f4f6' }} />)}
-        </div>
-      ) : bookings.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '4rem 1rem', border: '4px dashed #d1d5db' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🗓️</div>
-          <h3 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '1.1rem', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-            {tab === 'active' ? 'Tidak Ada Pesanan Aktif' : 'Belum Ada Riwayat'}
-          </h3>
-          <p style={{ color: '#6b7280', fontWeight: 500, marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-            {tab === 'active' ? 'Mulai pesan hotel impian Anda sekarang!' : 'Riwayat pemesanan akan muncul di sini.'}
-          </p>
-          <Link to="/hotels" className="btn btn-primary">Cari Hotel <ArrowRight size={14} /></Link>
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          {bookings.map(booking => <BookingCard key={booking.id_booking || booking.id} booking={booking} onCancel={handleCancel} />)}
-        </div>
-      )}
+      <style>{`
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+      `}</style>
     </div>
   );
 };
@@ -111,66 +122,78 @@ const BookingCard = ({ booking, onCancel }) => {
 
   const nights = diffDays(booking.check_in, booking.check_out);
 
+  // Status badges colors matching Elegant Sanctuary theme
+  const getBadgeColor = (status) => {
+    switch (status) {
+      case 'PENDING': return { bg: 'rgba(212,175,55,0.1)', text: 'var(--color-primary)' };
+      case 'CONFIRMED': return { bg: 'rgba(72,187,120,0.1)', text: '#276749' };
+      case 'CANCELLED': return { bg: 'rgba(229,62,62,0.1)', text: '#9B2C2C' };
+      default: return { bg: 'var(--color-accent)', text: 'var(--color-muted)' };
+    }
+  };
+
+  const statusBadge = getBadgeColor(booking.status);
+
   return (
-    <div className="card" style={{ padding: '1.5rem', overflow: 'hidden' }}>
+    <div className="card card-hover" style={{ padding: '2rem', border: '1px solid var(--color-accent)', display: 'flex', flexDirection: 'column', gap: '1.5rem', background: 'var(--color-surface)' }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <span style={{ fontFamily: 'Space Grotesk', fontWeight: 900, color: '#9ca3af', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+          <span style={{ color: 'var(--color-muted)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
             Pesanan #{booking.id_booking || booking.id}
           </span>
-          <h3 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '1rem', textTransform: 'uppercase', margin: '0.25rem 0', color: 'var(--neo-dark)' }}>
+          <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.4rem', margin: '0.25rem 0 0', color: 'var(--color-text)' }}>
             {booking.hotel_name || `Hotel #${booking.hotel_id}`}
           </h3>
         </div>
-        <span className="badge" style={{ background: bg, color, border: `2px solid var(--neo-dark)`, boxShadow: '2px 2px 0px 0px var(--neo-dark)' }}>{label}</span>
+        <span className="badge" style={{ background: statusBadge.bg, color: statusBadge.text, borderColor: 'transparent', padding: '0.4rem 1rem' }}>{label}</span>
       </div>
 
       {/* Summary Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem', marginBottom: '1rem', padding: '1rem', background: 'var(--neo-light)', border: '2px solid var(--neo-dark)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '1.5rem', padding: '1.25rem', background: 'var(--color-background)', border: '1px solid var(--color-accent)', borderRadius: 'var(--radius-sm)' }}>
         <div>
-          <div style={{ color: '#9ca3af', fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Check-In</div>
-          <div style={{ fontWeight: 700, fontSize: '0.875rem' }}>{formatDate(booking.check_in)}</div>
+          <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Check-In</div>
+          <div style={{ fontWeight: 400, fontSize: '0.85rem', color: 'var(--color-text)' }}>{formatDate(booking.check_in)}</div>
         </div>
         <div>
-          <div style={{ color: '#9ca3af', fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Check-Out</div>
-          <div style={{ fontWeight: 700, fontSize: '0.875rem' }}>{formatDate(booking.check_out)}</div>
+          <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Check-Out</div>
+          <div style={{ fontWeight: 400, fontSize: '0.85rem', color: 'var(--color-text)' }}>{formatDate(booking.check_out)}</div>
         </div>
         <div>
-          <div style={{ color: '#9ca3af', fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Durasi</div>
-          <div style={{ fontWeight: 700, fontSize: '0.875rem' }}>{nights} malam</div>
+          <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Durasi</div>
+          <div style={{ fontWeight: 400, fontSize: '0.85rem', color: 'var(--color-text)' }}>{nights} malam</div>
         </div>
         <div>
-          <div style={{ color: '#9ca3af', fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Tamu</div>
-          <div style={{ fontWeight: 700, fontSize: '0.875rem' }}>{booking.number_of_guest} orang</div>
+          <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Tamu</div>
+          <div style={{ fontWeight: 400, fontSize: '0.85rem', color: 'var(--color-text)' }}>{booking.number_of_guest} orang</div>
         </div>
         <div>
-          <div style={{ color: '#9ca3af', fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Total</div>
-          <div style={{ fontFamily: 'Space Grotesk', fontWeight: 900, fontSize: '0.95rem', color: 'var(--neo-orange)' }}>{formatCurrency(booking.total_price)}</div>
+          <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Total</div>
+          <div style={{ fontWeight: 400, fontSize: '0.95rem', color: 'var(--color-primary)' }}>{formatCurrency(booking.total_price)}</div>
         </div>
       </div>
 
-      {/* Bukti Upload - jika sudah dibayar */}
+      {/* Bukti Upload status message */}
       {alreadyPaid && (
-        <div style={{ background: '#f0fdf4', border: '2px solid #16a34a', padding: '0.6rem 0.875rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', fontWeight: 600, color: '#166534' }}>
-          <CheckCircle size={14} style={{ color: '#16a34a', flexShrink: 0 }} />
+        <div style={{ background: 'rgba(72,187,120,0.05)', border: '1px solid rgba(72,187,120,0.2)', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: '#276749', borderRadius: 'var(--radius-sm)' }}>
+          <CheckCircle size={14} style={{ color: '#38A169', flexShrink: 0 }} />
           Bukti pembayaran sudah dikirim — menunggu konfirmasi admin hotel.
         </div>
       )}
 
       {/* Pending Countdown */}
       {booking.status === 'PENDING' && timeLeft > 0 && (
-        <div style={{ background: '#fff8e1', border: '2px solid var(--neo-orange)', padding: '0.6rem 0.875rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Clock size={14} style={{ color: 'var(--neo-orange)', flexShrink: 0 }} />
-          <span style={{ fontWeight: 700, fontSize: '0.8rem', color: '#92400e' }}>Batas bayar: <strong style={{ fontFamily: 'Space Grotesk', color: 'var(--neo-orange)' }}>{formatCount(timeLeft)}</strong></span>
+        <div style={{ background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.2)', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', borderRadius: 'var(--radius-sm)' }}>
+          <Clock size={14} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />
+          <span style={{ fontSize: '0.8rem', color: 'var(--color-text)', fontWeight: 300 }}>Batas bayar: <strong style={{ color: 'var(--color-primary)', fontWeight: 500 }}>{formatCount(timeLeft)}</strong></span>
         </div>
       )}
 
-      {/* Detail Expandable */}
+      {/* Expanded details */}
       {expanded && (
-        <div style={{ background: '#f9fafb', border: '2px solid #e5e7eb', padding: '1rem', marginBottom: '1rem', fontSize: '0.875rem' }}>
-          <h4 style={{ fontFamily: 'Space Grotesk', fontWeight: 900, textTransform: 'uppercase', fontSize: '0.8rem', marginBottom: '0.75rem', color: '#6b7280' }}>Detail Pemesan</h4>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem 1.5rem' }}>
+        <div style={{ background: 'var(--color-background)', border: '1px solid var(--color-accent)', padding: '1.5rem', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '1rem', borderRadius: 'var(--radius-sm)' }}>
+          <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.1rem', color: 'var(--color-text)', margin: 0, fontWeight: 300 }}>Detail Pemesan</h4>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem 2rem' }}>
             {[
               { label: 'Nama Pemesan', val: booking.orderer_name },
               { label: 'Email', val: booking.orderer_email },
@@ -179,16 +202,16 @@ const BookingCard = ({ booking, onCancel }) => {
               { label: 'ID Pesanan', val: `#${booking.id_booking || booking.id}` },
             ].map(({ label, val }) => val && (
               <div key={label}>
-                <div style={{ color: '#9ca3af', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase' }}>{label}</div>
-                <div style={{ fontWeight: 600, marginTop: '0.15rem' }}>{val}</div>
+                <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</div>
+                <div style={{ fontWeight: 400, color: 'var(--color-text)', marginTop: '0.15rem' }}>{val}</div>
               </div>
             ))}
           </div>
           {booking.payment_proof && (
-            <div style={{ marginTop: '0.75rem' }}>
-              <div style={{ color: '#9ca3af', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.4rem' }}>Bukti Pembayaran</div>
+            <div style={{ marginTop: '0.5rem' }}>
+              <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.5rem' }}>Bukti Pembayaran</div>
               <a href={booking.payment_proof} target="_blank" rel="noopener noreferrer">
-                <img src={booking.payment_proof} alt="Bukti Bayar" style={{ maxHeight: 160, maxWidth: '100%', border: '3px solid var(--neo-dark)', objectFit: 'contain' }} />
+                <img src={booking.payment_proof} alt="Bukti Bayar" style={{ maxHeight: 160, maxWidth: '100%', objectFit: 'contain', borderRadius: 2, border: '1px solid var(--color-accent)' }} />
               </a>
             </div>
           )}
@@ -196,28 +219,28 @@ const BookingCard = ({ booking, onCancel }) => {
       )}
 
       {/* Action Buttons */}
-      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-        {/* Bayar Sekarang hanya muncul jika PENDING dan belum ada bukti pembayaran */}
+      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', borderTop: '1px solid var(--color-accent)', paddingTop: '1.25rem' }}>
         {booking.status === 'PENDING' && !alreadyPaid && (
-          <Link to={`/payment/${booking.id_booking || booking.id}`} className="btn btn-orange btn-sm">
-            <Calendar size={13} /> Bayar Sekarang
+          <Link to={`/payment/${booking.id_booking || booking.id}`} className="btn btn-primary btn-sm" style={{ background: 'var(--color-primary)' }}>
+            Bayar Sekarang
           </Link>
         )}
-        {/* Upload Ulang hanya jika PENDING dan sudah ada bukti tapi ingin ganti */}
         {booking.status === 'PENDING' && alreadyPaid && (
-          <Link to={`/payment/${booking.id_booking || booking.id}`} className="btn btn-sm" style={{ background: '#e0f2fe', color: '#0369a1', border: '3px solid #0369a1', boxShadow: '3px 3px 0 #0369a1' }}>
+          <Link to={`/payment/${booking.id_booking || booking.id}`} className="btn btn-white btn-sm" style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}>
             Ganti Bukti Bayar
           </Link>
         )}
         {booking.status === 'COMPLETED' && (
-          <Link to={`/hotels/${booking.hotel_id}`} className="btn btn-primary btn-sm">Pesan Lagi</Link>
+          <Link to={`/hotels/${booking.hotel_id}`} className="btn btn-primary btn-sm" style={{ background: 'var(--color-primary)' }}>Pesan Lagi</Link>
         )}
         <button onClick={() => setExpanded(e => !e)} className="btn btn-white btn-sm">
-          {expanded ? <><ChevronUp size={13} /> Sembunyikan</> : <><ChevronDown size={13} /> Lihat Detail</>}
+          {expanded ? <><ChevronUp size={12} /> Sembunyikan</> : <><ChevronDown size={12} /> Lihat Detail</>}
         </button>
         {booking.status === 'PENDING' && (
-          <button onClick={() => onCancel(booking.id_booking || booking.id)} className="btn btn-sm" style={{ background: '#fff0f3', color: 'var(--neo-pink)', border: '3px solid var(--neo-pink)', boxShadow: '3px 3px 0px 0px var(--neo-pink)' }}>
-            <XCircle size={13} /> Batalkan
+          <button onClick={() => onCancel(booking.id_booking || booking.id)} className="btn btn-white btn-sm" style={{ color: '#E53E3E', borderColor: 'rgba(229,62,62,0.3)' }}
+            onMouseEnter={e => e.currentTarget.style.background = '#FFF5F5'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+            <XCircle size={12} style={{ color: '#E53E3E' }} /> Batalkan
           </button>
         )}
       </div>

@@ -30,7 +30,7 @@
 | React Router DOM | Routing halaman |
 | Axios | HTTP client ke API |
 | Context API / Redux Toolkit | State management (JWT token, user session) |
-| Tailwind CSS | UI styling dengan gaya desain **Neubrutalism** (Neo-brutalism) |
+| Vanilla CSS | UI styling dengan gaya desain **Elegant Sanctuary** (Minimalist Luxury) |
 
 ### Database & Tools
 | Teknologi | Keterangan |
@@ -238,7 +238,8 @@ public class HotelImage {
     @JoinColumn(name = "hotel_id")
     private Hotel hotel;
 
-    private String image_url;      // URL gambar hotel (eksterior, lobi, kolam, dll.)
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String image_url;      // Gambar Base64 berukuran besar (>5MB)
     private int sort_order;        // Urutan tampil (0 = foto utama)
 }
 ```
@@ -349,7 +350,8 @@ public class RoomTypeImage {
     @JoinColumn(name = "room_type_id")
     private RoomType roomType;
 
-    private String image_url;
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String image_url;      // Gambar Base64 berukuran besar
     private int sort_order;        // 0 = foto utama tipe kamar
 }
 ```
@@ -449,7 +451,8 @@ public class Booking {
     private BookingStatus status;  // PENDING, CONFIRMED, CANCELLED, COMPLETED
 
     private String payment_method; // "Transfer BCA", "Transfer BRI", "QRIS", dll.
-    private String payment_proof;  // URL bukti pembayaran yang diupload user
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String payment_proof;  // Gambar Base64 bukti pembayaran yang diupload user
 
     private LocalDateTime created_at;
     private LocalDateTime payment_deadline; // created_at + 24 jam, untuk auto-cancel
@@ -574,7 +577,8 @@ public class Booking {
 
     private LocalDateTime created_at;
     private String payment_method; // Transfer, OVO, dll.
-    private String payment_proof;  // URL bukti pembayaran (opsional)
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String payment_proof;  // Gambar Base64 bukti pembayaran
 }
 ```
 
@@ -1133,8 +1137,7 @@ Setiap service wajib mengimplementasikan `@RestControllerAdvice` yang menangkap 
 > **Saran**: User biasa bisa self-register via OTP. Admin Hotel dibuat oleh Admin Aplikasi (tidak ada form register untuk Admin Hotel).
 
 ### 2. Booking — Siapa yang Konfirmasi Pembayaran?
-> ❓ **Ambigu**: Pembayaran manual (transfer) atau otomatis (payment gateway)?
-> **Saran**: Untuk MVP, gunakan pembayaran manual — User upload bukti bayar, Admin Hotel konfirmasi. Tambahkan field `payment_proof` (URL gambar) di tabel Booking.
+> **Saran**: Untuk MVP, gunakan pembayaran manual — User upload bukti bayar dalam bentuk file gambar, lalu Admin Hotel konfirmasi. Tambahkan field `payment_proof` (tipe `MEDIUMTEXT` untuk menyimpan *string* Base64) di tabel Booking.
 
 ### 3. Admin Hotel Mana yang Bisa Lihat Booking Apa?
 > ❓ **Ambigu**: Admin Hotel harus hanya bisa lihat booking untuk hotel-nya sendiri.
@@ -1211,6 +1214,23 @@ spring.jpa.properties.hibernate.format_sql=true
 jwt.secret=ngninep-user-service-super-secret-key-yang-sangat-panjang-untuk-keamanan-jwt-2025
 jwt.expiration=3600000
 
+Konfigurasi `application.properties` di booking-service:
+```yaml
+server.port=8083
+
+# Database Configuration
+spring.datasource.url=jdbc:mysql://localhost:3306/ngninep_booking?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=
+
+# Hibernate / JPA
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+# JWT Secret (HARUS SAMA)
+jwt.secret=ngninep-user-service-super-secret-key-yang-sangat-panjang-untuk-keamanan-jwt-2025
+jwt.expiration=3600000
 ```
 
 ---
@@ -1237,9 +1257,8 @@ cd booking-service && mvn spring-boot:run
 ```bash
 cd frontend
 pnpm install
-pnpm start
-# Atau pnpm run dev (tergantung konfigurasi package.json)
-# Berjalan di http://localhost:3000
+pnpm run dev
+# Berjalan di http://localhost:5173
 ```
 
 ---
@@ -1252,7 +1271,7 @@ pnpm start
 | User Service | 8081 |
 | Hotel Service | 8082 |
 | Booking Service | 8083 |
-| React Frontend | 3000 |
+| React Frontend | 5173 |
 | MySQL (XAMPP) | 3306 |
 
 ---
