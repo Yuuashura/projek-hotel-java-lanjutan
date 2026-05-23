@@ -22,7 +22,7 @@ public class RoomTypeController {
     private final RoomTypeService roomTypeService;
     private final FileStorageService fileStorageService;
 
-    // ✅ Publik — lihat tipe kamar untuk suatu hotel
+    // Endpoint publik untuk melihat daftar tipe kamar berdasarkan ID hotel
     @GetMapping("/hotel/{hotelId}")
     public ResponseEntity<WebResponse<List<RoomTypeResponse>>> getByHotel(@PathVariable int hotelId) {
         WebResponse<List<RoomTypeResponse>> response = WebResponse.<List<RoomTypeResponse>>builder()
@@ -43,7 +43,7 @@ public class RoomTypeController {
         return ResponseEntity.ok(response);
     }
 
-    // 🔒 Admin Hotel & Admin Aplikasi — kelola tipe kamar
+    // Mengelola tipe kamar (hanya untuk Admin Hotel dan Admin Aplikasi)
     @PostMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_HOTEL', 'ROLE_ADMIN_APP')")
     public ResponseEntity<WebResponse<RoomTypeResponse>> create(@Valid @RequestBody RoomTypeRequest request) {

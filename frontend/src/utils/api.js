@@ -7,7 +7,7 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// 🔒 Inject Bearer Token secara otomatis
+// Sisipkan Bearer Token secara otomatis pada setiap request
 api.interceptors.request.use(
   (config) => {
     if (config.data instanceof FormData) {
@@ -21,7 +21,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ⚠️ Handle global error responses
+// Tangani response error secara global
 api.interceptors.response.use(
   (response) => response,
   (error) => {

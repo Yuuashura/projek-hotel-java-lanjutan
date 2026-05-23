@@ -36,12 +36,12 @@ public class Customer {
     @Column(nullable = false)
     private String password;  // BCrypt hash
 
-    // ✅ Field tanpa prefix is_ agar Lombok generate: isBanned() / setBanned()
+    // Field tanpa prefix is_ agar Lombok generate: isBanned() / setBanned()
     @Column(name = "is_banned")
     @Builder.Default
     private boolean banned = false;
 
-    // ✅ Field tanpa prefix is_ agar Lombok generate: isVerified() / setVerified()
+    // Field tanpa prefix is_ agar Lombok generate: isVerified() / setVerified()
     @Column(name = "is_verified")
     @Builder.Default
     private boolean verified = false;

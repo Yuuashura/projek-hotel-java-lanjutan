@@ -8,7 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔄 Load token and user session on initial application mount
+  // Load token and user session on initial application mount
   useEffect(() => {
     const savedToken = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // 🔑 Log in a user and save session to local storage
+  // Log in a user and save session to local storage
   const login = (tokenStr, userData) => {
     localStorage.setItem('token', tokenStr);
     localStorage.setItem('user', JSON.stringify(userData));
@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
   };
 
-  // 🔒 Log out a user and clear session
+  // Log out a user and clear session
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  // 👤 Fetch latest profile information from API Gateway
+  // Fetch latest profile information from API Gateway
   const refreshProfile = async () => {
     try {
       const response = await api.get('/api/users/me');

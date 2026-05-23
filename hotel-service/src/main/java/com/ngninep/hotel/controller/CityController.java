@@ -19,7 +19,7 @@ public class CityController {
 
     private final CityService cityService;
 
-    // ✅ Publik — untuk dropdown di form Register, Profil, tambah Hotel
+    // Endpoint publik untuk data dropdown
     @GetMapping
     public ResponseEntity<WebResponse<List<CityResponse>>> getAll() {
         WebResponse<List<CityResponse>> response = WebResponse.<List<CityResponse>>builder()
@@ -40,7 +40,7 @@ public class CityController {
         return ResponseEntity.ok(response);
     }
 
-    // 🔒 Hanya Admin Aplikasi
+    // Hanya diakses oleh Admin Aplikasi
     @PostMapping
     @PreAuthorize("hasAuthority('ROLE_ADMIN_APP')")
     public ResponseEntity<WebResponse<CityResponse>> create(@Valid @RequestBody CityRequest request) {

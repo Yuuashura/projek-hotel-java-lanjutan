@@ -25,12 +25,12 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                // ✅ Endpoint publik — siapapun bisa akses
+                // Endpoint publik yang dapat diakses tanpa autentikasi
                 .requestMatchers(HttpMethod.GET, "/api/cities/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/facilities/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/hotels/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/room-types/**").permitAll()
-                // 🔒 Endpoint mutasi (POST, PUT, DELETE) harus login
+                // Endpoint mutasi data (POST, PUT, DELETE) yang membutuhkan login/autentikasi
                 .anyRequest().authenticated()
             )
             .sessionManagement(session ->

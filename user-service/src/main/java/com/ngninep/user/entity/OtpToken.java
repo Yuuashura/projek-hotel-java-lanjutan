@@ -32,7 +32,7 @@ public class OtpToken {
     @Column(name = "expired_at", nullable = false)
     private LocalDateTime expiredAt;   // created_at + 5 menit
 
-    // ✅ Field tanpa prefix is_ agar Lombok generate: isUsed() / setUsed()
+    // Field tanpa prefix is_ agar Lombok generate: isUsed() / setUsed()
     @Column(name = "is_used")
     @Builder.Default
     private boolean used = false;

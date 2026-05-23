@@ -19,7 +19,7 @@ public class FacilityController {
 
     private final FacilityService facilityService;
 
-    // ✅ Publik — untuk tampilkan fasilitas di halaman hotel
+    // Endpoint publik untuk menampilkan daftar fasilitas
     @GetMapping
     public ResponseEntity<WebResponse<List<FacilityResponse>>> getAll() {
         WebResponse<List<FacilityResponse>> response = WebResponse.<List<FacilityResponse>>builder()
@@ -40,7 +40,7 @@ public class FacilityController {
         return ResponseEntity.ok(response);
     }
 
-    // 🔒 Hanya Admin Aplikasi
+    // Hanya diakses oleh Admin Aplikasi
     @PostMapping
     @PreAuthorize("hasAuthority('ROLE_ADMIN_APP')")
     public ResponseEntity<WebResponse<FacilityResponse>> create(@Valid @RequestBody FacilityRequest request) {

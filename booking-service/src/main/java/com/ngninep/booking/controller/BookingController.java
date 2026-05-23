@@ -39,7 +39,7 @@ public class BookingController {
         return (Integer) credentials;
     }
 
-    // 🔒 USER — Membuat pesanan baru
+    // Membuat pesanan baru
     @PostMapping
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<WebResponse<BookingResponse>> createBooking(@Valid @RequestBody BookingRequest request) {
@@ -52,7 +52,7 @@ public class BookingController {
         return ResponseEntity.ok(response);
     }
 
-    // 🔒 USER — Melihat riwayat pesanan sendiri
+    // Melihat riwayat pesanan sendiri
     @GetMapping("/my")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<WebResponse<List<BookingResponse>>> getMyBookings(
@@ -68,7 +68,7 @@ public class BookingController {
         return ResponseEntity.ok(response);
     }
 
-    // 🔒 USER — Membayar pesanan (Upload bukti bayar)
+    // Membayar pesanan
     @PatchMapping("/{id}/pay")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<WebResponse<BookingResponse>> payBooking(
@@ -107,7 +107,7 @@ public class BookingController {
         return ResponseEntity.ok(response);
     }
 
-    // 🔒 USER — Membatalkan pesanan sendiri (hanya PENDING)
+    // Membatalkan pesanan sendiri (hanya yang berstatus PENDING)
     @PatchMapping("/{id}/cancel")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<WebResponse<BookingResponse>> cancelBooking(@PathVariable int id) {
@@ -120,7 +120,7 @@ public class BookingController {
         return ResponseEntity.ok(response);
     }
 
-    // 🔒 ADMIN_APP & ADMIN_HOTEL — Melihat semua pesanan
+    // Melihat semua pesanan
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_APP', 'ROLE_ADMIN_HOTEL')")
     public ResponseEntity<WebResponse<List<BookingResponse>>> getAllBookings(
@@ -134,7 +134,7 @@ public class BookingController {
         return ResponseEntity.ok(response);
     }
 
-    // 🔒 ADMIN_HOTEL — Melihat pesanan berdasarkan hotel miliknya (Untuk filter manual)
+    // Melihat pesanan berdasarkan hotel miliknya (Untuk filter manual)
     @GetMapping("/hotel/{hotelId}")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_APP', 'ROLE_ADMIN_HOTEL')")
     public ResponseEntity<WebResponse<List<BookingResponse>>> getBookingsByHotel(
@@ -149,7 +149,7 @@ public class BookingController {
         return ResponseEntity.ok(response);
     }
 
-    // 🔒 ADMIN_APP & ADMIN_HOTEL — Mengupdate status pesanan (Konfirmasi, Cancel, Selesai)
+    // Mengupdate status pesanan (Konfirmasi, Cancel, Selesai)
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_APP', 'ROLE_ADMIN_HOTEL')")
     public ResponseEntity<WebResponse<BookingResponse>> updateStatus(
@@ -174,7 +174,7 @@ public class BookingController {
         return ResponseEntity.ok(response);
     }
 
-    // 🔒 ADMIN_APP — Menghapus pesanan secara permanen
+    // Menghapus pesanan secara permanen
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN_APP')")
     public ResponseEntity<WebResponse<Void>> deleteBooking(@PathVariable int id) {

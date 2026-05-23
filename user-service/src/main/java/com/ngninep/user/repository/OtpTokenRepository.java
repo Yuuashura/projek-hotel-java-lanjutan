@@ -16,7 +16,7 @@ import java.util.Optional;
 public interface OtpTokenRepository extends JpaRepository<OtpToken, Integer> {
 
     // Ambil OTP terbaru untuk suatu email yang belum dipakai
-    // ✅ Field sekarang bernama 'used' (bukan 'is_used')
+    // Field sekarang bernama 'used' (bukan 'is_used')
     Optional<OtpToken> findTopByEmailAndUsedFalseOrderByCreatedAtDesc(String email);
 
     // Ambil semua OTP aktif milik suatu email (untuk invalidate saat resend)
