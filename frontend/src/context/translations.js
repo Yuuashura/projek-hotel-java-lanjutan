@@ -15,6 +15,11 @@ export const translations = {
       theme: 'Tema',
       light: 'Terang',
       dark: 'Gelap',
+      logoutConfirmTitle: 'Keluar dari akun?',
+      logoutConfirmMessage: 'Sesi Anda akan ditutup dan Anda akan kembali ke halaman Home.',
+      logoutConfirmAction: 'Ya, Logout',
+      logoutCancelAction: 'Batal',
+      logoutLoading: 'Sedang logout...',
     },
     common: {
       search: 'Cari',
@@ -338,6 +343,11 @@ export const translations = {
       theme: 'Theme',
       light: 'Light',
       dark: 'Dark',
+      logoutConfirmTitle: 'Log out of your account?',
+      logoutConfirmMessage: 'Your session will be closed and you will return to Home.',
+      logoutConfirmAction: 'Yes, Logout',
+      logoutCancelAction: 'Cancel',
+      logoutLoading: 'Logging out...',
     },
     common: {
       search: 'Search',

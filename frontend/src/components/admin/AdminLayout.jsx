@@ -1,8 +1,9 @@
 import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Hotel, Users, Calendar, LogOut, Menu, Globe, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { usePreferences } from '../../context/PreferencesContext';
+import LogoutConfirmModal from '../LogoutConfirmModal';
 
 const adminMenu = [
   { path: '/admin/dashboard', labelKey: 'admin.menu.dashboard', icon: LayoutDashboard },
@@ -14,45 +15,73 @@ const adminMenu = [
 const AdminLayout = ({ children }) => {
   const { user, logout } = useAuth();
   const { language, setLanguage, theme, toggleTheme, t } = usePreferences();
-  const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  const [logoRotating, setLogoRotating] = React.useState(false);
-  const didMountTheme = React.useRef(false);
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = React.useState(false);
+  const [logoutLoading, setLogoutLoading] = React.useState(false);
+  const logoutTimerRef = React.useRef(null);
   const ThemeIcon = theme === 'dark' ? Sun : Moon;
   const activeMenu = adminMenu.find(m => m.path === location.pathname);
 
-  const handleLogout = () => {
+  React.useEffect(() => {
+    return () => {
+      if (logoutTimerRef.current) {
+        window.clearTimeout(logoutTimerRef.current);
+      }
+    };
+  }, []);
+
+  const finishLogout = () => {
+    setLogoutConfirmOpen(false);
+    setLogoutLoading(false);
     sessionStorage.setItem('ngninep-flash', JSON.stringify({ type: 'success', key: 'flash.logoutSuccess' }));
-    window.dispatchEvent(new Event('ngninep-flash'));
     logout();
-    navigate('/');
+    window.location.assign('/');
   };
 
-  React.useEffect(() => {
-    if (!didMountTheme.current) {
-      didMountTheme.current = true;
-      return;
-    }
-    setLogoRotating(true);
-    const timer = window.setTimeout(() => setLogoRotating(false), 560);
-    return () => window.clearTimeout(timer);
-  }, [theme]);
+  const requestLogout = () => {
+    setSidebarOpen(false);
+    setLogoutConfirmOpen(true);
+  };
+
+  const confirmLogout = () => {
+    if (logoutLoading) return;
+    setLogoutLoading(true);
+    logoutTimerRef.current = window.setTimeout(finishLogout, 2000);
+  };
+
+  const cancelLogout = () => {
+    if (logoutLoading) return;
+    setLogoutConfirmOpen(false);
+  };
 
   const preferenceControls = (
     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 2, padding: 3, border: '1px solid var(--color-accent)', background: 'var(--color-background)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
-        <Globe size={13} style={{ color: 'var(--color-muted)', margin: '0 0.35rem', zIndex: 1 }} />
+      <div style={{
+        position: 'relative',
+        display: 'grid',
+        gridTemplateColumns: '30px 38px 38px',
+        alignItems: 'center',
+        height: 40,
+        padding: 3,
+        border: '1px solid var(--color-accent)',
+        background: 'var(--color-background)',
+        borderRadius: 999,
+        overflow: 'hidden',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)'
+      }}>
+        <Globe size={13} style={{ color: 'var(--color-muted)', justifySelf: 'center', zIndex: 2 }} />
         <span style={{
           position: 'absolute',
           top: 3,
           bottom: 3,
-          left: language === 'id' ? 35 : 71,
-          width: 34,
-          borderRadius: 'var(--radius-sm)',
+          left: 33,
+          width: 38,
+          borderRadius: 999,
           background: 'var(--color-primary)',
           boxShadow: 'var(--shadow-float)',
-          transition: 'left 0.28s cubic-bezier(0.16, 1, 0.3, 1)',
+          transform: language === 'id' ? 'translateX(0)' : 'translateX(38px)',
+          transition: 'transform 0.32s cubic-bezier(0.16, 1, 0.3, 1)',
         }} />
         {['id', 'en'].map((lang) => (
           <button
@@ -61,20 +90,28 @@ const AdminLayout = ({ children }) => {
             onClick={() => setLanguage(lang)}
             title="Language"
             style={{
-              height: 30,
-              minWidth: 34,
+              height: 34,
+              width: 38,
               border: 'none',
               cursor: 'pointer',
               position: 'relative',
-              zIndex: 1,
-              borderRadius: 'var(--radius-sm)',
+              zIndex: 2,
+              borderRadius: 999,
               background: 'transparent',
               color: language === lang ? 'white' : 'var(--color-muted)',
               fontFamily: 'var(--font-body)',
               fontSize: '0.7rem',
-              fontWeight: 500,
+              fontWeight: 700,
+              letterSpacing: '0.7px',
+              lineHeight: 1,
               textTransform: 'uppercase',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'color 0.24s ease, transform 0.24s ease',
             }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
           >
             {lang}
           </button>
@@ -84,7 +121,7 @@ const AdminLayout = ({ children }) => {
         type="button"
         onClick={toggleTheme}
         title="Theme"
-        className="btn btn-white btn-sm"
+        className="btn btn-white btn-sm navbar-control-button"
         style={{ height: 38, width: 42, padding: 0 }}
       >
         <ThemeIcon key={theme} size={15} className="theme-icon-rotate" />
@@ -104,7 +141,7 @@ const AdminLayout = ({ children }) => {
       }} className={`sidebar-fixed ${sidebarOpen ? 'open' : ''}`}>
         {/* Logo */}
         <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--color-accent)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div className={`brand-logo ${logoRotating ? 'is-rotating' : ''}`} style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.4rem', color: 'var(--color-primary)', fontStyle: 'italic', letterSpacing: '1px' }}>NgiNep.</div>
+          <div className="brand-logo" style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.4rem', color: 'var(--color-primary)', fontStyle: 'italic', letterSpacing: '1px' }}>NgiNep.</div>
           <span style={{ color: 'var(--color-muted)', fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Admin</span>
         </div>
 
@@ -130,7 +167,7 @@ const AdminLayout = ({ children }) => {
 
         {/* Logout */}
         <div style={{ borderTop: '1px solid var(--color-accent)', padding: '1rem' }}>
-          <button onClick={handleLogout} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'none', border: '1px solid var(--color-accent)', cursor: 'pointer', fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '0.75rem', color: 'var(--color-danger)', textTransform: 'uppercase', letterSpacing: '1.5px', borderRadius: 'var(--radius-sm)', transition: 'all 0.3s ease' }}
+          <button onClick={requestLogout} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'none', border: '1px solid var(--color-accent)', cursor: 'pointer', fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '0.75rem', color: 'var(--color-danger)', textTransform: 'uppercase', letterSpacing: '1.5px', borderRadius: 'var(--radius-sm)', transition: 'all 0.3s ease' }}
             onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-danger)'; e.currentTarget.style.color = '#FFFFFF'; e.currentTarget.style.borderColor = 'var(--color-danger)'; }}
             onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--color-danger)'; e.currentTarget.style.borderColor = 'var(--color-accent)'; }}>
             <LogOut size={14} /> {t('admin.actions.logout')}
@@ -170,6 +207,17 @@ const AdminLayout = ({ children }) => {
           .show-mobile-admin { display: block !important; }
         }
       `}</style>
+      <LogoutConfirmModal
+        open={logoutConfirmOpen}
+        loading={logoutLoading}
+        title={t('nav.logoutConfirmTitle')}
+        message={t('nav.logoutConfirmMessage')}
+        confirmLabel={t('nav.logoutConfirmAction')}
+        cancelLabel={t('nav.logoutCancelAction')}
+        loadingLabel={t('nav.logoutLoading')}
+        onConfirm={confirmLogout}
+        onCancel={cancelLogout}
+      />
     </div>
   );
 };
