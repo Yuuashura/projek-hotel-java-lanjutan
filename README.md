@@ -81,7 +81,41 @@ docker compose up --build
 ```
 *Backend akan berjalan secara otomatis di port `8080` melalui API Gateway.*
 
-### 3. Konfigurasi Frontend (Lokal)
+### 3. Konfigurasi & Menjalankan Backend secara Lokal (Tanpa Docker)
+Jika Anda ingin menjalankan microservices langsung di laptop tanpa Docker, Anda perlu mengaktifkan profile `local` agar Spring Boot membaca konfigurasi dari file `application-local.properties` di masing-masing folder service:
+
+1. **Periksa Konfigurasi File `application-local.properties`:**
+   * Masuk ke folder resources di setiap service:
+     * `user-service/src/main/resources/application-local.properties`
+     * `hotel-service/src/main/resources/application-local.properties`
+     * `booking-service/src/main/resources/application-local.properties`
+   * Pastikan kredensial database Supabase, SMTP Gmail, dan JWT secret key sudah terisi dengan benar.
+
+2. **Jalankan Layanan Menggunakan Maven:**
+   Buka terminal terpisah untuk setiap direktori service dan jalankan perintah berikut:
+   * **User Service (Port 8081):**
+     ```bash
+     cd user-service
+     mvn spring-boot:run -Dspring.profiles.active=local
+     ```
+   * **Hotel Service (Port 8082):**
+     ```bash
+     cd hotel-service
+     mvn spring-boot:run -Dspring.profiles.active=local
+     ```
+   * **Booking Service (Port 8083):**
+     ```bash
+     cd booking-service
+     mvn spring-boot:run -Dspring.profiles.active=local
+     ```
+   * **API Gateway (Port 8080):**
+     *(Secara bawaan Gateway akan mengarah ke localhost:8081-8083)*
+     ```bash
+     cd api-gateway
+     mvn spring-boot:run
+     ```
+
+### 4. Konfigurasi Frontend (Lokal)
 Masuk ke direktori frontend:
 ```bash
 cd frontend
@@ -90,7 +124,7 @@ npm run dev
 ```
 *Frontend lokal Anda akan berjalan di `http://localhost:5173`.*
 
-### 4. Menghubungkan Frontend Vercel dengan Backend Lokal (LocalTunnel)
+### 5. Menghubungkan Frontend Vercel dengan Backend Lokal (LocalTunnel)
 Jika Anda men-deploy frontend ke **Vercel** dan ingin tetap menembak backend lokal di komputer Anda:
 1. Pastikan docker backend Anda sudah berjalan di port `8080`.
 2. Buka terminal baru dan jalankan LocalTunnel:
