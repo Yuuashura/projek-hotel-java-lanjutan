@@ -4,6 +4,7 @@ import com.ngninep.booking.dto.req.BookingRequest;
 import com.ngninep.booking.dto.req.PaymentRequest;
 import com.ngninep.booking.dto.req.UpdateStatusRequest;
 import com.ngninep.booking.dto.res.BookingResponse;
+import com.ngninep.booking.dto.res.BookingStatsResponse;
 import com.ngninep.booking.dto.res.WebResponse;
 import com.ngninep.booking.entity.BookingStatus;
 import com.ngninep.booking.service.FileStorageService;
@@ -145,6 +146,17 @@ public class BookingController {
                 .status("200")
                 .message("Berhasil mengambil pesanan hotel")
                 .data(bookingService.getBookingsByHotel(hotelId, page, size))
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/dashboard/stats")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_APP', 'ROLE_ADMIN_HOTEL')")
+    public ResponseEntity<WebResponse<BookingStatsResponse>> getDashboardStats() {
+        WebResponse<BookingStatsResponse> response = WebResponse.<BookingStatsResponse>builder()
+                .status("200")
+                .message("Berhasil mengambil statistik booking")
+                .data(bookingService.getDashboardStats())
                 .build();
         return ResponseEntity.ok(response);
     }

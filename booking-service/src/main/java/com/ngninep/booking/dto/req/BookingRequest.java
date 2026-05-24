@@ -39,8 +39,6 @@ public class BookingRequest {
     @JsonProperty("number_of_guest")
     private Integer numberOfGuest;
 
-    @NotNull(message = "Total harga tidak boleh kosong")
-    @Min(value = 0, message = "Total harga tidak boleh negatif")
     @JsonProperty("total_price")
     private Long totalPrice;
 

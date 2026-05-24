@@ -3,21 +3,31 @@ package com.ngninep.booking.service.impl;
 import com.ngninep.booking.dto.req.BookingRequest;
 import com.ngninep.booking.dto.req.PaymentRequest;
 import com.ngninep.booking.dto.res.BookingResponse;
+import com.ngninep.booking.dto.res.BookingStatsResponse;
+import com.ngninep.booking.dto.res.RoomTypeSnapshot;
+import com.ngninep.booking.dto.res.WebResponse;
 import com.ngninep.booking.entity.Booking;
 import com.ngninep.booking.entity.BookingStatus;
 import com.ngninep.booking.repository.BookingRepository;
 import com.ngninep.booking.service.BookingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,8 +37,15 @@ import java.util.stream.Collectors;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    @Value("${hotel.service.url:http://localhost:8082}")
+    private String hotelServiceUrl;
+
     private static final List<BookingStatus> ACTIVE_STATUSES =
             Arrays.asList(BookingStatus.PENDING, BookingStatus.CONFIRMED);
+    private static final List<BookingStatus> REVENUE_STATUSES =
+            Arrays.asList(BookingStatus.CONFIRMED, BookingStatus.COMPLETED);
     private static final List<BookingStatus> HISTORY_STATUSES =
             Arrays.asList(BookingStatus.COMPLETED, BookingStatus.CANCELLED);
 
@@ -58,6 +75,9 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public BookingResponse createBooking(BookingRequest request, int customerId) {
         validateBookingDates(request);
+        RoomTypeSnapshot roomType = fetchRoomType(request.getRoomTypeId());
+        validateRoomType(request, roomType);
+        Long totalPrice = calculateTotalPrice(request, roomType);
 
         Booking booking = Booking.builder()
                 .customerId(customerId)
@@ -66,7 +86,7 @@ public class BookingServiceImpl implements BookingService {
                 .checkIn(request.getCheckIn())
                 .checkOut(request.getCheckOut())
                 .numberOfGuest(request.getNumberOfGuest())
-                .totalPrice(request.getTotalPrice())
+                .totalPrice(totalPrice)
                 .ordererName(request.getOrdererName())
                 .ordererPhone(request.getOrdererPhone())
                 .ordererEmail(request.getOrdererEmail())
@@ -200,6 +220,28 @@ public class BookingServiceImpl implements BookingService {
         bookingRepository.delete(booking);
     }
 
+    @Override
+    @Transactional
+    public BookingStatsResponse getDashboardStats() {
+        expirePendingBookings();
+
+        long pending = bookingRepository.countByStatus(BookingStatus.PENDING);
+        long confirmed = bookingRepository.countByStatus(BookingStatus.CONFIRMED);
+        long cancelled = bookingRepository.countByStatus(BookingStatus.CANCELLED);
+        long completed = bookingRepository.countByStatus(BookingStatus.COMPLETED);
+        Long revenue = bookingRepository.sumTotalPriceByStatusIn(REVENUE_STATUSES);
+
+        return BookingStatsResponse.builder()
+                .totalBookings(bookingRepository.count())
+                .pendingBookings(pending)
+                .confirmedBookings(confirmed)
+                .cancelledBookings(cancelled)
+                .completedBookings(completed)
+                .activeBookings(bookingRepository.countByStatusIn(ACTIVE_STATUSES))
+                .totalRevenue(revenue != null ? revenue : 0)
+                .build();
+    }
+
     @Scheduled(fixedDelay = 300000)
     @Transactional
     public void expirePendingBookings() {
@@ -223,6 +265,62 @@ public class BookingServiceImpl implements BookingService {
         if (request.getCheckIn().isBefore(LocalDate.now())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tanggal check-in tidak boleh tanggal lampau");
         }
+    }
+
+    private RoomTypeSnapshot fetchRoomType(int roomTypeId) {
+        try {
+            String baseUrl = hotelServiceUrl != null ? hotelServiceUrl.replaceAll("/+$", "") : "http://localhost:8082";
+            ResponseEntity<WebResponse<RoomTypeSnapshot>> response = restTemplate.exchange(
+                    baseUrl + "/api/room-types/" + roomTypeId,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<>() {
+                    }
+            );
+
+            WebResponse<RoomTypeSnapshot> body = response.getBody();
+            if (!response.getStatusCode().is2xxSuccessful() || body == null || body.getData() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipe kamar tidak valid atau tidak tersedia");
+            }
+
+            return body.getData();
+        } catch (RestClientException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipe kamar tidak valid atau tidak tersedia");
+        }
+    }
+
+    private void validateRoomType(BookingRequest request, RoomTypeSnapshot roomType) {
+        if (roomType.getHotelId() != request.getHotelId()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipe kamar tidak sesuai dengan hotel");
+        }
+
+        if (request.getNumberOfGuest() > roomType.getMaxGuest()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Jumlah tamu melebihi kapasitas kamar");
+        }
+
+        if (roomType.getRoomAvailable() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kamar tidak tersedia");
+        }
+
+        long bookedRooms = bookingRepository.countByRoomTypeIdAndStatusInAndCheckInLessThanAndCheckOutGreaterThan(
+                request.getRoomTypeId(),
+                ACTIVE_STATUSES,
+                request.getCheckOut(),
+                request.getCheckIn()
+        );
+
+        if (bookedRooms >= roomType.getRoomAvailable()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kamar sudah penuh pada tanggal tersebut");
+        }
+    }
+
+    private Long calculateTotalPrice(BookingRequest request, RoomTypeSnapshot roomType) {
+        if (roomType.getPricePerNight() == null || roomType.getPricePerNight() < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Harga tipe kamar tidak valid");
+        }
+
+        long nights = ChronoUnit.DAYS.between(request.getCheckIn(), request.getCheckOut());
+        return roomType.getPricePerNight() * nights;
     }
 
     private void validateStatusTransition(BookingStatus currentStatus, BookingStatus nextStatus) {

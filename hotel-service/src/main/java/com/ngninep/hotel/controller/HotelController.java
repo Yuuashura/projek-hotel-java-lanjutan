@@ -35,12 +35,19 @@ public class HotelController {
     public ResponseEntity<WebResponse<List<HotelResponse>>> getAll(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Integer cityId,
+            @RequestParam(required = false) Long minPrice,
+            @RequestParam(required = false) Long maxPrice,
+            @RequestParam(required = false) Float minRating,
+            @RequestParam(required = false) Boolean featured,
+            @RequestParam(required = false) Boolean onSale,
+            @RequestParam(required = false) List<Integer> facilityIds,
+            @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size) {
         WebResponse<List<HotelResponse>> response = WebResponse.<List<HotelResponse>>builder()
                 .status("200")
                 .message("Success")
-                .data(hotelService.search(keyword, cityId, page, size))
+                .data(hotelService.search(keyword, cityId, minPrice, maxPrice, minRating, featured, onSale, facilityIds, sortBy, page, size))
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -51,6 +58,56 @@ public class HotelController {
                 .status("200")
                 .message("Success")
                 .data(hotelService.getFeatured())
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/latest")
+    public ResponseEntity<WebResponse<List<HotelResponse>>> getLatest(@RequestParam(required = false) Integer limit) {
+        WebResponse<List<HotelResponse>> response = WebResponse.<List<HotelResponse>>builder()
+                .status("200")
+                .message("Success")
+                .data(hotelService.getLatest(limit))
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/on-sale")
+    public ResponseEntity<WebResponse<List<HotelResponse>>> getOnSale(@RequestParam(required = false) Integer limit) {
+        WebResponse<List<HotelResponse>> response = WebResponse.<List<HotelResponse>>builder()
+                .status("200")
+                .message("Success")
+                .data(hotelService.getOnSale(limit))
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/popular-cities")
+    public ResponseEntity<WebResponse<List<Map<String, Object>>>> getPopularCities(@RequestParam(required = false) Integer limit) {
+        WebResponse<List<Map<String, Object>>> response = WebResponse.<List<Map<String, Object>>>builder()
+                .status("200")
+                .message("Success")
+                .data(hotelService.getPopularCities(limit))
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/popular-facilities")
+    public ResponseEntity<WebResponse<List<Map<String, Object>>>> getPopularFacilities(@RequestParam(required = false) Integer limit) {
+        WebResponse<List<Map<String, Object>>> response = WebResponse.<List<Map<String, Object>>>builder()
+                .status("200")
+                .message("Success")
+                .data(hotelService.getPopularFacilities(limit))
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<WebResponse<Map<String, Object>>> getStats() {
+        WebResponse<Map<String, Object>> response = WebResponse.<Map<String, Object>>builder()
+                .status("200")
+                .message("Success")
+                .data(hotelService.getStats())
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -85,6 +142,28 @@ public class HotelController {
                 .status("200")
                 .message("Success")
                 .data(hotelService.update(id, request))
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/facilities/{facilityId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_HOTEL', 'ROLE_ADMIN_APP')")
+    public ResponseEntity<WebResponse<HotelResponse>> addFacility(@PathVariable int id, @PathVariable int facilityId) {
+        WebResponse<HotelResponse> response = WebResponse.<HotelResponse>builder()
+                .status("200")
+                .message("Fasilitas hotel berhasil ditambahkan")
+                .data(hotelService.addFacility(id, facilityId))
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}/facilities/{facilityId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_HOTEL', 'ROLE_ADMIN_APP')")
+    public ResponseEntity<WebResponse<HotelResponse>> removeFacility(@PathVariable int id, @PathVariable int facilityId) {
+        WebResponse<HotelResponse> response = WebResponse.<HotelResponse>builder()
+                .status("200")
+                .message("Fasilitas hotel berhasil dihapus")
+                .data(hotelService.removeFacility(id, facilityId))
                 .build();
         return ResponseEntity.ok(response);
     }

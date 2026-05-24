@@ -3,6 +3,7 @@ package com.ngninep.booking.service;
 import com.ngninep.booking.dto.req.BookingRequest;
 import com.ngninep.booking.dto.req.PaymentRequest;
 import com.ngninep.booking.dto.res.BookingResponse;
+import com.ngninep.booking.dto.res.BookingStatsResponse;
 import com.ngninep.booking.entity.BookingStatus;
 
 import java.util.List;
@@ -24,5 +25,7 @@ public interface BookingService {
     
     BookingResponse cancelBooking(int id, int customerId);
     
+    BookingStatsResponse getDashboardStats();
+
     void deleteBooking(int id);
 }
