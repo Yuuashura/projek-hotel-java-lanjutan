@@ -11,7 +11,9 @@ import com.ngninep.booking.service.FileStorageService;
 import com.ngninep.booking.service.BookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,8 +35,8 @@ public class BookingController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object credentials = authentication.getCredentials();
         if (credentials == null) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                    org.springframework.http.HttpStatus.UNAUTHORIZED, "User ID tidak ditemukan dalam token"
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "User ID tidak ditemukan dalam token"
             );
         }
         return (Integer) credentials;
@@ -172,8 +174,8 @@ public class BookingController {
         try {
             status = BookingStatus.valueOf(request.getStatus().toUpperCase());
         } catch (IllegalArgumentException ex) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                    org.springframework.http.HttpStatus.BAD_REQUEST,
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
                     "Status booking tidak valid"
             );
         }
