@@ -25,19 +25,19 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                // Endpoint publik yang dapat diakses tanpa autentikasi
-                .requestMatchers("/", "/health").permitAll()
+                .requestMatchers("/", "/health").permitAll() // coba deploy railway, gakuat cugh
                 .requestMatchers(HttpMethod.GET, "/api/cities/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/facilities/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/hotels/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/room-types/**").permitAll()
-                // Endpoint mutasi data (POST, PUT, DELETE) yang membutuhkan login/autentikasi
                 .anyRequest().authenticated()
             )
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(
+                jwtFilter, 
+                UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

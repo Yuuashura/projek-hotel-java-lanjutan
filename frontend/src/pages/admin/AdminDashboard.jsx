@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Hotel, Calendar, TrendingUp, CheckCircle, Clock, XCircle, Upload, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 import AdminLayout from '../../components/admin/AdminLayout';
+import LoadingState from '../../components/LoadingState';
 import api from '../../utils/api';
 import { unwrapList } from '../../utils/response';
 import { usePreferences } from '../../context/PreferencesContext';
@@ -19,6 +20,14 @@ const StatCard = ({ label, value, icon: Icon, sub }) => (
       {sub && <div style={{ fontSize: '0.7rem', fontWeight: 300, color: 'var(--color-muted)', marginTop: '0.25rem' }}>{sub}</div>}
     </div>
   </div>
+);
+
+const StatLoadingDots = () => (
+  <span className="stat-loading-dots" aria-label="Loading">
+    <i />
+    <i />
+    <i />
+  </span>
 );
 
 const AdminDashboard = () => {
@@ -101,9 +110,9 @@ const AdminDashboard = () => {
 
         {/* Stats Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1.25rem' }}>
-          <StatCard label={t('admin.dashboard.totalHotels')} value={loading ? '...' : stats.hotels} icon={Hotel} />
-          <StatCard label={t('admin.dashboard.totalBookings')} value={loading ? '...' : stats.bookings.length} icon={Calendar} />
-          <StatCard label={t('admin.dashboard.totalRevenue')} value={loading ? '...' : formatCurrency(stats.totalRevenue)} icon={TrendingUp} sub={t('admin.dashboard.revenueSub')} />
+          <StatCard label={t('admin.dashboard.totalHotels')} value={loading ? <StatLoadingDots /> : stats.hotels} icon={Hotel} />
+          <StatCard label={t('admin.dashboard.totalBookings')} value={loading ? <StatLoadingDots /> : stats.bookings.length} icon={Calendar} />
+          <StatCard label={t('admin.dashboard.totalRevenue')} value={loading ? <StatLoadingDots /> : formatCurrency(stats.totalRevenue)} icon={TrendingUp} sub={t('admin.dashboard.revenueSub')} />
         </div>
 
         {/* Booking Status Breakdown */}
@@ -128,7 +137,7 @@ const AdminDashboard = () => {
         <div className="card" style={{ padding: '1.5rem', overflowX: 'auto', border: '1px solid var(--color-accent)' }}>
           <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, textTransform: 'uppercase', letterSpacing: '1px', fontSize: '1rem', marginBottom: '1.25rem', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.75rem', color: 'var(--color-text)' }}>{t('admin.dashboard.latestBookings')}</h3>
           {loading ? (
-            <div style={{ textAlign: 'center', color: 'var(--color-muted)', padding: '2rem 0', fontWeight: 300, fontSize: '0.9rem' }}>{t('admin.dashboard.loading')}</div>
+            <LoadingState text={t('admin.dashboard.loading')} compact />
           ) : recentBookings.length === 0 ? (
             <div style={{ textAlign: 'center', color: 'var(--color-muted)', padding: '2rem 0', fontWeight: 300, fontSize: '0.9rem' }}>{t('admin.dashboard.emptyBookings')}</div>
           ) : (

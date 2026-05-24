@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { PreferencesProvider } from './context/PreferencesContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import LoadingState from './components/LoadingState';
 import { usePreferences } from './context/PreferencesContext';
 
 // === Public Pages ===
@@ -34,7 +35,7 @@ import AdminRoomTypes from './pages/admin/AdminRoomTypes';
 // ==========================================
 const UserRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  if (loading) return null;
+  if (loading) return <RouteLoading />;
   if (!user) return <Navigate to="/login" replace />;
   if (user.role !== 'ROLE_USER') return <Navigate to="/admin/dashboard" replace />;
   return children;
@@ -42,11 +43,17 @@ const UserRoute = ({ children }) => {
 
 const AdminRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  if (loading) return null;
+  if (loading) return <RouteLoading />;
   if (!user) return <Navigate to="/login" replace />;
   if (user.role !== 'ROLE_ADMIN_HOTEL' && user.role !== 'ROLE_ADMIN_APP') return <Navigate to="/" replace />;
   return children;
 };
+
+const RouteLoading = () => (
+  <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: '2rem' }}>
+    <LoadingState text="Menyiapkan sesi..." />
+  </div>
+);
 
 // ==========================================
 // Public Layout (Navbar + Footer)

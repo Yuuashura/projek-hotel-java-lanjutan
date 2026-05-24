@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { formatCurrency } from '../../utils/formatters';
 import AdminLayout from '../../components/admin/AdminLayout';
 import PaginationControls from '../../components/admin/PaginationControls';
+import LoadingState from '../../components/LoadingState';
 import api from '../../utils/api';
 import CitySearchSelect from '../../components/CitySearchSelect';
 import { getErrorMessage, unwrapList } from '../../utils/response';
@@ -185,7 +186,7 @@ const AdminHotels = () => {
       )}
 
       {loading ? (
-        <div className="card" style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>{t('admin.hotels.loading')}</div>
+        <LoadingState text={t('admin.hotels.loading')} compact />
       ) : (
         <div style={{ overflowX: 'auto' }}>
           <table className="neo-table">

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Calendar, Clock, CheckCircle, XCircle, AlertCircle, ArrowRight, ChevronDown, ChevronUp, MapPin, Users } from 'lucide-react';
 import { formatCurrency, formatDate, diffDays, statusColor } from '../../utils/formatters';
 import { useAuth } from '../../context/AuthContext';
+import LoadingState from '../../components/LoadingState';
 import api from '../../utils/api';
 
 const MyBookings = () => {
@@ -69,11 +70,7 @@ const MyBookings = () => {
 
         {/* Content */}
         {loading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {[1, 2].map(i => (
-              <div key={i} style={{ height: 160, background: 'linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite', borderRadius: 'var(--radius-sm)' }} />
-            ))}
-          </div>
+          <LoadingState text="Memuat pesanan Anda..." />
         ) : bookings.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '5rem 1.5rem', border: '1px dashed var(--color-accent)', borderRadius: 'var(--radius-sm)', background: 'var(--color-surface)' }}>
             <div style={{ fontSize: '3rem', marginBottom: '1.5rem', opacity: 0.6 }}>🗓️</div>
@@ -91,10 +88,6 @@ const MyBookings = () => {
           </div>
         )}
       </div>
-
-      <style>{`
-        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-      `}</style>
     </div>
   );
 };

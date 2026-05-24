@@ -5,6 +5,7 @@ import { formatCurrency } from '../../utils/formatters';
 import api from '../../utils/api';
 import CitySearchSelect from '../../components/CitySearchSelect';
 import { usePreferences } from '../../context/PreferencesContext';
+import LoadingState from '../../components/LoadingState';
 import { getImageUrl } from '../../utils/uploads';
 
 const DEFAULT_FILTERS = {
@@ -317,11 +318,7 @@ const Hotels = () => {
         )}
 
         {loading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {[1, 2, 3].map(i => (
-              <div key={i} style={{ height: 240, background: 'linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite', borderRadius: 'var(--radius-sm)' }} />
-            ))}
-          </div>
+          <LoadingState text={t('common.loadingHotel')} />
         ) : visibleHotels.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '5rem 1rem' }}>
             <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', marginBottom: '0.5rem', fontWeight: 300 }}>{t('hotels.emptyTitle')}</h3>

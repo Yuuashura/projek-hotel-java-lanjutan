@@ -74,8 +74,8 @@ const Register = () => {
 
   if (step === 'unverified') {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--color-background)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-        <div className="card" style={{ maxWidth: 420, width: '100%', padding: '3rem 2rem', textAlign: 'center', border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-float)' }}>
+      <div className="auth-page">
+        <div className="card auth-card auth-card-compact" style={{ textAlign: 'center' }}>
           <AlertCircle size={48} style={{ color: 'var(--color-primary)', marginBottom: '1.5rem' }} />
           <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.8rem', marginBottom: '0.75rem' }}>Akun Belum Diverifikasi</h2>
           {error && (
@@ -98,29 +98,25 @@ const Register = () => {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-background)', padding: '5rem 1rem', position: 'relative', overflow: 'hidden' }}>
-      {/* Decorative Glowing Blobs */}
-      <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(44, 82, 130, 0.12) 0%, rgba(44, 82, 130, 0) 70%)', top: '-5%', left: '-10%', pointerEvents: 'none', filter: 'blur(60px)' }} />
-      <div style={{ position: 'absolute', width: 450, height: 450, borderRadius: '50%', background: 'radial-gradient(circle, rgba(49, 130, 206, 0.08) 0%, rgba(49, 130, 206, 0) 70%)', bottom: '-10%', right: '-10%', pointerEvents: 'none', filter: 'blur(60px)' }} />
-      
-      <div style={{ maxWidth: 560, margin: '0 auto', position: 'relative', zIndex: 1 }} className="animate-slide-in">
-        <Link to="/" className="btn btn-white btn-sm" style={{ display: 'inline-flex', alignItems: 'center', marginBottom: '1.5rem', background: 'var(--color-surface-glass)' }}>
+    <div className="auth-page auth-page-scroll">
+      <div className="auth-shell auth-shell-wide animate-slide-in">
+        <Link to="/" className="btn btn-white btn-sm auth-back-link">
           <ArrowLeft size={14} /> Kembali ke Home
         </Link>
 
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <div className="auth-header">
           <Link to="/" style={{ textDecoration: 'none' }}>
-            <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '2.5rem', color: 'var(--color-text)', letterSpacing: '1px' }}>
+            <div className="auth-brand">
               NgiNep<span style={{ color: 'var(--color-primary)' }}>.</span>
             </div>
           </Link>
-          <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.8rem', marginTop: '1.25rem', marginBottom: '0.25rem', color: 'var(--color-text)' }}>Buat Akun Baru</h1>
-          <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>Sudah punya akun? <Link to="/login" style={{ color: 'var(--color-primary)', fontWeight: 400, textDecoration: 'none' }}>Masuk di sini</Link></p>
+          <h1>Buat Akun Baru</h1>
+          <p>Sudah punya akun? <Link to="/login">Masuk di sini</Link></p>
         </div>
 
-        <div className="card" style={{ padding: '2.5rem 2.5rem', border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-float)', background: 'var(--color-surface-glass)', backdropFilter: 'blur(10px)', position: 'relative', overflow: 'hidden' }}>
+        <div className="card auth-card">
           {/* Card Top Accent Line */}
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, var(--color-primary), #3182ce)' }} />
+          <div className="auth-card-accent" />
 
           {error && (
             <div className="alert-danger" style={{ padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
@@ -130,23 +126,23 @@ const Register = () => {
           )}
 
           <form onSubmit={handleSubmit}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.25rem' }}>
-              <div>
+            <div className="auth-grid-2">
+              <div className="auth-field">
                 <label className="label">Nama Depan *</label>
                 <input className="input" placeholder="Budi" value={form.first_name} onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))} required />
               </div>
-              <div>
+              <div className="auth-field">
                 <label className="label">Nama Belakang</label>
                 <input className="input" placeholder="Santoso" value={form.last_name} onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))} />
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.25rem' }}>
-              <div>
+            <div className="auth-grid-2">
+              <div className="auth-field">
                 <label className="label">Umur *</label>
                 <input className="input" type="number" min="17" placeholder="22" value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))} required />
               </div>
-              <div>
+              <div className="auth-field">
                 <label className="label">Kota *</label>
                 <CitySearchSelect
                   cities={cities}
@@ -157,18 +153,18 @@ const Register = () => {
               </div>
             </div>
 
-            <div style={{ marginBottom: '1.25rem' }}>
+            <div className="auth-field">
               <label className="label">No. Telepon *</label>
               <input className="input" type="tel" placeholder="08123456789" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} required />
             </div>
 
-            <div style={{ marginBottom: '1.25rem' }}>
+            <div className="auth-field">
               <label className="label">Email *</label>
               <input className="input" type="email" placeholder="nama@email.com" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
-              <div>
+            <div className="auth-grid-2 auth-grid-last">
+              <div className="auth-field">
                 <label className="label">Password *</label>
                 <div style={{ position: 'relative' }}>
                   <input className="input" style={{ paddingRight: '2.5rem' }} type={showPw ? 'text' : 'password'} placeholder="Min 8 karakter" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required minLength={8} />
@@ -177,7 +173,7 @@ const Register = () => {
                   </button>
                 </div>
               </div>
-              <div>
+              <div className="auth-field">
                 <label className="label">Konfirmasi Password *</label>
                 <input className="input" type="password" placeholder="Ulangi password" value={form.confirmPassword} onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))} required />
               </div>

@@ -3,6 +3,7 @@ import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { CalendarDays, User, AlertCircle, BedDouble, ShieldCheck } from 'lucide-react';
 import { formatCurrency, formatDate, diffDays } from '../../utils/formatters';
 import { useAuth } from '../../context/AuthContext';
+import LoadingState from '../../components/LoadingState';
 import api from '../../utils/api';
 
 const toDateInputValue = (date) => {
@@ -18,6 +19,33 @@ const addDays = (dateString, days) => {
   return toDateInputValue(date);
 };
 
+const dateFromInput = (value) => new Date(`${value}T00:00:00`);
+
+const isBeforeDate = (value, minValue) => {
+  if (!value || !minValue) return false;
+  return dateFromInput(value) < dateFromInput(minValue);
+};
+
+const monthLabel = (date) => date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+
+const getCalendarCells = (monthDate) => {
+  const year = monthDate.getFullYear();
+  const month = monthDate.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const startOffset = firstDay.getDay();
+  const start = new Date(year, month, 1 - startOffset);
+
+  return Array.from({ length: 42 }, (_, index) => {
+    const date = new Date(start);
+    date.setDate(start.getDate() + index);
+    return {
+      value: toDateInputValue(date),
+      day: date.getDate(),
+      isCurrentMonth: date.getMonth() === month,
+    };
+  });
+};
+
 const Booking = () => {
   const { hotelId } = useParams();
   const [searchParams] = useSearchParams();
@@ -29,6 +57,7 @@ const Booking = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [openCalendar, setOpenCalendar] = useState(null);
 
   const today = toDateInputValue(new Date());
   const tomorrow = addDays(today, 1);
@@ -45,6 +74,7 @@ const Booking = () => {
     orderer_phone: '',
     orderer_email: '',
   });
+  const [calendarMonth, setCalendarMonth] = useState(dateFromInput(initialCheckIn));
 
   // Focus states for custom input floating label animation
   const [focusedField, setFocusedField] = useState(null);
@@ -100,6 +130,21 @@ const Booking = () => {
     }));
   };
 
+  const openDatePicker = (field) => {
+    const value = field === 'check_in' ? form.check_in : form.check_out || checkOutMin;
+    setCalendarMonth(dateFromInput(value));
+    setOpenCalendar(current => current === field ? null : field);
+  };
+
+  const selectDate = (field, value) => {
+    if (field === 'check_in') {
+      handleCheckInChange(value);
+    } else {
+      handleCheckOutChange(value);
+    }
+    setOpenCalendar(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.check_out) return setError('Pilih tanggal check-out terlebih dahulu');
@@ -130,8 +175,8 @@ const Booking = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-        <span style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--color-muted)' }}>Memuat...</span>
+      <div style={{ minHeight: '70vh', display: 'grid', placeItems: 'center', padding: '2rem' }}>
+        <LoadingState text="Memuat data booking..." />
       </div>
     );
   }
@@ -195,21 +240,43 @@ const Booking = () => {
               </div>
               
               <div className="booking-date-grid">
-                <div className="booking-date-card">
+                <div className={`booking-date-card ${openCalendar === 'check_in' ? 'is-open' : ''}`}>
                   <div className="booking-date-icon"><CalendarDays size={18} /></div>
                   <div className="booking-date-body">
                     <label>Check-In</label>
-                    <input type="date" min={today} value={form.check_in} onChange={e => handleCheckInChange(e.target.value)} required />
+                    <button type="button" className="booking-date-trigger" onClick={() => openDatePicker('check_in')}>
+                      {form.check_in ? formatDate(form.check_in) : 'Pilih tanggal'}
+                    </button>
                     <span>{form.check_in ? formatDate(form.check_in) : 'Pilih tanggal datang'}</span>
                   </div>
+                  {openCalendar === 'check_in' && (
+                    <CalendarPopover
+                      month={calendarMonth}
+                      setMonth={setCalendarMonth}
+                      selected={form.check_in}
+                      minDate={today}
+                      onSelect={(value) => selectDate('check_in', value)}
+                    />
+                  )}
                 </div>
-                <div className="booking-date-card">
+                <div className={`booking-date-card ${openCalendar === 'check_out' ? 'is-open' : ''}`}>
                   <div className="booking-date-icon"><CalendarDays size={18} /></div>
                   <div className="booking-date-body">
                     <label>Check-Out</label>
-                    <input type="date" min={checkOutMin} value={form.check_out} onChange={e => handleCheckOutChange(e.target.value)} required />
+                    <button type="button" className="booking-date-trigger" onClick={() => openDatePicker('check_out')}>
+                      {form.check_out ? formatDate(form.check_out) : 'Pilih tanggal'}
+                    </button>
                     <span>{form.check_out ? formatDate(form.check_out) : 'Otomatis esok hari'}</span>
                   </div>
+                  {openCalendar === 'check_out' && (
+                    <CalendarPopover
+                      month={calendarMonth}
+                      setMonth={setCalendarMonth}
+                      selected={form.check_out}
+                      minDate={checkOutMin}
+                      onSelect={(value) => selectDate('check_out', value)}
+                    />
+                  )}
                 </div>
               </div>
 
@@ -366,6 +433,55 @@ const Booking = () => {
           form { grid-template-columns: 1fr !important; gap: 3rem !important; } 
         }
       `}</style>
+    </div>
+  );
+};
+
+const CalendarPopover = ({ month, setMonth, selected, minDate, onSelect }) => {
+  const cells = getCalendarCells(month);
+  const weekdays = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+
+  const changeMonth = (offset) => {
+    setMonth(current => new Date(current.getFullYear(), current.getMonth() + offset, 1));
+  };
+
+  return (
+    <div className="booking-calendar-popover">
+      <div className="booking-calendar-head">
+        <button type="button" onClick={() => changeMonth(-1)} aria-label="Bulan sebelumnya">
+          {'<'}
+        </button>
+        <strong>{monthLabel(month)}</strong>
+        <button type="button" onClick={() => changeMonth(1)} aria-label="Bulan berikutnya">
+          {'>'}
+        </button>
+      </div>
+
+      <div className="booking-calendar-week" aria-hidden="true">
+        {weekdays.map(day => <span key={day}>{day}</span>)}
+      </div>
+
+      <div className="booking-calendar-grid">
+        {cells.map(cell => {
+          const disabled = isBeforeDate(cell.value, minDate);
+          return (
+            <button
+              type="button"
+              key={cell.value}
+              className={[
+                'booking-calendar-day',
+                !cell.isCurrentMonth ? 'is-muted' : '',
+                selected === cell.value ? 'is-selected' : '',
+                disabled ? 'is-disabled' : '',
+              ].filter(Boolean).join(' ')}
+              disabled={disabled}
+              onClick={() => onSelect(cell.value)}
+            >
+              {cell.day}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 };

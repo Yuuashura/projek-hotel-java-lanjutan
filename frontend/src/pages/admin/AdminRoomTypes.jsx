@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Plus, Pencil, Trash2, X, AlertCircle, ArrowLeft, Users, ImageIcon, Check } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 import AdminLayout from '../../components/admin/AdminLayout';
+import LoadingState from '../../components/LoadingState';
 import api from '../../utils/api';
 import { uploadFile, validateImageFile } from '../../utils/uploads';
 import { usePreferences } from '../../context/PreferencesContext';
@@ -160,9 +161,7 @@ const AdminRoomTypes = () => {
       )}
 
       {loading ? (
-        <div className="card" style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>
-          {t('admin.rooms.loading')}
-        </div>
+        <LoadingState text={t('admin.rooms.loading')} compact />
       ) : (
         <div style={{ overflowX: 'auto' }}>
           <table className="neo-table">

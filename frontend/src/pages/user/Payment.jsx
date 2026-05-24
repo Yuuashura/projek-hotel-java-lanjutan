@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Upload, Clock, Check, AlertCircle, X, ImageIcon } from 'lucide-react';
 import { formatCurrency, formatDate, diffDays } from '../../utils/formatters';
 import { useAuth } from '../../context/AuthContext';
+import LoadingState from '../../components/LoadingState';
 import api from '../../utils/api';
 import { validateImageFile } from '../../utils/uploads';
 
@@ -145,8 +146,8 @@ const Payment = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-        <span style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--color-muted)' }}>Memuat detail pembayaran...</span>
+      <div style={{ minHeight: '70vh', display: 'grid', placeItems: 'center', padding: '2rem' }}>
+        <LoadingState text="Memuat detail pembayaran..." />
       </div>
     );
   }

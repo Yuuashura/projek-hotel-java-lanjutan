@@ -10,6 +10,40 @@
 
 ---
 
+## Catatan Pengembangan Halaman Depan
+
+Beberapa ide yang dapat ditambahkan ke halaman depan agar pengalaman pengguna lebih kuat dan tidak hanya bersifat visual:
+
+1. **Hotel Populer Berdasarkan Kota**
+   - Tampilkan kota seperti Bali, Jakarta, Bandung, Yogyakarta, dan Lombok.
+   - Sertakan jumlah hotel per kota agar user bisa langsung masuk ke hasil pencarian.
+
+2. **Quick Filter Fasilitas**
+   - Tambahkan chip filter cepat seperti Free WiFi, Kolam Renang, Sarapan, Parkir, AC, dan Restoran.
+   - Filter ini sebaiknya terhubung ke data fasilitas hotel yang sebenarnya.
+
+3. **Section Kenapa Booking di NgiNep**
+   - Buat benefit yang lebih konkret, misalnya pembayaran terverifikasi, booking dapat dipantau, hotel terkurasi, dan konfirmasi oleh admin hotel.
+
+4. **Hotel Terbaru / Baru Ditambahkan**
+   - Selain hotel featured, tampilkan hotel yang baru masuk database.
+   - Membuat home terasa lebih hidup karena kontennya mengikuti data terbaru.
+
+5. **Promo Banner / Hotel Diskon**
+   - Tampilkan hotel dengan status `onSale`.
+   - Sertakan diskon, harga, dan tombol menuju detail hotel.
+
+6. **Testimoni atau Statistik Ringkas**
+   - Jika belum ada review asli, gunakan statistik nyata seperti total hotel, total booking, atau jumlah kota.
+   - Hindari dummy testimonial yang terlalu banyak agar tidak terasa palsu.
+
+Prioritas implementasi yang disarankan:
+1. Hotel Populer Berdasarkan Kota
+2. Quick Filter Fasilitas
+3. Hotel Terbaru
+
+---
+
 ## 🛠️ Tech Stack
 
 ### Backend

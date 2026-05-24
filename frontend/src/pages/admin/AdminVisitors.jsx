@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Shield, ShieldOff, AlertCircle } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import PaginationControls from '../../components/admin/PaginationControls';
+import LoadingState from '../../components/LoadingState';
 import api from '../../utils/api';
 import { getErrorMessage, unwrapList } from '../../utils/response';
 import { usePreferences } from '../../context/PreferencesContext';
@@ -79,7 +80,7 @@ const AdminVisitors = () => {
       )}
 
       {loading ? (
-        <div className="card" style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>{t('admin.visitors.loading')}</div>
+        <LoadingState text={t('admin.visitors.loading')} compact />
       ) : (
         <div style={{ overflowX: 'auto' }}>
           <table className="neo-table">

@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Star, MapPin, ArrowRight, ChevronDown } from
 import { formatCurrency } from '../../utils/formatters';
 import api from '../../utils/api';
 import CitySearchSelect from '../../components/CitySearchSelect';
+import LoadingState from '../../components/LoadingState';
 import { usePreferences } from '../../context/PreferencesContext';
 import { getImageUrl } from '../../utils/uploads';
 
@@ -163,17 +164,7 @@ const Home = () => {
         </div>
 
         {featuredLoading ? (
-          <div className="card loading-luxury">
-            <div className="loading-luxury-content">
-              <div className="loading-luxury-spinner" />
-              <div className="loading-luxury-text">{t('common.loadingHotel')}</div>
-              <div className="loading-luxury-bars" aria-hidden="true">
-                <span />
-                <span />
-                <span />
-              </div>
-            </div>
-          </div>
+          <LoadingState text={t('common.loadingHotel')} />
         ) : featuredHotels.length > 0 ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
             {featuredHotels.map(hotel => <HotelCard key={hotel.id_hotel} hotel={hotel} />)}

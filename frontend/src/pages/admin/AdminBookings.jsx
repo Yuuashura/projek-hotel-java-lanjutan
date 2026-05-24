@@ -3,6 +3,7 @@ import { Search, Check, X, AlertCircle, Eye } from 'lucide-react';
 import { formatCurrency, formatDate, statusColor } from '../../utils/formatters';
 import AdminLayout from '../../components/admin/AdminLayout';
 import PaginationControls from '../../components/admin/PaginationControls';
+import LoadingState from '../../components/LoadingState';
 import api from '../../utils/api';
 import { getErrorMessage, unwrapList } from '../../utils/response';
 import { usePreferences } from '../../context/PreferencesContext';
@@ -103,7 +104,7 @@ const AdminBookings = () => {
       )}
 
       {loading ? (
-        <div className="card" style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>{t('admin.bookings.loading')}</div>
+        <LoadingState text={t('admin.bookings.loading')} compact />
       ) : (
         <div style={{ overflowX: 'auto' }}>
           <table className="neo-table">
