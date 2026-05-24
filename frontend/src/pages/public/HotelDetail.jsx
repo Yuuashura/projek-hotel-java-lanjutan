@@ -65,6 +65,8 @@ const normalizeFacility = (item) => {
   };
 };
 
+const getRoomAvailability = (room) => Number(room?.room_available ?? room?.roomAvailable ?? 0);
+
 const HotelDetail = () => {
   const { id } = useParams();
   const { user } = useAuth();
@@ -121,6 +123,8 @@ const HotelDetail = () => {
 
   const roomTypes = hotel.roomTypes || hotel.room_types || [];
   const selectedRoom = roomTypes.find(r => (r.id_room_type || r.idRoomType) === activeRoom);
+  const selectedRoomAvailable = getRoomAvailability(selectedRoom);
+  const selectedRoomUnavailable = selectedRoom && selectedRoomAvailable <= 0;
   const hotelFacilities = (hotel.facilities || hotel.hotelFacilities || [])
     .map(normalizeFacility)
     .filter(Boolean);
@@ -230,6 +234,8 @@ const HotelDetail = () => {
                   {roomTypes.map(room => {
                     const roomId = room.id_room_type || room.idRoomType;
                     const isSelected = activeRoom === roomId;
+                    const roomAvailable = getRoomAvailability(room);
+                    const roomUnavailable = roomAvailable <= 0;
                     return (
                       <div key={roomId} onClick={() => setActiveRoom(roomId)}
                         style={{
@@ -248,8 +254,8 @@ const HotelDetail = () => {
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                               <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', margin: 0, fontWeight: 300, color: 'var(--color-text)' }}>{room.name}</h4>
                               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <span className="badge" style={{ fontSize: '0.65rem', background: (room.room_available ?? room.roomAvailable) > 3 ? 'rgba(72,187,120,0.1)' : 'rgba(237,137,54,0.1)', color: (room.room_available ?? room.roomAvailable) > 3 ? '#276749' : '#DD6B20', borderColor: 'transparent' }}>
-                                  {t('hotelDetail.available', { count: room.room_available ?? room.roomAvailable })}
+                                <span className="badge" style={{ fontSize: '0.65rem', background: roomUnavailable ? 'rgba(229,62,62,0.1)' : roomAvailable > 3 ? 'rgba(72,187,120,0.1)' : 'rgba(237,137,54,0.1)', color: roomUnavailable ? '#C53030' : roomAvailable > 3 ? '#276749' : '#DD6B20', borderColor: 'transparent' }}>
+                                  {roomUnavailable ? t('hotelDetail.unavailableRoom') : t('hotelDetail.available', { count: roomAvailable })}
                                 </span>
                               </div>
                             </div>
@@ -286,6 +292,11 @@ const HotelDetail = () => {
                   <div>
                     <span style={{ fontSize: '0.7rem', color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('hotelDetail.roomType')}</span>
                     <div style={{ fontWeight: 400, color: 'var(--color-text)', fontSize: '1rem', marginTop: '0.25rem' }}>{selectedRoom.name}</div>
+                    {selectedRoomUnavailable && (
+                      <div style={{ color: 'var(--color-danger)', fontSize: '0.8rem', marginTop: '0.5rem', fontWeight: 400 }}>
+                        {t('hotelDetail.roomUnavailableMessage')}
+                      </div>
+                    )}
                   </div>
                   
                   <div style={{ background: 'var(--color-background)', border: '1px solid var(--color-accent)', padding: '1rem', borderRadius: 'var(--radius-sm)' }}>
@@ -306,9 +317,15 @@ const HotelDetail = () => {
               )}
 
               {user?.role === 'ROLE_USER' ? (
+                selectedRoomUnavailable ? (
+                  <button type="button" className="btn btn-primary btn-full" disabled style={{ justifyContent: 'center', height: 50, opacity: 0.55, cursor: 'not-allowed' }}>
+                    {t('hotelDetail.unavailableRoom')}
+                  </button>
+                ) : (
                 <Link to={`/booking/${hotel.id_hotel}?roomTypeId=${activeRoom}`} className="btn btn-primary btn-full" style={{ justifyContent: 'center', height: 50, background: 'var(--color-primary)' }}>
                   {t('hotelDetail.reserve')}
                 </Link>
+                )
               ) : !user ? (
                 <Link to={`/login?redirect=/hotels/${hotel.id_hotel}`} className="btn btn-dark btn-full" style={{ justifyContent: 'center', height: 50 }}>
                   {t('hotelDetail.signInToBook')}

@@ -26,6 +26,8 @@ const isBeforeDate = (value, minValue) => {
   return dateFromInput(value) < dateFromInput(minValue);
 };
 
+const getRoomAvailability = (room) => Number(room?.room_available ?? room?.roomAvailable ?? 0);
+
 const monthLabel = (date) => date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
 
 const getCalendarCells = (monthDate) => {
@@ -111,6 +113,9 @@ const Booking = () => {
   }, [form.for_self, user]);
 
   const selectedRoom = rooms.find(r => r.id_room_type === parseInt(form.room_type_id));
+  const selectedRoomAvailable = getRoomAvailability(selectedRoom);
+  const selectedRoomUnavailable = selectedRoom && selectedRoomAvailable <= 0;
+  const bookingBlocked = !selectedRoom || selectedRoomUnavailable;
   const nights = form.check_in && form.check_out ? diffDays(form.check_in, form.check_out) : 0;
   const totalPrice = selectedRoom ? selectedRoom.price_per_night * Math.max(nights, 1) : 0;
   const checkOutMin = form.check_in ? addDays(form.check_in, 1) : tomorrow;
@@ -149,6 +154,8 @@ const Booking = () => {
     e.preventDefault();
     if (!form.check_out) return setError('Pilih tanggal check-out terlebih dahulu');
     if (form.check_out <= form.check_in) return setError('Tanggal check-out harus setelah check-in');
+    if (!selectedRoom) return setError('Pilih tipe kamar terlebih dahulu');
+    if (selectedRoomUnavailable) return setError('Tipe kamar ini sedang tidak tersedia. Silakan pilih tipe kamar lain.');
     setSubmitting(true);
     setError('');
     try {
@@ -284,8 +291,20 @@ const Booking = () => {
                 <div>
                   <label className="label">Tipe Kamar *</label>
                   <select className="input booking-solid-input" value={form.room_type_id} onChange={e => setForm(f => ({ ...f, room_type_id: parseInt(e.target.value) }))} required>
-                    {rooms.map(r => <option key={r.id_room_type} value={r.id_room_type}>{r.name}</option>)}
+                    {rooms.map(r => {
+                      const available = getRoomAvailability(r);
+                      return (
+                        <option key={r.id_room_type} value={r.id_room_type} disabled={available <= 0}>
+                          {r.name}{available <= 0 ? ' - Tidak tersedia' : ` - ${available} tersedia`}
+                        </option>
+                      );
+                    })}
                   </select>
+                  {selectedRoomUnavailable && (
+                    <p style={{ color: 'var(--color-danger)', fontSize: '0.8rem', marginTop: '0.5rem', fontWeight: 400 }}>
+                      Tipe kamar ini sedang tidak tersedia. Silakan pilih tipe kamar lain.
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="label">Jumlah Tamu *</label>
@@ -371,6 +390,10 @@ const Booking = () => {
                     <span>Tipe Kamar</span>
                     <span>{selectedRoom.name}</span>
                   </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: selectedRoomUnavailable ? 'var(--color-danger)' : 'var(--color-muted)' }}>
+                    <span>Ketersediaan</span>
+                    <span>{selectedRoomUnavailable ? 'Tidak tersedia' : `${selectedRoomAvailable} kamar`}</span>
+                  </div>
                   {form.check_in && (
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span>Tanggal</span>
@@ -407,16 +430,17 @@ const Booking = () => {
                 </div>
               )}
 
-              <button type="submit" className="btn btn-primary btn-full animate-float" disabled={submitting} 
+              <button type="submit" className="btn btn-primary btn-full animate-float" disabled={submitting || bookingBlocked}
                 style={{ 
                   marginTop: '2rem', 
                   justifyContent: 'center', 
                   height: 56, 
                   background: 'var(--color-primary)', 
-                  opacity: submitting ? 0.7 : 1,
+                  opacity: submitting || bookingBlocked ? 0.55 : 1,
+                  cursor: submitting || bookingBlocked ? 'not-allowed' : 'pointer',
                   animation: 'none'
                 }}>
-                {submitting ? 'Processing...' : 'Lanjutkan Pembayaran'}
+                {!selectedRoom ? 'Pilih Tipe Kamar' : selectedRoomUnavailable ? 'Kamar Tidak Tersedia' : submitting ? 'Processing...' : 'Lanjutkan Pembayaran'}
               </button>
               <div className="booking-secure-note">
                 <ShieldCheck size={14} />
