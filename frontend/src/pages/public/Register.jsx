@@ -129,18 +129,18 @@ const Register = () => {
             <div className="auth-grid-2">
               <div className="auth-field">
                 <label className="label">Nama Depan *</label>
-                <input className="input" placeholder="Budi" value={form.first_name} onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))} required />
+                <input className="input" placeholder="Afi Naufal" value={form.first_name} onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))} required />
               </div>
               <div className="auth-field">
                 <label className="label">Nama Belakang</label>
-                <input className="input" placeholder="Santoso" value={form.last_name} onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))} />
+                <input className="input" placeholder="Riski Yang" value={form.last_name} onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))} />
               </div>
             </div>
 
             <div className="auth-grid-2">
               <div className="auth-field">
                 <label className="label">Umur *</label>
-                <input className="input" type="number" min="17" placeholder="22" value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))} required />
+                <input className="input" type="number" min="17" placeholder="25" value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))} required />
               </div>
               <div className="auth-field">
                 <label className="label">Kota *</label>
