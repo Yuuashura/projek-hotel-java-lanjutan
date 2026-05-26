@@ -5,6 +5,7 @@ import com.ngninep.hotel.dto.res.CityResponse;
 import com.ngninep.hotel.entity.City;
 import com.ngninep.hotel.repository.CityRepository;
 import com.ngninep.hotel.service.CityService;
+import com.ngninep.hotel.util.Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class CityServiceImpl implements CityService {
     @Override
     public CityResponse getById(int id) {
         City city = cityRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kota tidak ditemukan"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.CITY_NOT_FOUND));
         return mapToResponse(city);
     }
 
@@ -53,7 +54,7 @@ public class CityServiceImpl implements CityService {
     @Override
     public CityResponse update(int id, CityRequest request) {
         City city = cityRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kota tidak ditemukan"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.CITY_NOT_FOUND));
         
         city.setName(request.getName());
         city.setProvince(request.getProvince());
@@ -64,7 +65,7 @@ public class CityServiceImpl implements CityService {
     @Override
     public void delete(int id) {
         City city = cityRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kota tidak ditemukan"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.CITY_NOT_FOUND));
         cityRepository.delete(city);
     }
 }

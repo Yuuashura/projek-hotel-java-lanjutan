@@ -327,7 +327,7 @@ const HotelDetail = () => {
                 </Link>
                 )
               ) : !user ? (
-                <Link to={`/login?redirect=/hotels/${hotel.id_hotel}`} className="btn btn-dark btn-full" style={{ justifyContent: 'center', height: 50 }}>
+                <Link to={`/login?redirect=/hotels/${hotel.id_hotel}`} className="btn btn-full hotel-login-book-btn" style={{ justifyContent: 'center', height: 50 }}>
                   {t('hotelDetail.signInToBook')}
                 </Link>
               ) : (

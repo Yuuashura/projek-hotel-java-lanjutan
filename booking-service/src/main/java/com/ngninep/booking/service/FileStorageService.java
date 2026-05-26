@@ -1,5 +1,6 @@
 package com.ngninep.booking.service;
 
+import com.ngninep.booking.util.Message;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -46,19 +47,19 @@ public class FileStorageService {
             Files.copy(file.getInputStream(), targetFile, StandardCopyOption.REPLACE_EXISTING);
             return publicPath + fileName;
         } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Gagal menyimpan file");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, Message.FILE_SAVE_FAILED);
         }
     }
 
     private void validateImage(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File gambar tidak boleh kosong");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.IMAGE_FILE_EMPTY);
         }
         if (file.getSize() > MAX_IMAGE_SIZE) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ukuran file maksimal 5MB");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.IMAGE_FILE_MAX_SIZE);
         }
         if (!ALLOWED_IMAGE_TYPES.contains(file.getContentType())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Format gambar harus JPG, PNG, atau WEBP");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.IMAGE_FILE_INVALID_FORMAT);
         }
     }
 

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { User, Lock, Camera, Save, AlertCircle, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
-import { validateImageFile } from '../../utils/uploads';
+import { getImageUrl, validateImageFile } from '../../utils/uploads';
 
 const Profile = () => {
   const { user, login, token, logout } = useAuth();
@@ -109,7 +109,7 @@ const Profile = () => {
           <div style={{ position: 'relative' }}>
             <div style={{ width: 88, height: 88, borderRadius: '50%', border: '1px solid var(--color-accent)', background: 'var(--color-surface)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {user?.profile_picture ? (
-                <img src={user.profile_picture} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={getImageUrl(user.profile_picture)} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 <User size={36} style={{ color: 'var(--color-muted)' }} />
               )}

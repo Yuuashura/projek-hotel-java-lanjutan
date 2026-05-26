@@ -5,10 +5,12 @@ import com.ngninep.booking.dto.req.PaymentRequest;
 import com.ngninep.booking.dto.req.UpdateStatusRequest;
 import com.ngninep.booking.dto.res.BookingResponse;
 import com.ngninep.booking.dto.res.BookingStatsResponse;
+import com.ngninep.booking.dto.res.PagedResult;
 import com.ngninep.booking.dto.res.WebResponse;
 import com.ngninep.booking.entity.BookingStatus;
 import com.ngninep.booking.service.FileStorageService;
 import com.ngninep.booking.service.BookingService;
+import com.ngninep.booking.util.Message;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -36,7 +38,7 @@ public class BookingController {
         Object credentials = authentication.getCredentials();
         if (credentials == null) {
             throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED, "User ID tidak ditemukan dalam token"
+                    HttpStatus.UNAUTHORIZED, Message.USER_ID_NOT_FOUND_IN_TOKEN
             );
         }
         return (Integer) credentials;
@@ -49,7 +51,7 @@ public class BookingController {
         int customerId = getCurrentUserId();
         WebResponse<BookingResponse> response = WebResponse.<BookingResponse>builder()
                 .status("200")
-                .message("Pesanan berhasil dibuat")
+                .message(Message.BOOKING_CREATED)
                 .data(bookingService.createBooking(request, customerId))
                 .build();
         return ResponseEntity.ok(response);
@@ -63,10 +65,12 @@ public class BookingController {
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size) {
         int customerId = getCurrentUserId();
+        PagedResult<BookingResponse> result = bookingService.getMyBookings(customerId, status, page, size);
         WebResponse<List<BookingResponse>> response = WebResponse.<List<BookingResponse>>builder()
                 .status("200")
-                .message("Berhasil mengambil data pesanan")
-                .data(bookingService.getMyBookings(customerId, status, page, size))
+                .message(Message.BOOKING_DATA_FETCHED)
+                .data(result.getData())
+                .pagination(result.getPagination())
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -82,7 +86,7 @@ public class BookingController {
         
         WebResponse<BookingResponse> response = WebResponse.<BookingResponse>builder()
                 .status("200")
-                .message("Pembayaran berhasil diproses")
+                .message(Message.BOOKING_PAYMENT_PROCESSED)
                 .data(bookingService.payBooking(id, request, customerId))
                 .build();
         return ResponseEntity.ok(response);
@@ -104,7 +108,7 @@ public class BookingController {
 
         WebResponse<BookingResponse> response = WebResponse.<BookingResponse>builder()
                 .status("200")
-                .message("Pembayaran berhasil diproses")
+                .message(Message.BOOKING_PAYMENT_PROCESSED)
                 .data(bookingService.payBooking(id, request, customerId))
                 .build();
         return ResponseEntity.ok(response);
@@ -117,7 +121,7 @@ public class BookingController {
         int customerId = getCurrentUserId();
         WebResponse<BookingResponse> response = WebResponse.<BookingResponse>builder()
                 .status("200")
-                .message("Pesanan berhasil dibatalkan")
+                .message(Message.BOOKING_CANCELLED)
                 .data(bookingService.cancelBooking(id, customerId))
                 .build();
         return ResponseEntity.ok(response);
@@ -129,10 +133,12 @@ public class BookingController {
     public ResponseEntity<WebResponse<List<BookingResponse>>> getAllBookings(
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size) {
+        PagedResult<BookingResponse> result = bookingService.getAllBookings(page, size);
         WebResponse<List<BookingResponse>> response = WebResponse.<List<BookingResponse>>builder()
                 .status("200")
-                .message("Berhasil mengambil semua pesanan")
-                .data(bookingService.getAllBookings(page, size))
+                .message(Message.BOOKING_ALL_FETCHED)
+                .data(result.getData())
+                .pagination(result.getPagination())
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -144,10 +150,12 @@ public class BookingController {
             @PathVariable int hotelId,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size) {
+        PagedResult<BookingResponse> result = bookingService.getBookingsByHotel(hotelId, page, size);
         WebResponse<List<BookingResponse>> response = WebResponse.<List<BookingResponse>>builder()
                 .status("200")
-                .message("Berhasil mengambil pesanan hotel")
-                .data(bookingService.getBookingsByHotel(hotelId, page, size))
+                .message(Message.BOOKING_BY_HOTEL_FETCHED)
+                .data(result.getData())
+                .pagination(result.getPagination())
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -157,7 +165,7 @@ public class BookingController {
     public ResponseEntity<WebResponse<BookingStatsResponse>> getDashboardStats() {
         WebResponse<BookingStatsResponse> response = WebResponse.<BookingStatsResponse>builder()
                 .status("200")
-                .message("Berhasil mengambil statistik booking")
+                .message(Message.BOOKING_STATS_FETCHED)
                 .data(bookingService.getDashboardStats())
                 .build();
         return ResponseEntity.ok(response);
@@ -176,26 +184,25 @@ public class BookingController {
         } catch (IllegalArgumentException ex) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Status booking tidak valid"
+                    Message.BOOKING_STATUS_INVALID
             );
         }
         
         WebResponse<BookingResponse> response = WebResponse.<BookingResponse>builder()
                 .status("200")
-                .message("Status pesanan berhasil diperbarui")
+                .message(Message.BOOKING_STATUS_UPDATED)
                 .data(bookingService.updateStatus(id, status))
                 .build();
         return ResponseEntity.ok(response);
     }
 
-    // Menghapus pesanan secara permanen
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN_APP')")
     public ResponseEntity<WebResponse<Void>> deleteBooking(@PathVariable int id) {
         bookingService.deleteBooking(id);
         WebResponse<Void> response = WebResponse.<Void>builder()
                 .status("200")
-                .message("Pesanan berhasil dihapus secara permanen")
+                .message(Message.BOOKING_DELETED)
                 .build();
         return ResponseEntity.ok(response);
     }

@@ -254,6 +254,38 @@ h1, h2, h3, h4, h5, h6 {
   width: 100%; 
 }
 
+.hotel-login-book-btn {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+  color: #FFFFFF;
+  border-color: transparent;
+  box-shadow: 0 14px 28px rgba(44, 82, 130, 0.16);
+}
+
+.hotel-login-book-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+}
+
+:root[data-theme="dark"] .hotel-login-book-btn {
+  color: #061426;
+  box-shadow: 0 14px 32px rgba(122, 183, 240, 0.2);
+}
+
+.about-cta-panel {
+  background:
+    radial-gradient(circle at 18% 20%, rgba(246, 211, 101, 0.18), transparent 34%),
+    linear-gradient(135deg, #102A43, #1E3A5F);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+:root[data-theme="dark"] .about-cta-panel {
+  background:
+    radial-gradient(circle at 16% 18%, rgba(122,183,240,0.24) 0 1px, transparent 2px),
+    radial-gradient(circle at 78% 32%, rgba(246,211,101,0.18), transparent 30%),
+    linear-gradient(135deg, rgba(10, 22, 46, 0.98), rgba(15, 35, 72, 0.95));
+  border-color: rgba(122,183,240,0.24);
+}
+
 /* Fallback button colors to prevent broken links */
 .btn-orange { background: #D69E2E; color: white; }
 .btn-purple { background: #2B6CB0; color: white; }

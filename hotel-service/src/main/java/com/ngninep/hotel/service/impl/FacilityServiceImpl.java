@@ -5,6 +5,7 @@ import com.ngninep.hotel.dto.res.FacilityResponse;
 import com.ngninep.hotel.entity.Facility;
 import com.ngninep.hotel.repository.FacilityRepository;
 import com.ngninep.hotel.service.FacilityService;
+import com.ngninep.hotel.util.Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class FacilityServiceImpl implements FacilityService {
     @Override
     public FacilityResponse getById(int id) {
         Facility facility = facilityRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Fasilitas tidak ditemukan"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.FACILITY_NOT_FOUND));
         return mapToResponse(facility);
     }
 
@@ -53,7 +54,7 @@ public class FacilityServiceImpl implements FacilityService {
     @Override
     public FacilityResponse update(int id, FacilityRequest request) {
         Facility facility = facilityRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Fasilitas tidak ditemukan"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.FACILITY_NOT_FOUND));
         
         facility.setName(request.getName());
         facility.setIcon(request.getIcon());
@@ -64,7 +65,7 @@ public class FacilityServiceImpl implements FacilityService {
     @Override
     public void delete(int id) {
         Facility facility = facilityRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Fasilitas tidak ditemukan"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.FACILITY_NOT_FOUND));
         facilityRepository.delete(facility);
     }
 }

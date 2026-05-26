@@ -5,6 +5,7 @@ import com.ngninep.hotel.dto.res.RoomTypeResponse;
 import com.ngninep.hotel.dto.res.WebResponse;
 import com.ngninep.hotel.service.FileStorageService;
 import com.ngninep.hotel.service.RoomTypeService;
+import com.ngninep.hotel.util.Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,7 +28,7 @@ public class RoomTypeController {
     public ResponseEntity<WebResponse<List<RoomTypeResponse>>> getByHotel(@PathVariable int hotelId) {
         WebResponse<List<RoomTypeResponse>> response = WebResponse.<List<RoomTypeResponse>>builder()
                 .status("200")
-                .message("Success")
+                .message(Message.SUCCESS)
                 .data(roomTypeService.getByHotelId(hotelId))
                 .build();
         return ResponseEntity.ok(response);
@@ -37,7 +38,7 @@ public class RoomTypeController {
     public ResponseEntity<WebResponse<RoomTypeResponse>> getById(@PathVariable int id) {
         WebResponse<RoomTypeResponse> response = WebResponse.<RoomTypeResponse>builder()
                 .status("200")
-                .message("Success")
+                .message(Message.SUCCESS)
                 .data(roomTypeService.getById(id))
                 .build();
         return ResponseEntity.ok(response);
@@ -49,7 +50,7 @@ public class RoomTypeController {
     public ResponseEntity<WebResponse<RoomTypeResponse>> create(@Valid @RequestBody RoomTypeRequest request) {
         WebResponse<RoomTypeResponse> response = WebResponse.<RoomTypeResponse>builder()
                 .status("200")
-                .message("Success")
+                .message(Message.SUCCESS)
                 .data(roomTypeService.create(request))
                 .build();
         return ResponseEntity.ok(response);
@@ -60,7 +61,7 @@ public class RoomTypeController {
     public ResponseEntity<WebResponse<RoomTypeResponse>> update(@PathVariable int id, @Valid @RequestBody RoomTypeRequest request) {
         WebResponse<RoomTypeResponse> response = WebResponse.<RoomTypeResponse>builder()
                 .status("200")
-                .message("Success")
+                .message(Message.SUCCESS)
                 .data(roomTypeService.update(id, request))
                 .build();
         return ResponseEntity.ok(response);
@@ -72,7 +73,7 @@ public class RoomTypeController {
         roomTypeService.delete(id);
         WebResponse<Void> response = WebResponse.<Void>builder()
                 .status("200")
-                .message("Success")
+                .message(Message.SUCCESS)
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -83,7 +84,7 @@ public class RoomTypeController {
         String imageUrl = fileStorageService.saveRoomTypeImage(file);
         WebResponse<Map<String, String>> response = WebResponse.<Map<String, String>>builder()
                 .status("200")
-                .message("Gambar tipe kamar berhasil diunggah")
+                .message(Message.ROOM_TYPE_IMAGE_UPLOADED)
                 .data(Map.of("url", imageUrl))
                 .build();
         return ResponseEntity.ok(response);

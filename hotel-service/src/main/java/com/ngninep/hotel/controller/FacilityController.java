@@ -4,6 +4,7 @@ import com.ngninep.hotel.dto.req.FacilityRequest;
 import com.ngninep.hotel.dto.res.FacilityResponse;
 import com.ngninep.hotel.dto.res.WebResponse;
 import com.ngninep.hotel.service.FacilityService;
+import com.ngninep.hotel.util.Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,7 +25,7 @@ public class FacilityController {
     public ResponseEntity<WebResponse<List<FacilityResponse>>> getAll() {
         WebResponse<List<FacilityResponse>> response = WebResponse.<List<FacilityResponse>>builder()
                 .status("200")
-                .message("Success")
+                .message(Message.SUCCESS)
                 .data(facilityService.getAll())
                 .build();
         return ResponseEntity.ok(response);
@@ -34,7 +35,7 @@ public class FacilityController {
     public ResponseEntity<WebResponse<FacilityResponse>> getById(@PathVariable int id) {
         WebResponse<FacilityResponse> response = WebResponse.<FacilityResponse>builder()
                 .status("200")
-                .message("Success")
+                .message(Message.SUCCESS)
                 .data(facilityService.getById(id))
                 .build();
         return ResponseEntity.ok(response);
@@ -46,7 +47,7 @@ public class FacilityController {
     public ResponseEntity<WebResponse<FacilityResponse>> create(@Valid @RequestBody FacilityRequest request) {
         WebResponse<FacilityResponse> response = WebResponse.<FacilityResponse>builder()
                 .status("200")
-                .message("Success")
+                .message(Message.SUCCESS)
                 .data(facilityService.create(request))
                 .build();
         return ResponseEntity.ok(response);
@@ -57,7 +58,7 @@ public class FacilityController {
     public ResponseEntity<WebResponse<FacilityResponse>> update(@PathVariable int id, @Valid @RequestBody FacilityRequest request) {
         WebResponse<FacilityResponse> response = WebResponse.<FacilityResponse>builder()
                 .status("200")
-                .message("Success")
+                .message(Message.SUCCESS)
                 .data(facilityService.update(id, request))
                 .build();
         return ResponseEntity.ok(response);
@@ -69,7 +70,7 @@ public class FacilityController {
         facilityService.delete(id);
         WebResponse<Void> response = WebResponse.<Void>builder()
                 .status("200")
-                .message("Success")
+                .message(Message.SUCCESS)
                 .build();
         return ResponseEntity.ok(response);
     }

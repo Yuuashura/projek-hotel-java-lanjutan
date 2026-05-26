@@ -5,6 +5,8 @@ import com.ngninep.hotel.dto.res.CityResponse;
 import com.ngninep.hotel.dto.res.FacilityResponse;
 import com.ngninep.hotel.dto.res.HotelImageResponse;
 import com.ngninep.hotel.dto.res.HotelResponse;
+import com.ngninep.hotel.dto.res.PageMetadata;
+import com.ngninep.hotel.dto.res.PagedResult;
 import com.ngninep.hotel.dto.res.RoomTypeImageResponse;
 import com.ngninep.hotel.entity.City;
 import com.ngninep.hotel.entity.Facility;
@@ -17,6 +19,7 @@ import com.ngninep.hotel.repository.HotelFacilityRepository;
 import com.ngninep.hotel.repository.HotelImageRepository;
 import com.ngninep.hotel.repository.HotelRepository;
 import com.ngninep.hotel.service.HotelService;
+import com.ngninep.hotel.util.Message;
 import lombok.RequiredArgsConstructor;
 
 import org.apache.poi.ss.usermodel.Sheet;
@@ -131,9 +134,9 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<HotelResponse> search(String keyword, Integer cityId, Long minPrice, Long maxPrice,
-                                      Float minRating, Boolean featured, Boolean onSale,
-                                      List<Integer> facilityIds, String sortBy, Integer page, Integer size) {
+    public PagedResult<HotelResponse> search(String keyword, Integer cityId, Long minPrice, Long maxPrice,
+                                             Float minRating, Boolean featured, Boolean onSale,
+                                             List<Integer> facilityIds, String sortBy, Integer page, Integer size) {
         List<Hotel> hotels = hotelRepository.findAll().stream()
                 .filter(hotel -> matchesKeyword(hotel, keyword))
                 .filter(hotel -> cityId == null || (hotel.getCity() != null && hotel.getCity().getIdCity() == cityId))
@@ -145,9 +148,14 @@ public class HotelServiceImpl implements HotelService {
                 .sorted(getHotelComparator(sortBy))
                 .collect(Collectors.toList());
 
-        return applyPagination(hotels, page, size).stream()
+        List<HotelResponse> data = applyPagination(hotels, page, size).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+
+        return PagedResult.<HotelResponse>builder()
+                .data(data)
+                .pagination(buildPagination(hotels.size(), data.size(), page, size))
+                .build();
     }
 
     @Override
@@ -238,7 +246,7 @@ public class HotelServiceImpl implements HotelService {
     @Override
     public HotelResponse getById(int id) {
         Hotel hotel = hotelRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotel tidak ditemukan"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.HOTEL_NOT_FOUND));
         return mapToResponse(hotel);
     }
 
@@ -246,9 +254,9 @@ public class HotelServiceImpl implements HotelService {
     @Transactional
     public HotelResponse addFacility(int hotelId, int facilityId) {
         Hotel hotel = hotelRepository.findById(hotelId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotel tidak ditemukan"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.HOTEL_NOT_FOUND));
         Facility facility = facilityRepository.findById(facilityId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Fasilitas tidak valid"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.FACILITY_INVALID));
 
         if (!hotelFacilityRepository.existsByHotel_IdHotelAndFacility_IdFacility(hotelId, facilityId)) {
             hotelFacilityRepository.save(HotelFacility.builder()
@@ -264,10 +272,10 @@ public class HotelServiceImpl implements HotelService {
     @Transactional
     public HotelResponse removeFacility(int hotelId, int facilityId) {
         if (!hotelRepository.existsById(hotelId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotel tidak ditemukan");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, Message.HOTEL_NOT_FOUND);
         }
         if (!facilityRepository.existsById(facilityId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Fasilitas tidak valid");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.FACILITY_INVALID);
         }
 
         hotelFacilityRepository.deleteByHotel_IdHotelAndFacility_IdFacility(hotelId, facilityId);
@@ -278,7 +286,7 @@ public class HotelServiceImpl implements HotelService {
     @Transactional
     public HotelResponse create(HotelRequest request) {
         City city = cityRepository.findById(request.getCityId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kota tidak valid"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.CITY_INVALID));
 
         Hotel hotel = Hotel.builder()
                 .name(request.getName())
@@ -317,10 +325,10 @@ public class HotelServiceImpl implements HotelService {
     @Transactional
     public HotelResponse update(int id, HotelRequest request) {
         Hotel hotel = hotelRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotel tidak ditemukan"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.HOTEL_NOT_FOUND));
 
         City city = cityRepository.findById(request.getCityId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kota tidak valid"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.CITY_INVALID));
 
         hotel.setName(request.getName());
         hotel.setCity(city);
@@ -358,7 +366,7 @@ public class HotelServiceImpl implements HotelService {
     @Override
     public void delete(int id) {
         Hotel hotel = hotelRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotel tidak ditemukan"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.HOTEL_NOT_FOUND));
         hotelRepository.delete(hotel);
     }
 
@@ -370,12 +378,12 @@ public class HotelServiceImpl implements HotelService {
     public void uploadExcel(MultipartFile file) throws Exception {
         // validasi file kosong
         if (file.isEmpty()) {
-            throw new RuntimeException("File kosong");
+            throw new RuntimeException(Message.FILE_EMPTY);
         }
 
         String fileName = file.getOriginalFilename();
         if (fileName == null || !fileName.endsWith(".xlsx")) {
-            throw new RuntimeException("File harus berupa excel");
+            throw new RuntimeException(Message.FILE_MUST_BE_EXCEL);
         }
 
         // create folder jika belum ada
@@ -424,7 +432,7 @@ public class HotelServiceImpl implements HotelService {
             if (row.getCell(1) != null) {
                 int cityId = (int) row.getCell(1).getNumericCellValue();
                 City city = cityRepository.findById(cityId)
-                        .orElseThrow(() -> new RuntimeException("Kota dengan ID " + cityId + " tidak ditemukan"));
+                        .orElseThrow(() -> new RuntimeException(String.format(Message.CITY_WITH_ID_NOT_FOUND, cityId)));
                 newHotel.setCity(city);
             }
 
@@ -552,6 +560,22 @@ public class HotelServiceImpl implements HotelService {
         int fromIndex = Math.min(safePage * safeSize, hotels.size());
         int toIndex = Math.min(fromIndex + safeSize, hotels.size());
         return hotels.subList(fromIndex, toIndex);
+    }
+
+    private PageMetadata buildPagination(long totalItems, int returnedItems, Integer page, Integer size) {
+        boolean paged = page != null || size != null;
+        int safePage = paged && page != null && page >= 0 ? page : 0;
+        int safeSize = paged && size != null && size > 0 ? Math.min(size, 100) : (paged ? 10 : returnedItems);
+        int totalPages = safeSize > 0 ? (int) Math.ceil((double) totalItems / safeSize) : 0;
+
+        return PageMetadata.builder()
+                .currentPage(safePage)
+                .pageSize(safeSize)
+                .totalItems(totalItems)
+                .totalPages(totalPages)
+                .hasNext(paged && safePage + 1 < totalPages)
+                .hasPrevious(paged && safePage > 0 && totalPages > 0)
+                .build();
     }
 
     private int safeLimit(Integer limit) {

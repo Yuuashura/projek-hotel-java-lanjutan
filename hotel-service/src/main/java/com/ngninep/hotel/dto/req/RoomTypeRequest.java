@@ -1,6 +1,7 @@
 package com.ngninep.hotel.dto.req;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ngninep.hotel.util.Message;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -14,10 +15,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RoomTypeRequest {
     
-    @NotBlank(message = "Nama tipe kamar tidak boleh kosong")
+    @NotBlank(message = Message.ROOM_TYPE_NAME_REQUIRED)
     private String name;
     
-    @NotNull(message = "ID Hotel tidak boleh kosong")
+    @NotNull(message = Message.HOTEL_ID_REQUIRED)
     @JsonProperty("hotel_id")
     private Integer hotelId;
     

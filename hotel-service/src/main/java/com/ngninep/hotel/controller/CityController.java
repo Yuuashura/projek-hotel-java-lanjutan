@@ -4,6 +4,7 @@ import com.ngninep.hotel.dto.req.CityRequest;
 import com.ngninep.hotel.dto.res.CityResponse;
 import com.ngninep.hotel.dto.res.WebResponse;
 import com.ngninep.hotel.service.CityService;
+import com.ngninep.hotel.util.Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,7 +25,7 @@ public class CityController {
     public ResponseEntity<WebResponse<List<CityResponse>>> getAll() {
         WebResponse<List<CityResponse>> response = WebResponse.<List<CityResponse>>builder()
                 .status("200")
-                .message("Success")
+                .message(Message.SUCCESS)
                 .data(cityService.getAll())
                 .build();
         return ResponseEntity.ok(response);
@@ -34,7 +35,7 @@ public class CityController {
     public ResponseEntity<WebResponse<CityResponse>> getById(@PathVariable int id) {
         WebResponse<CityResponse> response = WebResponse.<CityResponse>builder()
                 .status("200")
-                .message("Success")
+                .message(Message.SUCCESS)
                 .data(cityService.getById(id))
                 .build();
         return ResponseEntity.ok(response);
@@ -46,7 +47,7 @@ public class CityController {
     public ResponseEntity<WebResponse<CityResponse>> create(@Valid @RequestBody CityRequest request) {
         WebResponse<CityResponse> response = WebResponse.<CityResponse>builder()
                 .status("200")
-                .message("Success")
+                .message(Message.SUCCESS)
                 .data(cityService.create(request))
                 .build();
         return ResponseEntity.ok(response);
@@ -57,7 +58,7 @@ public class CityController {
     public ResponseEntity<WebResponse<CityResponse>> update(@PathVariable int id, @Valid @RequestBody CityRequest request) {
         WebResponse<CityResponse> response = WebResponse.<CityResponse>builder()
                 .status("200")
-                .message("Success")
+                .message(Message.SUCCESS)
                 .data(cityService.update(id, request))
                 .build();
         return ResponseEntity.ok(response);
@@ -69,7 +70,7 @@ public class CityController {
         cityService.delete(id);
         WebResponse<Void> response = WebResponse.<Void>builder()
                 .status("200")
-                .message("Success")
+                .message(Message.SUCCESS)
                 .build();
         return ResponseEntity.ok(response);
     }

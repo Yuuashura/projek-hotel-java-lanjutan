@@ -4,6 +4,7 @@ import com.ngninep.booking.dto.req.BookingRequest;
 import com.ngninep.booking.dto.req.PaymentRequest;
 import com.ngninep.booking.dto.res.BookingResponse;
 import com.ngninep.booking.dto.res.BookingStatsResponse;
+import com.ngninep.booking.dto.res.PagedResult;
 import com.ngninep.booking.entity.BookingStatus;
 
 import java.util.List;
@@ -11,11 +12,11 @@ import java.util.List;
 public interface BookingService {
     BookingResponse createBooking(BookingRequest request, int customerId);
     
-    List<BookingResponse> getMyBookings(int customerId, String statusFilter, Integer page, Integer size);
+    PagedResult<BookingResponse> getMyBookings(int customerId, String statusFilter, Integer page, Integer size);
     
-    List<BookingResponse> getAllBookings(Integer page, Integer size);
+    PagedResult<BookingResponse> getAllBookings(Integer page, Integer size);
     
-    List<BookingResponse> getBookingsByHotel(int hotelId, Integer page, Integer size);
+    PagedResult<BookingResponse> getBookingsByHotel(int hotelId, Integer page, Integer size);
     
     BookingResponse getBookingById(int id);
     

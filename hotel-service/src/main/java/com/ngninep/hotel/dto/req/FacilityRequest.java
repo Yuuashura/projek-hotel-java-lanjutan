@@ -1,5 +1,6 @@
 package com.ngninep.hotel.dto.req;
 
+import com.ngninep.hotel.util.Message;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FacilityRequest {
-    @NotBlank(message = "Nama fasilitas tidak boleh kosong")
+    @NotBlank(message = Message.FACILITY_NAME_REQUIRED)
     private String name;
     
     private String icon;

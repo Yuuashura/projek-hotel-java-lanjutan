@@ -4,15 +4,19 @@ import com.ngninep.booking.dto.req.BookingRequest;
 import com.ngninep.booking.dto.req.PaymentRequest;
 import com.ngninep.booking.dto.res.BookingResponse;
 import com.ngninep.booking.dto.res.BookingStatsResponse;
+import com.ngninep.booking.dto.res.PageMetadata;
+import com.ngninep.booking.dto.res.PagedResult;
 import com.ngninep.booking.dto.res.RoomTypeSnapshot;
 import com.ngninep.booking.dto.res.WebResponse;
 import com.ngninep.booking.entity.Booking;
 import com.ngninep.booking.entity.BookingStatus;
 import com.ngninep.booking.repository.BookingRepository;
 import com.ngninep.booking.service.BookingService;
+import com.ngninep.booking.util.Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpMethod;
@@ -101,55 +105,54 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public List<BookingResponse> getMyBookings(int customerId, String statusFilter, Integer page, Integer size) {
+    public PagedResult<BookingResponse> getMyBookings(int customerId, String statusFilter, Integer page, Integer size) {
         expirePendingBookings();
         List<Booking> bookings;
         Pageable pageable = toPageable(page, size);
         if ("active".equalsIgnoreCase(statusFilter)) {
-            bookings = pageable != null
-                    ? bookingRepository.findByCustomerIdAndStatusIn(customerId, ACTIVE_STATUSES, pageable).getContent()
-                    : bookingRepository.findByCustomerIdAndStatusIn(customerId, ACTIVE_STATUSES);
+            if (pageable != null) {
+                return mapPage(bookingRepository.findByCustomerIdAndStatusIn(customerId, ACTIVE_STATUSES, pageable));
+            }
+            bookings = bookingRepository.findByCustomerIdAndStatusIn(customerId, ACTIVE_STATUSES);
         } else if ("history".equalsIgnoreCase(statusFilter)) {
-            bookings = pageable != null
-                    ? bookingRepository.findByCustomerIdAndStatusIn(customerId, HISTORY_STATUSES, pageable).getContent()
-                    : bookingRepository.findByCustomerIdAndStatusIn(customerId, HISTORY_STATUSES);
+            if (pageable != null) {
+                return mapPage(bookingRepository.findByCustomerIdAndStatusIn(customerId, HISTORY_STATUSES, pageable));
+            }
+            bookings = bookingRepository.findByCustomerIdAndStatusIn(customerId, HISTORY_STATUSES);
         } else {
-            bookings = pageable != null
-                    ? bookingRepository.findByCustomerId(customerId, pageable).getContent()
-                    : bookingRepository.findByCustomerId(customerId);
+            if (pageable != null) {
+                return mapPage(bookingRepository.findByCustomerId(customerId, pageable));
+            }
+            bookings = bookingRepository.findByCustomerId(customerId);
         }
-        return bookings.stream().map(this::mapToResponse).collect(Collectors.toList());
+        return mapList(bookings);
     }
 
     @Override
     @Transactional
-    public List<BookingResponse> getAllBookings(Integer page, Integer size) {
+    public PagedResult<BookingResponse> getAllBookings(Integer page, Integer size) {
         expirePendingBookings();
         Pageable pageable = toPageable(page, size);
-        List<Booking> bookings = pageable != null
-                ? bookingRepository.findAll(pageable).getContent()
-                : bookingRepository.findAll();
-        return bookings.stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        if (pageable != null) {
+            return mapPage(bookingRepository.findAll(pageable));
+        }
+        return mapList(bookingRepository.findAll());
     }
 
     @Override
     @Transactional
-    public List<BookingResponse> getBookingsByHotel(int hotelId, Integer page, Integer size) {
+    public PagedResult<BookingResponse> getBookingsByHotel(int hotelId, Integer page, Integer size) {
         expirePendingBookings();
         Pageable pageable = toPageable(page, size);
-        List<Booking> bookings = pageable != null
-                ? bookingRepository.findByHotelId(hotelId, pageable).getContent()
-                : bookingRepository.findByHotelId(hotelId);
-        return bookings.stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        if (pageable != null) {
+            return mapPage(bookingRepository.findByHotelId(hotelId, pageable));
+        }
+        return mapList(bookingRepository.findByHotelId(hotelId));
     }
 
     private Booking getBookingEntityById(int id) {
         return bookingRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking tidak ditemukan"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.BOOKING_NOT_FOUND));
     }
 
     @Override
@@ -166,17 +169,17 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = getBookingEntityById(id);
         
         if (booking.getCustomerId() != customerId) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Anda tidak memiliki akses ke booking ini");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, Message.BOOKING_ACCESS_DENIED);
         }
         
         if (booking.getStatus() != BookingStatus.PENDING) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Booking sudah diproses atau dibatalkan");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.BOOKING_ALREADY_PROCESSED);
         }
 
         if (booking.getPaymentDeadline() != null && LocalDateTime.now().isAfter(booking.getPaymentDeadline())) {
             booking.setStatus(BookingStatus.CANCELLED);
             bookingRepository.save(booking);
-            throw new ResponseStatusException(HttpStatus.GONE, "Batas waktu pembayaran sudah lewat");
+            throw new ResponseStatusException(HttpStatus.GONE, Message.BOOKING_PAYMENT_DEADLINE_PASSED);
         }
         
         booking.setPaymentMethod(request.getPaymentMethod());
@@ -202,11 +205,11 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = getBookingEntityById(id);
         
         if (booking.getCustomerId() != customerId) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Anda tidak memiliki akses ke booking ini");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, Message.BOOKING_ACCESS_DENIED);
         }
         
         if (booking.getStatus() != BookingStatus.PENDING) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hanya pesanan dengan status PENDING yang bisa dibatalkan");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.BOOKING_ONLY_PENDING_CAN_BE_CANCELLED);
         }
         
         booking.setStatus(BookingStatus.CANCELLED);
@@ -259,11 +262,11 @@ public class BookingServiceImpl implements BookingService {
 
     private void validateBookingDates(BookingRequest request) {
         if (!request.getCheckOut().isAfter(request.getCheckIn())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tanggal check-out harus setelah check-in");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.CHECK_OUT_AFTER_CHECK_IN);
         }
 
         if (request.getCheckIn().isBefore(LocalDate.now())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tanggal check-in tidak boleh tanggal lampau");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.CHECK_IN_NOT_IN_PAST);
         }
     }
 
@@ -280,26 +283,26 @@ public class BookingServiceImpl implements BookingService {
 
             WebResponse<RoomTypeSnapshot> body = response.getBody();
             if (!response.getStatusCode().is2xxSuccessful() || body == null || body.getData() == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipe kamar tidak valid atau tidak tersedia");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.ROOM_TYPE_INVALID_OR_UNAVAILABLE);
             }
 
             return body.getData();
         } catch (RestClientException ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipe kamar tidak valid atau tidak tersedia");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.ROOM_TYPE_INVALID_OR_UNAVAILABLE);
         }
     }
 
     private void validateRoomType(BookingRequest request, RoomTypeSnapshot roomType) {
         if (roomType.getHotelId() != request.getHotelId()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipe kamar tidak sesuai dengan hotel");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.ROOM_TYPE_NOT_MATCH_HOTEL);
         }
 
         if (request.getNumberOfGuest() > roomType.getMaxGuest()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Jumlah tamu melebihi kapasitas kamar");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.GUEST_EXCEEDS_ROOM_CAPACITY);
         }
 
         if (roomType.getRoomAvailable() <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kamar tidak tersedia");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.ROOM_UNAVAILABLE);
         }
 
         long bookedRooms = bookingRepository.countByRoomTypeIdAndStatusInAndCheckInLessThanAndCheckOutGreaterThan(
@@ -310,13 +313,13 @@ public class BookingServiceImpl implements BookingService {
         );
 
         if (bookedRooms >= roomType.getRoomAvailable()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kamar sudah penuh pada tanggal tersebut");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.ROOM_FULL_ON_DATE);
         }
     }
 
     private Long calculateTotalPrice(BookingRequest request, RoomTypeSnapshot roomType) {
         if (roomType.getPricePerNight() == null || roomType.getPricePerNight() < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Harga tipe kamar tidak valid");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.ROOM_TYPE_PRICE_INVALID);
         }
 
         long nights = ChronoUnit.DAYS.between(request.getCheckIn(), request.getCheckOut());
@@ -330,21 +333,21 @@ public class BookingServiceImpl implements BookingService {
 
         if (currentStatus == BookingStatus.CANCELLED || currentStatus == BookingStatus.COMPLETED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Status " + currentStatus + " tidak bisa diubah lagi");
+                    String.format(Message.BOOKING_STATUS_CANNOT_BE_CHANGED, currentStatus));
         }
 
         if (currentStatus == BookingStatus.PENDING &&
                 nextStatus != BookingStatus.CONFIRMED &&
                 nextStatus != BookingStatus.CANCELLED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Booking PENDING hanya bisa dikonfirmasi atau dibatalkan");
+                    Message.BOOKING_PENDING_TRANSITION_ONLY);
         }
 
         if (currentStatus == BookingStatus.CONFIRMED &&
                 nextStatus != BookingStatus.COMPLETED &&
                 nextStatus != BookingStatus.CANCELLED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Booking CONFIRMED hanya bisa diselesaikan atau dibatalkan");
+                    Message.BOOKING_CONFIRMED_TRANSITION_ONLY);
         }
     }
 
@@ -356,5 +359,41 @@ public class BookingServiceImpl implements BookingService {
         int safePage = page != null && page >= 0 ? page : 0;
         int safeSize = size != null && size > 0 ? Math.min(size, 100) : 10;
         return PageRequest.of(safePage, safeSize);
+    }
+
+    private PagedResult<BookingResponse> mapPage(Page<Booking> page) {
+        List<BookingResponse> data = page.getContent().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+
+        return PagedResult.<BookingResponse>builder()
+                .data(data)
+                .pagination(PageMetadata.builder()
+                        .currentPage(page.getNumber())
+                        .pageSize(page.getSize())
+                        .totalItems(page.getTotalElements())
+                        .totalPages(page.getTotalPages())
+                        .hasNext(page.hasNext())
+                        .hasPrevious(page.hasPrevious())
+                        .build())
+                .build();
+    }
+
+    private PagedResult<BookingResponse> mapList(List<Booking> bookings) {
+        List<BookingResponse> data = bookings.stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+
+        return PagedResult.<BookingResponse>builder()
+                .data(data)
+                .pagination(PageMetadata.builder()
+                        .currentPage(0)
+                        .pageSize(data.size())
+                        .totalItems(data.size())
+                        .totalPages(data.isEmpty() ? 0 : 1)
+                        .hasNext(false)
+                        .hasPrevious(false)
+                        .build())
+                .build();
     }
 }

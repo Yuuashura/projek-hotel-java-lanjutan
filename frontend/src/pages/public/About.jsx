@@ -59,7 +59,7 @@ const About = () => {
         </div>
 
         {/* CTA Banner */}
-        <div className="reveal" style={{ background: 'var(--color-text)', borderRadius: 'var(--radius-sm)', padding: '3.5rem 2rem', color: 'white', textAlign: 'center', boxShadow: 'var(--shadow-hover)' }}>
+        <div className="reveal about-cta-panel" style={{ borderRadius: 'var(--radius-sm)', padding: '3.5rem 2rem', color: 'white', textAlign: 'center', boxShadow: 'var(--shadow-hover)' }}>
           <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '2.2rem', color: 'white', marginBottom: '1rem' }}>{t('about.ctaTitle')}</h2>
           <p style={{ color: 'rgba(255,255,255,0.7)', fontWeight: 300, marginBottom: '2.5rem', maxWidth: 500, margin: '0 auto 2.5rem', fontSize: '0.95rem' }}>{t('about.ctaText')}</p>
           <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>

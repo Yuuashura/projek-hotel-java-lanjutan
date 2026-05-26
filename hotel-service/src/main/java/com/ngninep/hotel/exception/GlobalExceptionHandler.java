@@ -1,6 +1,7 @@
 package com.ngninep.hotel.exception;
 
 import com.ngninep.hotel.dto.res.WebResponse;
+import com.ngninep.hotel.util.Message;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -39,7 +40,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<WebResponse<String>> handleGeneral(Exception ex) {
         WebResponse<String> response = WebResponse.<String>builder()
                 .status("500")
-                .message("Terjadi kesalahan: " + ex.getMessage())
+                .message(Message.GENERAL_ERROR_PREFIX + ex.getMessage())
                 .build();
         return ResponseEntity.internalServerError().body(response);
     }

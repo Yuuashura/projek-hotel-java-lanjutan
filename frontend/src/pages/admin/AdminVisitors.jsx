@@ -4,6 +4,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import PaginationControls from '../../components/admin/PaginationControls';
 import LoadingState from '../../components/LoadingState';
 import api from '../../utils/api';
+import { getImageUrl } from '../../utils/uploads';
 import { getErrorMessage, unwrapList } from '../../utils/response';
 import { usePreferences } from '../../context/PreferencesContext';
 
@@ -94,7 +95,7 @@ const AdminVisitors = () => {
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                       <div style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--color-accent)', background: 'var(--color-background)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden', fontWeight: 300, fontSize: '0.9rem', color: 'var(--color-text)' }}>
-                        {u.profile_picture ? <img src={u.profile_picture} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (u.first_name?.[0] || '?')}
+                        {u.profile_picture ? <img src={getImageUrl(u.profile_picture)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (u.first_name?.[0] || '?')}
                       </div>
                       <div>
                         <div style={{ fontWeight: 400, fontSize: '0.9rem', color: 'var(--color-text)' }}>{u.first_name} {u.last_name}</div>

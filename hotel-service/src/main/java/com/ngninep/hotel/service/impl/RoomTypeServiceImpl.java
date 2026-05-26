@@ -10,6 +10,7 @@ import com.ngninep.hotel.repository.HotelRepository;
 import com.ngninep.hotel.repository.RoomTypeImageRepository;
 import com.ngninep.hotel.repository.RoomTypeRepository;
 import com.ngninep.hotel.service.RoomTypeService;
+import com.ngninep.hotel.util.Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -64,7 +65,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     @Override
     public RoomTypeResponse getById(int id) {
         RoomType roomType = roomTypeRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tipe kamar tidak ditemukan"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.ROOM_TYPE_NOT_FOUND));
         return mapToResponse(roomType);
     }
 
@@ -72,7 +73,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     @Transactional
     public RoomTypeResponse create(RoomTypeRequest request) {
         Hotel hotel = hotelRepository.findById(request.getHotelId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hotel tidak valid"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.HOTEL_INVALID));
                 
         RoomType roomType = RoomType.builder()
                 .name(request.getName())
@@ -102,10 +103,10 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     @Transactional
     public RoomTypeResponse update(int id, RoomTypeRequest request) {
         RoomType roomType = roomTypeRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tipe kamar tidak ditemukan"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.ROOM_TYPE_NOT_FOUND));
                 
         Hotel hotel = hotelRepository.findById(request.getHotelId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hotel tidak valid"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.HOTEL_INVALID));
                 
         roomType.setName(request.getName());
         roomType.setHotel(hotel);
@@ -133,7 +134,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     @Override
     public void delete(int id) {
         RoomType roomType = roomTypeRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tipe kamar tidak ditemukan"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.ROOM_TYPE_NOT_FOUND));
         roomTypeRepository.delete(roomType);
     }
 }

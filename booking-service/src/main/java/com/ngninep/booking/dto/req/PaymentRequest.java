@@ -1,6 +1,7 @@
 package com.ngninep.booking.dto.req;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ngninep.booking.util.Message;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,11 +14,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PaymentRequest {
 
-    @NotBlank(message = "Metode pembayaran tidak boleh kosong")
+    @NotBlank(message = Message.PAYMENT_METHOD_REQUIRED)
     @JsonProperty("payment_method")
     private String paymentMethod;
 
-    @NotBlank(message = "Bukti pembayaran tidak boleh kosong")
+    @NotBlank(message = Message.PAYMENT_PROOF_REQUIRED)
     @JsonProperty("payment_proof")
     private String paymentProof;
 }

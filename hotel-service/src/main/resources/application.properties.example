@@ -18,3 +18,5 @@ jwt.expiration=${JWT_EXPIRATION:3600000}
 
 # ===================== FILE UPLOAD =====================
 app.file.upload-path=${APP_FILE_UPLOAD_PATH:uploads/hotel-service}
+spring.servlet.multipart.max-file-size=5MB
+spring.servlet.multipart.max-request-size=6MB
