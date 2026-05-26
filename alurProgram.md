@@ -1208,9 +1208,9 @@ spring.application.name=user-service
 server.port=8081
 
 # Database Configuration (Supabase PostgreSQL)
-spring.datasource.url=jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0
-spring.datasource.username=postgres.yksjudnbzkpgmzbtksad
-spring.datasource.password=yuuashura12
+spring.datasource.url=${SPRING_DATASOURCE_URL}
+spring.datasource.username=${SPRING_DATASOURCE_USERNAME}
+spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}
 spring.datasource.driver-class-name=org.postgresql.Driver
 
 # Hibernate / JPA
@@ -1220,14 +1220,14 @@ spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.properties.hibernate.format_sql=true
 
 # JWT Secret (HARUS SAMA dengan service lainnya)
-jwt.secret=ngninep-user-service-super-secret-key-yang-sangat-panjang-untuk-keamanan-jwt-2025
+jwt.secret=${JWT_SECRET}
 jwt.expiration=3600000
 
 # Email Configuration (OTP Verification)
 spring.mail.host=smtp.gmail.com
 spring.mail.port=587
-spring.mail.username=tzyudistira@gmail.com
-spring.mail.password=lhcu waxx rifj thta
+spring.mail.username=${SPRING_MAIL_USERNAME}
+spring.mail.password=${SPRING_MAIL_PASSWORD}
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
 spring.mail.properties.mail.smtp.starttls.required=true
@@ -1238,9 +1238,9 @@ Konfigurasi `application.properties` di hotel-service:
 server.port=8082
 
 # Database Configuration (Supabase PostgreSQL)
-spring.datasource.url=jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0
-spring.datasource.username=postgres.yksjudnbzkpgmzbtksad
-spring.datasource.password=yuuashura12
+spring.datasource.url=${SPRING_DATASOURCE_URL}
+spring.datasource.username=${SPRING_DATASOURCE_USERNAME}
+spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}
 spring.datasource.driver-class-name=org.postgresql.Driver
 
 # Hibernate / JPA
@@ -1250,7 +1250,7 @@ spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.properties.hibernate.format_sql=true
 
 # JWT Secret (HARUS SAMA dengan service lainnya)
-jwt.secret=ngninep-user-service-super-secret-key-yang-sangat-panjang-untuk-keamanan-jwt-2025
+jwt.secret=${JWT_SECRET}
 jwt.expiration=3600000
 
 # Path Penyimpanan File Excel
@@ -1262,9 +1262,9 @@ Konfigurasi `application.properties` di booking-service:
 server.port=8083
 
 # Database Configuration (Supabase PostgreSQL)
-spring.datasource.url=jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0
-spring.datasource.username=postgres.yksjudnbzkpgmzbtksad
-spring.datasource.password=yuuashura12
+spring.datasource.url=${SPRING_DATASOURCE_URL}
+spring.datasource.username=${SPRING_DATASOURCE_USERNAME}
+spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}
 spring.datasource.driver-class-name=org.postgresql.Driver
 
 # Hibernate / JPA
@@ -1274,7 +1274,7 @@ spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.properties.hibernate.format_sql=true
 
 # JWT Secret (HARUS SAMA dengan service lainnya)
-jwt.secret=ngninep-user-service-super-secret-key-yang-sangat-panjang-untuk-keamanan-jwt-2025
+jwt.secret=${JWT_SECRET}
 jwt.expiration=3600000
 ```
 

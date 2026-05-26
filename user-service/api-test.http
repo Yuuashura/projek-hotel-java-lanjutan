@@ -15,7 +15,7 @@ Content-Type: application/json
   "age": 25,
   "city_id": 1,
   "phone": "081234567890",
-  "email": "tzyudistira@gmail.com",
+  "email": "user@example.com",
   "password": "password123"
 }
 
@@ -27,7 +27,7 @@ POST http://localhost:8081/api/auth/verify-otp
 Content-Type: application/json
 
 {
-  "email": "tzyudistira@gmail.com",
+  "email": "user@example.com",
   "otp_code": "123456"
 }
 
@@ -38,7 +38,7 @@ POST http://localhost:8081/api/auth/resend-otp
 Content-Type: application/json
 
 {
-  "email": "tzyudistira@gmail.com"
+  "email": "user@example.com"
 }
 
 ###
@@ -49,7 +49,7 @@ POST http://localhost:8081/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "tzyudistira@gmail.com",
+  "email": "user@example.com",
   "password": "password123"
 }
 
