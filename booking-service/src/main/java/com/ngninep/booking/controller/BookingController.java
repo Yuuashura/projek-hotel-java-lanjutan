@@ -13,7 +13,10 @@ import com.ngninep.booking.service.BookingService;
 import com.ngninep.booking.util.Message;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +25,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 
 @RestController
@@ -169,6 +173,16 @@ public class BookingController {
                 .data(bookingService.getDashboardStats())
                 .build();
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/download-excel")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_APP', 'ROLE_ADMIN_HOTEL')")
+    public ResponseEntity<InputStreamResource> downloadExcel() throws Exception {
+        ByteArrayInputStream stream = bookingService.downloadExcel();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=data-pemesanan.xlsx")
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(new InputStreamResource(stream));
     }
 
     // Mengupdate status pesanan (Konfirmasi, Cancel, Selesai)

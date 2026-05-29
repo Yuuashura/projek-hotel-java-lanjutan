@@ -413,29 +413,121 @@ h1, h2, h3, h4, h5, h6 {
 /* ============================================
    SIDEBAR (ADMIN)
    ============================================ */
+:root {
+  --admin-sidebar-bg:
+    linear-gradient(180deg, rgba(16, 58, 99, 0.98), rgba(10, 38, 74, 0.98) 48%, rgba(6, 23, 48, 0.99)),
+    radial-gradient(circle at 20% 0%, rgba(122, 183, 240, 0.34), transparent 32%);
+  --admin-sidebar-border: rgba(168, 204, 238, 0.24);
+  --admin-sidebar-text: #F4F8FF;
+  --admin-sidebar-muted: rgba(222, 234, 248, 0.72);
+  --admin-sidebar-hover: rgba(255, 255, 255, 0.11);
+  --admin-sidebar-active: linear-gradient(90deg, rgba(246, 211, 101, 0.24), rgba(122, 183, 240, 0.16));
+  --admin-sidebar-user-bg: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="dark"] {
+  --admin-sidebar-bg:
+    linear-gradient(180deg, rgba(8, 19, 49, 0.98), rgba(8, 33, 74, 0.98) 52%, rgba(3, 10, 29, 0.99)),
+    radial-gradient(circle at 18% 4%, rgba(122, 183, 240, 0.26), transparent 34%),
+    radial-gradient(circle at 86% 22%, rgba(246, 211, 101, 0.14), transparent 28%);
+  --admin-sidebar-border: rgba(122, 183, 240, 0.26);
+  --admin-sidebar-hover: rgba(122, 183, 240, 0.12);
+  --admin-sidebar-active: linear-gradient(90deg, rgba(122, 183, 240, 0.26), rgba(246, 211, 101, 0.14));
+  --admin-sidebar-user-bg: rgba(122, 183, 240, 0.08);
+}
+
+.sidebar-fixed {
+  background: var(--admin-sidebar-bg) !important;
+  border-right-color: var(--admin-sidebar-border) !important;
+  overflow: hidden;
+  box-shadow: 18px 0 45px -34px rgba(4, 18, 42, 0.8);
+}
+
+.sidebar-fixed::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(140deg, rgba(255, 255, 255, 0.16), transparent 28%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 92px);
+  opacity: 0.72;
+}
+
+.sidebar-fixed > * {
+  position: relative;
+  z-index: 1;
+}
+
 .sidebar-link {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 1rem 1.5rem;
+  margin: 0.25rem 0.85rem;
+  padding: 0.9rem 1rem;
   font-family: var(--font-body);
-  font-weight: 500;
+  font-weight: 600;
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  color: var(--color-text);
+  color: var(--admin-sidebar-muted);
   text-decoration: none;
-  border-left: 3px solid transparent;
-  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  transition: transform 0.24s ease, background 0.24s ease, color 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease;
+}
+.sidebar-link svg {
+  color: inherit !important;
+  stroke: currentColor;
+  transition: transform 0.24s ease;
 }
 .sidebar-link:hover { 
-  color: var(--color-text); 
-  background: var(--color-background); 
+  color: var(--admin-sidebar-text);
+  background: var(--admin-sidebar-hover);
+  border-color: rgba(255, 255, 255, 0.14);
+  transform: translateX(4px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+.sidebar-link:hover svg {
+  transform: scale(1.08);
 }
 .sidebar-link.active { 
-  color: var(--color-primary); 
-  background: var(--color-background); 
-  border-left-color: var(--color-primary); 
+  color: #FFFFFF;
+  background: var(--admin-sidebar-active);
+  border-color: rgba(246, 211, 101, 0.34);
+  box-shadow: inset 3px 0 0 var(--color-gold), 0 14px 32px -24px rgba(0, 0, 0, 0.8);
+}
+
+.admin-sidebar-brand {
+  color: #FFFFFF !important;
+  text-shadow: 0 8px 24px rgba(122, 183, 240, 0.28);
+}
+
+.admin-sidebar-kicker,
+.admin-sidebar-user-email {
+  color: var(--admin-sidebar-muted) !important;
+}
+
+.admin-sidebar-user {
+  background: var(--admin-sidebar-user-bg) !important;
+  border-color: var(--admin-sidebar-border) !important;
+}
+
+.admin-sidebar-user-name {
+  color: var(--admin-sidebar-text) !important;
+}
+
+.admin-sidebar-logout {
+  border-color: rgba(252, 165, 165, 0.34) !important;
+  color: #FECACA !important;
+  background: rgba(127, 29, 29, 0.1) !important;
+}
+
+.admin-sidebar-logout:hover:not(:disabled) {
+  color: #FFFFFF !important;
+  background: linear-gradient(135deg, rgba(229, 62, 62, 0.9), rgba(185, 28, 28, 0.9)) !important;
+  border-color: rgba(254, 202, 202, 0.52) !important;
+  transform: translateY(-1px);
 }
 
 .admin-content,

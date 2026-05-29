@@ -9,7 +9,10 @@ import com.ngninep.hotel.service.FileStorageService;
 import com.ngninep.hotel.service.HotelService;
 import com.ngninep.hotel.util.Message;
 
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.validation.Valid;
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -115,6 +119,16 @@ public class HotelController {
                 .data(hotelService.getStats())
                 .build();
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/download-excel")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_HOTEL', 'ROLE_ADMIN_APP')")
+    public ResponseEntity<InputStreamResource> downloadExcel() throws Exception {
+        ByteArrayInputStream stream = hotelService.downloadExcel();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=data-hotel.xlsx")
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(new InputStreamResource(stream));
     }
 
     @GetMapping("/{id}")

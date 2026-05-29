@@ -7,6 +7,7 @@ import com.ngninep.booking.dto.res.BookingStatsResponse;
 import com.ngninep.booking.dto.res.PagedResult;
 import com.ngninep.booking.entity.BookingStatus;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 
 public interface BookingService {
@@ -27,6 +28,8 @@ public interface BookingService {
     BookingResponse cancelBooking(int id, int customerId);
     
     BookingStatsResponse getDashboardStats();
+
+    ByteArrayInputStream downloadExcel() throws Exception;
 
     void deleteBooking(int id);
 }

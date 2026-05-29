@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Eye, EyeOff, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 import api from '../../utils/api';
 
 const Login = () => {
@@ -66,10 +66,6 @@ const Login = () => {
   return (
     <div className="auth-page">
       <div className="auth-shell animate-slide-in">
-        <Link to="/" className="btn btn-white btn-sm auth-back-link">
-          <ArrowLeft size={14} /> Kembali ke Home
-        </Link>
-
         {/* Logo */}
         <div className="auth-header">
           <Link to="/" style={{ textDecoration: 'none' }}>

@@ -14,6 +14,12 @@ import com.ngninep.booking.repository.BookingRepository;
 import com.ngninep.booking.service.BookingService;
 import com.ngninep.booking.util.Message;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
@@ -29,11 +35,16 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -245,6 +256,86 @@ public class BookingServiceImpl implements BookingService {
                 .build();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public ByteArrayInputStream downloadExcel() throws Exception {
+        String[] headers = {
+                "ID Booking",
+                "Customer ID",
+                "Hotel ID",
+                "Nama Hotel",
+                "Room Type ID",
+                "Tipe Kamar",
+                "Check-In",
+                "Check-Out",
+                "Jumlah Malam",
+                "Jumlah Tamu",
+                "Total Harga",
+                "Nama Pemesan",
+                "Telepon Pemesan",
+                "Email Pemesan",
+                "Untuk Diri Sendiri",
+                "Status",
+                "Metode Bayar",
+                "Bukti Bayar",
+                "Dibuat Pada",
+                "Batas Bayar"
+        };
+
+        try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            Sheet sheet = workbook.createSheet("Data Pemesanan");
+            CellStyle headerStyle = workbook.createCellStyle();
+            Font headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerStyle.setFont(headerFont);
+
+            Row headerRow = sheet.createRow(0);
+            for (int i = 0; i < headers.length; i++) {
+                headerRow.createCell(i).setCellValue(headers[i]);
+                headerRow.getCell(i).setCellStyle(headerStyle);
+            }
+
+            Map<Integer, String> hotelNameCache = new HashMap<>();
+            Map<Integer, String> roomTypeNameCache = new HashMap<>();
+            List<Booking> bookings = bookingRepository.findAll().stream()
+                    .sorted(Comparator.comparingInt(Booking::getIdBooking))
+                    .collect(Collectors.toList());
+
+            int rowIndex = 1;
+            for (Booking booking : bookings) {
+                Row row = sheet.createRow(rowIndex++);
+                long nights = ChronoUnit.DAYS.between(booking.getCheckIn(), booking.getCheckOut());
+                row.createCell(0).setCellValue(booking.getIdBooking());
+                row.createCell(1).setCellValue(booking.getCustomerId());
+                row.createCell(2).setCellValue(booking.getHotelId());
+                row.createCell(3).setCellValue(getHotelName(booking.getHotelId(), hotelNameCache));
+                row.createCell(4).setCellValue(booking.getRoomTypeId());
+                row.createCell(5).setCellValue(getRoomTypeName(booking.getRoomTypeId(), roomTypeNameCache));
+                row.createCell(6).setCellValue(booking.getCheckIn() != null ? booking.getCheckIn().toString() : "");
+                row.createCell(7).setCellValue(booking.getCheckOut() != null ? booking.getCheckOut().toString() : "");
+                row.createCell(8).setCellValue(nights);
+                row.createCell(9).setCellValue(booking.getNumberOfGuest());
+                row.createCell(10).setCellValue(booking.getTotalPrice() != null ? booking.getTotalPrice() : 0);
+                row.createCell(11).setCellValue(safeString(booking.getOrdererName()));
+                row.createCell(12).setCellValue(safeString(booking.getOrdererPhone()));
+                row.createCell(13).setCellValue(safeString(booking.getOrdererEmail()));
+                row.createCell(14).setCellValue(booking.isForSelf() ? "Ya" : "Tidak");
+                row.createCell(15).setCellValue(booking.getStatus() != null ? booking.getStatus().name() : "");
+                row.createCell(16).setCellValue(safeString(booking.getPaymentMethod()));
+                row.createCell(17).setCellValue(safeString(booking.getPaymentProof()));
+                row.createCell(18).setCellValue(booking.getCreatedAt() != null ? booking.getCreatedAt().toString() : "");
+                row.createCell(19).setCellValue(booking.getPaymentDeadline() != null ? booking.getPaymentDeadline().toString() : "");
+            }
+
+            for (int i = 0; i < headers.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            workbook.write(outputStream);
+            return new ByteArrayInputStream(outputStream.toByteArray());
+        }
+    }
+
     @Scheduled(fixedDelay = 300000)
     @Transactional
     public void expirePendingBookings() {
@@ -289,6 +380,50 @@ public class BookingServiceImpl implements BookingService {
             return body.getData();
         } catch (RestClientException ex) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.ROOM_TYPE_INVALID_OR_UNAVAILABLE);
+        }
+    }
+
+    private String getHotelName(int hotelId, Map<Integer, String> cache) {
+        if (cache.containsKey(hotelId)) {
+            return cache.get(hotelId);
+        }
+
+        String fallback = "Hotel #" + hotelId;
+        try {
+            String baseUrl = hotelServiceUrl != null ? hotelServiceUrl.replaceAll("/+$", "") : "http://localhost:8082";
+            ResponseEntity<WebResponse<Map<String, Object>>> response = restTemplate.exchange(
+                    baseUrl + "/api/hotels/" + hotelId,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<>() {
+                    }
+            );
+
+            WebResponse<Map<String, Object>> body = response.getBody();
+            Object name = body != null && body.getData() != null ? body.getData().get("name") : null;
+            String hotelName = name instanceof String && !((String) name).isBlank() ? (String) name : fallback;
+            cache.put(hotelId, hotelName);
+            return hotelName;
+        } catch (RestClientException ex) {
+            cache.put(hotelId, fallback);
+            return fallback;
+        }
+    }
+
+    private String getRoomTypeName(int roomTypeId, Map<Integer, String> cache) {
+        if (cache.containsKey(roomTypeId)) {
+            return cache.get(roomTypeId);
+        }
+
+        String fallback = "Tipe Kamar #" + roomTypeId;
+        try {
+            RoomTypeSnapshot roomType = fetchRoomType(roomTypeId);
+            String roomTypeName = roomType.getName() != null && !roomType.getName().isBlank() ? roomType.getName() : fallback;
+            cache.put(roomTypeId, roomTypeName);
+            return roomTypeName;
+        } catch (ResponseStatusException ex) {
+            cache.put(roomTypeId, fallback);
+            return fallback;
         }
     }
 
@@ -395,5 +530,9 @@ public class BookingServiceImpl implements BookingService {
                         .hasPrevious(false)
                         .build())
                 .build();
+    }
+
+    private String safeString(String value) {
+        return value != null ? value : "";
     }
 }

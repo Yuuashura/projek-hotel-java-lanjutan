@@ -133,22 +133,22 @@ const AdminLayout = ({ children }) => {
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--color-background)' }}>
       {/* Sidebar */}
       <aside style={{
-        width: 260, flexShrink: 0, background: 'var(--color-surface)', borderRight: '1px solid var(--color-accent)',
+        width: 260, flexShrink: 0, background: 'var(--admin-sidebar-bg)', borderRight: '1px solid var(--admin-sidebar-border)',
         display: 'flex', flexDirection: 'column',
         position: 'fixed', top: 0, height: '100vh', zIndex: 50,
         transition: 'transform 0.25s ease',
         boxShadow: sidebarOpen ? 'var(--shadow-hover)' : 'none',
       }} className={`sidebar-fixed ${sidebarOpen ? 'open' : ''}`}>
         {/* Logo */}
-        <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--color-accent)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div className="brand-logo" style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.4rem', color: 'var(--color-primary)', fontStyle: 'italic', letterSpacing: '1px' }}>NgiNep.</div>
-          <span style={{ color: 'var(--color-muted)', fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Admin</span>
+        <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--admin-sidebar-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="brand-logo admin-sidebar-brand" style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.4rem', color: '#FFFFFF', fontStyle: 'italic', letterSpacing: '1px' }}>NgiNep.</div>
+          <span className="admin-sidebar-kicker" style={{ color: 'var(--admin-sidebar-muted)', fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Admin</span>
         </div>
 
         {/* User Info */}
-        <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--color-accent)', background: 'var(--color-background)' }}>
-          <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.1rem', color: 'var(--color-text)' }}>{user?.first_name} {user?.last_name}</div>
-          <div style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.75rem', marginBottom: '0.5rem' }}>{user?.email}</div>
+        <div className="admin-sidebar-user" style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--admin-sidebar-border)', background: 'var(--admin-sidebar-user-bg)' }}>
+          <div className="admin-sidebar-user-name" style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.1rem', color: 'var(--admin-sidebar-text)' }}>{user?.first_name} {user?.last_name}</div>
+          <div className="admin-sidebar-user-email" style={{ color: 'var(--admin-sidebar-muted)', fontWeight: 300, fontSize: '0.75rem', marginBottom: '0.5rem' }}>{user?.email}</div>
           <span className="badge badge-yellow" style={{ fontSize: '0.65rem' }}>{user?.role?.replace('ROLE_', '')}</span>
         </div>
 
@@ -158,7 +158,7 @@ const AdminLayout = ({ children }) => {
             const active = location.pathname === path;
             return (
               <Link key={path} to={path} onClick={() => setSidebarOpen(false)} className={`sidebar-link ${active ? 'active' : ''}`}>
-                <Icon size={16} style={{ color: active ? 'var(--color-primary)' : 'var(--color-muted)' }} />
+                <Icon size={16} />
                 {t(labelKey)}
               </Link>
             );
@@ -166,10 +166,8 @@ const AdminLayout = ({ children }) => {
         </nav>
 
         {/* Logout */}
-        <div style={{ borderTop: '1px solid var(--color-accent)', padding: '1rem' }}>
-          <button onClick={requestLogout} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'none', border: '1px solid var(--color-accent)', cursor: 'pointer', fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '0.75rem', color: 'var(--color-danger)', textTransform: 'uppercase', letterSpacing: '1.5px', borderRadius: 'var(--radius-sm)', transition: 'all 0.3s ease' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-danger)'; e.currentTarget.style.color = '#FFFFFF'; e.currentTarget.style.borderColor = 'var(--color-danger)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--color-danger)'; e.currentTarget.style.borderColor = 'var(--color-accent)'; }}>
+        <div style={{ borderTop: '1px solid var(--admin-sidebar-border)', padding: '1rem' }}>
+          <button className="admin-sidebar-logout" onClick={requestLogout} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: 'rgba(127, 29, 29, 0.1)', border: '1px solid rgba(252, 165, 165, 0.34)', cursor: 'pointer', fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '0.75rem', color: '#FECACA', textTransform: 'uppercase', letterSpacing: '1.5px', borderRadius: 'var(--radius-sm)', transition: 'all 0.3s ease' }}>
             <LogOut size={14} /> {t('admin.actions.logout')}
           </button>
         </div>

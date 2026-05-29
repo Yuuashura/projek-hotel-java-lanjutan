@@ -22,8 +22,10 @@ import com.ngninep.hotel.service.HotelService;
 import com.ngninep.hotel.util.Message;
 import lombok.RequiredArgsConstructor;
 
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.HttpStatus;
@@ -32,6 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -476,8 +480,71 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
-    public java.io.ByteArrayInputStream downloadExcel() throws Exception {
-        return null;
+    @Transactional(readOnly = true)
+    public ByteArrayInputStream downloadExcel() throws Exception {
+        String[] headers = {
+                "ID Hotel",
+                "Nama Hotel",
+                "Kota",
+                "Provinsi",
+                "Alamat",
+                "Tipe",
+                "Rating",
+                "Featured",
+                "On Sale",
+                "Diskon (%)",
+                "Admin Hotel ID",
+                "Jumlah Tipe Kamar",
+                "Harga Termurah",
+                "Fasilitas",
+                "Jumlah Foto"
+        };
+
+        try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            Sheet sheet = workbook.createSheet("Data Hotel");
+            CellStyle headerStyle = workbook.createCellStyle();
+            Font headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerStyle.setFont(headerFont);
+
+            Row headerRow = sheet.createRow(0);
+            for (int i = 0; i < headers.length; i++) {
+                headerRow.createCell(i).setCellValue(headers[i]);
+                headerRow.getCell(i).setCellStyle(headerStyle);
+            }
+
+            List<Hotel> hotels = hotelRepository.findAll().stream()
+                    .sorted(Comparator.comparingInt(Hotel::getIdHotel))
+                    .collect(Collectors.toList());
+
+            int rowIndex = 1;
+            for (Hotel hotel : hotels) {
+                Row row = sheet.createRow(rowIndex++);
+                row.createCell(0).setCellValue(hotel.getIdHotel());
+                row.createCell(1).setCellValue(safeString(hotel.getName()));
+                row.createCell(2).setCellValue(hotel.getCity() != null ? safeString(hotel.getCity().getName()) : "");
+                row.createCell(3).setCellValue(hotel.getCity() != null ? safeString(hotel.getCity().getProvince()) : "");
+                row.createCell(4).setCellValue(safeString(hotel.getAddress()));
+                row.createCell(5).setCellValue(safeString(hotel.getType()));
+                row.createCell(6).setCellValue(hotel.getRating());
+                row.createCell(7).setCellValue(hotel.isFeatured() ? "Ya" : "Tidak");
+                row.createCell(8).setCellValue(hotel.isOnSale() ? "Ya" : "Tidak");
+                row.createCell(9).setCellValue(hotel.getDiscount_percent());
+                row.createCell(10).setCellValue(hotel.getAdmin_hotel_id());
+                row.createCell(11).setCellValue(hotel.getRoomTypes() != null ? hotel.getRoomTypes().size() : 0);
+                Long minPrice = getMinRoomPrice(hotel);
+                row.createCell(12).setCellValue(minPrice != null ? minPrice : 0);
+                row.createCell(13).setCellValue(formatFacilities(hotel));
+                row.createCell(14).setCellValue(hotel.getImages() != null ? hotel.getImages().size() : 0);
+            }
+
+            for (int i = 0; i < headers.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            workbook.write(outputStream);
+            return new ByteArrayInputStream(outputStream.toByteArray());
+        }
     }
 
     @Override
@@ -580,5 +647,22 @@ public class HotelServiceImpl implements HotelService {
 
     private int safeLimit(Integer limit) {
         return limit != null && limit > 0 ? Math.min(limit, 50) : 6;
+    }
+
+    private String safeString(String value) {
+        return value != null ? value : "";
+    }
+
+    private String formatFacilities(Hotel hotel) {
+        if (hotel.getFacilities() == null || hotel.getFacilities().isEmpty()) {
+            return "";
+        }
+
+        return hotel.getFacilities().stream()
+                .map(HotelFacility::getFacility)
+                .filter(java.util.Objects::nonNull)
+                .map(Facility::getName)
+                .filter(name -> name != null && !name.isBlank())
+                .collect(Collectors.joining(", "));
     }
 }

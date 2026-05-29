@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Check, X, AlertCircle, Eye } from 'lucide-react';
+import { Search, Check, X, AlertCircle, Eye, Download } from 'lucide-react';
 import { formatCurrency, formatDate, statusColor } from '../../utils/formatters';
 import AdminLayout from '../../components/admin/AdminLayout';
 import PaginationControls from '../../components/admin/PaginationControls';
@@ -24,6 +24,7 @@ const AdminBookings = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [page, setPage] = useState(0);
+  const [excelDownloading, setExcelDownloading] = useState(false);
 
   const getHotelId = (booking) => booking.hotel_id ?? booking.hotelId;
 
@@ -78,6 +79,30 @@ const AdminBookings = () => {
 
   const openDetail = (b) => { setSelected(b); setNewStatus(b.status); setError(''); setModal('detail'); };
   const getHotelName = (booking) => booking.hotel_name || `Hotel #${getHotelId(booking)}`;
+
+  const downloadBlob = (blob, filename) => {
+    const url = window.URL.createObjectURL(new Blob([blob]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleExcelDownload = async () => {
+    setExcelDownloading(true);
+    setError('');
+    try {
+      const res = await api.get('/api/bookings/download-excel', { responseType: 'blob' });
+      downloadBlob(res.data, 'data-pemesanan.xlsx');
+    } catch (err) {
+      setError(err.response?.data?.message || t('admin.errors.downloadExcelFailed'));
+    } finally {
+      setExcelDownloading(false);
+    }
+  };
   
   const handleUpdateStatus = async () => {
     if (newStatus === selected.status) return;
@@ -99,7 +124,10 @@ const AdminBookings = () => {
           <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.75rem', textTransform: 'uppercase', letterSpacing: '1px', margin: 0, color: 'var(--color-text)' }}>{t('admin.bookings.title')}</h2>
           <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', margin: '0.25rem 0 0' }}>{t('admin.bookings.count', { count: filtered.length })}</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <button onClick={handleExcelDownload} className="btn btn-white btn-sm" disabled={excelDownloading}>
+            <Download size={14} /> {excelDownloading ? t('admin.actions.downloading') : t('admin.actions.downloadExcel')}
+          </button>
           {['ALL', ...STATUS_OPTIONS].map(s => {
             const active = statusFilter === s;
             return (

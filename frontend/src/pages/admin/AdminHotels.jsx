@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Pencil, Trash2, X, Check, AlertCircle, Star, MapPin, Bed, ImageIcon, Upload } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Check, AlertCircle, Star, MapPin, Bed, ImageIcon, Upload, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatCurrency } from '../../utils/formatters';
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -28,6 +28,7 @@ const AdminHotels = () => {
   const [page, setPage] = useState(0);
   const [imageUploading, setImageUploading] = useState(false);
   const [excelUploading, setExcelUploading] = useState(false);
+  const [excelDownloading, setExcelDownloading] = useState(false);
   const fileRef = useRef();
   const excelRef = useRef();
 
@@ -158,6 +159,30 @@ const AdminHotels = () => {
     }
   };
 
+  const downloadBlob = (blob, filename) => {
+    const url = window.URL.createObjectURL(new Blob([blob]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleExcelDownload = async () => {
+    setExcelDownloading(true);
+    setError('');
+    try {
+      const res = await api.get('/api/hotels/download-excel', { responseType: 'blob' });
+      downloadBlob(res.data, 'data-hotel.xlsx');
+    } catch (err) {
+      setError(err.response?.data?.message || t('admin.errors.downloadExcelFailed'));
+    } finally {
+      setExcelDownloading(false);
+    }
+  };
+
   const totalPages = Math.max(1, Math.ceil(hotels.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages - 1);
   const paginatedHotels = hotels.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
@@ -170,6 +195,9 @@ const AdminHotels = () => {
           <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', margin: '0.25rem 0 0' }}>{t('admin.hotels.count', { count: hotels.length })}</p>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <button onClick={handleExcelDownload} className="btn btn-white btn-sm" disabled={excelDownloading}>
+            <Download size={14} /> {excelDownloading ? t('admin.actions.downloading') : t('admin.actions.downloadExcel')}
+          </button>
           <button onClick={() => excelRef.current?.click()} className="btn btn-white btn-sm" disabled={excelUploading}>
             <Upload size={14} /> {excelUploading ? t('admin.actions.uploading') : t('admin.actions.uploadExcel')}
           </button>
