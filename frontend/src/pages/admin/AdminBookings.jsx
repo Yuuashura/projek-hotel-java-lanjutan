@@ -25,13 +25,35 @@ const AdminBookings = () => {
   const [error, setError] = useState('');
   const [page, setPage] = useState(0);
 
+  const getHotelId = (booking) => booking.hotel_id ?? booking.hotelId;
+
+  const enrichHotelNames = async (items) => {
+    const hotelIds = [...new Set(items.map(getHotelId).filter(Boolean))];
+    const hotels = await Promise.all(
+      hotelIds.map(id => api.get(`/api/hotels/${id}`).then(res => res.data?.data).catch(() => null))
+    );
+    const hotelsById = Object.fromEntries(
+      hotels.filter(Boolean).map(hotel => [hotel.id_hotel ?? hotel.idHotel, hotel])
+    );
+
+    return items.map(booking => {
+      const hotel = hotelsById[getHotelId(booking)];
+      return {
+        ...booking,
+        hotel_name: hotel?.name || booking.hotel_name,
+        hotel_city: hotel?.city?.name || booking.hotel_city,
+      };
+    });
+  };
+
   const load = () => {
     setLoading(true);
     setError('');
-    api.get('/api/bookings').then(r => {
+    api.get('/api/bookings').then(async r => {
       const data = unwrapList(r.data);
-      setBookings(data);
-      setFiltered(data);
+      const enriched = await enrichHotelNames(data);
+      setBookings(enriched);
+      setFiltered(enriched);
     }).catch((err) => setError(getErrorMessage(err, t('admin.errors.loadBookings')))).finally(() => setLoading(false));
   };
 
@@ -41,7 +63,10 @@ const AdminBookings = () => {
     const q = search.toLowerCase();
     setFiltered(bookings.filter(b =>
       (statusFilter === 'ALL' || b.status === statusFilter) &&
-      (b.orderer_name?.toLowerCase().includes(q) || b.orderer_email?.toLowerCase().includes(q) || String(b.id_booking || b.id).includes(q))
+      (b.orderer_name?.toLowerCase().includes(q)
+        || b.orderer_email?.toLowerCase().includes(q)
+        || b.hotel_name?.toLowerCase().includes(q)
+        || String(b.id_booking || b.id).includes(q))
     ));
   }, [search, statusFilter, bookings]);
 
@@ -52,7 +77,8 @@ const AdminBookings = () => {
   const paginated = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
 
   const openDetail = (b) => { setSelected(b); setNewStatus(b.status); setError(''); setModal('detail'); };
-
+  const getHotelName = (booking) => booking.hotel_name || `Hotel #${getHotelId(booking)}`;
+  
   const handleUpdateStatus = async () => {
     if (newStatus === selected.status) return;
     setSubmitting(true);
@@ -123,7 +149,10 @@ const AdminBookings = () => {
                       <div style={{ fontWeight: 400, fontSize: '0.9rem', color: 'var(--color-text)' }}>{b.orderer_name}</div>
                       <div style={{ color: 'var(--color-muted)', fontSize: '0.75rem', fontWeight: 300, marginTop: '0.15rem' }}>{b.orderer_email}</div>
                     </td>
-                    <td style={{ fontSize: '0.85rem', color: 'var(--color-text)', fontWeight: 300 }}>Hotel #{b.hotel_id}</td>
+                    <td style={{ fontSize: '0.85rem', color: 'var(--color-text)', fontWeight: 300 }}>
+                      <div style={{ fontWeight: 400 }}>{getHotelName(b)}</div>
+                      {b.hotel_city && <div style={{ color: 'var(--color-muted)', fontSize: '0.72rem', marginTop: '0.15rem' }}>{b.hotel_city}</div>}
+                    </td>
                     <td style={{ fontSize: '0.85rem', color: 'var(--color-text)', fontWeight: 300 }}>{formatDate(b.check_in)}</td>
                     <td style={{ fontSize: '0.85rem', color: 'var(--color-text)', fontWeight: 300 }}>{formatDate(b.check_out)}</td>
                     <td style={{ fontWeight: 400, color: 'var(--color-primary)', fontSize: '0.85rem' }}>{formatCurrency(b.total_price)}</td>
@@ -160,7 +189,7 @@ const AdminBookings = () => {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.5rem' }}>
               {[
-                { l: t('admin.table.hotelId'), v: `Hotel #${selected.hotel_id}` },
+                { l: t('admin.table.hotel'), v: getHotelName(selected) },
                 { l: t('admin.table.booker'), v: selected.orderer_name },
                 { l: t('admin.table.email'), v: selected.orderer_email },
                 { l: t('admin.table.phone'), v: selected.orderer_phone },

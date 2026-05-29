@@ -17,10 +17,49 @@ const MyBookings = () => {
     if (!user || user.role !== 'ROLE_USER') navigate('/login');
   }, [user]);
 
+  const getHotelId = (booking) => booking.hotel_id ?? booking.hotelId;
+  const getRoomTypeId = (booking) => booking.room_type_id ?? booking.roomTypeId;
+
+  const enrichBookingDetails = async (items) => {
+    const hotelIds = [...new Set(items.map(getHotelId).filter(Boolean))];
+    const roomTypeIds = [...new Set(items.map(getRoomTypeId).filter(Boolean))];
+
+    const [hotelResults, roomTypeResults] = await Promise.all([
+      Promise.all(hotelIds.map(id => api.get(`/api/hotels/${id}`).then(res => res.data?.data).catch(() => null))),
+      Promise.all(roomTypeIds.map(id => api.get(`/api/room-types/${id}`).then(res => res.data?.data).catch(() => null))),
+    ]);
+
+    const hotelsById = Object.fromEntries(
+      hotelResults.filter(Boolean).map(hotel => [hotel.id_hotel ?? hotel.idHotel, hotel])
+    );
+    const roomTypesById = Object.fromEntries(
+      roomTypeResults.filter(Boolean).map(room => [room.id_room_type ?? room.idRoomType, room])
+    );
+
+    return items.map(booking => {
+      const hotelId = getHotelId(booking);
+      const roomTypeId = getRoomTypeId(booking);
+      const hotel = hotelsById[hotelId];
+      const roomType = roomTypesById[roomTypeId]
+        || hotel?.roomTypes?.find(room => (room.id_room_type ?? room.idRoomType) === roomTypeId);
+
+      return {
+        ...booking,
+        hotel_name: hotel?.name || booking.hotel_name,
+        room_type_name: roomType?.name || booking.room_type_name,
+        hotel_city: hotel?.city?.name || booking.hotel_city,
+        hotel_address: hotel?.address || booking.hotel_address,
+      };
+    });
+  };
+
   const loadBookings = () => {
     setLoading(true);
     api.get(`/api/bookings/my?status=${tab}`)
-      .then(r => setBookings(r.data.data || []))
+      .then(async r => {
+        const data = r.data.data || [];
+        setBookings(await enrichBookingDetails(data));
+      })
       .catch(() => setBookings([]))
       .finally(() => setLoading(false));
   };
@@ -114,6 +153,10 @@ const BookingCard = ({ booking, onCancel }) => {
   };
 
   const nights = diffDays(booking.check_in, booking.check_out);
+  const hotelId = booking.hotel_id ?? booking.hotelId;
+  const roomTypeId = booking.room_type_id ?? booking.roomTypeId;
+  const hotelName = booking.hotel_name || `Hotel #${hotelId}`;
+  const roomTypeName = booking.room_type_name || `Tipe Kamar #${roomTypeId}`;
 
   // Status badges colors matching Elegant Sanctuary theme
   const getBadgeColor = (status) => {
@@ -136,8 +179,18 @@ const BookingCard = ({ booking, onCancel }) => {
             Pesanan #{booking.id_booking || booking.id}
           </span>
           <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.4rem', margin: '0.25rem 0 0', color: 'var(--color-text)' }}>
-            {booking.hotel_name || `Hotel #${booking.hotel_id}`}
+            {hotelName}
           </h3>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '0.5rem', color: 'var(--color-muted)', fontSize: '0.8rem', fontWeight: 300 }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+              <Users size={13} /> {roomTypeName}
+            </span>
+            {booking.hotel_city && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                <MapPin size={13} /> {booking.hotel_city}
+              </span>
+            )}
+          </div>
         </div>
         <span className="badge" style={{ background: statusBadge.bg, color: statusBadge.text, borderColor: 'transparent', padding: '0.4rem 1rem' }}>{label}</span>
       </div>
@@ -193,6 +246,9 @@ const BookingCard = ({ booking, onCancel }) => {
               { label: 'No. Telepon', val: booking.orderer_phone },
               { label: 'Metode Bayar', val: booking.payment_method || '-' },
               { label: 'ID Pesanan', val: `#${booking.id_booking || booking.id}` },
+              { label: 'Hotel', val: hotelName },
+              { label: 'Tipe Kamar', val: roomTypeName },
+              { label: 'Alamat Hotel', val: booking.hotel_address },
             ].map(({ label, val }) => val && (
               <div key={label}>
                 <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</div>
@@ -224,7 +280,7 @@ const BookingCard = ({ booking, onCancel }) => {
           </Link>
         )}
         {booking.status === 'COMPLETED' && (
-          <Link to={`/hotels/${booking.hotel_id}`} className="btn btn-primary btn-sm" style={{ background: 'var(--color-primary)' }}>Pesan Lagi</Link>
+          <Link to={`/hotels/${hotelId}`} className="btn btn-primary btn-sm" style={{ background: 'var(--color-primary)' }}>Pesan Lagi</Link>
         )}
         <button onClick={() => setExpanded(e => !e)} className="btn btn-white btn-sm">
           {expanded ? <><ChevronUp size={12} /> Sembunyikan</> : <><ChevronDown size={12} /> Lihat Detail</>}
