@@ -26,13 +26,22 @@ public class OtpToken {
     @Column(nullable = false)
     private String otp_code;
 
+    public enum Purpose {
+        REGISTER_VERIFICATION,
+        PASSWORD_RESET
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "purpose", nullable = false, columnDefinition = "varchar(50) default 'REGISTER_VERIFICATION'")
+    @Builder.Default
+    private Purpose purpose = Purpose.REGISTER_VERIFICATION;
+
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;   // Untuk rate limit (cek < 5 menit)
+    private LocalDateTime createdAt;
 
     @Column(name = "expired_at", nullable = false)
-    private LocalDateTime expiredAt;   // created_at + 5 menit
+    private LocalDateTime expiredAt;
 
-    // Field tanpa prefix is_ agar Lombok generate: isUsed() / setUsed()
     @Column(name = "is_used")
     @Builder.Default
     private boolean used = false;

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Data
 @Builder
@@ -20,10 +21,10 @@ public class UserProfileResponse {
     private String phone;
     private String email;
     private Role role;
-    @com.fasterxml.jackson.annotation.JsonProperty("is_verified")
+    @JsonProperty("is_verified")
     private boolean is_verified;
     
-    @com.fasterxml.jackson.annotation.JsonProperty("is_banned")
+    @JsonProperty("is_banned")
     private boolean is_banned;
     
     private String profile_picture;

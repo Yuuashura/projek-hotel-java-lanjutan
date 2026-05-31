@@ -37,6 +37,27 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", message));
     }
 
+    // POST /api/auth/forgot-password
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        String message = authService.forgotPassword(request);
+        return ResponseEntity.ok(Map.of("message", message));
+    }
+
+    // POST /api/auth/verify-reset-otp
+    @PostMapping("/verify-reset-otp")
+    public ResponseEntity<?> verifyResetOtp(@Valid @RequestBody VerifyOtpRequest request) {
+        String message = authService.verifyResetOtp(request);
+        return ResponseEntity.ok(Map.of("message", message));
+    }
+
+    // POST /api/auth/reset-password
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        String message = authService.resetPassword(request);
+        return ResponseEntity.ok(Map.of("message", message));
+    }
+
     // POST /api/auth/login
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {

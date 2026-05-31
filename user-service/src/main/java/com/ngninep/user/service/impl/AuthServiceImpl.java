@@ -28,6 +28,10 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
+    private static final OtpToken.Purpose REGISTER_PURPOSE = OtpToken.Purpose.REGISTER_VERIFICATION;
+    private static final OtpToken.Purpose RESET_PURPOSE = OtpToken.Purpose.PASSWORD_RESET;
+    private static final String FORGOT_PASSWORD_RESPONSE =
+            "Jika email terdaftar, kode reset password akan dikirim.";
 
     // ==================== REGISTER ====================
     @Override
@@ -57,7 +61,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         customerRepository.save(newCustomer);
-        otpService.generateAndSendOtp(request.getEmail());
+        otpService.generateAndSendOtp(request.getEmail(), REGISTER_PURPOSE);
 
         return "Registrasi berhasil. Silakan cek email untuk kode OTP.";
     }
@@ -72,7 +76,7 @@ public class AuthServiceImpl implements AuthService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Akun sudah terverifikasi, silakan login");
         }
 
-        String result = otpService.validateOtp(request.getEmail(), request.getOtp_code());
+        String result = otpService.validateOtp(request.getEmail(), request.getOtp_code(), REGISTER_PURPOSE);
 
         switch (result) {
             case "OTP_INVALID" ->
@@ -99,7 +103,7 @@ public class AuthServiceImpl implements AuthService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Akun sudah terverifikasi, silakan login");
         }
 
-        Optional<OtpToken> activeOtp = otpService.getActiveOtp(request.getEmail());
+        Optional<OtpToken> activeOtp = otpService.getActiveOtp(request.getEmail(), REGISTER_PURPOSE);
         if (activeOtp.isPresent()) {
             LocalDateTime canResendAt = activeOtp.get().getCreatedAt().plusMinutes(5);
             if (LocalDateTime.now().isBefore(canResendAt)) {
@@ -109,10 +113,97 @@ public class AuthServiceImpl implements AuthService {
             }
         }
 
-        otpService.invalidateAllActiveOtp(request.getEmail());
-        otpService.generateAndSendOtp(request.getEmail());
+        otpService.invalidateAllActiveOtp(request.getEmail(), REGISTER_PURPOSE);
+        otpService.generateAndSendOtp(request.getEmail(), REGISTER_PURPOSE);
 
         return "OTP baru telah dikirim ke email " + request.getEmail();
+    }
+
+    // ==================== FORGOT PASSWORD ====================
+    @Override
+    public String forgotPassword(ForgotPasswordRequest request) {
+        Optional<Customer> optionalCustomer = customerRepository.findByEmail(request.getEmail());
+
+        if (optionalCustomer.isEmpty()) {
+            return FORGOT_PASSWORD_RESPONSE;
+        }
+
+        Customer customer = optionalCustomer.get();
+        if (!customer.isVerified() || customer.isBanned()) {
+            return FORGOT_PASSWORD_RESPONSE;
+        }
+
+        Optional<OtpToken> activeOtp = otpService.getActiveOtp(request.getEmail(), RESET_PURPOSE);
+        if (activeOtp.isPresent()) {
+            LocalDateTime canResendAt = activeOtp.get().getCreatedAt().plusMinutes(5);
+            if (LocalDateTime.now().isBefore(canResendAt)) {
+                return FORGOT_PASSWORD_RESPONSE;
+            }
+        }
+
+        otpService.invalidateAllActiveOtp(request.getEmail(), RESET_PURPOSE);
+        otpService.generateAndSendOtp(request.getEmail(), RESET_PURPOSE);
+
+        return FORGOT_PASSWORD_RESPONSE;
+    }
+
+    // ==================== VERIFY RESET OTP ====================
+    @Override
+    public String verifyResetOtp(VerifyOtpRequest request) {
+        Customer customer = customerRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kode reset tidak valid"));
+
+        if (!customer.isVerified()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Akun belum terverifikasi");
+        }
+
+        if (customer.isBanned()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Akun Anda telah dinonaktifkan");
+        }
+
+        String result = otpService.checkOtp(request.getEmail(), request.getOtp_code(), RESET_PURPOSE);
+
+        switch (result) {
+            case "OTP_INVALID" ->
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kode reset tidak valid");
+            case "OTP_EXPIRED" ->
+                throw new ResponseStatusException(HttpStatus.GONE, "Kode reset sudah kadaluarsa");
+            case "OTP_NOT_FOUND" ->
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kode reset tidak ditemukan");
+        }
+
+        return "Kode reset valid. Silakan buat password baru.";
+    }
+
+    // ==================== RESET PASSWORD ====================
+    @Override
+    public String resetPassword(ResetPasswordRequest request) {
+        Customer customer = customerRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kode reset tidak valid"));
+
+        if (!customer.isVerified()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Akun belum terverifikasi");
+        }
+
+        if (customer.isBanned()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Akun Anda telah dinonaktifkan");
+        }
+
+        String result = otpService.validateOtp(request.getEmail(), request.getOtp_code(), RESET_PURPOSE);
+
+        switch (result) {
+            case "OTP_INVALID" ->
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kode reset tidak valid");
+            case "OTP_EXPIRED" ->
+                throw new ResponseStatusException(HttpStatus.GONE, "Kode reset sudah kadaluarsa");
+            case "OTP_NOT_FOUND" ->
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kode reset tidak ditemukan");
+        }
+
+        customer.setPassword(passwordEncoder.encode(request.getNew_password()));
+        customerRepository.save(customer);
+
+        return "Password berhasil direset. Silakan login kembali.";
     }
 
     // ==================== LOGIN ====================

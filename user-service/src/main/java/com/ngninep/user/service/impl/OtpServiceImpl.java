@@ -21,32 +21,33 @@ public class OtpServiceImpl implements OtpService {
     private final OtpMailSender otpMailSender;
 
     @Override
-    public void generateAndSendOtp(String email) {
+    public void generateAndSendOtp(String email, OtpToken.Purpose purpose) {
         String otpCode = generateOtpCode();
 
         OtpToken otp = OtpToken.builder()
                 .email(email)
                 .otp_code(otpCode)
+                .purpose(purpose)
                 .createdAt(LocalDateTime.now())
                 .expiredAt(LocalDateTime.now().plusMinutes(5))
                 .used(false)
                 .build();
 
         otpTokenRepository.save(otp);
-        otpMailSender.sendOtpEmailAsync(email, otpCode);
+        otpMailSender.sendOtpEmailAsync(email, otpCode, purpose);
 
-        log.info("OTP dikirim ke {}: {}", email, otpCode);
+        log.info("Pengiriman OTP {} dijadwalkan untuk {}", purpose, email);
     }
 
     @Override
-    public Optional<OtpToken> getActiveOtp(String email) {
-        return otpTokenRepository.findTopByEmailAndUsedFalseOrderByCreatedAtDesc(email);
+    public Optional<OtpToken> getActiveOtp(String email, OtpToken.Purpose purpose) {
+        return otpTokenRepository.findTopByEmailAndPurposeAndUsedFalseOrderByCreatedAtDesc(email, purpose);
     }
 
     @Override
-    public String validateOtp(String email, String otpCode) {
+    public String checkOtp(String email, String otpCode, OtpToken.Purpose purpose) {
         Optional<OtpToken> optionalOtp = otpTokenRepository
-                .findTopByEmailAndUsedFalseOrderByCreatedAtDesc(email);
+                .findTopByEmailAndPurposeAndUsedFalseOrderByCreatedAtDesc(email, purpose);
 
         if (optionalOtp.isEmpty()) {
             return "OTP_NOT_FOUND";
@@ -62,6 +63,19 @@ public class OtpServiceImpl implements OtpService {
             return "OTP_EXPIRED";
         }
 
+        return "OTP_VALID";
+    }
+
+    @Override
+    public String validateOtp(String email, String otpCode, OtpToken.Purpose purpose) {
+        String result = checkOtp(email, otpCode, purpose);
+        if (!"OTP_VALID".equals(result)) {
+            return result;
+        }
+
+        OtpToken otp = otpTokenRepository
+                .findTopByEmailAndPurposeAndUsedFalseOrderByCreatedAtDesc(email, purpose)
+                .orElseThrow();
         otp.setUsed(true);
         otpTokenRepository.save(otp);
 
@@ -69,8 +83,8 @@ public class OtpServiceImpl implements OtpService {
     }
 
     @Override
-    public void invalidateAllActiveOtp(String email) {
-        List<OtpToken> activeOtps = otpTokenRepository.findAllByEmailAndUsedFalse(email);
+    public void invalidateAllActiveOtp(String email, OtpToken.Purpose purpose) {
+        List<OtpToken> activeOtps = otpTokenRepository.findAllByEmailAndPurposeAndUsedFalse(email, purpose);
         activeOtps.forEach(otp -> otp.setUsed(true));
         otpTokenRepository.saveAll(activeOtps);
     }

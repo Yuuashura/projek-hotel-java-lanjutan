@@ -13,6 +13,8 @@ import Home from './pages/public/Home';
 import Login from './pages/public/Login';
 import Register from './pages/public/Register';
 import VerifyOtp from './pages/public/VerifyOtp';
+import ForgotPassword from './pages/public/ForgotPassword';
+import ResetPassword from './pages/public/ResetPassword';
 import Hotels from './pages/public/Hotels';
 import HotelDetail from './pages/public/HotelDetail';
 import About from './pages/public/About';
@@ -82,6 +84,8 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/verify-otp" element={<VerifyOtp />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* ============ USER ROUTES ============ */}
       <Route path="/booking/:hotelId" element={<UserRoute><PublicLayout><Booking /></PublicLayout></UserRoute>} />

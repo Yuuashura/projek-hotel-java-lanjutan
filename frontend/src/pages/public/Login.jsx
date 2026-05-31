@@ -102,6 +102,11 @@ const Login = () => {
                   {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
+              <div style={{ textAlign: 'right', marginTop: '0.65rem' }}>
+                <Link to="/forgot-password" style={{ color: 'var(--color-primary)', fontWeight: 700, fontSize: '0.82rem', textDecoration: 'none' }}>
+                  Lupa Password?
+                </Link>
+              </div>
             </div>
 
             <button type="submit" className="btn btn-primary btn-full" disabled={loading} style={{ height: 50, marginTop: '0.5rem', background: 'var(--color-primary)', opacity: loading ? 0.7 : 1 }}>

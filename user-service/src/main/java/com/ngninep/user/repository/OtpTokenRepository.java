@@ -14,15 +14,10 @@ import java.util.Optional;
 
 @Repository
 public interface OtpTokenRepository extends JpaRepository<OtpToken, Integer> {
+    Optional<OtpToken> findTopByEmailAndPurposeAndUsedFalseOrderByCreatedAtDesc(String email, OtpToken.Purpose purpose);
 
-    // Ambil OTP terbaru untuk suatu email yang belum dipakai
-    // Field sekarang bernama 'used' (bukan 'is_used')
-    Optional<OtpToken> findTopByEmailAndUsedFalseOrderByCreatedAtDesc(String email);
+    List<OtpToken> findAllByEmailAndPurposeAndUsedFalse(String email, OtpToken.Purpose purpose);
 
-    // Ambil semua OTP aktif milik suatu email (untuk invalidate saat resend)
-    List<OtpToken> findAllByEmailAndUsedFalse(String email);
-
-    // Hapus semua OTP yang sudah expired (dipakai oleh Scheduler)
     @Modifying
     @Transactional
     @Query("DELETE FROM OtpToken o WHERE o.expiredAt < :now")
