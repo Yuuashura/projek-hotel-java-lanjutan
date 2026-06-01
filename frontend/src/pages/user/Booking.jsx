@@ -78,8 +78,7 @@ const Booking = () => {
   });
   const [calendarMonth, setCalendarMonth] = useState(dateFromInput(initialCheckIn));
 
-  // Focus states for custom input floating label animation
-  const [focusedField, setFocusedField] = useState(null);
+
 
   useEffect(() => {
     if (!user || user.role !== 'ROLE_USER') navigate('/login');
@@ -188,32 +187,7 @@ const Booking = () => {
     );
   }
 
-  // Helper styles for floating inputs
-  const getInputStyle = (name) => ({
-    width: '100%',
-    height: 56,
-    border: 'none',
-    borderBottom: focusedField === name || form[name] ? '1px solid var(--color-text)' : '1px solid var(--color-muted)',
-    background: 'transparent',
-    color: 'var(--color-text)',
-    outline: 'none',
-    fontSize: '1rem',
-    fontWeight: 300,
-    transition: 'all 0.3s ease',
-    padding: '1.25rem 0 0.25rem'
-  });
 
-  const getLabelStyle = (name) => ({
-    position: 'absolute',
-    left: 0,
-    top: focusedField === name || form[name] ? 0 : 20,
-    fontSize: focusedField === name || form[name] ? '0.75rem' : '0.95rem',
-    color: focusedField === name || form[name] ? 'var(--color-text)' : 'var(--color-muted)',
-    transition: 'all 0.3s ease',
-    pointerEvents: 'none',
-    textTransform: 'uppercase',
-    letterSpacing: '1px'
-  });
 
   return (
     <div className="booking-page">
@@ -333,32 +307,47 @@ const Booking = () => {
                 ))}
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                <div style={{ position: 'relative' }}>
-                  <span style={getLabelStyle('orderer_name')}>Nama Lengkap *</span>
-                  <input className="input" style={getInputStyle('orderer_name')} value={form.orderer_name} 
-                    onFocus={() => setFocusedField('orderer_name')}
-                    onBlur={() => setFocusedField(null)}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginTop: '1.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <label style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    Nama Lengkap *
+                  </label>
+                  <input 
+                    className="input booking-solid-input" 
+                    value={form.orderer_name} 
                     onChange={e => setForm(f => ({ ...f, orderer_name: e.target.value }))} 
-                    required disabled={form.for_self} />
+                    required 
+                    disabled={form.for_self} 
+                  />
                 </div>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                  <div style={{ position: 'relative' }}>
-                    <span style={getLabelStyle('orderer_phone')}>Nomor Telepon *</span>
-                    <input type="tel" className="input" style={getInputStyle('orderer_phone')} value={form.orderer_phone} 
-                      onFocus={() => setFocusedField('orderer_phone')}
-                      onBlur={() => setFocusedField(null)}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    <label style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                      Nomor Telepon *
+                    </label>
+                    <input 
+                      type="tel" 
+                      className="input booking-solid-input" 
+                      value={form.orderer_phone} 
                       onChange={e => setForm(f => ({ ...f, orderer_phone: e.target.value }))} 
-                      required disabled={form.for_self} />
+                      required 
+                      disabled={form.for_self} 
+                    />
                   </div>
-                  <div style={{ position: 'relative' }}>
-                    <span style={getLabelStyle('orderer_email')}>Alamat Email *</span>
-                    <input type="email" className="input" style={getInputStyle('orderer_email')} value={form.orderer_email} 
-                      onFocus={() => setFocusedField('orderer_email')}
-                      onBlur={() => setFocusedField(null)}
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    <label style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                      Alamat Email *
+                    </label>
+                    <input 
+                      type="email" 
+                      className="input booking-solid-input" 
+                      value={form.orderer_email} 
                       onChange={e => setForm(f => ({ ...f, orderer_email: e.target.value }))} 
-                      required disabled={form.for_self} />
+                      required 
+                      disabled={form.for_self} 
+                    />
                   </div>
                 </div>
               </div>

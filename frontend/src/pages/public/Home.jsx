@@ -76,7 +76,7 @@ const Home = () => {
 
     setFeaturedLoading(true);
     api.get('/api/hotels', {
-      params: { featured: true, page: 0, size: FEATURED_LIMIT, sortBy: 'rating' },
+      params: { page: 0, size: FEATURED_LIMIT, sortBy: 'rating' },
       signal: controller.signal,
     })
       .then(r => setFeaturedHotels(r.data.data || []))
