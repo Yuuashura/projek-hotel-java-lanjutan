@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 import api from '../../utils/api';
 import CitySearchSelect from '../../components/CitySearchSelect';
 import { useAuth } from '../../context/AuthContext';
+import AuthLayout from '../../components/auth/AuthLayout';
+import Alert from '../../components/ui/Alert';
+import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
+import { FormField, TextInput } from '../../components/ui/FormField';
 
 const Register = () => {
   const { token, user } = useAuth();
@@ -75,117 +80,89 @@ const Register = () => {
   if (step === 'unverified') {
     return (
       <div className="auth-page">
-        <div className="card auth-card auth-card-compact" style={{ textAlign: 'center' }}>
-          <AlertCircle size={48} style={{ color: 'var(--color-primary)', marginBottom: '1.5rem' }} />
-          <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.8rem', marginBottom: '0.75rem' }}>Akun Belum Diverifikasi</h2>
-          {error && (
-            <div className="alert-danger" style={{ padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
-              <AlertCircle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
-              <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.85rem', textAlign: 'left' }}>{error}</span>
-            </div>
-          )}
-          <p style={{ color: 'var(--color-muted)', fontWeight: 300, lineHeight: 1.6, marginBottom: '2rem', fontSize: '0.9rem' }}>
+        <Card className="auth-card auth-card-compact text-center">
+          <AlertCircle size={48} className="mx-auto mb-6 text-[var(--color-primary)]" />
+          <h2 className="mb-3 font-[var(--font-heading)] text-3xl font-semibold text-[var(--color-text)]">Akun Belum Diverifikasi</h2>
+          {error && <Alert type="danger" className="text-left">{error}</Alert>}
+          <p className="mb-8 text-sm leading-7 text-[var(--color-muted)]">
             Email <strong>{form.email}</strong> sudah terdaftar namun belum diverifikasi. Kirim ulang OTP untuk melanjutkan verifikasi.
           </p>
-          <button onClick={resendOtp} className="btn btn-primary btn-full" disabled={loading} style={{ background: 'var(--color-primary)', height: 48 }}>{loading ? 'Mengirim...' : 'Kirim Ulang OTP'}</button>
-          <button onClick={() => setStep('form')} className="btn btn-white btn-full" style={{ marginTop: '0.75rem', height: 48 }}>Kembali ke Form</button>
-        </div>
+          <Button onClick={resendOtp} full disabled={loading} className="min-h-12">{loading ? 'Mengirim...' : 'Kirim Ulang OTP'}</Button>
+          <Button onClick={() => setStep('form')} variant="white" full className="mt-3 min-h-12">Kembali ke Form</Button>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="auth-page auth-page-scroll">
-      <div className="auth-shell auth-shell-wide animate-slide-in">
-        <div className="auth-header">
-          <Link to="/" style={{ textDecoration: 'none' }}>
-            <div className="auth-brand">
-              NgiNep<span style={{ color: 'var(--color-primary)' }}>.</span>
-            </div>
-          </Link>
-          <h1>Buat Akun Baru</h1>
-          <p>Sudah punya akun? <Link to="/login">Masuk di sini</Link></p>
+    <AuthLayout
+      title="Buat Akun Baru"
+      subtitle={<>Sudah punya akun? <Link to="/login">Masuk di sini</Link></>}
+      wide
+      scroll
+    >
+      {error && <Alert type="danger">{error}</Alert>}
+
+      <form onSubmit={handleSubmit}>
+        <div className="auth-grid-2">
+          <FormField label="Nama Depan *">
+            <TextInput placeholder="Afi Naufal" value={form.first_name} onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))} required />
+          </FormField>
+          <FormField label="Nama Belakang">
+            <TextInput placeholder="Riski Yang" value={form.last_name} onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))} />
+          </FormField>
         </div>
 
-        <div className="card auth-card">
-          {/* Card Top Accent Line */}
-          <div className="auth-card-accent" />
-
-          {error && (
-            <div className="alert-danger" style={{ padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
-              <AlertCircle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
-              <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.85rem' }}>{error}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <div className="auth-grid-2">
-              <div className="auth-field">
-                <label className="label">Nama Depan *</label>
-                <input className="input" placeholder="Afi Naufal" value={form.first_name} onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))} required />
-              </div>
-              <div className="auth-field">
-                <label className="label">Nama Belakang</label>
-                <input className="input" placeholder="Riski Yang" value={form.last_name} onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))} />
-              </div>
-            </div>
-
-            <div className="auth-grid-2">
-              <div className="auth-field">
-                <label className="label">Umur *</label>
-                <input className="input" type="number" min="17" placeholder="25" value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))} required />
-              </div>
-              <div className="auth-field">
-                <label className="label">Kota *</label>
-                <CitySearchSelect
-                  cities={cities}
-                  value={form.city_id}
-                  onChange={val => setForm(f => ({ ...f, city_id: val }))}
-                  placeholder="Pilih Kota"
-                />
-              </div>
-            </div>
-
-            <div className="auth-field">
-              <label className="label">No. Telepon *</label>
-              <input className="input" type="tel" placeholder="08123456789" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} required />
-            </div>
-
-            <div className="auth-field">
-              <label className="label">Email *</label>
-              <input className="input" type="email" placeholder="nama@email.com" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required />
-            </div>
-
-            <div className="auth-grid-2 auth-grid-last">
-              <div className="auth-field">
-                <label className="label">Password *</label>
-                <div style={{ position: 'relative' }}>
-                  <input className="input" style={{ paddingRight: '2.5rem' }} type={showPw ? 'text' : 'password'} placeholder="Min 8 karakter" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required minLength={8} />
-                  <button type="button" onClick={() => setShowPw(!showPw)} style={{ position: 'absolute', right: '0.875rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)' }}>
-                    {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-              </div>
-              <div className="auth-field">
-                <label className="label">Konfirmasi Password *</label>
-                <input className="input" type="password" placeholder="Ulangi password" value={form.confirmPassword} onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))} required />
-              </div>
-            </div>
-
-            <div className="alert-success" style={{ padding: '0.875rem 1rem', marginBottom: '2rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
-              <CheckCircle size={16} style={{ color: 'var(--color-success)', flexShrink: 0 }} />
-              <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: 300, color: 'var(--color-success)' }}>
-                Setelah mendaftar, kami akan mengirimkan <strong>kode OTP 6 digit</strong> ke email Anda untuk verifikasi akun.
-              </p>
-            </div>
-
-            <button type="submit" className="btn btn-primary btn-full" disabled={loading} style={{ height: 50, background: 'var(--color-primary)', opacity: loading ? 0.7 : 1 }}>
-              {loading ? <><span className="btn-spinner" /> Mendaftarkan...</> : 'Daftar & Kirim OTP'}
-            </button>
-          </form>
+        <div className="auth-grid-2">
+          <FormField label="Umur *">
+            <TextInput type="number" min="17" placeholder="25" value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))} required />
+          </FormField>
+          <FormField label="Kota *">
+            <CitySearchSelect
+              cities={cities}
+              value={form.city_id}
+              onChange={val => setForm(f => ({ ...f, city_id: val }))}
+              placeholder="Pilih Kota"
+            />
+          </FormField>
         </div>
-      </div>
-    </div>
+
+        <FormField label="No. Telepon *">
+          <TextInput type="tel" placeholder="08123456789" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} required />
+        </FormField>
+
+        <FormField label="Email *">
+          <TextInput type="email" placeholder="nama@email.com" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required />
+        </FormField>
+
+        <div className="auth-grid-2 auth-grid-last">
+          <FormField label="Password *">
+            <TextInput
+              type={showPw ? 'text' : 'password'}
+              placeholder="Min 8 karakter"
+              value={form.password}
+              onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+              required
+              minLength={8}
+              right={(
+                <button type="button" onClick={() => setShowPw(!showPw)} className="flex h-9 w-9 items-center justify-center border-0 bg-transparent p-0 text-[var(--color-muted)] transition hover:text-[var(--color-primary)]">
+                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              )}
+            />
+          </FormField>
+          <FormField label="Konfirmasi Password *">
+            <TextInput type="password" placeholder="Ulangi password" value={form.confirmPassword} onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))} required />
+          </FormField>
+        </div>
+
+        <Alert type="success" className="mb-8">Setelah mendaftar, kami akan mengirimkan <strong>kode OTP 6 digit</strong> ke email Anda untuk verifikasi akun.</Alert>
+
+        <Button type="submit" full disabled={loading} className="min-h-[50px]">
+          {loading ? <><span className="btn-spinner" /> Mendaftarkan...</> : 'Daftar & Kirim OTP'}
+        </Button>
+      </form>
+    </AuthLayout>
   );
 };
 

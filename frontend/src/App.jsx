@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { createPortal } from 'react-dom';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { animate, stagger } from 'animejs';
@@ -9,29 +9,24 @@ import Footer from './components/Footer';
 import LoadingState from './components/LoadingState';
 import { usePreferences } from './context/PreferencesContext';
 
-// === Public Pages ===
-import Home from './pages/public/Home';
-import Login from './pages/public/Login';
-import Register from './pages/public/Register';
-import VerifyOtp from './pages/public/VerifyOtp';
-import ForgotPassword from './pages/public/ForgotPassword';
-import ResetPassword from './pages/public/ResetPassword';
-import Hotels from './pages/public/Hotels';
-import HotelDetail from './pages/public/HotelDetail';
-import About from './pages/public/About';
-
-// === User Pages ===
-import Booking from './pages/user/Booking';
-import Payment from './pages/user/Payment';
-import MyBookings from './pages/user/MyBookings';
-import Profile from './pages/user/Profile';
-
-// === Admin Pages ===
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminHotels from './pages/admin/AdminHotels';
-import AdminVisitors from './pages/admin/AdminVisitors';
-import AdminBookings from './pages/admin/AdminBookings';
-import AdminRoomTypes from './pages/admin/AdminRoomTypes';
+const Home = lazy(() => import('./pages/public/Home'));
+const Login = lazy(() => import('./pages/public/Login'));
+const Register = lazy(() => import('./pages/public/Register'));
+const VerifyOtp = lazy(() => import('./pages/public/VerifyOtp'));
+const ForgotPassword = lazy(() => import('./pages/public/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/public/ResetPassword'));
+const Hotels = lazy(() => import('./pages/public/Hotels'));
+const HotelDetail = lazy(() => import('./pages/public/HotelDetail'));
+const About = lazy(() => import('./pages/public/About'));
+const Booking = lazy(() => import('./pages/user/Booking'));
+const Payment = lazy(() => import('./pages/user/Payment'));
+const MyBookings = lazy(() => import('./pages/user/MyBookings'));
+const Profile = lazy(() => import('./pages/user/Profile'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminHotels = lazy(() => import('./pages/admin/AdminHotels'));
+const AdminVisitors = lazy(() => import('./pages/admin/AdminVisitors'));
+const AdminBookings = lazy(() => import('./pages/admin/AdminBookings'));
+const AdminRoomTypes = lazy(() => import('./pages/admin/AdminRoomTypes'));
 
 // ==========================================
 // Route Guards
@@ -58,6 +53,12 @@ const RouteLoading = () => (
   </div>
 );
 
+const LazyPage = ({ children }) => (
+  <Suspense fallback={<RouteLoading />}>
+    {children}
+  </Suspense>
+);
+
 // ==========================================
 // Public Layout (Navbar + Footer)
 // ==========================================
@@ -76,30 +77,30 @@ function AppRoutes() {
   return (
     <Routes>
       {/* ============ PUBLIC ROUTES ============ */}
-      <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
-      <Route path="/hotels" element={<PublicLayout><Hotels /></PublicLayout>} />
-      <Route path="/hotels/:id" element={<PublicLayout><HotelDetail /></PublicLayout>} />
-      <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
+      <Route path="/" element={<PublicLayout><LazyPage><Home /></LazyPage></PublicLayout>} />
+      <Route path="/hotels" element={<PublicLayout><LazyPage><Hotels /></LazyPage></PublicLayout>} />
+      <Route path="/hotels/:id" element={<PublicLayout><LazyPage><HotelDetail /></LazyPage></PublicLayout>} />
+      <Route path="/about" element={<PublicLayout><LazyPage><About /></LazyPage></PublicLayout>} />
 
       {/* Auth (No Layout) */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/verify-otp" element={<VerifyOtp />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/login" element={<LazyPage><Login /></LazyPage>} />
+      <Route path="/register" element={<LazyPage><Register /></LazyPage>} />
+      <Route path="/verify-otp" element={<LazyPage><VerifyOtp /></LazyPage>} />
+      <Route path="/forgot-password" element={<LazyPage><ForgotPassword /></LazyPage>} />
+      <Route path="/reset-password" element={<LazyPage><ResetPassword /></LazyPage>} />
 
       {/* ============ USER ROUTES ============ */}
-      <Route path="/booking/:hotelId" element={<UserRoute><PublicLayout><Booking /></PublicLayout></UserRoute>} />
-      <Route path="/payment/:bookingId" element={<UserRoute><PublicLayout><Payment /></PublicLayout></UserRoute>} />
-      <Route path="/my-bookings" element={<UserRoute><PublicLayout><MyBookings /></PublicLayout></UserRoute>} />
-      <Route path="/profile" element={<UserRoute><PublicLayout><Profile /></PublicLayout></UserRoute>} />
+      <Route path="/booking/:hotelId" element={<UserRoute><PublicLayout><LazyPage><Booking /></LazyPage></PublicLayout></UserRoute>} />
+      <Route path="/payment/:bookingId" element={<UserRoute><PublicLayout><LazyPage><Payment /></LazyPage></PublicLayout></UserRoute>} />
+      <Route path="/my-bookings" element={<UserRoute><PublicLayout><LazyPage><MyBookings /></LazyPage></PublicLayout></UserRoute>} />
+      <Route path="/profile" element={<UserRoute><PublicLayout><LazyPage><Profile /></LazyPage></PublicLayout></UserRoute>} />
 
       {/* ============ ADMIN ROUTES ============ */}
-      <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-      <Route path="/admin/hotels" element={<AdminRoute><AdminHotels /></AdminRoute>} />
-      <Route path="/admin/hotels/:hotelId/rooms" element={<AdminRoute><AdminRoomTypes /></AdminRoute>} />
-      <Route path="/admin/visitors" element={<AdminRoute><AdminVisitors /></AdminRoute>} />
-      <Route path="/admin/bookings" element={<AdminRoute><AdminBookings /></AdminRoute>} />
+      <Route path="/admin/dashboard" element={<AdminRoute><LazyPage><AdminDashboard /></LazyPage></AdminRoute>} />
+      <Route path="/admin/hotels" element={<AdminRoute><LazyPage><AdminHotels /></LazyPage></AdminRoute>} />
+      <Route path="/admin/hotels/:hotelId/rooms" element={<AdminRoute><LazyPage><AdminRoomTypes /></LazyPage></AdminRoute>} />
+      <Route path="/admin/visitors" element={<AdminRoute><LazyPage><AdminVisitors /></LazyPage></AdminRoute>} />
+      <Route path="/admin/bookings" element={<AdminRoute><LazyPage><AdminBookings /></LazyPage></AdminRoute>} />
 
       {/* Catch all */}
       <Route path="*" element={<Navigate to="/" replace />} />

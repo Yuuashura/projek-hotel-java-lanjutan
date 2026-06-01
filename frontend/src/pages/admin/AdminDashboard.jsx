@@ -1,26 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Hotel, Calendar, TrendingUp, CheckCircle, Clock, XCircle, Upload, AlertCircle } from 'lucide-react';
+import { Hotel, Calendar, TrendingUp, CheckCircle, Clock, XCircle, Upload } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 import AdminLayout from '../../components/admin/AdminLayout';
+import AdminPageHeader from '../../components/admin/AdminPageHeader';
+import AdminSectionCard, { AdminStatCard } from '../../components/admin/AdminSectionCard';
 import LoadingState from '../../components/LoadingState';
+import Alert from '../../components/ui/Alert';
+import Button from '../../components/ui/Button';
 import api from '../../utils/api';
 import { unwrapList } from '../../utils/response';
 import { usePreferences } from '../../context/PreferencesContext';
-
-const StatCard = ({ label, value, icon: Icon, sub }) => (
-  <div className="card" style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', position: 'relative', overflow: 'hidden', border: '1px solid var(--color-accent)', boxShadow: 'none' }}>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-      <div style={{ width: 44, height: 44, borderRadius: '50%', background: `rgba(212, 175, 55, 0.08)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Icon size={18} style={{ color: 'var(--color-primary)' }} />
-      </div>
-    </div>
-    <div>
-      <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '2rem', lineHeight: 1, color: 'var(--color-text)' }}>{value}</div>
-      <div style={{ fontFamily: 'var(--font-body)', fontWeight: 300, textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.75rem', color: 'var(--color-muted)', marginTop: '0.35rem' }}>{label}</div>
-      {sub && <div style={{ fontSize: '0.7rem', fontWeight: 300, color: 'var(--color-muted)', marginTop: '0.25rem' }}>{sub}</div>}
-    </div>
-  </div>
-);
 
 const StatLoadingDots = () => (
   <span className="stat-loading-dots" aria-label="Loading">
@@ -90,34 +79,29 @@ const AdminDashboard = () => {
   return (
     <AdminLayout>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-          <div>
-            <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.75rem', textTransform: 'uppercase', letterSpacing: '1px', margin: 0, color: 'var(--color-text)' }}>{t('admin.dashboard.title')}</h2>
-            <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', margin: '0.25rem 0 0' }}>{t('admin.dashboard.welcome')}</p>
-          </div>
-          <button onClick={() => excelRef.current?.click()} className="btn btn-white btn-sm" disabled={excelUploading}>
-            <Upload size={14} /> {excelUploading ? t('admin.actions.uploading') : t('admin.actions.uploadHotelExcel')}
-          </button>
+        <AdminPageHeader
+          title={t('admin.dashboard.title')}
+          subtitle={t('admin.dashboard.welcome')}
+          className="mb-0"
+          actions={(
+            <Button onClick={() => excelRef.current?.click()} variant="white" size="sm" disabled={excelUploading}>
+              <Upload size={14} /> {excelUploading ? t('admin.actions.uploading') : t('admin.actions.uploadHotelExcel')}
+            </Button>
+          )}
+        />
           <input ref={excelRef} type="file" accept=".xlsx" style={{ display: 'none' }} onChange={handleExcelUpload} />
-        </div>
 
-        {error && (
-          <div className="alert-danger" style={{ borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <AlertCircle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
-            <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.85rem' }}>{error}</span>
-          </div>
-        )}
+        {error && <Alert type="danger" className="mb-0">{error}</Alert>}
 
         {/* Stats Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1.25rem' }}>
-          <StatCard label={t('admin.dashboard.totalHotels')} value={loading ? <StatLoadingDots /> : stats.hotels} icon={Hotel} />
-          <StatCard label={t('admin.dashboard.totalBookings')} value={loading ? <StatLoadingDots /> : stats.bookings.length} icon={Calendar} />
-          <StatCard label={t('admin.dashboard.totalRevenue')} value={loading ? <StatLoadingDots /> : formatCurrency(stats.totalRevenue)} icon={TrendingUp} sub={t('admin.dashboard.revenueSub')} />
+          <AdminStatCard label={t('admin.dashboard.totalHotels')} value={loading ? <StatLoadingDots /> : stats.hotels} icon={Hotel} />
+          <AdminStatCard label={t('admin.dashboard.totalBookings')} value={loading ? <StatLoadingDots /> : stats.bookings.length} icon={Calendar} />
+          <AdminStatCard label={t('admin.dashboard.totalRevenue')} value={loading ? <StatLoadingDots /> : formatCurrency(stats.totalRevenue)} icon={TrendingUp} sub={t('admin.dashboard.revenueSub')} />
         </div>
 
         {/* Booking Status Breakdown */}
-        <div className="card" style={{ padding: '1.5rem', border: '1px solid var(--color-accent)' }}>
-          <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, textTransform: 'uppercase', letterSpacing: '1px', fontSize: '1rem', marginBottom: '1.25rem', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.75rem', color: 'var(--color-text)' }}>{t('admin.dashboard.bookingStatus')}</h3>
+        <AdminSectionCard title={t('admin.dashboard.bookingStatus')}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
             {bookingStats.map(({ label, count, bg, color, icon: Icon }) => (
               <div key={label} style={{ padding: '1.25rem', border: '1px solid var(--color-accent)', borderRadius: 'var(--radius-sm)', background: 'var(--color-surface)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -131,11 +115,10 @@ const AdminDashboard = () => {
               </div>
             ))}
           </div>
-        </div>
+        </AdminSectionCard>
 
         {/* Recent Bookings */}
-        <div className="card" style={{ padding: '1.5rem', overflowX: 'auto', border: '1px solid var(--color-accent)' }}>
-          <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, textTransform: 'uppercase', letterSpacing: '1px', fontSize: '1rem', marginBottom: '1.25rem', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.75rem', color: 'var(--color-text)' }}>{t('admin.dashboard.latestBookings')}</h3>
+        <AdminSectionCard title={t('admin.dashboard.latestBookings')} className="overflow-x-auto">
           {loading ? (
             <LoadingState text={t('admin.dashboard.loading')} compact />
           ) : recentBookings.length === 0 ? (
@@ -165,7 +148,7 @@ const AdminDashboard = () => {
               </tbody>
             </table>
           )}
-        </div>
+        </AdminSectionCard>
       </div>
     </AdminLayout>
   );

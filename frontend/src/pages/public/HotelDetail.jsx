@@ -1,71 +1,16 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import {
-  Star,
-  MapPin,
-  Users,
-  ArrowLeft,
-  Check,
-  X,
-  Wifi,
-  Snowflake,
-  ShowerHead,
-  Armchair,
-  Waves,
-  Car,
-  Coffee,
-  Utensils,
-  WashingMachine,
-} from 'lucide-react';
-import { formatCurrency } from '../../utils/formatters';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, MapPin, Star } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { usePreferences } from '../../context/PreferencesContext';
 import LoadingState from '../../components/LoadingState';
+import HotelFacilities from '../../components/hotels/detail/HotelFacilities';
+import HotelGallery from '../../components/hotels/detail/HotelGallery';
+import HotelLightbox from '../../components/hotels/detail/HotelLightbox';
+import HotelReservationCard from '../../components/hotels/detail/HotelReservationCard';
+import HotelRoomCard from '../../components/hotels/detail/HotelRoomCard';
+import { getRoomAvailability, HOTEL_FALLBACK_IMAGE, normalizeFacility, resolveHotelImageUrl } from '../../components/hotels/detail/hotelDetailUtils';
 import api from '../../utils/api';
-
-const HOTEL_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1200';
-const ROOM_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=600';
-
-const getImageUrl = (image) => {
-  if (!image) return '';
-  const path = typeof image === 'string' ? image : (image.image_url || image.imageUrl || image.url || '');
-  if (!path) return '';
-  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
-    return path;
-  }
-  const apiBase = import.meta.env.VITE_API_URL || '';
-  const cleanApiBase = apiBase.endsWith('/') ? apiBase.slice(0, -1) : apiBase;
-  const cleanPath = path.startsWith('/') ? path : '/' + path;
-  return cleanApiBase + cleanPath;
-};
-
-const facilityIconMap = {
-  wifi: Wifi,
-  snowflake: Snowflake,
-  shower: ShowerHead,
-  armchair: Armchair,
-  pool: Waves,
-  car: Car,
-  coffee: Coffee,
-  elevator: Check,
-  utensils: Utensils,
-  'washing-machine': WashingMachine,
-};
-
-const normalizeFacility = (item) => {
-  if (!item) return null;
-  const source = item.facility || item;
-  const name = source.name || source.facility_name || source.facilityName || item.name;
-  if (!name) return null;
-
-  return {
-    id: source.id_facility || source.idFacility || source.id || item.facility_id || item.facilityId || name,
-    name,
-    icon: source.icon || item.icon || 'check',
-  };
-};
-
-const getRoomAvailability = (room) => Number(room?.room_available ?? room?.roomAvailable ?? 0);
 
 const HotelDetail = () => {
   const { id } = useParams();
@@ -119,74 +64,42 @@ const HotelDetail = () => {
       </div>
     );
   }
+
   if (!hotel) return null;
 
   const roomTypes = hotel.roomTypes || hotel.room_types || [];
-  const selectedRoom = roomTypes.find(r => (r.id_room_type || r.idRoomType) === activeRoom);
-  const selectedRoomAvailable = getRoomAvailability(selectedRoom);
-  const selectedRoomUnavailable = selectedRoom && selectedRoomAvailable <= 0;
-  const hotelFacilities = (hotel.facilities || hotel.hotelFacilities || [])
-    .map(normalizeFacility)
-    .filter(Boolean);
+  const selectedRoom = roomTypes.find(room => (room.id_room_type || room.idRoomType) === activeRoom);
+  const selectedRoomUnavailable = selectedRoom && getRoomAvailability(selectedRoom) <= 0;
+  const hotelFacilities = (hotel.facilities || hotel.hotelFacilities || []).map(normalizeFacility).filter(Boolean);
   const displayFacilities = hotelFacilities.length > 0 ? hotelFacilities : allFacilities;
   const usingFacilityFallback = hotelFacilities.length === 0 && displayFacilities.length > 0;
-
-  const uploadedImages = hotel.images?.map(getImageUrl).filter(Boolean) || [];
+  const uploadedImages = hotel.images?.map(image => resolveHotelImageUrl(image)).filter(Boolean) || [];
   const images = uploadedImages.length > 0 ? uploadedImages : [HOTEL_FALLBACK_IMAGE];
+
+  const openLightbox = (index) => {
+    setActiveImg(index);
+    setLightboxOpen(true);
+  };
 
   return (
     <div className="hotel-detail-page" style={{ background: 'var(--color-background)', minHeight: '100vh', padding: '4rem 1.5rem' }}>
       <div style={{ maxWidth: 1300, margin: '0 auto' }}>
-        
-        {/* Back Link */}
         <Link to="/hotels" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontFamily: 'var(--font-body)', fontWeight: 400, textDecoration: 'none', color: 'var(--color-text)', marginBottom: '2.5rem', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>
           <ArrowLeft size={14} /> {t('hotelDetail.back')}
         </Link>
 
-        <section className={`hotel-gallery ${images.length === 1 ? 'single' : ''}`} aria-label={t('hotelDetail.gallery')}>
-          <button type="button" className="hotel-gallery-main" onClick={() => { setActiveImg(0); setLightboxOpen(true); }}>
-            <img src={images[0]} alt={`${hotel.name} - foto utama`} />
-            <span className="hotel-gallery-shade" />
-            <span className="hotel-gallery-caption">
-              <span>{t('hotelDetail.gallery')}</span>
-              <strong>{hotel.name}</strong>
-            </span>
-          </button>
+        <HotelGallery images={images} hotelName={hotel.name} t={t} onOpen={openLightbox} />
 
-          {images.length > 1 && (
-            <div className="hotel-gallery-thumbs">
-              {[1, 2, 3, 4].map((slot) => {
-                const imageIndex = Math.min(slot, images.length - 1);
-                const showMore = slot === 4 && images.length > 5;
-                return (
-                  <button
-                    type="button"
-                    key={slot}
-                    className="hotel-gallery-thumb"
-                    onClick={() => { setActiveImg(imageIndex); setLightboxOpen(true); }}
-                  >
-                    <img src={images[imageIndex]} alt={`${hotel.name} - foto ${imageIndex + 1}`} />
-                    {showMore && <span className="hotel-gallery-more">{t('hotelDetail.morePhotos', { count: images.length - 4 })}</span>}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        {/* SPLIT LAYOUT */}
         <div className="hotel-detail-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '3.5rem', alignItems: 'flex-start' }}>
-          
-          {/* LEFT COLUMN: Info, Amenities, Room Matrix */}
           <div>
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
               <span className="badge badge-yellow">{hotel.city?.name}</span>
               <span className="badge badge-gray">{hotel.type || t('hotelDetail.luxuryResort')}</span>
               {hotel.featured && <span className="badge badge-yellow" style={{ background: 'var(--color-primary)', color: 'white' }}>{t('common.featured')}</span>}
             </div>
-            
+
             <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '3rem', margin: '0 0 1rem', color: 'var(--color-text)', lineHeight: 1.1 }}>{hotel.name}</h1>
-            
+
             <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap', marginBottom: '2rem', borderBottom: '1px solid var(--color-accent)', paddingBottom: '1.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--color-primary)', fontWeight: 400 }}>
                 <Star size={14} fill="var(--color-primary)" /> {hotel.rating?.toFixed(1) || '4.5'} {t('common.rating')}
@@ -200,171 +113,48 @@ const HotelDetail = () => {
               {hotel.description || t('hotelDetail.defaultDescription')}
             </p>
 
-            {/* AMENITIES */}
-            {displayFacilities.length > 0 && (
-              <div style={{ marginBottom: '4rem' }}>
-                <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.8rem', marginBottom: '1.5rem', color: 'var(--color-text)' }}>{t('hotelDetail.facilities')}</h3>
-                {usingFacilityFallback && (
-                  <p style={{ color: 'var(--color-muted)', fontSize: '0.85rem', fontWeight: 400, lineHeight: 1.6, margin: '-0.75rem 0 1.5rem' }}>
-                    {t('hotelDetail.facilityFallbackNote')}
-                  </p>
-                )}
-                <div className="hotel-detail-facilities-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
-                  {displayFacilities.map(f => {
-                    const iconKey = String(f.icon || '').toLowerCase();
-                    const FacilityIcon = facilityIconMap[iconKey] || Check;
-                    return (
-                    <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--color-text)', fontSize: '0.9rem', fontWeight: 300 }}>
-                      <div style={{ background: 'var(--color-background)', width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--color-accent)' }}>
-                        <FacilityIcon size={14} style={{ color: 'var(--color-primary)' }} />
-                      </div>
-                      <span>{f.name}</span>
-                    </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+            <HotelFacilities facilities={displayFacilities} usingFallback={usingFacilityFallback} t={t} />
 
-            {/* ROOM MATRIX */}
             {roomTypes.length > 0 && (
               <div>
                 <h3 id="room-matrix" style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.8rem', marginBottom: '1.5rem', color: 'var(--color-text)' }}>{t('hotelDetail.rooms')}</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                   {roomTypes.map(room => {
                     const roomId = room.id_room_type || room.idRoomType;
-                    const isSelected = activeRoom === roomId;
-                    const roomAvailable = getRoomAvailability(room);
-                    const roomUnavailable = roomAvailable <= 0;
                     return (
-                      <div key={roomId} className="hotel-detail-room-card" onClick={() => setActiveRoom(roomId)}
-                        style={{
-                          display: 'flex', height: 180, cursor: 'pointer', borderRadius: 'var(--radius-sm)', overflow: 'hidden',
-                          border: isSelected ? '1px solid var(--color-primary)' : '1px solid var(--color-accent)',
-                          background: isSelected ? 'var(--color-surface)' : 'transparent',
-                          boxShadow: isSelected ? 'var(--shadow-hover)' : 'none',
-                          transition: 'all 0.3s ease'
-                        }}>
-                        <div className="hotel-detail-room-media" style={{ width: 220, height: '100%', flexShrink: 0, overflow: 'hidden' }}>
-                          <img src={getImageUrl(room.images?.[0]) || ROOM_FALLBACK_IMAGE} alt={room.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        </div>
-                        {/* Room description */}
-                        <div className="hotel-detail-room-body" style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                              <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', margin: 0, fontWeight: 300, color: 'var(--color-text)' }}>{room.name}</h4>
-                              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <span className="badge" style={{ fontSize: '0.65rem', background: roomUnavailable ? 'rgba(229,62,62,0.1)' : roomAvailable > 3 ? 'rgba(72,187,120,0.1)' : 'rgba(237,137,54,0.1)', color: roomUnavailable ? '#C53030' : roomAvailable > 3 ? '#276749' : '#DD6B20', borderColor: 'transparent' }}>
-                                  {roomUnavailable ? t('hotelDetail.unavailableRoom') : t('hotelDetail.available', { count: roomAvailable })}
-                                </span>
-                              </div>
-                            </div>
-                            <p style={{ color: 'var(--color-muted)', fontSize: '0.8rem', fontWeight: 300, marginTop: '0.5rem', display: 'flex', gap: '1rem' }}>
-                              <span>{t('hotelDetail.roomSize')}</span>
-                              <span>-</span>
-                              <span>{t('hotelDetail.bed')}</span>
-                            </p>
-                          </div>
-
-                          <div className="hotel-detail-room-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid var(--color-accent)', paddingTop: '0.75rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: 'var(--color-muted)', fontWeight: 300 }}><Users size={12} /> {t('hotelDetail.maxGuests', { count: room.max_guest ?? room.maxGuest })}</div>
-                            <div style={{ textAlign: 'right' }}>
-                              <div style={{ fontSize: '0.95rem', fontWeight: 400, color: 'var(--color-primary)' }}>{formatCurrency(room.price_per_night ?? room.pricePerNight)}<span style={{ fontSize: '0.7rem', color: 'var(--color-muted)' }}>{t('home.perNight')}</span></div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                      <HotelRoomCard
+                        key={roomId}
+                        room={room}
+                        selected={activeRoom === roomId}
+                        onSelect={() => setActiveRoom(roomId)}
+                        t={t}
+                      />
                     );
                   })}
                 </div>
               </div>
             )}
-
           </div>
 
-          {/* RIGHT COLUMN: Sticky Reserve Summary */}
-          <div className="hotel-detail-reservation" style={{ position: 'sticky', top: 120 }}>
-            <div className="card" style={{ padding: '2rem', border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-float)' }}>
-              <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--color-text)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.75rem', fontWeight: 300 }}>{t('hotelDetail.reservation')}</h3>
-              
-              {selectedRoom ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '2rem' }}>
-                  <div>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('hotelDetail.roomType')}</span>
-                    <div style={{ fontWeight: 400, color: 'var(--color-text)', fontSize: '1rem', marginTop: '0.25rem' }}>{selectedRoom.name}</div>
-                    {selectedRoomUnavailable && (
-                      <div style={{ color: 'var(--color-danger)', fontSize: '0.8rem', marginTop: '0.5rem', fontWeight: 400 }}>
-                        {t('hotelDetail.roomUnavailableMessage')}
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div style={{ background: 'var(--color-background)', border: '1px solid var(--color-accent)', padding: '1rem', borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--color-text)', marginBottom: '0.5rem' }}>
-                      <span>{t('hotelDetail.priceNight')}</span>
-                      <span>{formatCurrency(selectedRoom.price_per_night ?? selectedRoom.pricePerNight)}</span>
-                    </div>
-                    {hotel.onSale && hotel.discountPercent > 0 && (
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#C53030' }}>
-                        <span>{t('hotelDetail.discount', { percent: hotel.discountPercent })}</span>
-                        <span>-{formatCurrency((selectedRoom.price_per_night ?? selectedRoom.pricePerNight) * hotel.discountPercent / 100)}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <p style={{ color: 'var(--color-muted)', fontSize: '0.85rem', marginBottom: '2rem', fontWeight: 300 }}>{t('hotelDetail.chooseRoom')}</p>
-              )}
-
-              {user?.role === 'ROLE_USER' ? (
-                selectedRoomUnavailable ? (
-                  <button type="button" className="btn btn-primary btn-full" disabled style={{ justifyContent: 'center', height: 50, opacity: 0.55, cursor: 'not-allowed' }}>
-                    {t('hotelDetail.unavailableRoom')}
-                  </button>
-                ) : (
-                <Link to={`/booking/${hotel.id_hotel}?roomTypeId=${activeRoom}`} className="btn btn-primary btn-full" style={{ justifyContent: 'center', height: 50, background: 'var(--color-primary)' }}>
-                  {t('hotelDetail.reserve')}
-                </Link>
-                )
-              ) : !user ? (
-                <Link to={`/login?redirect=/hotels/${hotel.id_hotel}`} className="btn btn-full hotel-login-book-btn" style={{ justifyContent: 'center', height: 50 }}>
-                  {t('hotelDetail.signInToBook')}
-                </Link>
-              ) : (
-                <div style={{ background: 'var(--color-background)', border: '1px solid var(--color-accent)', padding: '1rem', textAlign: 'center', fontSize: '0.8rem', color: 'var(--color-muted)', fontWeight: 300 }}>
-                  {t('hotelDetail.adminCannotBook')}
-                </div>
-              )}
-
-              <p style={{ textAlign: 'center', color: 'var(--color-muted)', fontSize: '0.75rem', marginTop: '1rem', fontWeight: 300 }}>
-                {t('hotelDetail.secureCheckout')}
-              </p>
-            </div>
-          </div>
-
+          <HotelReservationCard
+            hotel={hotel}
+            selectedRoom={selectedRoom}
+            activeRoom={activeRoom}
+            selectedRoomUnavailable={selectedRoomUnavailable}
+            user={user}
+            t={t}
+          />
         </div>
-
       </div>
 
-      {/* LIGHTBOX MODAL */}
       {lightboxOpen && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(26,54,93,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-          <button onClick={() => setLightboxOpen(false)} style={{ position: 'absolute', top: 30, right: 30, background: 'transparent', border: 'none', cursor: 'pointer', color: 'white' }}>
-            <X size={32} />
-          </button>
-          
-          <button onClick={() => setActiveImg(c => (c - 1 + images.length) % images.length)} style={{ position: 'absolute', left: 40, background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', padding: '0.75rem', cursor: 'pointer', color: 'white' }}>
-            <ArrowLeft size={24} />
-          </button>
-
-          <div style={{ maxWidth: '80%', maxHeight: '80%', overflow: 'hidden' }}>
-            <img src={images[activeImg]} alt={`${hotel.name} - foto ${activeImg + 1}`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-          </div>
-
-          <button onClick={() => setActiveImg(c => (c + 1) % images.length)} style={{ position: 'absolute', right: 40, background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', padding: '0.75rem', cursor: 'pointer', color: 'white' }}>
-            <ArrowLeft size={24} style={{ transform: 'rotate(180deg)' }} />
-          </button>
-        </div>
+        <HotelLightbox
+          images={images}
+          activeImg={activeImg}
+          setActiveImg={setActiveImg}
+          onClose={() => setLightboxOpen(false)}
+          hotelName={hotel.name}
+        />
       )}
 
       <style>{`
@@ -494,7 +284,6 @@ const HotelDetail = () => {
           }
         }
       `}</style>
-
     </div>
   );
 };

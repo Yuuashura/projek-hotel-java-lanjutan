@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Shield, ShieldOff, AlertCircle } from 'lucide-react';
+import { Shield, ShieldOff } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import PaginationControls from '../../components/admin/PaginationControls';
+import AdminPageHeader from '../../components/admin/AdminPageHeader';
+import AdminSearchInput from '../../components/admin/AdminSearchInput';
+import AdminTableShell from '../../components/admin/AdminTableShell';
 import LoadingState from '../../components/LoadingState';
+import Alert from '../../components/ui/Alert';
+import Button from '../../components/ui/Button';
 import api from '../../utils/api';
 import { getImageUrl } from '../../utils/uploads';
 import { getErrorMessage, unwrapList } from '../../utils/response';
@@ -62,28 +67,18 @@ const AdminVisitors = () => {
 
   return (
     <AdminLayout>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.75rem', textTransform: 'uppercase', letterSpacing: '1px', margin: 0, color: 'var(--color-text)' }}>{t('admin.visitors.title')}</h2>
-          <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', margin: '0.25rem 0 0' }}>{t('admin.visitors.count', { count: filtered.length })}</p>
-        </div>
-        <div style={{ position: 'relative', maxWidth: 300, width: '100%' }}>
-          <Search size={14} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-muted)' }} />
-          <input className="input" placeholder={t('admin.visitors.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: '2.25rem', height: '2.25rem' }} />
-        </div>
-      </div>
+      <AdminPageHeader
+        title={t('admin.visitors.title')}
+        subtitle={t('admin.visitors.count', { count: filtered.length })}
+        actions={<AdminSearchInput placeholder={t('admin.visitors.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} className="max-w-[300px]" />}
+      />
 
-      {error && (
-        <div className="alert-danger" style={{ borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <AlertCircle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
-          <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.85rem' }}>{error}</span>
-        </div>
-      )}
+      {error && <Alert type="danger">{error}</Alert>}
 
       {loading ? (
         <LoadingState text={t('admin.visitors.loading')} compact />
       ) : (
-        <div style={{ overflowX: 'auto' }}>
+        <AdminTableShell isEmpty={filtered.length === 0} emptyText={t('admin.visitors.empty')}>
           <table className="neo-table">
             <thead>
               <tr>{[t('admin.table.number'), t('admin.table.name'), t('admin.table.email'), t('admin.table.phone'), t('admin.table.city'), t('admin.table.status'), t('admin.table.actions')].map(h => <th key={h}>{h}</th>)}</tr>
@@ -116,20 +111,20 @@ const AdminVisitors = () => {
                     )}
                   </td>
                   <td>
-                    <button
+                    <Button
                       onClick={() => handleToggleBan(u.id_customer || u.id, u.is_banned)}
                       disabled={actionLoading === (u.id_customer || u.id)}
-                      className="btn btn-white btn-sm"
-                      style={{ padding: '0.4rem 0.8rem', color: u.is_banned ? 'var(--color-success)' : 'var(--color-danger)' }}
+                      variant="white"
+                      size="sm"
+                      className={u.is_banned ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'}
                     >
                       {actionLoading === (u.id_customer || u.id) ? '...' : u.is_banned ? <><ShieldOff size={12} style={{ marginRight: '0.25rem' }} /> Unban</> : <><Shield size={12} style={{ marginRight: '0.25rem' }} /> Ban</>}
-                    </button>
+                    </Button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {filtered.length === 0 && <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>{t('admin.visitors.empty')}</div>}
           <PaginationControls
             page={currentPage}
             totalPages={totalPages}
@@ -137,7 +132,7 @@ const AdminVisitors = () => {
             pageSize={PAGE_SIZE}
             onPageChange={setPage}
           />
-        </div>
+        </AdminTableShell>
       )}
     </AdminLayout>
   );
