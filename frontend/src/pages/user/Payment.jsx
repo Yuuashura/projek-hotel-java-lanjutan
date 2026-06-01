@@ -1,16 +1,59 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { AlertCircle } from 'lucide-react';
-import { formatDate, diffDays } from '../../utils/formatters';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { Upload, Clock, Check, AlertCircle, X, ImageIcon } from 'lucide-react';
+import { formatCurrency, formatDate, diffDays } from '../../utils/formatters';
 import { useAuth } from '../../context/AuthContext';
 import LoadingState from '../../components/LoadingState';
-import PaymentSuccess from '../../components/payment/PaymentSuccess';
-import PaymentTimerBanner from '../../components/payment/PaymentTimerBanner';
-import PaymentMethodSelector from '../../components/payment/PaymentMethodSelector';
-import PaymentProofUpload from '../../components/payment/PaymentProofUpload';
-import PaymentSummaryCard from '../../components/payment/PaymentSummaryCard';
 import api from '../../utils/api';
 import { validateImageFile } from '../../utils/uploads';
+import qrisImg from '../../assets/qris.png';
+
+const BcaLogo = () => (
+  <svg width="46" height="26" viewBox="0 0 46 26" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    <rect width="46" height="26" rx="4" fill="#0A387E" />
+    <path d="M 6 12 Q 9 8.5, 12 12 T 18 12" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+    <path d="M 6 16 Q 9 12.5, 12 16 T 18 16" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+    <text x="31" y="16.5" fontFamily="system-ui, -apple-system, sans-serif" fontWeight="900" fontSize="10" fill="white" letterSpacing="0.2">BCA</text>
+  </svg>
+);
+
+const BriLogo = () => (
+  <svg width="46" height="26" viewBox="0 0 46 26" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    <rect width="46" height="26" rx="4" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" />
+    <rect x="4" y="5" width="13" height="16" rx="1.5" fill="#00529C" />
+    <path d="M 7 13 Q 10.5 9.5, 14 13" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+    <circle cx="10.5" cy="15" r="1.2" fill="#F37021" />
+    <text x="31" y="17.5" fontFamily="system-ui, -apple-system, sans-serif" fontWeight="900" fontSize="11" fill="#00529C" letterSpacing="0.1">BRI</text>
+  </svg>
+);
+
+const BniLogo = () => (
+  <svg width="46" height="26" viewBox="0 0 46 26" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    <rect width="46" height="26" rx="4" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" />
+    <circle cx="10" cy="13" r="5.5" fill="#E05C1C" />
+    <text x="10" y="15" fontFamily="system-ui, -apple-system, sans-serif" fontWeight="700" fontSize="6.5" fill="white" textAnchor="middle">46</text>
+    <text x="27" y="17.5" fontFamily="system-ui, -apple-system, sans-serif" fontWeight="900" fontSize="11" fill="#005E6A" letterSpacing="-0.5">BNI</text>
+  </svg>
+);
+
+const QrisLogo = () => (
+  <svg width="46" height="26" viewBox="0 0 46 26" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+    <rect width="46" height="26" rx="4" fill="#FFFFFF" stroke="#E2E8F0" strokeWidth="1" />
+    <text x="23" y="17" fontFamily="system-ui, -apple-system, sans-serif" fontWeight="900" fontSize="11" textAnchor="middle" letterSpacing="-0.5">
+      <tspan fill="#009FB7">Q</tspan>
+      <tspan fill="#E51C24">R</tspan>
+      <tspan fill="#F58220">I</tspan>
+      <tspan fill="#0F3B7A">S</tspan>
+    </text>
+  </svg>
+);
+
+const PAYMENT_METHODS = [
+  { id: 'Transfer Bank BCA', label: 'Transfer Bank BCA', info: 'No. Rek: 1234567890 a.n. PT NgiNep Corp', logo: <BcaLogo /> },
+  { id: 'Transfer Bank BRI', label: 'Transfer Bank BRI', info: 'No. Rek: 0987654321 a.n. PT NgiNep Corp', logo: <BriLogo /> },
+  { id: 'Transfer Bank BNI', label: 'Transfer Bank BNI', info: 'No. Rek: 1122334455 a.n. PT NgiNep Corp', logo: <BniLogo /> },
+  { id: 'QRIS', label: 'QRIS', info: 'Scan QR code di bawah untuk melakukan pembayaran', logo: <QrisLogo /> },
+];
 
 
 const Payment = () => {
@@ -111,7 +154,22 @@ const Payment = () => {
   }
   if (!booking) return null;
 
-  if (success) return <PaymentSuccess />;
+  if (success) {
+    return (
+      <div className="payment-success-shell" style={{ maxWidth: 520, margin: '6rem auto', padding: '0 1.5rem', textAlign: 'center' }}>
+        <div className="card" style={{ padding: '3.5rem 2.5rem', border: '1px solid var(--color-accent)' }}>
+          <div style={{ width: 64, height: 64, background: 'rgba(72,187,120,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+            <Check size={32} style={{ color: '#38A169' }} />
+          </div>
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '2rem', marginBottom: '0.75rem', fontWeight: 300 }}>Pembayaran Dikirim</h2>
+          <p style={{ color: 'var(--color-muted)', fontWeight: 300, lineHeight: 1.7, marginBottom: '2.5rem', fontSize: '0.9rem' }}>
+            Bukti transfer Anda telah kami terima dan sedang dalam proses verifikasi oleh Admin Hotel. Voucher menginap Anda akan aktif dalam 1×24 jam.
+          </p>
+          <Link to="/my-bookings" className="btn btn-dark btn-full" style={{ justifyContent: 'center', height: 50 }}>Lihat Pesanan Saya</Link>
+        </div>
+      </div>
+    );
+  }
 
   const nights = diffDays(booking.check_in, booking.check_out);
 
@@ -120,7 +178,23 @@ const Payment = () => {
       <div className="payment-shell" style={{ maxWidth: 1000, margin: '0 auto' }}>
         <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '2.5rem', marginBottom: '3rem', color: 'var(--color-text)' }}>Informasi Pembayaran</h1>
 
-        <PaymentTimerBanner timeLeft={timeLeft} formatCountdown={formatCountdown} />
+        {/* Countdown timer banner */}
+        {timeLeft > 0 && (
+          <div style={{ background: timeLeft < 3600 ? '#FFF5F5' : '#FFFDF3', border: `1px solid ${timeLeft < 3600 ? '#FEB2B2' : '#FEEBC8'}`, padding: '1.25rem 1.5rem', marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '1rem', borderRadius: 'var(--radius-sm)' }}>
+            <Clock size={24} style={{ color: timeLeft < 3600 ? '#E53E3E' : '#DD6B20', flexShrink: 0 }} />
+            <div>
+              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-muted)', letterSpacing: '1px' }}>Sisa Waktu Pembayaran</div>
+              <div style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '1.5rem', color: timeLeft < 3600 ? '#E53E3E' : '#DD6B20', marginTop: '0.15rem' }}>{formatCountdown(timeLeft)}</div>
+            </div>
+          </div>
+        )}
+
+        {timeLeft === 0 && (
+          <div style={{ background: '#FFF5F5', border: '1px solid #FEB2B2', padding: '1.25rem 1.5rem', marginBottom: '2.5rem', display: 'flex', gap: '0.75rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
+            <X size={20} style={{ color: '#E53E3E', flexShrink: 0 }} />
+            <span style={{ fontWeight: 300, color: '#C53030', fontSize: '0.9rem' }}>Batas waktu pembayaran telah habis. Silakan buat pesanan baru.</span>
+          </div>
+        )}
 
         <div className="payment-layout" style={{ display: 'grid', gridTemplateColumns: '62% 38%', gap: '3.5rem', alignItems: 'flex-start' }}>
           {/* Left Column */}
@@ -152,17 +226,86 @@ const Payment = () => {
               
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 
-                <PaymentMethodSelector
-                  value={form.payment_method}
-                  onChange={paymentMethod => setForm(f => ({ ...f, payment_method: paymentMethod }))}
-                />
+                {/* Bank selection cards */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {PAYMENT_METHODS.map(m => {
+                    const isChecked = form.payment_method === m.id;
+                    return (
+                      <label key={m.id} 
+                        style={{ 
+                          display: 'flex', gap: '1rem', padding: '1.25rem', cursor: 'pointer', borderRadius: 'var(--radius-sm)',
+                          border: isChecked ? '1px solid var(--color-primary)' : '1px solid var(--color-accent)', 
+                          background: isChecked ? 'rgba(212,175,55,0.02)' : 'var(--color-surface)', 
+                          transition: 'all 0.3s ease' 
+                        }}>
+                        <input type="radio" name="payment" value={m.id} checked={isChecked} onChange={() => setForm(f => ({ ...f, payment_method: m.id }))} style={{ accentColor: 'var(--color-primary)', marginTop: 5, width: 16, height: 16, flexShrink: 0 }} />
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', width: '100%' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 500, fontSize: '0.95rem', color: 'var(--color-text)' }}>
+                            {m.logo}
+                            <span>{m.label}</span>
+                          </div>
+                          <div style={{ color: 'var(--color-muted)', fontSize: '0.8rem', fontWeight: 300 }}>{m.info}</div>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
 
-                <PaymentProofUpload
-                  fileRef={fileRef}
-                  previewFile={previewFile}
-                  previewUrl={previewUrl}
-                  onChange={handleFileChange}
-                />
+                {form.payment_method === 'QRIS' && (
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    background: '#F8FAFC',
+                    padding: '1.5rem',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--color-accent)',
+                    marginTop: '0.5rem',
+                    animation: 'fadeIn 0.4s ease'
+                  }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--color-text)' }}>QRIS NgiNep Corp</div>
+                    <div style={{ background: 'white', padding: '0.75rem', border: '1px solid #E2E8F0', borderRadius: 'var(--radius-sm)', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                      {/* IMG QRIS */}
+                      <img src={qrisImg} alt="QRIS" style={{ width: '270px', height: '350px', borderRadius: 'var(--radius-sm)' }} />
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--color-muted)', textAlign: 'center' }}>Scan QR di atas dengan aplikasi bank atau e-wallet pilihan Anda</div>
+                  </div>
+                )}
+
+                {/* Upload Proof */}
+                <div>
+                  <label className="label" style={{ display: 'block', marginBottom: '0.5rem' }}>Bukti Pembayaran *</label>
+                  <div
+                    onClick={() => fileRef.current?.click()}
+                    style={{
+                      border: previewUrl ? '1px solid #38A169' : '1px dashed var(--color-muted)',
+                      padding: '2rem',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      background: previewUrl ? 'rgba(72,187,120,0.02)' : 'transparent',
+                      transition: 'all 0.3s ease',
+                      borderRadius: 'var(--radius-sm)',
+                      marginBottom: '0.5rem'
+                    }}
+                  >
+                    {previewUrl ? (
+                      <div>
+                        <img src={previewUrl} alt="Bukti bayar" style={{ maxHeight: 180, maxWidth: '100%', objectFit: 'contain', borderRadius: 2, marginBottom: '1rem', border: '1px solid var(--color-accent)' }} />
+                        <div style={{ fontSize: '0.8rem', fontWeight: 400, color: '#38A169' }}>
+                          {previewFile ? previewFile.name : 'Bukti transfer siap kirim'}
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <ImageIcon size={32} style={{ color: 'var(--color-muted)', marginBottom: '0.5rem' }} />
+                        <div style={{ fontWeight: 400, fontSize: '0.85rem', color: 'var(--color-text)' }}>Klik untuk memilih file bukti bayar</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', fontWeight: 300, marginTop: '0.25rem' }}>Format gambar JPG, PNG, WEBP max 5MB</div>
+                      </div>
+                    )}
+                  </div>
+                  <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
+                </div>
 
                 {error && (
                   <div style={{ background: '#FFF5F5', border: '1px solid #FEB2B2', padding: '0.875rem', display: 'flex', gap: '0.5rem', borderRadius: 'var(--radius-sm)' }}>
@@ -180,7 +323,28 @@ const Payment = () => {
 
           </div>
 
-          <PaymentSummaryCard nights={nights} totalPrice={booking.total_price} />
+          {/* Right Column: Order Pricing */}
+          <div className="payment-summary-sticky" style={{ position: 'sticky', top: 120 }}>
+            <div className="payment-summary-card flow-animate" style={{ background: '#F7FAFC', border: '1px solid var(--color-accent)', padding: '2rem', borderRadius: 'var(--radius-sm)' }}>
+              <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--color-text)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.75rem', fontWeight: 300 }}>Total Tagihan</h3>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--color-muted)', marginBottom: '1rem' }}>
+                <span>Suite & Nights</span>
+                <span>{nights} malam</span>
+              </div>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-heading)', fontSize: '1.6rem', color: 'var(--color-text)', borderTop: '1px solid var(--color-accent)', paddingTop: '1rem', fontWeight: 300 }}>
+                <span>Total</span>
+                <span style={{ color: 'var(--color-primary)' }}>{formatCurrency(booking.total_price)}</span>
+              </div>
+              
+              <div style={{ display: 'block', textAlign: 'center', marginTop: '1.5rem' }}>
+                <span className="badge" style={{ background: 'rgba(212,175,55,0.1)', color: 'var(--color-primary)', borderColor: 'transparent', width: '100%', height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  AWAITING PAYMENT VERIFICATION
+                </span>
+              </div>
+            </div>
+          </div>
 
         </div>
 

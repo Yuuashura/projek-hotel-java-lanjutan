@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 import api from '../../utils/api';
-import AuthLayout from '../../components/auth/AuthLayout';
-import Alert from '../../components/ui/Alert';
-import Button from '../../components/ui/Button';
-import { FormField, TextInput } from '../../components/ui/FormField';
 
 const Login = () => {
   const { login, token, user } = useAuth();
@@ -68,41 +64,62 @@ const Login = () => {
   };
 
   return (
-    <AuthLayout
-      title="Masuk ke Akun Anda"
-      subtitle={<>Belum punya akun? <Link to="/register">Daftar sekarang</Link></>}
-      footnote={<>Dengan masuk, Anda menyetujui <a href="#">Syarat & Ketentuan</a> NgiNep.</>}
-    >
-      {error && <Alert type="danger">{error}</Alert>}
+    <div className="auth-page">
+      <div className="auth-shell animate-slide-in">
+        {/* Logo */}
+        <div className="auth-header">
+          <Link to="/" style={{ textDecoration: 'none' }}>
+            <div className="auth-brand">
+              NgiNep<span style={{ color: 'var(--color-primary)' }}>.</span>
+            </div>
+          </Link>
+          <h1>Masuk ke Akun Anda</h1>
+          <p>Belum punya akun? <Link to="/register">Daftar sekarang</Link></p>
+        </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-        <FormField label="Alamat Email">
-          <TextInput type="email" placeholder="nama@email.com" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required />
-        </FormField>
+        <div className="card auth-card">
+          {/* Card Top Accent Line */}
+          <div className="auth-card-accent" />
 
-        <FormField label="Password">
-          <TextInput
-            type={showPw ? 'text' : 'password'}
-            placeholder="Masukkan password Anda"
-            value={form.password}
-            onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-            required
-            right={(
-              <button type="button" onClick={() => setShowPw(!showPw)} className="flex h-9 w-9 items-center justify-center border-0 bg-transparent p-0 text-[var(--color-muted)] transition hover:text-[var(--color-primary)]">
-                {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            )}
-          />
-          <div className="mt-2.5 text-right">
-            <Link to="/forgot-password" className="text-sm font-bold text-[var(--color-primary)] no-underline">Lupa Password?</Link>
-          </div>
-        </FormField>
+          {/* Error Alert */}
+          {error && (
+            <div className="alert-danger" style={{ padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
+              <AlertCircle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
+              <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.85rem' }}>{error}</span>
+            </div>
+          )}
 
-        <Button type="submit" full disabled={loading} className="mt-2 min-h-[50px]">
-          {loading ? <><span className="btn-spinner" /> Memproses...</> : 'Masuk Sekarang'}
-        </Button>
-      </form>
-    </AuthLayout>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div className="auth-field">
+              <label className="label">Alamat Email</label>
+              <input className="input" type="email" placeholder="nama@email.com" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required />
+            </div>
+            <div className="auth-field">
+              <label className="label">Password</label>
+              <div style={{ position: 'relative' }}>
+                <input className="input" style={{ paddingRight: '2.5rem' }} type={showPw ? 'text' : 'password'} placeholder="Masukkan password Anda" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required />
+                <button type="button" onClick={() => setShowPw(!showPw)} style={{ position: 'absolute', right: '0.875rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)' }}>
+                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              <div style={{ textAlign: 'right', marginTop: '0.65rem' }}>
+                <Link to="/forgot-password" style={{ color: 'var(--color-primary)', fontWeight: 700, fontSize: '0.82rem', textDecoration: 'none' }}>
+                  Lupa Password?
+                </Link>
+              </div>
+            </div>
+
+            <button type="submit" className="btn btn-primary btn-full" disabled={loading} style={{ height: 50, marginTop: '0.5rem', background: 'var(--color-primary)', opacity: loading ? 0.7 : 1 }}>
+              {loading ? <><span className="btn-spinner" /> Memproses...</> : 'Masuk Sekarang'}
+            </button>
+          </form>
+        </div>
+
+        <p className="auth-footnote">
+          Dengan masuk, Anda menyetujui <a href="#">Syarat & Ketentuan</a> NgiNep.
+        </p>
+      </div>
+    </div>
   );
 };
 

@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ShieldCheck, Heart, Award, Users } from 'lucide-react';
 import { usePreferences } from '../../context/PreferencesContext';
-import AboutValueCard from '../../components/about/AboutValueCard';
 
 const About = () => {
   const { t } = usePreferences();
@@ -43,7 +42,19 @@ const About = () => {
         <div className="reveal" style={{ marginBottom: '5rem' }}>
           <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '2rem', textAlign: 'center', marginBottom: '3rem', color: 'var(--color-text)' }}>{t('about.valuesTitle')}</h2>
           <div className="about-value-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
-            {values.map((value, i) => <AboutValueCard key={value.title} value={value} meta={icons[i]} />)}
+            {values.map((v, i) => {
+              const meta = icons[i];
+              const Icon = meta.icon;
+              return (
+                <div key={i} className="card card-hover" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem', border: '1px solid var(--color-accent)' }}>
+                  <div style={{ background: meta.color, width: 48, height: 48, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Icon size={20} style={{ color: meta.iconColor }} />
+                  </div>
+                  <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.3rem', margin: 0, color: 'var(--color-text)' }}>{v.title}</h3>
+                  <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.875rem', lineHeight: 1.7, margin: 0 }}>{v.desc}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
 
