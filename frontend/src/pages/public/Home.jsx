@@ -36,7 +36,10 @@ const Home = () => {
 
     api.get('/api/cities', { signal: controller.signal }).then(r => setCities(r.data.data || [])).catch(() => {});
     setFeaturedLoading(true);
-    api.get('/api/hotels', { params: { page: 0, size: FEATURED_LIMIT, sortBy: 'rating' }, signal: controller.signal })
+    api.get('/api/hotels', {
+      params: { page: 0, size: FEATURED_LIMIT, sortBy: 'rating' },
+      signal: controller.signal,
+    })
       .then(r => setFeaturedHotels(r.data.data || []))
       .catch(() => setFeaturedHotels([]))
       .finally(() => setFeaturedLoading(false));

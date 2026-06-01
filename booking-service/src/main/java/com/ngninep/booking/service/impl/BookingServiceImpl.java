@@ -51,7 +51,6 @@ public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
     private final WebClient hotelServiceWebClient;
-    private final BookingStatusMailSender bookingStatusMailSender;
 
     private static final Duration HOTEL_SERVICE_TIMEOUT = Duration.ofSeconds(5);
     private static final List<BookingStatus> ACTIVE_STATUSES =
@@ -201,14 +200,9 @@ public class BookingServiceImpl implements BookingService {
     public BookingResponse updateStatus(int id, BookingStatus status) {
         expirePendingBookings();
         Booking booking = getBookingEntityById(id);
-        BookingStatus previousStatus = booking.getStatus();
-        validateStatusTransition(previousStatus, status);
+        validateStatusTransition(booking.getStatus(), status);
         booking.setStatus(status);
-        Booking savedBooking = bookingRepository.save(booking);
-        if (previousStatus != status) {
-            bookingStatusMailSender.sendStatusChangedEmail(savedBooking, previousStatus, status);
-        }
-        return mapToResponse(savedBooking);
+        return mapToResponse(bookingRepository.save(booking));
     }
 
     @Override
