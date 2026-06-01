@@ -130,7 +130,7 @@ const AdminLayout = ({ children }) => {
   );
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--color-background)' }}>
+    <div className="admin-shell" style={{ display: 'flex', minHeight: '100vh', background: 'var(--color-background)' }}>
       {/* Sidebar */}
       <aside style={{
         width: 260, flexShrink: 0, background: 'var(--admin-sidebar-bg)', borderRight: '1px solid var(--admin-sidebar-border)',
@@ -179,7 +179,7 @@ const AdminLayout = ({ children }) => {
       {/* Main Content */}
       <div style={{ flex: 1, marginLeft: 260, display: 'flex', flexDirection: 'column' }} className="admin-content">
         {/* Top Bar */}
-        <div style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-accent)', padding: '1rem 2rem', display: 'flex', alignItems: 'center', gap: '1rem', position: 'sticky', top: 0, zIndex: 30 }}>
+        <div className="admin-topbar" style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-accent)', padding: '1rem 2rem', display: 'flex', alignItems: 'center', gap: '1rem', position: 'sticky', top: 0, zIndex: 30 }}>
           <button onClick={() => setSidebarOpen(!sidebarOpen)} className="show-mobile-admin" style={{ background: 'none', border: '1px solid var(--color-accent)', padding: '0.5rem', cursor: 'pointer', display: 'none', borderRadius: 'var(--radius-sm)' }}>
             <Menu size={16} />
           </button>
@@ -191,7 +191,7 @@ const AdminLayout = ({ children }) => {
         </div>
 
         {/* Page Content */}
-        <main style={{ flex: 1, padding: '2.5rem 2rem' }}>
+        <main className="admin-page-main" style={{ flex: 1, padding: '2.5rem 2rem' }}>
           {children}
         </main>
       </div>

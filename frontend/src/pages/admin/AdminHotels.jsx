@@ -14,6 +14,15 @@ import { usePreferences } from '../../context/PreferencesContext';
 const EMPTY_FORM = { name: '', city_id: '', address: '', type: '', description: '', is_featured: false, is_on_sale: false, discount_percent: 0, rating: 0, image_url: '' };
 const PAGE_SIZE = 25;
 
+const normalizePagination = (pagination, fallbackPage, fallbackCount) => ({
+  currentPage: pagination?.current_page ?? pagination?.currentPage ?? fallbackPage,
+  pageSize: pagination?.page_size ?? pagination?.pageSize ?? PAGE_SIZE,
+  totalItems: pagination?.total_items ?? pagination?.totalItems ?? fallbackCount,
+  totalPages: pagination?.total_pages ?? pagination?.totalPages ?? 1,
+  hasNext: pagination?.has_next ?? pagination?.hasNext ?? false,
+  hasPrevious: pagination?.has_previous ?? pagination?.hasPrevious ?? false,
+});
+
 const AdminHotels = () => {
   const { t } = usePreferences();
   const [hotels, setHotels] = useState([]);
@@ -29,6 +38,14 @@ const AdminHotels = () => {
   const [imageUploading, setImageUploading] = useState(false);
   const [excelUploading, setExcelUploading] = useState(false);
   const [excelDownloading, setExcelDownloading] = useState(false);
+  const [pagination, setPagination] = useState({
+    currentPage: 0,
+    pageSize: PAGE_SIZE,
+    totalItems: 0,
+    totalPages: 1,
+    hasNext: false,
+    hasPrevious: false,
+  });
   const fileRef = useRef();
   const excelRef = useRef();
 
@@ -36,15 +53,16 @@ const AdminHotels = () => {
     setLoading(true);
     setError('');
     Promise.all([
-      api.get('/api/hotels'),
+      api.get('/api/hotels', { params: { page, size: PAGE_SIZE } }),
       api.get('/api/cities'),
     ]).then(([h, c]) => {
       setHotels(unwrapList(h.data));
+      setPagination(normalizePagination(h.data?.pagination, page, unwrapList(h.data).length));
       setCities(unwrapList(c.data));
     }).catch((err) => setError(getErrorMessage(err, t('admin.errors.loadHotels')))).finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [page]);
 
   const openCreate = () => {
     setForm(EMPTY_FORM);
@@ -53,23 +71,31 @@ const AdminHotels = () => {
     setModal('create');
   };
 
-  const openEdit = (h) => {
-    setSelected(h);
-    const hotelImgs = h.images?.map(img => img.imageUrl || img.image_url).filter(Boolean) || [];
-    setImagesList(hotelImgs);
-    setForm({ 
-      name: h.name, 
-      city_id: h.city?.id_city || '', 
-      address: h.address || '', 
-      type: h.type || '', 
-      description: h.description || '', 
-      is_featured: h.featured, 
-      is_on_sale: h.onSale, 
-      discount_percent: h.discount_percent || 0, 
-      rating: h.rating || 0, 
-      image_url: hotelImgs.join('|||') 
-    });
+  const openEdit = async (h) => {
     setError('');
+    let hotel = h;
+    try {
+      const res = await api.get(`/api/hotels/${h.id_hotel}`);
+      hotel = res.data?.data || h;
+    } catch {
+      hotel = h;
+    }
+
+    setSelected(hotel);
+    const hotelImgs = hotel.images?.map(img => img.imageUrl || img.image_url).filter(Boolean) || [];
+    setImagesList(hotelImgs);
+    setForm({
+      name: hotel.name,
+      city_id: hotel.city?.id_city || '',
+      address: hotel.address || '',
+      type: hotel.type || '',
+      description: hotel.description || '',
+      is_featured: hotel.featured,
+      is_on_sale: hotel.onSale,
+      discount_percent: hotel.discount_percent || 0,
+      rating: hotel.rating || 0,
+      image_url: hotelImgs.join('|||')
+    });
     setModal('edit');
   };
 
@@ -96,7 +122,8 @@ const AdminHotels = () => {
       if (modal === 'create') await api.post('/api/hotels', payload);
       if (modal === 'edit') await api.put(`/api/hotels/${selected.id_hotel}`, payload);
       closeModal();
-      load();
+      if (modal === 'create' && page !== 0) setPage(0);
+      else load();
     } catch (err) {
       setError(err.response?.data?.message || t('admin.errors.operationFailed'));
     } finally { setSubmitting(false); }
@@ -150,7 +177,8 @@ const AdminHotels = () => {
       const formData = new FormData();
       formData.append('file', file);
       await api.post('/api/hotels/upload-excel', formData);
-      load();
+      if (page !== 0) setPage(0);
+      else load();
     } catch (err) {
       setError(err.response?.data?.message || t('admin.errors.uploadExcelFailed'));
     } finally {
@@ -183,16 +211,17 @@ const AdminHotels = () => {
     }
   };
 
-  const totalPages = Math.max(1, Math.ceil(hotels.length / PAGE_SIZE));
-  const currentPage = Math.min(page, totalPages - 1);
-  const paginatedHotels = hotels.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+  const totalPages = Math.max(1, pagination.totalPages || 1);
+  const currentPage = Math.min(pagination.currentPage ?? page, totalPages - 1);
+  const totalItems = pagination.totalItems ?? hotels.length;
+  const paginatedHotels = hotels;
 
   return (
     <AdminLayout>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.75rem', textTransform: 'uppercase', letterSpacing: '1px', margin: 0, color: 'var(--color-text)' }}>{t('admin.hotels.title')}</h2>
-          <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', margin: '0.25rem 0 0' }}>{t('admin.hotels.count', { count: hotels.length })}</p>
+          <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', margin: '0.25rem 0 0' }}>{t('admin.hotels.count', { count: totalItems })}</p>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
           <button onClick={handleExcelDownload} className="btn btn-white btn-sm" disabled={excelDownloading}>
@@ -258,8 +287,8 @@ const AdminHotels = () => {
           <PaginationControls
             page={currentPage}
             totalPages={totalPages}
-            totalItems={hotels.length}
-            pageSize={PAGE_SIZE}
+            totalItems={totalItems}
+            pageSize={pagination.pageSize || PAGE_SIZE}
             onPageChange={setPage}
           />
         </div>

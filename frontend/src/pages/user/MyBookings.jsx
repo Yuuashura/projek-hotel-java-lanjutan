@@ -82,13 +82,13 @@ const MyBookings = () => {
   ];
 
   return (
-    <div style={{ background: 'var(--color-background)', minHeight: '100vh', padding: '6rem 1.5rem' }}>
-      <div style={{ maxWidth: 900, margin: '0 auto' }}>
+    <div className="user-page my-bookings-page" style={{ background: 'var(--color-background)', minHeight: '100vh', padding: '6rem 1.5rem' }}>
+      <div className="user-page-shell" style={{ maxWidth: 900, margin: '0 auto' }}>
         <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '2.5rem', marginBottom: '0.5rem', color: 'var(--color-text)' }}>Pesanan Saya</h1>
         <p style={{ color: 'var(--color-muted)', fontWeight: 300, marginBottom: '3rem', fontSize: '0.9rem' }}>Kelola dan pantau status semua pemesanan hotel Anda</p>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', borderBottom: '1px solid var(--color-accent)', marginBottom: '2.5rem', gap: '2rem' }}>
+        <div className="user-tabs" style={{ display: 'flex', borderBottom: '1px solid var(--color-accent)', marginBottom: '2.5rem', gap: '2rem' }}>
           {tabs.map(({ key, label, icon: Icon }) => (
             <button key={key} onClick={() => setTab(key)} 
               style={{
@@ -122,7 +122,7 @@ const MyBookings = () => {
             <Link to="/hotels" className="btn btn-primary" style={{ background: 'var(--color-primary)' }}>Cari Hotel <ArrowRight size={14} /></Link>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div className="flow-animate" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {bookings.map(booking => <BookingCard key={booking.id_booking || booking.id} booking={booking} onCancel={handleCancel} />)}
           </div>
         )}
@@ -171,7 +171,7 @@ const BookingCard = ({ booking, onCancel }) => {
   const statusBadge = getBadgeColor(booking.status);
 
   return (
-    <div className="card card-hover" style={{ padding: '2rem', border: '1px solid var(--color-accent)', display: 'flex', flexDirection: 'column', gap: '1.5rem', background: 'var(--color-surface)' }}>
+    <div className="card card-hover booking-history-card flow-animate" style={{ padding: '2rem', border: '1px solid var(--color-accent)', display: 'flex', flexDirection: 'column', gap: '1.5rem', background: 'var(--color-surface)' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
@@ -196,7 +196,7 @@ const BookingCard = ({ booking, onCancel }) => {
       </div>
 
       {/* Summary Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '1.5rem', padding: '1.25rem', background: 'var(--color-background)', border: '1px solid var(--color-accent)', borderRadius: 'var(--radius-sm)' }}>
+      <div className="booking-history-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '1.5rem', padding: '1.25rem', background: 'var(--color-background)', border: '1px solid var(--color-accent)', borderRadius: 'var(--radius-sm)' }}>
         <div>
           <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Check-In</div>
           <div style={{ fontWeight: 400, fontSize: '0.85rem', color: 'var(--color-text)' }}>{formatDate(booking.check_in)}</div>
@@ -239,7 +239,7 @@ const BookingCard = ({ booking, onCancel }) => {
       {expanded && (
         <div style={{ background: 'var(--color-background)', border: '1px solid var(--color-accent)', padding: '1.5rem', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '1rem', borderRadius: 'var(--radius-sm)' }}>
           <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.1rem', color: 'var(--color-text)', margin: 0, fontWeight: 300 }}>Detail Pemesan</h4>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem 2rem' }}>
+          <div className="booking-history-detail-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem 2rem' }}>
             {[
               { label: 'Nama Pemesan', val: booking.orderer_name },
               { label: 'Email', val: booking.orderer_email },
@@ -268,7 +268,7 @@ const BookingCard = ({ booking, onCancel }) => {
       )}
 
       {/* Action Buttons */}
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', borderTop: '1px solid var(--color-accent)', paddingTop: '1.25rem' }}>
+      <div className="booking-history-actions" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', borderTop: '1px solid var(--color-accent)', paddingTop: '1.25rem' }}>
         {booking.status === 'PENDING' && !alreadyPaid && (
           <Link to={`/payment/${booking.id_booking || booking.id}`} className="btn btn-primary btn-sm" style={{ background: 'var(--color-primary)' }}>
             Bayar Sekarang

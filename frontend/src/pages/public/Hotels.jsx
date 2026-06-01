@@ -7,6 +7,9 @@ import CitySearchSelect from '../../components/CitySearchSelect';
 import { usePreferences } from '../../context/PreferencesContext';
 import LoadingState from '../../components/LoadingState';
 import { getImageUrl } from '../../utils/uploads';
+import PaginationControls from '../../components/admin/PaginationControls';
+
+const PAGE_SIZE = 25;
 
 const DEFAULT_FILTERS = {
   keyword: '',
@@ -23,6 +26,9 @@ const getRoomTypes = (hotel) => hotel.roomTypes || hotel.room_types || [];
 const getRoomPrice = (room) => Number(room.price_per_night ?? room.pricePerNight ?? room.price ?? 0);
 
 const getMinPrice = (hotel) => {
+  const summaryPrice = Number(hotel.min_price ?? hotel.minPrice ?? 0);
+  if (summaryPrice > 0) return summaryPrice;
+
   const prices = getRoomTypes(hotel).map(getRoomPrice).filter(price => price > 0);
   return prices.length ? Math.min(...prices) : 0;
 };
@@ -37,6 +43,15 @@ const isFeaturedHotel = (hotel) => Boolean(hotel.featured ?? hotel.is_featured ?
 
 const getCityId = (city) => String(city.id_city ?? city.id ?? '');
 
+const normalizePagination = (pagination, fallbackPage, fallbackCount) => ({
+  currentPage: pagination?.current_page ?? pagination?.currentPage ?? fallbackPage,
+  pageSize: pagination?.page_size ?? pagination?.pageSize ?? PAGE_SIZE,
+  totalItems: pagination?.total_items ?? pagination?.totalItems ?? fallbackCount,
+  totalPages: pagination?.total_pages ?? pagination?.totalPages ?? 1,
+  hasNext: pagination?.has_next ?? pagination?.hasNext ?? false,
+  hasPrevious: pagination?.has_previous ?? pagination?.hasPrevious ?? false,
+});
+
 const Hotels = () => {
   const { t } = usePreferences();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -48,6 +63,15 @@ const Hotels = () => {
   const [hotels, setHotels] = useState([]);
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [pagination, setPagination] = useState({
+    currentPage: 0,
+    pageSize: PAGE_SIZE,
+    totalItems: 0,
+    totalPages: 1,
+    hasNext: false,
+    hasPrevious: false,
+  });
   const [filters, setFilters] = useState({
     ...DEFAULT_FILTERS,
     ...initialSearch,
@@ -67,49 +91,45 @@ const Hotels = () => {
     const fetchHotels = async () => {
       setLoading(true);
       try {
-        const params = {};
+        const params = { page, size: PAGE_SIZE };
         const keyword = submittedSearch.keyword.trim();
         if (keyword) params.keyword = keyword;
         if (submittedSearch.cityId) params.cityId = submittedSearch.cityId;
+        if (filters.minPrice !== '') params.minPrice = filters.minPrice;
+        if (filters.maxPrice !== '') params.maxPrice = filters.maxPrice;
+        if (filters.minRating !== '') params.minRating = filters.minRating;
+        if (filters.featured === 'featured') params.featured = true;
+        if (filters.featured === 'regular') params.featured = false;
+        if (filters.sortBy !== 'default') params.sortBy = filters.sortBy;
 
         const res = await api.get('/api/hotels', { params });
-        setHotels(res.data.data || []);
+        const data = res.data.data || [];
+        setHotels(data);
+        setPagination(normalizePagination(res.data.pagination, page, data.length));
       } catch {
         setHotels([]);
+        setPagination({
+          currentPage: 0,
+          pageSize: PAGE_SIZE,
+          totalItems: 0,
+          totalPages: 1,
+          hasNext: false,
+          hasPrevious: false,
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchHotels();
-  }, [submittedSearch]);
+  }, [submittedSearch, filters.minPrice, filters.maxPrice, filters.minRating, filters.featured, filters.sortBy, page]);
 
-  const visibleHotels = useMemo(() => {
-    const minPrice = filters.minPrice === '' ? null : Number(filters.minPrice);
-    const maxPrice = filters.maxPrice === '' ? null : Number(filters.maxPrice);
-    const minRating = filters.minRating === '' ? null : Number(filters.minRating);
-
-    let data = hotels.filter((hotel) => {
-      const hotelPrice = getMinPrice(hotel);
-      const hotelRating = Number(hotel.rating || 0);
-
-      if (minPrice !== null && hotelPrice < minPrice) return false;
-      if (maxPrice !== null && (hotelPrice === 0 || hotelPrice > maxPrice)) return false;
-      if (minRating !== null && hotelRating < minRating) return false;
-      if (filters.featured === 'featured' && !isFeaturedHotel(hotel)) return false;
-      if (filters.featured === 'regular' && isFeaturedHotel(hotel)) return false;
-
-      return true;
-    });
-
-    if (filters.sortBy === 'price_asc') data = [...data].sort((a, b) => getMinPrice(a) - getMinPrice(b));
-    if (filters.sortBy === 'price_desc') data = [...data].sort((a, b) => getMinPrice(b) - getMinPrice(a));
-    if (filters.sortBy === 'rating') data = [...data].sort((a, b) => (b.rating || 0) - (a.rating || 0));
-
-    return data;
-  }, [filters.minPrice, filters.maxPrice, filters.minRating, filters.featured, filters.sortBy, hotels]);
+  const visibleHotels = useMemo(() => hotels, [hotels]);
 
   const updateFilter = (key, value) => {
+    if (key !== 'keyword' && key !== 'cityId') {
+      setPage(0);
+    }
     setFilters(current => ({ ...current, [key]: value }));
   };
 
@@ -128,12 +148,14 @@ const Hotels = () => {
       keyword: filters.keyword.trim(),
     };
     setFilters(nextFilters);
+    setPage(0);
     setSubmittedSearch({ keyword: nextFilters.keyword, cityId: nextFilters.cityId });
     syncSearchParams(nextFilters);
   };
 
   const clearAllFilters = () => {
     setFilters(DEFAULT_FILTERS);
+    setPage(0);
     setSubmittedSearch({ keyword: '', cityId: '' });
     setSearchParams({});
   };
@@ -141,6 +163,7 @@ const Hotels = () => {
   const clearFilter = (key) => {
     const nextFilters = { ...filters, [key]: DEFAULT_FILTERS[key] };
     setFilters(nextFilters);
+    setPage(0);
     if (key === 'keyword' || key === 'cityId') {
       setSubmittedSearch({ keyword: nextFilters.keyword, cityId: nextFilters.cityId });
     }
@@ -159,16 +182,16 @@ const Hotels = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-background)', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-accent)', padding: '2.5rem 1.5rem 1.5rem' }}>
+      <div className="flow-hero-band" style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-accent)', padding: '2.5rem 1.5rem 1.5rem' }}>
         <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
           <div>
             <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '2rem', margin: 0, color: 'var(--color-text)' }}>{t('hotels.title')}</h1>
             <p style={{ color: 'var(--color-muted)', fontSize: '0.85rem', fontWeight: 300, margin: '0.25rem 0 0' }}>
-              {t('hotels.count', { shown: visibleHotels.length, total: hotels.length })}
+              {t('hotels.count', { shown: visibleHotels.length, total: pagination.totalItems || visibleHotels.length })}
             </p>
           </div>
 
-          <form onSubmit={submitSearch} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', flex: 1, justifyContent: 'flex-end', maxWidth: 820 }}>
+          <form className="hotel-search-form" onSubmit={submitSearch} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', flex: 1, justifyContent: 'flex-end', maxWidth: 820 }}>
             <input
               className="input"
               style={{ width: 'auto', minWidth: 220, padding: '0.5rem 1rem', height: 42 }}
@@ -298,7 +321,7 @@ const Hotels = () => {
             <div className="hotel-results-toolbar">
               <div>
                 <span>{t('hotels.resultsTitle')}</span>
-                <strong>{t('hotels.count', { shown: visibleHotels.length, total: hotels.length })}</strong>
+                <strong>{t('hotels.count', { shown: visibleHotels.length, total: pagination.totalItems || visibleHotels.length })}</strong>
               </div>
             </div>
 
@@ -326,11 +349,20 @@ const Hotels = () => {
             <button onClick={clearAllFilters} className="btn btn-primary" style={{ background: 'var(--color-primary)' }}>{t('common.reset')}</button>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            {visibleHotels.map(hotel => (
-              <PropertyHorizontalCard key={hotel.id_hotel} hotel={hotel} t={t} />
-            ))}
-          </div>
+          <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+              {visibleHotels.map(hotel => (
+                <PropertyHorizontalCard key={hotel.id_hotel} hotel={hotel} t={t} />
+              ))}
+            </div>
+            <PaginationControls
+              page={pagination.currentPage ?? page}
+              totalPages={pagination.totalPages || 1}
+              totalItems={pagination.totalItems || visibleHotels.length}
+              pageSize={pagination.pageSize || PAGE_SIZE}
+              onPageChange={setPage}
+            />
+          </>
         )}
           </section>
         </div>
@@ -358,12 +390,12 @@ const PropertyHorizontalCard = ({ hotel, t }) => {
   const minPrice = getMinPrice(hotel);
 
   return (
-    <div className="reveal active" style={{ display: 'flex', minHeight: 240, overflow: 'hidden', borderBottom: '1px solid var(--color-accent)', paddingBottom: '1.5rem' }}>
-      <div style={{ width: 240, height: 240, flexShrink: 0, overflow: 'hidden', borderRadius: 'var(--radius-sm)' }}>
+    <div className="reveal active hotel-list-card" style={{ display: 'flex', minHeight: 240, overflow: 'hidden', borderBottom: '1px solid var(--color-accent)', paddingBottom: '1.5rem' }}>
+      <div className="hotel-list-card-media" style={{ width: 240, height: 240, flexShrink: 0, overflow: 'hidden', borderRadius: 'var(--radius-sm)' }}>
         <img src={getPrimaryImage(hotel)} alt={hotel.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.8s ease' }} />
       </div>
 
-      <div style={{ padding: '0 0 0 1.5rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minWidth: 0 }}>
+      <div className="hotel-list-card-body" style={{ padding: '0 0 0 1.5rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minWidth: 0 }}>
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--color-primary)', letterSpacing: '1.5px', textTransform: 'uppercase', fontWeight: 400 }}>{hotel.city?.name || t('common.hotel')}</span>
@@ -383,7 +415,7 @@ const PropertyHorizontalCard = ({ hotel, t }) => {
           </p>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '1rem', borderTop: '1px solid var(--color-accent)', paddingTop: '0.75rem', flexWrap: 'wrap' }}>
+        <div className="hotel-list-card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '1rem', borderTop: '1px solid var(--color-accent)', paddingTop: '0.75rem', flexWrap: 'wrap' }}>
           <div>
             <span style={{ fontSize: '0.7rem', color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('common.pricePerNight')}</span>
             <div style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '1.1rem', color: 'var(--color-text)' }}>

@@ -237,7 +237,7 @@ const Booking = () => {
           <div className="booking-main-column">
             
             {/* Stay Details */}
-            <div className="booking-panel">
+            <div className="booking-panel" style={{ zIndex: 2 }}>
               <div className="booking-section-title">
                 <CalendarDays size={18} />
                 <div>
@@ -246,8 +246,8 @@ const Booking = () => {
                 </div>
               </div>
               
-              <div className="booking-date-grid">
-                <div className={`booking-date-card ${openCalendar === 'check_in' ? 'is-open' : ''}`}>
+              <div className="booking-date-grid" >
+                <div className={`booking-date-card ${openCalendar === 'check_in' ? 'is-open' : ''}`} style={{ zIndex: 2 }}>
                   <div className="booking-date-icon"><CalendarDays size={18} /></div>
                   <div className="booking-date-body">
                     <label>Check-In</label>
@@ -266,7 +266,7 @@ const Booking = () => {
                     />
                   )}
                 </div>
-                <div className={`booking-date-card ${openCalendar === 'check_out' ? 'is-open' : ''}`}>
+                <div className={`booking-date-card ${openCalendar === 'check_out' ? 'is-open' : ''}`} style={{ zIndex: 2 }}>
                   <div className="booking-date-icon"><CalendarDays size={18} /></div>
                   <div className="booking-date-body">
                     <label>Check-Out</label>
@@ -314,7 +314,7 @@ const Booking = () => {
             </div>
 
             {/* Guest Details */}
-            <div className="booking-panel">
+            <div className="booking-panel" >
               <div className="booking-section-title">
                 <User size={18} />
                 <div>

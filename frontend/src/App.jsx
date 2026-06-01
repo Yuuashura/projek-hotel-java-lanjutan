@@ -1,6 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { animate, stagger } from 'animejs';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { PreferencesProvider } from './context/PreferencesContext';
 import Navbar from './components/Navbar';
@@ -63,7 +64,7 @@ const RouteLoading = () => (
 const PublicLayout = ({ children }) => (
   <>
     <Navbar />
-    <main>{children}</main>
+    <main className="public-main">{children}</main>
     <Footer />
   </>
 );
@@ -124,6 +125,17 @@ const ScrollRevealManager = () => {
         }
       });
     };
+
+    window.setTimeout(() => {
+      animate('.flow-animate, .reveal.active', {
+        opacity: [0, 1],
+        translateY: [14, 0],
+        scale: [0.985, 1],
+        duration: 520,
+        delay: stagger(45),
+        ease: 'outCubic',
+      });
+    }, 80);
 
     window.addEventListener('scroll', handleReveal);
     // Initial run to reveal elements already in view

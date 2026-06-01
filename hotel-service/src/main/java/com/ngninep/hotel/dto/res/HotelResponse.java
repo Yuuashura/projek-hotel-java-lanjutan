@@ -38,6 +38,9 @@ public class HotelResponse {
     private int discountPercent;
     
     private float rating;
+
+    @JsonProperty("min_price")
+    private Long minPrice;
     
     // Relasi. Untuk simplifikasi, kita bisa return struktur simpel (misal: List dari id / nama)
     // Atau jika ingin lengkap bisa pakai Nested DTO.

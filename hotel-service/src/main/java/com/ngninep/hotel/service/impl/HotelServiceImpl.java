@@ -28,6 +28,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -123,6 +126,7 @@ public class HotelServiceImpl implements HotelService {
                 .onSale(hotel.isOnSale())
                 .discountPercent(hotel.getDiscount_percent())
                 .rating(hotel.getRating())
+                .minPrice(getMinRoomPrice(hotel))
                 .images(imagesResponse)
                 .facilities(facilitiesResponse)
                 .roomTypes(roomTypesResponse)
@@ -141,6 +145,10 @@ public class HotelServiceImpl implements HotelService {
     public PagedResult<HotelResponse> search(String keyword, Integer cityId, Long minPrice, Long maxPrice,
                                              Float minRating, Boolean featured, Boolean onSale,
                                              List<Integer> facilityIds, String sortBy, Integer page, Integer size) {
+        if (canUseDatabasePagination(keyword, cityId, minPrice, maxPrice, minRating, featured, onSale, facilityIds, sortBy)) {
+            return searchWithDatabasePagination(keyword, cityId, minPrice, maxPrice, minRating, featured, onSale, sortBy, page, size);
+        }
+
         List<Hotel> hotels = hotelRepository.findAll().stream()
                 .filter(hotel -> matchesKeyword(hotel, keyword))
                 .filter(hotel -> cityId == null || (hotel.getCity() != null && hotel.getCity().getIdCity() == cityId))
@@ -168,6 +176,87 @@ public class HotelServiceImpl implements HotelService {
         return hotelRepository.findByFeaturedTrue().stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    private boolean canUseDatabasePagination(String keyword, Integer cityId, Long minPrice, Long maxPrice,
+                                             Float minRating, Boolean featured, Boolean onSale,
+                                             List<Integer> facilityIds, String sortBy) {
+        return facilityIds == null || facilityIds.isEmpty();
+    }
+
+    private PagedResult<HotelResponse> searchWithDatabasePagination(String keyword, Integer cityId,
+                                                                     Long minPrice, Long maxPrice, Float minRating,
+                                                                     Boolean featured, Boolean onSale, String sortBy,
+                                                                     Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(safePage(page), safePageSize(size));
+        String normalizedKeyword = keyword != null && !keyword.isBlank() ? keyword.trim() : null;
+        String normalizedSort = normalizeSortBy(sortBy);
+        Page<Object[]> hotelPage = hotelRepository.findHotelListPage(
+                normalizedKeyword,
+                cityId,
+                minPrice,
+                maxPrice,
+                minRating,
+                featured,
+                onSale,
+                normalizedSort,
+                pageable);
+
+        List<HotelResponse> data = hotelPage.getContent().stream()
+                .map(this::mapListRowToResponse)
+                .collect(Collectors.toList());
+
+        return PagedResult.<HotelResponse>builder()
+                .data(data)
+                .pagination(PageMetadata.builder()
+                        .currentPage(hotelPage.getNumber())
+                        .pageSize(hotelPage.getSize())
+                        .totalItems(hotelPage.getTotalElements())
+                        .totalPages(hotelPage.getTotalPages())
+                        .hasNext(hotelPage.hasNext())
+                        .hasPrevious(hotelPage.hasPrevious())
+                        .build())
+                .build();
+    }
+
+    private HotelResponse mapListRowToResponse(Object[] row) {
+        Long minPrice = row[16] != null ? ((Number) row[16]).longValue() : null;
+
+        CityResponse cityResponse = null;
+        if (row[10] != null) {
+            cityResponse = CityResponse.builder()
+                    .idCity(((Number) row[10]).intValue())
+                    .name((String) row[11])
+                    .province((String) row[12])
+                    .build();
+        }
+
+        List<Object> imagesResponse = new ArrayList<>();
+        if (row[13] != null) {
+            imagesResponse.add(HotelImageResponse.builder()
+                    .idImage(((Number) row[13]).intValue())
+                    .imageUrl((String) row[14])
+                    .sortOrder(row[15] != null ? ((Number) row[15]).intValue() : 0)
+                    .build());
+        }
+
+        return HotelResponse.builder()
+                .idHotel(((Number) row[0]).intValue())
+                .name((String) row[1])
+                .address((String) row[2])
+                .type((String) row[3])
+                .description((String) row[4])
+                .adminHotelId(row[5] != null ? ((Number) row[5]).intValue() : 0)
+                .featured(Boolean.TRUE.equals(row[6]))
+                .onSale(Boolean.TRUE.equals(row[7]))
+                .discountPercent(row[8] != null ? ((Number) row[8]).intValue() : 0)
+                .rating(row[9] != null ? ((Number) row[9]).floatValue() : 0)
+                .city(cityResponse)
+                .minPrice(minPrice)
+                .images(imagesResponse)
+                .facilities(new ArrayList<>())
+                .roomTypes(new ArrayList<>())
+                .build();
     }
 
     @Override
@@ -617,13 +706,34 @@ public class HotelServiceImpl implements HotelService {
         return Comparator.comparingInt(Hotel::getIdHotel).reversed();
     }
 
+    private String normalizeSortBy(String sortBy) {
+        if ("price_asc".equalsIgnoreCase(sortBy)) {
+            return "price_asc";
+        }
+        if ("price_desc".equalsIgnoreCase(sortBy)) {
+            return "price_desc";
+        }
+        if ("rating".equalsIgnoreCase(sortBy)) {
+            return "rating";
+        }
+        return "default";
+    }
+
+    private int safePage(Integer page) {
+        return page != null && page >= 0 ? page : 0;
+    }
+
+    private int safePageSize(Integer size) {
+        return size != null && size > 0 ? Math.min(size, 25) : 25;
+    }
+
     private List<Hotel> applyPagination(List<Hotel> hotels, Integer page, Integer size) {
         if (page == null && size == null) {
             return hotels;
         }
 
-        int safePage = page != null && page >= 0 ? page : 0;
-        int safeSize = size != null && size > 0 ? Math.min(size, 100) : 10;
+        int safePage = safePage(page);
+        int safeSize = safePageSize(size);
         int fromIndex = Math.min(safePage * safeSize, hotels.size());
         int toIndex = Math.min(fromIndex + safeSize, hotels.size());
         return hotels.subList(fromIndex, toIndex);
@@ -631,8 +741,8 @@ public class HotelServiceImpl implements HotelService {
 
     private PageMetadata buildPagination(long totalItems, int returnedItems, Integer page, Integer size) {
         boolean paged = page != null || size != null;
-        int safePage = paged && page != null && page >= 0 ? page : 0;
-        int safeSize = paged && size != null && size > 0 ? Math.min(size, 100) : (paged ? 10 : returnedItems);
+        int safePage = paged ? safePage(page) : 0;
+        int safeSize = paged ? safePageSize(size) : returnedItems;
         int totalPages = safeSize > 0 ? (int) Math.ceil((double) totalItems / safeSize) : 0;
 
         return PageMetadata.builder()

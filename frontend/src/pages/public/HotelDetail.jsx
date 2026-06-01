@@ -135,7 +135,7 @@ const HotelDetail = () => {
   const images = uploadedImages.length > 0 ? uploadedImages : [HOTEL_FALLBACK_IMAGE];
 
   return (
-    <div style={{ background: 'var(--color-background)', minHeight: '100vh', padding: '4rem 1.5rem' }}>
+    <div className="hotel-detail-page" style={{ background: 'var(--color-background)', minHeight: '100vh', padding: '4rem 1.5rem' }}>
       <div style={{ maxWidth: 1300, margin: '0 auto' }}>
         
         {/* Back Link */}
@@ -175,7 +175,7 @@ const HotelDetail = () => {
         </section>
 
         {/* SPLIT LAYOUT */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '3.5rem', alignItems: 'flex-start' }}>
+        <div className="hotel-detail-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '3.5rem', alignItems: 'flex-start' }}>
           
           {/* LEFT COLUMN: Info, Amenities, Room Matrix */}
           <div>
@@ -209,7 +209,7 @@ const HotelDetail = () => {
                     {t('hotelDetail.facilityFallbackNote')}
                   </p>
                 )}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+                <div className="hotel-detail-facilities-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
                   {displayFacilities.map(f => {
                     const iconKey = String(f.icon || '').toLowerCase();
                     const FacilityIcon = facilityIconMap[iconKey] || Check;
@@ -237,7 +237,7 @@ const HotelDetail = () => {
                     const roomAvailable = getRoomAvailability(room);
                     const roomUnavailable = roomAvailable <= 0;
                     return (
-                      <div key={roomId} onClick={() => setActiveRoom(roomId)}
+                      <div key={roomId} className="hotel-detail-room-card" onClick={() => setActiveRoom(roomId)}
                         style={{
                           display: 'flex', height: 180, cursor: 'pointer', borderRadius: 'var(--radius-sm)', overflow: 'hidden',
                           border: isSelected ? '1px solid var(--color-primary)' : '1px solid var(--color-accent)',
@@ -245,11 +245,11 @@ const HotelDetail = () => {
                           boxShadow: isSelected ? 'var(--shadow-hover)' : 'none',
                           transition: 'all 0.3s ease'
                         }}>
-                        <div style={{ width: 220, height: '100%', flexShrink: 0, overflow: 'hidden' }}>
+                        <div className="hotel-detail-room-media" style={{ width: 220, height: '100%', flexShrink: 0, overflow: 'hidden' }}>
                           <img src={getImageUrl(room.images?.[0]) || ROOM_FALLBACK_IMAGE} alt={room.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
                         {/* Room description */}
-                        <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div className="hotel-detail-room-body" style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                           <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                               <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', margin: 0, fontWeight: 300, color: 'var(--color-text)' }}>{room.name}</h4>
@@ -266,7 +266,7 @@ const HotelDetail = () => {
                             </p>
                           </div>
 
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid var(--color-accent)', paddingTop: '0.75rem' }}>
+                          <div className="hotel-detail-room-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid var(--color-accent)', paddingTop: '0.75rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: 'var(--color-muted)', fontWeight: 300 }}><Users size={12} /> {t('hotelDetail.maxGuests', { count: room.max_guest ?? room.maxGuest })}</div>
                             <div style={{ textAlign: 'right' }}>
                               <div style={{ fontSize: '0.95rem', fontWeight: 400, color: 'var(--color-primary)' }}>{formatCurrency(room.price_per_night ?? room.pricePerNight)}<span style={{ fontSize: '0.7rem', color: 'var(--color-muted)' }}>{t('home.perNight')}</span></div>
@@ -283,7 +283,7 @@ const HotelDetail = () => {
           </div>
 
           {/* RIGHT COLUMN: Sticky Reserve Summary */}
-          <div style={{ position: 'sticky', top: 120 }}>
+          <div className="hotel-detail-reservation" style={{ position: 'sticky', top: 120 }}>
             <div className="card" style={{ padding: '2rem', border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-float)' }}>
               <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--color-text)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.75rem', fontWeight: 300 }}>{t('hotelDetail.reservation')}</h3>
               

@@ -15,6 +15,20 @@ const slides = [
   { id: 3, image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1600&h=1000', title: 'The Heritage Pavilion', city: 'Yogyakarta', desc: 'Ketenteraman arsitektur klasik Jawa berbalut layanan berstandar internasional modern', price: 1200000 },
 ];
 
+const FEATURED_LIMIT = 12;
+const SALE_LIMIT = 3;
+
+const getHotelMinPrice = (hotel) => {
+  if (hotel.min_price != null) return hotel.min_price;
+  if (hotel.minPrice != null) return hotel.minPrice;
+
+  const roomPrices = (hotel.roomTypes || [])
+    .map(room => room.price_per_night ?? room.pricePerNight ?? 0)
+    .filter(price => price > 0);
+
+  return roomPrices.length > 0 ? Math.min(...roomPrices) : 0;
+};
+
 
 
 const FAQItem = ({ q, a }) => {
@@ -54,13 +68,29 @@ const Home = () => {
 
   // Fetch initial data
   useEffect(() => {
-    api.get('/api/cities').then(r => setCities(r.data.data || [])).catch(() => {});
+    const controller = new AbortController();
+
+    api.get('/api/cities', { signal: controller.signal })
+      .then(r => setCities(r.data.data || []))
+      .catch(() => {});
+
     setFeaturedLoading(true);
-    api.get('/api/hotels/featured')
-      .then(r => setFeaturedHotels((r.data.data || []).slice(0, 3)))
+    api.get('/api/hotels', {
+      params: { featured: true, page: 0, size: FEATURED_LIMIT, sortBy: 'rating' },
+      signal: controller.signal,
+    })
+      .then(r => setFeaturedHotels(r.data.data || []))
       .catch(() => setFeaturedHotels([]))
       .finally(() => setFeaturedLoading(false));
-    api.get('/api/hotels?keyword=sale').then(r => setSaleHotels((r.data.data || []).filter(h => h.is_on_sale).slice(0, 3))).catch(() => {});
+
+    api.get('/api/hotels', {
+      params: { onSale: true, page: 0, size: SALE_LIMIT, sortBy: 'rating' },
+      signal: controller.signal,
+    })
+      .then(r => setSaleHotels(r.data.data || []))
+      .catch(() => {});
+
+    return () => controller.abort();
   }, []);
 
   const handleSearch = (e) => {
@@ -91,16 +121,16 @@ const Home = () => {
             {/* Dark luxury navy overlay */}
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(7,22,38,0.74) 0%, rgba(7,22,38,0.48) 42%, rgba(7,22,38,0.16) 100%)' }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(7,22,38,0.74) 0%, rgba(7,22,38,0.2) 58%, rgba(7,22,38,0.34) 100%)' }} />
-            <div style={{ position: 'absolute', bottom: '12rem', left: '5%', right: '5%', zIndex: 2, color: '#FFFFFF', maxWidth: 800, textShadow: '0 3px 18px rgba(0,0,0,0.38)' }}>
+            <div className="home-hero-copy" style={{ position: 'absolute', bottom: '12rem', left: '5%', right: '5%', zIndex: 2, color: '#FFFFFF', maxWidth: 800, textShadow: '0 3px 18px rgba(0,0,0,0.38)' }}>
               <span className="badge badge-yellow animate-fade-in" style={{ marginBottom: '1rem', background: 'rgba(246,211,101,0.95)', border: '1px solid rgba(246,211,101,0.95)', color: '#15314F', padding: '0.4rem 1rem', textShadow: 'none' }}>{s.city}</span>
-              <h1 className="animate-slide-in" style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: 'clamp(2rem, 6vw, 4.5rem)', textTransform: 'none', margin: '0.5rem 0', lineHeight: 1.05, color: '#FFFFFF', textShadow: '0 4px 24px rgba(0,0,0,0.5)' }}>
+              <h1 className="home-hero-title animate-slide-in" style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: 'clamp(2rem, 6vw, 4.5rem)', textTransform: 'none', margin: '0.5rem 0', lineHeight: 1.05, color: '#FFFFFF', textShadow: '0 4px 24px rgba(0,0,0,0.5)' }}>
                 {s.title}
               </h1>
-              <p className="animate-slide-in" style={{ fontFamily: 'var(--font-body)', fontWeight: 400, color: 'rgba(255,255,255,0.94)', marginBottom: '2rem', fontSize: 'clamp(1rem, 1.5vw, 1.25rem)', letterSpacing: '0.5px', maxWidth: 720 }}>
+              <p className="home-hero-description animate-slide-in" style={{ fontFamily: 'var(--font-body)', fontWeight: 400, color: 'rgba(255,255,255,0.94)', marginBottom: '2rem', fontSize: 'clamp(1rem, 1.5vw, 1.25rem)', letterSpacing: '0.5px', maxWidth: 720 }}>
                 {s.desc}
               </p>
-              <div className="animate-slide-in" style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                <span style={{ fontFamily: 'var(--font-body)', fontWeight: 500, fontSize: '1.1rem', letterSpacing: '1px', color: '#FFFFFF' }}>{t('home.heroPrice', { price: formatCurrency(s.price) })}</span>
+              <div className="home-hero-actions animate-slide-in" style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                <span className="home-hero-price" style={{ fontFamily: 'var(--font-body)', fontWeight: 500, fontSize: '1.1rem', letterSpacing: '1px', color: '#FFFFFF' }}>{t('home.heroPrice', { price: formatCurrency(s.price) })}</span>
                 <Link to="/hotels" className="btn btn-primary" style={{ background: 'var(--color-primary)', color: '#FFFFFF' }}>{t('home.heroCta')}</Link>
               </div>
             </div>
@@ -166,8 +196,8 @@ const Home = () => {
         {featuredLoading ? (
           <LoadingState text={t('common.loadingHotel')} />
         ) : featuredHotels.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
-            {featuredHotels.map(hotel => <HotelCard key={hotel.id_hotel} hotel={hotel} />)}
+          <div className="home-featured-rail" aria-label={t('home.featuredTitle')}>
+            {featuredHotels.map(hotel => <HotelCard key={hotel.id_hotel} hotel={hotel} className="home-featured-card" />)}
           </div>
         ) : (
           <div className="card" style={{ padding: '3rem 2rem', textAlign: 'center' }}>
@@ -224,22 +254,22 @@ const Home = () => {
 };
 
 // Reusable Hotel Card
-export const HotelCard = ({ hotel, showDiscount }) => {
+export const HotelCard = ({ hotel, showDiscount, className = '' }) => {
   const { t } = usePreferences();
-  const discountedPrice = showDiscount && hotel.discount_percent
-    ? hotel.roomTypes?.[0]?.price_per_night * (1 - hotel.discount_percent / 100)
-    : hotel.roomTypes?.[0]?.price_per_night;
+  const minPrice = getHotelMinPrice(hotel);
 
-  const minPrice = hotel.roomTypes?.length > 0
-    ? Math.min(...hotel.roomTypes.map(r => r.price_per_night))
-    : 0;
+  const discountedPrice = showDiscount && hotel.discount_percent
+    ? minPrice * (1 - hotel.discount_percent / 100)
+    : minPrice;
 
   return (
-    <div className="card card-hover" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', border: '1px solid var(--color-accent)' }}>
+    <div className={`card card-hover ${className}`} style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', border: '1px solid var(--color-accent)' }}>
       <div style={{ height: 220, overflow: 'hidden', position: 'relative' }}>
         <img
           src={getImageUrl(hotel.images?.[0]?.image_url, `https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=400`)}
           alt={hotel.name}
+          loading="lazy"
+          decoding="async"
           style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)' }}
           onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
           onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}

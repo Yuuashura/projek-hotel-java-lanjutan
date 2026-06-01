@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import LoadingState from '../../components/LoadingState';
 import api from '../../utils/api';
 import { validateImageFile } from '../../utils/uploads';
+import qrisImg from '../../assets/qris.png';
 
 const BcaLogo = () => (
   <svg width="46" height="26" viewBox="0 0 46 26" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
@@ -155,7 +156,7 @@ const Payment = () => {
 
   if (success) {
     return (
-      <div style={{ maxWidth: 520, margin: '6rem auto', padding: '0 1.5rem', textAlign: 'center' }}>
+      <div className="payment-success-shell" style={{ maxWidth: 520, margin: '6rem auto', padding: '0 1.5rem', textAlign: 'center' }}>
         <div className="card" style={{ padding: '3.5rem 2.5rem', border: '1px solid var(--color-accent)' }}>
           <div style={{ width: 64, height: 64, background: 'rgba(72,187,120,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
             <Check size={32} style={{ color: '#38A169' }} />
@@ -173,8 +174,8 @@ const Payment = () => {
   const nights = diffDays(booking.check_in, booking.check_out);
 
   return (
-    <div style={{ background: 'var(--color-background)', minHeight: '100vh', padding: '6rem 1.5rem' }}>
-      <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+    <div className="user-page payment-page" style={{ background: 'var(--color-background)', minHeight: '100vh', padding: '6rem 1.5rem' }}>
+      <div className="payment-shell" style={{ maxWidth: 1000, margin: '0 auto' }}>
         <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '2.5rem', marginBottom: '3rem', color: 'var(--color-text)' }}>Informasi Pembayaran</h1>
 
         {/* Countdown timer banner */}
@@ -195,14 +196,14 @@ const Payment = () => {
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '62% 38%', gap: '3.5rem', alignItems: 'flex-start' }}>
+        <div className="payment-layout" style={{ display: 'grid', gridTemplateColumns: '62% 38%', gap: '3.5rem', alignItems: 'flex-start' }}>
           {/* Left Column */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+          <div className="payment-main-column" style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
             
             {/* Order Details */}
-            <div className="card" style={{ padding: '2rem', border: '1px solid var(--color-accent)' }}>
+            <div className="card flow-animate payment-panel" style={{ padding: '2rem', border: '1px solid var(--color-accent)' }}>
               <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--color-text)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.5rem' }}>Detail Reservasi</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', fontSize: '0.85rem' }}>
+              <div className="payment-detail-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', fontSize: '0.85rem' }}>
                 {[
                   { label: 'Pemesan', val: booking.orderer_name },
                   { label: 'Email', val: booking.orderer_email },
@@ -220,7 +221,7 @@ const Payment = () => {
             </div>
 
             {/* Payment Method Selector & File Upload */}
-            <div className="card" style={{ padding: '2rem', border: '1px solid var(--color-accent)' }}>
+            <div className="card flow-animate payment-panel" style={{ padding: '2rem', border: '1px solid var(--color-accent)' }}>
               <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--color-text)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.5rem' }}>Metode Pembayaran</h3>
               
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -265,37 +266,8 @@ const Payment = () => {
                   }}>
                     <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--color-text)' }}>QRIS NgiNep Corp</div>
                     <div style={{ background: 'white', padding: '0.75rem', border: '1px solid #E2E8F0', borderRadius: 'var(--radius-sm)', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-                      <svg width="150" height="150" viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="150" height="150" fill="white"/>
-                        <rect x="10" y="10" width="30" height="30" stroke="black" strokeWidth="4" fill="none"/>
-                        <rect x="18" y="18" width="14" height="14" fill="black"/>
-                        <rect x="110" y="10" width="30" height="30" stroke="black" strokeWidth="4" fill="none"/>
-                        <rect x="118" y="18" width="14" height="14" fill="black"/>
-                        <rect x="10" y="110" width="30" height="30" stroke="black" strokeWidth="4" fill="none"/>
-                        <rect x="18" y="118" width="14" height="14" fill="black"/>
-                        <rect x="50" y="15" width="8" height="8" fill="black"/>
-                        <rect x="65" y="10" width="12" height="6" fill="black"/>
-                        <rect x="85" y="25" width="6" height="12" fill="black"/>
-                        <rect x="55" y="45" width="15" height="8" fill="black"/>
-                        <rect x="80" y="45" width="8" height="12" fill="black"/>
-                        <rect x="15" y="60" width="12" height="8" fill="black"/>
-                        <rect x="35" y="70" width="8" height="15" fill="black"/>
-                        <rect x="50" y="70" width="12" height="12" fill="black"/>
-                        <rect x="75" y="65" width="18" height="8" fill="black"/>
-                        <rect x="105" y="60" width="10" height="10" fill="black"/>
-                        <rect x="125" y="75" width="12" height="12" fill="black"/>
-                        <rect x="25" y="90" width="8" height="8" fill="black"/>
-                        <rect x="60" y="95" width="12" height="6" fill="black"/>
-                        <rect x="90" y="90" width="18" height="8" fill="black"/>
-                        <rect x="130" y="100" width="8" height="8" fill="black"/>
-                        <rect x="50" y="115" width="18" height="12" fill="black"/>
-                        <rect x="80" y="125" width="12" height="12" fill="black"/>
-                        <rect x="115" y="120" width="8" height="15" fill="black"/>
-                        <rect x="65" y="130" width="8" height="8" fill="black"/>
-                        <rect x="95" y="110" width="8" height="8" fill="black"/>
-                        <rect x="60" y="60" width="30" height="30" fill="white" stroke="#0F3B7A" strokeWidth="2" rx="2"/>
-                        <text x="75" y="78" fontFamily="system-ui, -apple-system, sans-serif" fontWeight="900" fontSize="7" textAnchor="middle" fill="#0F3B7A">QRIS</text>
-                      </svg>
+                      {/* IMG QRIS */}
+                      <img src={qrisImg} alt="QRIS" style={{ width: '270px', height: '350px', borderRadius: 'var(--radius-sm)' }} />
                     </div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--color-muted)', textAlign: 'center' }}>Scan QR di atas dengan aplikasi bank atau e-wallet pilihan Anda</div>
                   </div>
@@ -352,8 +324,8 @@ const Payment = () => {
           </div>
 
           {/* Right Column: Order Pricing */}
-          <div style={{ position: 'sticky', top: 120 }}>
-            <div style={{ background: '#F7FAFC', border: '1px solid var(--color-accent)', padding: '2rem', borderRadius: 'var(--radius-sm)' }}>
+          <div className="payment-summary-sticky" style={{ position: 'sticky', top: 120 }}>
+            <div className="payment-summary-card flow-animate" style={{ background: '#F7FAFC', border: '1px solid var(--color-accent)', padding: '2rem', borderRadius: 'var(--radius-sm)' }}>
               <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--color-text)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.75rem', fontWeight: 300 }}>Total Tagihan</h3>
               
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--color-muted)', marginBottom: '1rem' }}>

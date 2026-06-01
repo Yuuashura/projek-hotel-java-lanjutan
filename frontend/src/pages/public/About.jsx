@@ -13,8 +13,8 @@ const About = () => {
   ];
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-background)', padding: '6rem 1.5rem' }}>
-      <div style={{ maxWidth: 850, margin: '0 auto' }}>
+    <div className="about-page" style={{ minHeight: '100vh', background: 'var(--color-background)', padding: '6rem 1.5rem' }}>
+      <div className="about-shell" style={{ maxWidth: 850, margin: '0 auto' }}>
         
         {/* Title Section */}
         <div className="reveal" style={{ textAlign: 'center', marginBottom: '5rem' }}>
@@ -28,7 +28,7 @@ const About = () => {
         </div>
 
         {/* Story Section */}
-        <div className="card reveal" style={{ padding: '3rem', marginBottom: '4rem', border: '1px solid var(--color-accent)' }}>
+        <div className="card reveal flow-animate about-story-card" style={{ padding: '3rem', marginBottom: '4rem', border: '1px solid var(--color-accent)' }}>
           <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.8rem', marginBottom: '1.5rem', color: 'var(--color-text)' }}>{t('about.missionTitle')}</h2>
           <p style={{ color: 'var(--color-text)', fontWeight: 300, lineHeight: 1.9, marginBottom: '1.5rem', fontSize: '0.95rem' }}>
             {t('about.mission1')}
@@ -41,7 +41,7 @@ const About = () => {
         {/* Value Grid */}
         <div className="reveal" style={{ marginBottom: '5rem' }}>
           <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '2rem', textAlign: 'center', marginBottom: '3rem', color: 'var(--color-text)' }}>{t('about.valuesTitle')}</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
+          <div className="about-value-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
             {values.map((v, i) => {
               const meta = icons[i];
               const Icon = meta.icon;

@@ -2,6 +2,7 @@ package com.ngninep.booking.exception;
 
 import com.ngninep.booking.dto.res.WebResponse;
 import com.ngninep.booking.util.Message;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -29,6 +30,19 @@ public class GlobalExceptionHandler {
                 .map(FieldError::getDefaultMessage)
                 .collect(Collectors.joining(", "));
         
+        WebResponse<String> response = WebResponse.<String>builder()
+                .status("400")
+                .message(message)
+                .build();
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<WebResponse<String>> handleDataAccess(DataAccessException ex) {
+        String message = ex.getMostSpecificCause() != null
+                ? ex.getMostSpecificCause().getMessage()
+                : "Data pemesanan tidak valid";
+
         WebResponse<String> response = WebResponse.<String>builder()
                 .status("400")
                 .message(message)

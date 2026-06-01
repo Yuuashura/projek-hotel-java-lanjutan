@@ -20,23 +20,21 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -52,11 +50,9 @@ import java.util.stream.Collectors;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final WebClient hotelServiceWebClient;
 
-    @Value("${hotel.service.url:http://localhost:8082}")
-    private String hotelServiceUrl;
-
+    private static final Duration HOTEL_SERVICE_TIMEOUT = Duration.ofSeconds(5);
     private static final List<BookingStatus> ACTIVE_STATUSES =
             Arrays.asList(BookingStatus.PENDING, BookingStatus.CONFIRMED);
     private static final List<BookingStatus> REVENUE_STATUSES =
@@ -362,25 +358,25 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private RoomTypeSnapshot fetchRoomType(int roomTypeId) {
+        WebResponse<RoomTypeSnapshot> body;
         try {
-            String baseUrl = hotelServiceUrl != null ? hotelServiceUrl.replaceAll("/+$", "") : "http://localhost:8082";
-            ResponseEntity<WebResponse<RoomTypeSnapshot>> response = restTemplate.exchange(
-                    baseUrl + "/api/room-types/" + roomTypeId,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<>() {
-                    }
-            );
-
-            WebResponse<RoomTypeSnapshot> body = response.getBody();
-            if (!response.getStatusCode().is2xxSuccessful() || body == null || body.getData() == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.ROOM_TYPE_INVALID_OR_UNAVAILABLE);
-            }
-
-            return body.getData();
-        } catch (RestClientException ex) {
+            body = hotelServiceWebClient.get()
+                    .uri("/api/room-types/{roomTypeId}", roomTypeId)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<WebResponse<RoomTypeSnapshot>>() {
+                    })
+                    .block(HOTEL_SERVICE_TIMEOUT);
+        } catch (WebClientResponseException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.ROOM_TYPE_INVALID_OR_UNAVAILABLE);
+        } catch (RuntimeException ex) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.ROOM_TYPE_INVALID_OR_UNAVAILABLE);
         }
+
+        if (body == null || body.getData() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.ROOM_TYPE_INVALID_OR_UNAVAILABLE);
+        }
+
+        return body.getData();
     }
 
     private String getHotelName(int hotelId, Map<Integer, String> cache) {
@@ -390,21 +386,17 @@ public class BookingServiceImpl implements BookingService {
 
         String fallback = "Hotel #" + hotelId;
         try {
-            String baseUrl = hotelServiceUrl != null ? hotelServiceUrl.replaceAll("/+$", "") : "http://localhost:8082";
-            ResponseEntity<WebResponse<Map<String, Object>>> response = restTemplate.exchange(
-                    baseUrl + "/api/hotels/" + hotelId,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<>() {
-                    }
-            );
-
-            WebResponse<Map<String, Object>> body = response.getBody();
+            WebResponse<Map<String, Object>> body = hotelServiceWebClient.get()
+                    .uri("/api/hotels/{hotelId}", hotelId)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<WebResponse<Map<String, Object>>>() {
+                    })
+                    .block(HOTEL_SERVICE_TIMEOUT);
             Object name = body != null && body.getData() != null ? body.getData().get("name") : null;
             String hotelName = name instanceof String && !((String) name).isBlank() ? (String) name : fallback;
             cache.put(hotelId, hotelName);
             return hotelName;
-        } catch (RestClientException ex) {
+        } catch (RuntimeException ex) {
             cache.put(hotelId, fallback);
             return fallback;
         }

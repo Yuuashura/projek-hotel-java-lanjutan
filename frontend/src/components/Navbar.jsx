@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { animate, stagger } from 'animejs';
 import { useAuth } from '../context/AuthContext';
 import { usePreferences } from '../context/PreferencesContext';
 import { LogOut, User, Calendar, Menu, X, ChevronDown, Globe, Moon, Sun } from 'lucide-react';
@@ -51,6 +52,19 @@ const Navbar = () => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    window.requestAnimationFrame(() => {
+      animate('.site-mobile-menu > *', {
+        opacity: [0, 1],
+        translateY: [-8, 0],
+        duration: 360,
+        delay: stagger(36),
+        ease: 'outCubic',
+      });
+    });
+  }, [isOpen]);
 
   const finishLogout = () => {
     setLogoutConfirmOpen(false);
@@ -157,7 +171,7 @@ const Navbar = () => {
 
   return (
     <>
-    <nav style={{
+    <nav className="site-navbar" style={{
       background: 'linear-gradient(135deg, rgba(9, 31, 59, 0.9), rgba(30, 78, 128, 0.76)), radial-gradient(circle at 18% 10%, rgba(246,211,101,0.18), transparent 32%), radial-gradient(circle at 82% 0%, rgba(122,183,240,0.18), transparent 30%)',
       backdropFilter: 'blur(22px) saturate(165%)',
       WebkitBackdropFilter: 'blur(22px) saturate(165%)',
@@ -167,7 +181,7 @@ const Navbar = () => {
       top: 0,
       zIndex: 100
     }}>
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 76 }}>
+      <div className="site-navbar-inner" style={{ maxWidth: 1280, margin: '0 auto', padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 76 }}>
 
         {/* Logo */}
         <Link to="/" style={{ textDecoration: 'none' }}>
@@ -184,7 +198,7 @@ const Navbar = () => {
         </Link>
 
         {/* Desktop Nav */}
-        <div style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }} className="hidden-mobile">
+        <div style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }} className="hidden-mobile site-navbar-links">
           <Link to="/" className="nav-link-luxury" style={navLinkStyle}>{t('nav.home')}</Link>
           <Link to="/hotels" className="nav-link-luxury" style={navLinkStyle}>{t('nav.hotels')}</Link>
           <Link to="/about" className="nav-link-luxury" style={navLinkStyle}>{t('nav.about')}</Link>
@@ -192,7 +206,7 @@ const Navbar = () => {
         </div>
 
         {/* Desktop Auth */}
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }} className="hidden-mobile">
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }} className="hidden-mobile site-navbar-actions">
           {preferenceControls}
           {user ? (
             <div style={{ position: 'relative' }}>
@@ -247,14 +261,14 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Hamburger */}
-        <button onClick={() => setIsOpen(!isOpen)} style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)', padding: '0.5rem', cursor: 'pointer', display: 'none', borderRadius: 'var(--radius-sm)', color: 'white' }} className="show-mobile">
+        <button onClick={() => setIsOpen(!isOpen)} style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)', padding: '0.5rem', cursor: 'pointer', display: 'none', borderRadius: 'var(--radius-sm)', color: 'white' }} className="show-mobile site-navbar-menu-button">
           {isOpen ? <X size={18} /> : <Menu size={18} />}
         </button>
       </div>
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div style={{
+        <div className="site-mobile-menu" style={{
           borderTop: '1px solid rgba(255,255,255,0.16)',
           background: 'linear-gradient(135deg, rgba(14,45,82,0.94), rgba(37,99,154,0.86))',
           backdropFilter: 'blur(16px) saturate(140%)',
