@@ -1,9 +1,10 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Hotel, Users, Calendar, LogOut, Menu, Globe, Moon, Sun } from 'lucide-react';
+import { LayoutDashboard, Hotel, Users, Calendar, LogOut, Menu } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { usePreferences } from '../../context/PreferencesContext';
 import LogoutConfirmModal from '../LogoutConfirmModal';
+import PreferenceControls from '../PreferenceControls';
 
 const adminMenu = [
   { path: '/admin/dashboard', labelKey: 'admin.menu.dashboard', icon: LayoutDashboard },
@@ -14,13 +15,12 @@ const adminMenu = [
 
 const AdminLayout = ({ children }) => {
   const { user, logout } = useAuth();
-  const { language, setLanguage, theme, toggleTheme, t } = usePreferences();
+  const { t } = usePreferences();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = React.useState(false);
   const [logoutLoading, setLogoutLoading] = React.useState(false);
   const logoutTimerRef = React.useRef(null);
-  const ThemeIcon = theme === 'dark' ? Sun : Moon;
   const activeMenu = adminMenu.find(m => m.path === location.pathname);
 
   React.useEffect(() => {
@@ -54,80 +54,6 @@ const AdminLayout = ({ children }) => {
     if (logoutLoading) return;
     setLogoutConfirmOpen(false);
   };
-
-  const preferenceControls = (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-      <div style={{
-        position: 'relative',
-        display: 'grid',
-        gridTemplateColumns: '30px 38px 38px',
-        alignItems: 'center',
-        height: 40,
-        padding: 3,
-        border: '1px solid var(--color-accent)',
-        background: 'var(--color-background)',
-        borderRadius: 999,
-        overflow: 'hidden',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)'
-      }}>
-        <Globe size={13} style={{ color: 'var(--color-muted)', justifySelf: 'center', zIndex: 2 }} />
-        <span style={{
-          position: 'absolute',
-          top: 3,
-          bottom: 3,
-          left: 33,
-          width: 38,
-          borderRadius: 999,
-          background: 'var(--color-primary)',
-          boxShadow: 'var(--shadow-float)',
-          transform: language === 'id' ? 'translateX(0)' : 'translateX(38px)',
-          transition: 'transform 0.32s cubic-bezier(0.16, 1, 0.3, 1)',
-        }} />
-        {['id', 'en'].map((lang) => (
-          <button
-            key={lang}
-            type="button"
-            onClick={() => setLanguage(lang)}
-            title="Language"
-            style={{
-              height: 34,
-              width: 38,
-              border: 'none',
-              cursor: 'pointer',
-              position: 'relative',
-              zIndex: 2,
-              borderRadius: 999,
-              background: 'transparent',
-              color: language === lang ? 'white' : 'var(--color-muted)',
-              fontFamily: 'var(--font-body)',
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              letterSpacing: '0.7px',
-              lineHeight: 1,
-              textTransform: 'uppercase',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'color 0.24s ease, transform 0.24s ease',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
-          >
-            {lang}
-          </button>
-        ))}
-      </div>
-      <button
-        type="button"
-        onClick={toggleTheme}
-        title="Theme"
-        className="btn btn-white btn-sm navbar-control-button"
-        style={{ height: 38, width: 42, padding: 0 }}
-      >
-        <ThemeIcon key={theme} size={15} className="theme-icon-rotate" />
-      </button>
-    </div>
-  );
 
   return (
     <div className="admin-shell" style={{ display: 'flex', minHeight: '100vh', background: 'var(--color-background)' }}>
@@ -186,7 +112,7 @@ const AdminLayout = ({ children }) => {
           <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.4rem', textTransform: 'uppercase', letterSpacing: '1px', flex: 1, margin: 0, color: 'var(--color-text)' }}>
             {activeMenu?.labelKey ? t(activeMenu.labelKey) : t('admin.panel')}
           </h1>
-          {preferenceControls}
+          <PreferenceControls tone="surface" />
           <span style={{ fontFamily: 'var(--font-body)', fontWeight: 300, fontSize: '0.75rem', color: 'var(--color-muted)', letterSpacing: '1px', textTransform: 'uppercase' }}>{t('admin.brand')}</span>
         </div>
 

@@ -1,6 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AlertCircle, CheckCircle, Mail } from 'lucide-react';
+import { Mail } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import AuthFrame from '../../components/auth/AuthFrame';
+import AlertMessage from '../../components/auth/AlertMessage';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 
@@ -13,9 +17,8 @@ const ForgotPassword = () => {
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
-    if (token) {
-      navigate(user?.role === 'ROLE_ADMIN_HOTEL' || user?.role === 'ROLE_ADMIN_APP' ? '/admin/dashboard' : '/');
-    }
+    if (!token) return;
+    navigate(user?.role === 'ROLE_ADMIN_HOTEL' || user?.role === 'ROLE_ADMIN_APP' ? '/admin/dashboard' : '/');
   }, [token, user, navigate]);
 
   const handleSubmit = async (e) => {
@@ -29,9 +32,7 @@ const ForgotPassword = () => {
       const message = res.data?.message || 'Jika email terdaftar, kode reset password akan dikirim.';
       sessionStorage.setItem('reset_password_email', email);
       setSuccess(message);
-      window.setTimeout(() => {
-        navigate(`/reset-password?email=${encodeURIComponent(email)}`);
-      }, 900);
+      window.setTimeout(() => navigate(`/reset-password?email=${encodeURIComponent(email)}`), 900);
     } catch (err) {
       setError(err.response?.data?.message || 'Gagal mengirim kode reset password');
     } finally {
@@ -40,55 +41,28 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-shell animate-slide-in">
-        <div className="auth-header">
-          <Link to="/" style={{ textDecoration: 'none' }}>
-            <div className="auth-brand">
-              NgiNep<span style={{ color: 'var(--color-primary)' }}>.</span>
-            </div>
-          </Link>
-          <h1>Lupa Password</h1>
-          <p>Masukkan email akun Anda untuk menerima kode reset.</p>
+    <AuthFrame
+      title="Lupa Password"
+      subtitle="Masukkan email akun Anda untuk menerima kode reset."
+      footnote={<>Ingat password Anda? <Link className="font-bold text-[var(--color-primary)]" to="/login">Masuk kembali</Link></>}
+    >
+      <AlertMessage tone="danger">{error}</AlertMessage>
+      <AlertMessage tone="success">{success}</AlertMessage>
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <div className="space-y-2">
+          <label className="label">Alamat Email</label>
+          <div className="relative">
+            <Input className="pr-11" type="email" placeholder="nama@email.com" value={email} onChange={e => setEmail(e.target.value)} required />
+            <Mail size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" />
+          </div>
         </div>
 
-        <div className="card auth-card">
-          <div className="auth-card-accent" />
-
-          {error && (
-            <div className="alert-danger" style={{ padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
-              <AlertCircle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
-              <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.85rem' }}>{error}</span>
-            </div>
-          )}
-
-          {success && (
-            <div className="alert-success" style={{ padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
-              <CheckCircle size={16} style={{ color: 'var(--color-success)', flexShrink: 0 }} />
-              <span style={{ fontWeight: 300, color: 'var(--color-success)', fontSize: '0.85rem' }}>{success}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <div className="auth-field">
-              <label className="label">Alamat Email</label>
-              <div style={{ position: 'relative' }}>
-                <input className="input" style={{ paddingRight: '2.5rem' }} type="email" placeholder="nama@email.com" value={email} onChange={e => setEmail(e.target.value)} required />
-                <Mail size={16} style={{ position: 'absolute', right: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-muted)' }} />
-              </div>
-            </div>
-
-            <button type="submit" className="btn btn-primary btn-full" disabled={loading} style={{ height: 50, background: 'var(--color-primary)', opacity: loading ? 0.7 : 1 }}>
-              {loading ? <><span className="btn-spinner" /> Mengirim...</> : 'Kirim Kode Reset'}
-            </button>
-          </form>
-        </div>
-
-        <p className="auth-footnote">
-          Ingat password Anda? <Link to="/login">Masuk kembali</Link>
-        </p>
-      </div>
-    </div>
+        <Button type="submit" full disabled={loading} className="min-h-12">
+          {loading ? <><span className="btn-spinner" /> Mengirim...</> : 'Kirim Kode Reset'}
+        </Button>
+      </form>
+    </AuthFrame>
   );
 };
 

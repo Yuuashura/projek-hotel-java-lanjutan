@@ -1,30 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
-import api from '../../utils/api';
+import { AlertCircle, CheckCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import AuthFrame from '../../components/auth/AuthFrame';
+import AlertMessage from '../../components/auth/AlertMessage';
+import PasswordField from '../../components/auth/PasswordField';
 import CitySearchSelect from '../../components/CitySearchSelect';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../utils/api';
 
 const Register = () => {
   const { token, user } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (token) {
-      if (user?.role === 'ROLE_ADMIN_HOTEL' || user?.role === 'ROLE_ADMIN_APP') {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/');
-      }
-    }
-  }, [token, user, navigate]);
-
   const [form, setForm] = useState({ first_name: '', last_name: '', age: '', city_id: '', phone: '', email: '', password: '', confirmPassword: '' });
   const [cities, setCities] = useState([]);
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [step, setStep] = useState('form');
+
+  useEffect(() => {
+    if (!token) return;
+    navigate(user?.role === 'ROLE_ADMIN_HOTEL' || user?.role === 'ROLE_ADMIN_APP' ? '/admin/dashboard' : '/');
+  }, [token, user, navigate]);
 
   useEffect(() => {
     api.get('/api/cities').then(r => setCities(r.data.data || [])).catch(() => {});
@@ -74,118 +73,94 @@ const Register = () => {
 
   if (step === 'unverified') {
     return (
-      <div className="auth-page">
-        <div className="card auth-card auth-card-compact" style={{ textAlign: 'center' }}>
-          <AlertCircle size={48} style={{ color: 'var(--color-primary)', marginBottom: '1.5rem' }} />
-          <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.8rem', marginBottom: '0.75rem' }}>Akun Belum Diverifikasi</h2>
-          {error && (
-            <div className="alert-danger" style={{ padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
-              <AlertCircle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
-              <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.85rem', textAlign: 'left' }}>{error}</span>
-            </div>
-          )}
-          <p style={{ color: 'var(--color-muted)', fontWeight: 300, lineHeight: 1.6, marginBottom: '2rem', fontSize: '0.9rem' }}>
-            Email <strong>{form.email}</strong> sudah terdaftar namun belum diverifikasi. Kirim ulang OTP untuk melanjutkan verifikasi.
-          </p>
-          <button onClick={resendOtp} className="btn btn-primary btn-full" disabled={loading} style={{ background: 'var(--color-primary)', height: 48 }}>{loading ? 'Mengirim...' : 'Kirim Ulang OTP'}</button>
-          <button onClick={() => setStep('form')} className="btn btn-white btn-full" style={{ marginTop: '0.75rem', height: 48 }}>Kembali ke Form</button>
+      <AuthFrame title="Akun Belum Diverifikasi" subtitle="Kirim ulang OTP untuk melanjutkan verifikasi." centerOnly>
+        <AlertCircle size={48} className="mx-auto mb-5 text-[var(--color-primary)]" />
+        <AlertMessage tone="danger" className="text-left">{error}</AlertMessage>
+        <p className="mb-7 text-sm leading-6 text-[var(--color-muted)]">
+          Email <strong>{form.email}</strong> sudah terdaftar namun belum diverifikasi.
+        </p>
+        <div className="grid gap-3">
+          <Button type="button" full disabled={loading} onClick={resendOtp} className="min-h-12">
+            {loading ? 'Mengirim...' : 'Kirim Ulang OTP'}
+          </Button>
+          <Button type="button" full variant="secondary" onClick={() => setStep('form')} className="min-h-12">
+            Kembali ke Form
+          </Button>
         </div>
-      </div>
+      </AuthFrame>
     );
   }
 
   return (
-    <div className="auth-page auth-page-scroll">
-      <div className="auth-shell auth-shell-wide animate-slide-in">
-        <div className="auth-header">
-          <Link to="/" style={{ textDecoration: 'none' }}>
-            <div className="auth-brand">
-              NgiNep<span style={{ color: 'var(--color-primary)' }}>.</span>
-            </div>
-          </Link>
-          <h1>Buat Akun Baru</h1>
-          <p>Sudah punya akun? <Link to="/login">Masuk di sini</Link></p>
+    <AuthFrame
+      title="Buat Akun Baru"
+      subtitle={<>Sudah punya akun? <Link className="font-bold text-[var(--color-primary)]" to="/login">Masuk di sini</Link></>}
+      wide
+    >
+      <AlertMessage tone="danger">{error}</AlertMessage>
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div className="space-y-2">
+            <label className="label">Nama Depan *</label>
+            <Input placeholder="Afi Naufal" value={form.first_name} onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))} required />
+          </div>
+          <div className="space-y-2">
+            <label className="label">Nama Belakang</label>
+            <Input placeholder="Riski Yang" value={form.last_name} onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))} />
+          </div>
         </div>
 
-        <div className="card auth-card">
-          {/* Card Top Accent Line */}
-          <div className="auth-card-accent" />
-
-          {error && (
-            <div className="alert-danger" style={{ padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
-              <AlertCircle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
-              <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.85rem' }}>{error}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <div className="auth-grid-2">
-              <div className="auth-field">
-                <label className="label">Nama Depan *</label>
-                <input className="input" placeholder="Afi Naufal" value={form.first_name} onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))} required />
-              </div>
-              <div className="auth-field">
-                <label className="label">Nama Belakang</label>
-                <input className="input" placeholder="Riski Yang" value={form.last_name} onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))} />
-              </div>
-            </div>
-
-            <div className="auth-grid-2">
-              <div className="auth-field">
-                <label className="label">Umur *</label>
-                <input className="input" type="number" min="17" placeholder="25" value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))} required />
-              </div>
-              <div className="auth-field">
-                <label className="label">Kota *</label>
-                <CitySearchSelect
-                  cities={cities}
-                  value={form.city_id}
-                  onChange={val => setForm(f => ({ ...f, city_id: val }))}
-                  placeholder="Pilih Kota"
-                />
-              </div>
-            </div>
-
-            <div className="auth-field">
-              <label className="label">No. Telepon *</label>
-              <input className="input" type="tel" placeholder="08123456789" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} required />
-            </div>
-
-            <div className="auth-field">
-              <label className="label">Email *</label>
-              <input className="input" type="email" placeholder="nama@email.com" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required />
-            </div>
-
-            <div className="auth-grid-2 auth-grid-last">
-              <div className="auth-field">
-                <label className="label">Password *</label>
-                <div style={{ position: 'relative' }}>
-                  <input className="input" style={{ paddingRight: '2.5rem' }} type={showPw ? 'text' : 'password'} placeholder="Min 8 karakter" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required minLength={8} />
-                  <button type="button" onClick={() => setShowPw(!showPw)} style={{ position: 'absolute', right: '0.875rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)' }}>
-                    {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-              </div>
-              <div className="auth-field">
-                <label className="label">Konfirmasi Password *</label>
-                <input className="input" type="password" placeholder="Ulangi password" value={form.confirmPassword} onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))} required />
-              </div>
-            </div>
-
-            <div className="alert-success" style={{ padding: '0.875rem 1rem', marginBottom: '2rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
-              <CheckCircle size={16} style={{ color: 'var(--color-success)', flexShrink: 0 }} />
-              <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: 300, color: 'var(--color-success)' }}>
-                Setelah mendaftar, kami akan mengirimkan <strong>kode OTP 6 digit</strong> ke email Anda untuk verifikasi akun.
-              </p>
-            </div>
-
-            <button type="submit" className="btn btn-primary btn-full" disabled={loading} style={{ height: 50, background: 'var(--color-primary)', opacity: loading ? 0.7 : 1 }}>
-              {loading ? <><span className="btn-spinner" /> Mendaftarkan...</> : 'Daftar & Kirim OTP'}
-            </button>
-          </form>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div className="space-y-2">
+            <label className="label">Umur *</label>
+            <Input type="number" min="17" placeholder="25" value={form.age} onChange={e => setForm(f => ({ ...f, age: e.target.value }))} required />
+          </div>
+          <div className="space-y-2">
+            <label className="label">Kota *</label>
+            <CitySearchSelect cities={cities} value={form.city_id} onChange={val => setForm(f => ({ ...f, city_id: val }))} placeholder="Pilih Kota" />
+          </div>
         </div>
-      </div>
-    </div>
+
+        <div className="space-y-2">
+          <label className="label">No. Telepon *</label>
+          <Input type="tel" placeholder="08123456789" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} required />
+        </div>
+
+        <div className="space-y-2">
+          <label className="label">Email *</label>
+          <Input type="email" placeholder="nama@email.com" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required />
+        </div>
+
+        <div className="grid gap-5 sm:grid-cols-2">
+          <PasswordField
+            label="Password *"
+            show={showPw}
+            onToggleShow={() => setShowPw(current => !current)}
+            placeholder="Min 8 karakter"
+            value={form.password}
+            onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+            required
+            minLength={8}
+          />
+          <div className="space-y-2">
+            <label className="label">Konfirmasi Password *</label>
+            <Input type="password" placeholder="Ulangi password" value={form.confirmPassword} onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))} required />
+          </div>
+        </div>
+
+        <div className="flex gap-2 rounded-[var(--radius-sm)] border border-[var(--color-success-border)] bg-[var(--color-success-soft)] px-4 py-3 text-sm font-medium text-[var(--color-success)]">
+          <CheckCircle size={16} className="mt-0.5 shrink-0" />
+          <p className="m-0 leading-6">
+            Setelah mendaftar, kami akan mengirimkan <strong>kode OTP 6 digit</strong> ke email Anda untuk verifikasi akun.
+          </p>
+        </div>
+
+        <Button type="submit" full disabled={loading} className="min-h-12">
+          {loading ? <><span className="btn-spinner" /> Mendaftarkan...</> : 'Daftar & Kirim OTP'}
+        </Button>
+      </form>
+    </AuthFrame>
   );
 };
 

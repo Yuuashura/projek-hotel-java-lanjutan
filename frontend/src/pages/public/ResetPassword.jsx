@@ -1,6 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { AlertCircle, CheckCircle, Eye, EyeOff, Lock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import AuthFrame from '../../components/auth/AuthFrame';
+import AlertMessage from '../../components/auth/AlertMessage';
+import PasswordField from '../../components/auth/PasswordField';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 
@@ -65,10 +69,7 @@ const ResetPassword = () => {
 
     try {
       if (!otpVerified) {
-        const res = await api.post('/api/auth/verify-reset-otp', {
-          email,
-          otp_code: code,
-        });
+        const res = await api.post('/api/auth/verify-reset-otp', { email, otp_code: code });
         setVerifiedCode(code);
         setOtpVerified(true);
         setSuccess(res.data?.message || 'Kode reset valid. Silakan buat password baru.');
@@ -95,98 +96,73 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="auth-page auth-page-scroll">
-      <div className="auth-shell animate-slide-in">
-        <div className="auth-header">
-          <Link to="/" style={{ textDecoration: 'none' }}>
-            <div className="auth-brand">
-              NgiNep<span style={{ color: 'var(--color-primary)' }}>.</span>
-            </div>
-          </Link>
-          <h1>Reset Password</h1>
-          <p>{otpVerified ? 'Kode valid. Buat password baru Anda.' : 'Masukkan kode OTP reset password terlebih dahulu.'}</p>
+    <AuthFrame
+      title="Reset Password"
+      subtitle={otpVerified ? 'Kode valid. Buat password baru Anda.' : 'Masukkan kode OTP reset password terlebih dahulu.'}
+      footnote={<>Belum menerima kode? <Link className="font-bold text-[var(--color-primary)]" to="/forgot-password">Kirim ulang kode reset</Link></>}
+    >
+      <AlertMessage tone="danger">{error}</AlertMessage>
+      <AlertMessage tone="success">{success}</AlertMessage>
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <div className="space-y-2">
+          <label className="label">Alamat Email</label>
+          <Input type="email" placeholder="nama@email.com" value={email} required disabled readOnly />
         </div>
 
-        <div className="card auth-card">
-          <div className="auth-card-accent" />
-
-          {error && (
-            <div className="alert-danger" style={{ padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
-              <AlertCircle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
-              <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.85rem' }}>{error}</span>
-            </div>
-          )}
-
-          {success && (
-            <div className="alert-success" style={{ padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
-              <CheckCircle size={16} style={{ color: 'var(--color-success)', flexShrink: 0 }} />
-              <span style={{ fontWeight: 300, color: 'var(--color-success)', fontSize: '0.85rem' }}>{success}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <div className="auth-field">
-              <label className="label">Alamat Email</label>
-              <input className="input" type="email" placeholder="nama@email.com" value={email} required disabled readOnly />
-            </div>
-
-            <div className="auth-field">
-              <label className="label">Kode Reset</label>
-              <div className="otp-input-row">
-                {otp.map((digit, index) => (
-                  <input
-                    key={index}
-                    ref={el => inputRefs.current[index] = el}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={digit}
-                    onChange={e => handleOtpChange(index, e.target.value)}
-                    onKeyDown={e => handleOtpKeyDown(index, e)}
-                    onPaste={handleOtpPaste}
-                    className="otp-input-box"
-                    aria-label={`Digit OTP ${index + 1}`}
-                    disabled={otpVerified}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {otpVerified && (
-              <div className="auth-verified-section">
-                <div className="auth-field">
-                  <label className="label">Password Baru</label>
-                  <div style={{ position: 'relative' }}>
-                    <input className="input" style={{ paddingRight: '2.5rem' }} type={showPw ? 'text' : 'password'} placeholder="Minimal 6 karakter" value={passwords.new_password} onChange={e => setPasswords(p => ({ ...p, new_password: e.target.value }))} required minLength={6} />
-                    <button type="button" onClick={() => setShowPw(!showPw)} style={{ position: 'absolute', right: '0.875rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)' }}>
-                      {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="auth-field">
-                  <label className="label">Konfirmasi Password</label>
-                  <div style={{ position: 'relative' }}>
-                    <input className="input" style={{ paddingRight: '2.5rem' }} type={showConfirmPw ? 'text' : 'password'} placeholder="Ulangi password baru" value={passwords.confirmPassword} onChange={e => setPasswords(p => ({ ...p, confirmPassword: e.target.value }))} required minLength={6} />
-                    <button type="button" onClick={() => setShowConfirmPw(!showConfirmPw)} style={{ position: 'absolute', right: '0.875rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)' }}>
-                      {showConfirmPw ? <EyeOff size={16} /> : <Lock size={16} />}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <button type="submit" className="btn btn-primary btn-full" disabled={loading} style={{ height: 50, background: 'var(--color-primary)', opacity: loading ? 0.7 : 1 }}>
-              {loading ? <><span className="btn-spinner" /> {otpVerified ? 'Mereset...' : 'Memverifikasi...'}</> : otpVerified ? 'Reset Password' : 'Verifikasi Kode Reset'}
-            </button>
-          </form>
+        <div className="space-y-2">
+          <label className="label">Kode Reset</label>
+          <div className="grid grid-cols-6 gap-2">
+            {otp.map((digit, index) => (
+              <input
+                key={index}
+                ref={el => inputRefs.current[index] = el}
+                type="text"
+                inputMode="numeric"
+                maxLength={1}
+                value={digit}
+                onChange={e => handleOtpChange(index, e.target.value)}
+                onKeyDown={e => handleOtpKeyDown(index, e)}
+                onPaste={handleOtpPaste}
+                className="h-14 min-w-0 rounded-[var(--radius-sm)] border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-center text-xl font-bold text-[var(--color-text)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] disabled:opacity-50"
+                aria-label={`Digit OTP ${index + 1}`}
+                disabled={otpVerified}
+              />
+            ))}
+          </div>
         </div>
 
-        <p className="auth-footnote">
-          Belum menerima kode? <Link to="/forgot-password">Kirim ulang kode reset</Link>
-        </p>
-      </div>
-    </div>
+        {otpVerified && (
+          <div className="space-y-5 rounded-[var(--radius-sm)] border border-[var(--color-success-border)] bg-[var(--color-success-soft)] p-4 animate-[authVerifiedIn_.32s_ease_both]">
+            <PasswordField
+              label="Password Baru"
+              show={showPw}
+              onToggleShow={() => setShowPw(current => !current)}
+              placeholder="Minimal 6 karakter"
+              value={passwords.new_password}
+              onChange={e => setPasswords(p => ({ ...p, new_password: e.target.value }))}
+              required
+              minLength={6}
+            />
+
+            <PasswordField
+              label="Konfirmasi Password"
+              show={showConfirmPw}
+              onToggleShow={() => setShowConfirmPw(current => !current)}
+              placeholder="Ulangi password baru"
+              value={passwords.confirmPassword}
+              onChange={e => setPasswords(p => ({ ...p, confirmPassword: e.target.value }))}
+              required
+              minLength={6}
+            />
+          </div>
+        )}
+
+        <Button type="submit" full disabled={loading} className="min-h-12">
+          {loading ? <><span className="btn-spinner" /> {otpVerified ? 'Mereset...' : 'Memverifikasi...'}</> : otpVerified ? 'Reset Password' : 'Verifikasi Kode Reset'}
+        </Button>
+      </form>
+    </AuthFrame>
   );
 };
 

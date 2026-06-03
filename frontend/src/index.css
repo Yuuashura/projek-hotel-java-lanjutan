@@ -1,45 +1,57 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
+@import "@radix-ui/colors/slate.css";
+@import "@radix-ui/colors/slate-dark.css";
+@import "@radix-ui/colors/blue.css";
+@import "@radix-ui/colors/blue-dark.css";
+@import "@radix-ui/colors/amber.css";
+@import "@radix-ui/colors/amber-dark.css";
+@import "@radix-ui/colors/red.css";
+@import "@radix-ui/colors/red-dark.css";
+@import "@radix-ui/colors/green.css";
+@import "@radix-ui/colors/green-dark.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* ============================================
    ELEGANT SANCTUARY DESIGN SYSTEM
    ============================================ */
 
 :root {
-  --color-primary: #2563EB;
-  --color-primary-hover: #1D4ED8;
-  --color-primary-soft: rgba(37, 99, 235, 0.11);
-  --color-background: #F7F9FC;
-  --color-surface: rgba(255, 255, 255, 0.76);
-  --color-text: #0F172A;
-  --color-muted: #475569;
-  --color-accent: rgba(148, 163, 184, 0.28);
-  --color-gold: #F59E0B;
-  --color-danger: #C53030;
-  --color-danger-soft: #FFF5F5;
-  --color-danger-border: #FEB2B2;
-  --color-success: #2F855A;
+  --color-primary: var(--blue-8);
+  --color-primary-hover: var(--blue-9);
+  --color-primary-soft: rgba(94, 177, 239, 0.14);
+  --color-background: #FDFBF7;
+  --color-surface: rgba(253, 251, 247, 0.74);
+  --color-text: var(--slate-12);
+  --color-muted: var(--slate-11);
+  --color-accent: rgba(148, 163, 184, 0.2);
+  --color-gold: var(--amber-9);
+  --color-danger: var(--red-11);
+  --color-danger-soft: var(--red-3);
+  --color-danger-border: var(--red-7);
+  --color-success: var(--green-11);
   --color-success-soft: rgba(72, 187, 120, 0.12);
   --color-success-border: rgba(72, 187, 120, 0.22);
   --color-warning: #B7791F;
   --color-warning-soft: rgba(237, 137, 54, 0.12);
   --color-warning-border: rgba(237, 137, 54, 0.24);
-  --color-surface-glass: rgba(255, 255, 255, 0.68);
-  --glass-bg: rgba(255, 255, 255, 0.68);
-  --glass-bg-strong: rgba(255, 255, 255, 0.84);
-  --glass-border: rgba(148, 163, 184, 0.28);
+  --color-surface-glass: rgba(253, 251, 247, 0.68);
+  --glass-bg: rgba(253, 251, 247, 0.58);
+  --glass-bg-strong: rgba(253, 251, 247, 0.74);
+  --glass-border: rgba(148, 163, 184, 0.17);
   --glass-blur: blur(18px) saturate(150%);
   --background-luxury:
-    radial-gradient(circle, rgba(44, 82, 130, 0.13) 1px, transparent 1.3px),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0) 50%),
-    linear-gradient(155deg, rgba(37, 99, 235, 0.08) 0%, rgba(37, 99, 235, 0) 52%),
-    linear-gradient(28deg, rgba(14, 165, 233, 0.1) 0%, rgba(14, 165, 233, 0) 38%),
-    repeating-linear-gradient(90deg, rgba(15, 23, 42, 0.028) 0 1px, transparent 1px 126px),
-    repeating-linear-gradient(0deg, rgba(15, 23, 42, 0.022) 0 1px, transparent 1px 126px),
+    radial-gradient(circle, rgba(44, 82, 130, 0.055) 1px, transparent 1.3px),
+    linear-gradient(145deg, rgba(253, 251, 247, 0.66) 0%, rgba(253, 251, 247, 0) 50%),
+    linear-gradient(155deg, rgba(94, 177, 239, 0.032) 0%, rgba(94, 177, 239, 0) 52%),
+    linear-gradient(28deg, rgba(245, 158, 11, 0.026) 0%, rgba(245, 158, 11, 0) 38%),
+    repeating-linear-gradient(90deg, rgba(15, 23, 42, 0.014) 0 1px, transparent 1px 126px),
+    repeating-linear-gradient(0deg, rgba(15, 23, 42, 0.012) 0 1px, transparent 1px 126px),
     var(--color-background);
   --background-luxury-overlay:
-    linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0) 36%),
-    linear-gradient(90deg, rgba(255,255,255,0.18), rgba(255,255,255,0) 44%);
+    linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0) 36%),
+    linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0) 44%);
   
   --font-heading: 'Plus Jakarta Sans', sans-serif;
   --font-body: 'Inter', sans-serif;
@@ -47,8 +59,8 @@
   --radius-sm: 8px;
   --radius-md: 8px;
   
-  --shadow-float: 0 18px 44px -28px rgba(15, 23, 42, 0.36);
-  --shadow-hover: 0 24px 60px -30px rgba(15, 23, 42, 0.44);
+  --shadow-float: 0 10px 28px -26px rgba(15, 23, 42, 0.24);
+  --shadow-hover: 0 16px 40px -30px rgba(15, 23, 42, 0.3);
   
   /* Backward compatibility for CSS variables used globally */
   --neo-yellow: var(--color-primary);
@@ -66,19 +78,19 @@
 }
 
 :root[data-theme="dark"] {
-  --color-primary: #60A5FA;
-  --color-primary-hover: #93C5FD;
+  --color-primary: var(--blue-11);
+  --color-primary-hover: var(--blue-12);
   --color-primary-soft: rgba(96, 165, 250, 0.14);
   --color-background: rgba(3, 7, 18, 0.92);
   --color-surface: rgba(15, 23, 42, 0.72);
-  --color-text: #F8FAFC;
-  --color-muted: #CBD5E1;
+  --color-text: var(--slate-12);
+  --color-muted: var(--slate-11);
   --color-accent: rgba(148, 163, 184, 0.22);
-  --color-gold: #FBBF24;
-  --color-danger: #FCA5A5;
+  --color-gold: var(--amber-10);
+  --color-danger: var(--red-11);
   --color-danger-soft: rgba(190, 18, 60, 0.16);
   --color-danger-border: rgba(252, 165, 165, 0.32);
-  --color-success: #86EFAC;
+  --color-success: var(--green-11);
   --color-success-soft: rgba(34, 197, 94, 0.16);
   --color-success-border: rgba(134, 239, 172, 0.28);
   --color-warning: #FBBF24;
@@ -319,7 +331,6 @@ h1, h2, h3, h4, h5, h6 {
 .hotel-results-toolbar,
 .booking-panel,
 .booking-summary-card,
-.auth-card,
 .payment-panel,
 .payment-summary-card {
   background-image:
@@ -661,129 +672,6 @@ h1, h2, h3, h4, h5, h6 {
   animation: spin 0.75s linear infinite;
 }
 
-.loading-luxury {
-  position: relative;
-  overflow: hidden;
-  display: grid;
-  place-items: center;
-  min-height: 210px;
-  padding: 3rem 2rem;
-  background:
-    linear-gradient(135deg, rgba(246,211,101,0.12), transparent 38%),
-    linear-gradient(160deg, rgba(44,82,130,0.08), transparent 52%),
-    var(--color-surface);
-}
-
-.loading-luxury-compact {
-  min-height: 150px;
-  padding: 2rem 1.25rem;
-}
-
-.loading-luxury::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.34), transparent);
-  animation: shimmer 1.6s ease-in-out infinite;
-}
-
-.loading-luxury-content {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  text-align: center;
-}
-
-.loading-constellation {
-  position: relative;
-  width: 96px;
-  height: 42px;
-  margin-bottom: -0.25rem;
-}
-
-.loading-constellation::before,
-.loading-constellation::after {
-  content: "";
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  top: 20px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--color-primary), var(--color-gold), transparent);
-  opacity: 0.52;
-  transform: rotate(-10deg);
-  transform-origin: center;
-  animation: constellationPulse 1.8s ease-in-out infinite;
-}
-
-.loading-constellation::after {
-  top: 24px;
-  transform: rotate(18deg);
-  opacity: 0.34;
-  animation-delay: 0.4s;
-}
-
-.loading-constellation span {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: var(--color-surface);
-  border: 2px solid var(--color-primary);
-  box-shadow: 0 0 14px var(--color-primary-soft);
-  animation: pulseDot 1.2s ease-in-out infinite;
-}
-
-.loading-constellation span:nth-child(1) { left: 8px; top: 19px; }
-.loading-constellation span:nth-child(2) { left: 34px; top: 9px; animation-delay: 0.15s; }
-.loading-constellation span:nth-child(3) { left: 62px; top: 24px; animation-delay: 0.3s; }
-.loading-constellation span:nth-child(4) { left: 82px; top: 13px; animation-delay: 0.45s; }
-
-.loading-luxury-spinner {
-  width: 42px;
-  height: 42px;
-  border-radius: 999px;
-  border: 1px solid var(--color-accent);
-  border-top-color: var(--color-primary);
-  border-right-color: var(--color-gold);
-  animation: spin 0.9s linear infinite;
-  box-shadow: 0 0 0 8px var(--color-primary-soft);
-}
-
-.loading-luxury-text {
-  color: var(--color-text);
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 1.8px;
-  text-transform: uppercase;
-}
-
-.loading-luxury-bars {
-  display: flex;
-  gap: 0.45rem;
-}
-
-.loading-luxury-bars span {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: var(--color-primary);
-  opacity: 0.35;
-  animation: pulseDot 1s ease-in-out infinite;
-}
-
-.loading-luxury-bars span:nth-child(2) {
-  animation-delay: 0.14s;
-}
-
-.loading-luxury-bars span:nth-child(3) {
-  animation-delay: 0.28s;
-}
-
 .stat-loading-dots {
   display: inline-flex;
   align-items: center;
@@ -887,336 +775,8 @@ h1, h2, h3, h4, h5, h6 {
   will-change: transform, opacity;
 }
 
-.logout-modal-backdrop {
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 9999;
-  display: grid;
-  place-items: center;
-  padding: 1.25rem;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(8, 18, 34, 0.52);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  animation: logoutBackdropIn 0.26s ease both;
-  pointer-events: auto;
-  isolation: isolate;
-}
-
-.logout-modal-backdrop.is-closing {
-  animation: logoutBackdropOut 0.24s ease both;
-}
-
-.logout-modal-card {
-  position: relative;
-  margin: 0;
-  width: min(420px, 100%);
-  max-height: calc(100vh - 2.5rem);
-  overflow: auto;
-  padding: 2rem;
-  border: 1px solid var(--color-accent);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-text);
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.24);
-  text-align: center;
-  animation: logoutModalIn 0.34s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.logout-modal-card.is-closing {
-  animation: logoutModalOut 0.24s ease both;
-}
-
-.logout-modal-close {
-  position: absolute;
-  top: 0.85rem;
-  right: 0.85rem;
-  width: 2rem;
-  height: 2rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--color-accent);
-  border-radius: 999px;
-  background: var(--color-background);
-  color: var(--color-muted);
-  cursor: pointer;
-  transition: transform 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-
-.logout-modal-close:hover:not(:disabled) {
-  transform: rotate(90deg);
-  color: var(--color-danger);
-  border-color: rgba(229, 62, 62, 0.45);
-}
-
-.logout-modal-close:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.logout-modal-icon {
-  width: 4rem;
-  height: 4rem;
-  margin: 0 auto 1.25rem;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  color: var(--color-danger);
-  background:
-    radial-gradient(circle at 35% 25%, rgba(255,255,255,0.72), transparent 34%),
-    rgba(229, 62, 62, 0.1);
-  border: 1px solid rgba(229, 62, 62, 0.22);
-}
-
-.logout-modal-card h2 {
-  margin: 0 0 0.65rem;
-  font-family: var(--font-heading);
-  font-size: 1.55rem;
-  font-weight: 300;
-  color: var(--color-text);
-}
-
-.logout-modal-card p {
-  margin: 0 auto 1.5rem;
-  max-width: 20rem;
-  color: var(--color-muted);
-  font-size: 0.92rem;
-  line-height: 1.65;
-  font-weight: 300;
-}
-
-.logout-modal-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-}
-
-.logout-modal-actions .btn {
-  justify-content: center;
-  min-height: 2.75rem;
-}
-
-.logout-modal-cancel {
-  background: var(--color-background) !important;
-  color: var(--color-text) !important;
-  border-color: var(--color-accent) !important;
-}
-
-.logout-modal-confirm {
-  background: var(--color-danger) !important;
-  border-color: var(--color-danger) !important;
-  color: #FFFFFF !important;
-}
-
-.logout-modal-spinner {
-  width: 1.55rem;
-  height: 1.55rem;
-  border-radius: 999px;
-  border: 2px solid rgba(229, 62, 62, 0.24);
-  border-top-color: var(--color-danger);
-  animation: spin 0.75s linear infinite;
-}
-
 .theme-icon-rotate {
   animation: logoThemeRotate 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.auth-page {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 5.5rem 1.25rem 2rem;
-  background:
-    linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0) 42%),
-    linear-gradient(160deg, rgba(44,82,130,0.13), rgba(44,82,130,0) 50%),
-    var(--background-luxury);
-}
-
-:root[data-theme="dark"] .auth-page {
-  background:
-    linear-gradient(135deg, rgba(122,183,240,0.1), rgba(122,183,240,0) 42%),
-    linear-gradient(160deg, rgba(246,211,101,0.06), rgba(246,211,101,0) 50%),
-    var(--background-luxury);
-}
-
-.auth-page-scroll {
-  align-items: start;
-}
-
-.auth-shell {
-  width: min(100%, 460px);
-}
-
-.auth-shell-wide {
-  width: min(100%, 600px);
-}
-
-.auth-back-link {
-  display: inline-flex;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  background: var(--color-surface);
-  border-color: color-mix(in srgb, var(--color-accent) 58%, var(--color-text));
-  color: var(--color-text);
-  box-shadow: var(--shadow-float);
-}
-
-.auth-header {
-  text-align: center;
-  margin-bottom: 1.65rem;
-  padding: 1rem 0.75rem;
-  background: color-mix(in srgb, var(--color-surface) 68%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-accent) 70%, transparent);
-  box-shadow: 0 16px 35px -30px rgba(26,54,93,0.5);
-}
-
-.auth-brand {
-  font-family: var(--font-heading);
-  font-weight: 500;
-  font-size: 2.6rem;
-  color: var(--color-text);
-  letter-spacing: 1px;
-  line-height: 1;
-}
-
-.auth-header h1 {
-  margin: 1rem 0 0.3rem;
-  font-size: 2rem;
-  font-weight: 400;
-  color: var(--color-text);
-}
-
-.auth-header p {
-  margin: 0;
-  color: var(--color-muted);
-  font-size: 0.93rem;
-  font-weight: 500;
-}
-
-.auth-header a,
-.auth-footnote a {
-  color: var(--color-primary);
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.auth-card {
-  position: relative;
-  overflow: hidden;
-  padding: 2.35rem;
-  background: var(--color-surface);
-  border: 1px solid color-mix(in srgb, var(--color-accent) 54%, var(--color-text));
-  box-shadow: 0 24px 70px -32px rgba(26,54,93,0.38);
-}
-
-:root[data-theme="dark"] .auth-card {
-  box-shadow: 0 24px 70px -28px rgba(0,0,0,0.78);
-}
-
-.auth-card-compact {
-  width: min(100%, 430px);
-  padding: 3rem 2rem;
-}
-
-.auth-card-accent {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-gold));
-}
-
-.auth-field {
-  margin-bottom: 1.25rem;
-}
-
-.auth-field .label,
-.auth-card .label {
-  color: var(--color-text);
-  font-weight: 700;
-  opacity: 0.94;
-}
-
-.auth-card .input {
-  min-height: 48px;
-  background: color-mix(in srgb, var(--color-surface) 82%, var(--color-background));
-  border-color: color-mix(in srgb, var(--color-accent) 58%, var(--color-text));
-  color: var(--color-text);
-  font-weight: 500;
-}
-
-.auth-card .input::placeholder {
-  color: var(--color-muted);
-  opacity: 0.78;
-}
-
-.auth-card .input:focus {
-  background: var(--color-surface);
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-soft);
-}
-
-.auth-grid-2 {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.1rem;
-}
-
-.auth-grid-last {
-  margin-bottom: 0.75rem;
-}
-
-.auth-footnote {
-  text-align: center;
-  color: var(--color-muted);
-  font-weight: 500;
-  font-size: 0.78rem;
-  line-height: 1.6;
-  margin: 1.35rem 0 0;
-  padding: 0.75rem 1rem;
-  background: color-mix(in srgb, var(--color-surface) 72%, transparent);
-  border: 1px solid var(--color-accent);
-}
-
-.otp-input-row {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-}
-
-.otp-input-box {
-  width: 46px;
-  height: 54px;
-  text-align: center;
-  font-family: var(--font-body);
-  font-size: 1.35rem;
-  font-weight: 600;
-  color: var(--color-text);
-  background: color-mix(in srgb, var(--color-surface) 82%, var(--color-background));
-  border: 1px solid color-mix(in srgb, var(--color-accent) 58%, var(--color-text));
-  border-radius: var(--radius-sm);
-  outline: none;
-  transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
-}
-
-.otp-input-box:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-soft);
-  transform: translateY(-1px);
-}
-
-.otp-input-box:disabled,
-.auth-card .input:disabled {
-  cursor: not-allowed;
-  opacity: 0.76;
-  background: color-mix(in srgb, var(--color-background) 72%, var(--color-surface));
-}
-
-.auth-verified-section {
-  animation: authVerifiedIn 0.28s ease both;
 }
 
 .hotels-page-main {
@@ -1811,13 +1371,8 @@ h1, h2, h3, h4, h5, h6 {
   .hotel-filter-choice-list,
   .booking-date-grid,
   .booking-field-grid,
-  .booking-guest-toggle,
-  .auth-grid-2 {
+  .booking-guest-toggle {
     grid-template-columns: 1fr;
-  }
-
-  .auth-card {
-    padding: 2rem 1.25rem;
   }
 }
 
@@ -2020,46 +1575,6 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 0.64rem;
     letter-spacing: 1px;
     padding: 0.22rem 0.58rem;
-  }
-
-  .auth-page {
-    min-height: 100dvh !important;
-    padding: 1rem !important;
-    align-items: flex-start !important;
-  }
-
-  .auth-shell,
-  .auth-shell-wide,
-  .auth-card-compact {
-    width: 100%;
-  }
-
-  .auth-header {
-    padding: 0.8rem 0.65rem;
-    margin-bottom: 1rem;
-  }
-
-  .auth-brand {
-    font-size: 2rem;
-  }
-
-  .auth-header h1 {
-    font-size: 1.45rem;
-  }
-
-  .auth-card,
-  .auth-card-compact {
-    padding: 1.35rem 1rem !important;
-  }
-
-  .otp-input-row {
-    gap: 0.35rem;
-  }
-
-  .otp-input-box {
-    width: 40px;
-    height: 48px;
-    font-size: 1.1rem;
   }
 
   .hotels-page-main {
@@ -2340,10 +1855,6 @@ h1, h2, h3, h4, h5, h6 {
     max-width: 100% !important;
   }
 
-  .logout-modal-card {
-    padding: 1.35rem 1rem;
-  }
-
   .flash-toast {
     top: 4.35rem;
     width: calc(100vw - 1rem);
@@ -2357,11 +1868,6 @@ h1, h2, h3, h4, h5, h6 {
 
   .site-navbar .brand-logo {
     font-size: 1.35rem !important;
-  }
-
-  .otp-input-box {
-    width: 36px;
-    height: 44px;
   }
 
   .booking-calendar-week,
@@ -2573,13 +2079,11 @@ textarea,
 .booking-panel,
 .booking-summary-card,
 .booking-history-card,
-.auth-card,
 .payment-panel,
 .payment-summary-card,
 .about-story-card,
 .about-cta-panel,
-.admin-topbar,
-.logout-modal-card {
+.admin-topbar {
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--glass-bg-strong) 72%, transparent), color-mix(in srgb, var(--glass-bg) 92%, transparent)) !important;
   border-color: var(--glass-border) !important;
@@ -2598,13 +2102,11 @@ textarea,
 :root[data-theme="dark"] .booking-panel,
 :root[data-theme="dark"] .booking-summary-card,
 :root[data-theme="dark"] .booking-history-card,
-:root[data-theme="dark"] .auth-card,
 :root[data-theme="dark"] .payment-panel,
 :root[data-theme="dark"] .payment-summary-card,
 :root[data-theme="dark"] .about-story-card,
 :root[data-theme="dark"] .about-cta-panel,
-:root[data-theme="dark"] .admin-topbar,
-:root[data-theme="dark"] .logout-modal-card {
+:root[data-theme="dark"] .admin-topbar {
   background:
     linear-gradient(180deg, rgba(15, 23, 42, 0.76), rgba(15, 23, 42, 0.58)) !important;
 }
@@ -2642,6 +2144,67 @@ textarea.input:focus {
   color: color-mix(in srgb, var(--color-text) 72%, var(--color-muted));
 }
 
+:root[data-theme="light"] .auth-frame header,
+:root[data-theme="light"] .auth-card-panel,
+:root[data-theme="light"] .auth-frame > div > p {
+  background: color-mix(in srgb, #ffffff 58%, var(--color-background)) !important;
+  border-color: rgba(148, 163, 184, 0.2) !important;
+}
+
+:root[data-theme="light"] .auth-frame {
+  background-color: #FDFBF7;
+  background-image:
+    radial-gradient(circle at 14% 18%, rgba(94, 177, 239, 0.12), transparent 28%),
+    radial-gradient(circle at 84% 72%, rgba(245, 158, 11, 0.10), transparent 30%),
+    linear-gradient(135deg, rgba(44, 82, 130, 0.075) 0 1px, transparent 1px 18px),
+    linear-gradient(45deg, rgba(148, 163, 184, 0.09) 0 1px, transparent 1px 22px),
+    radial-gradient(circle, rgba(44, 82, 130, 0.12) 1px, transparent 1.4px),
+    linear-gradient(180deg, #FDFBF7 0%, #F7F2EA 100%);
+  background-size:
+    auto,
+    auto,
+    120px 120px,
+    140px 140px,
+    34px 34px,
+    auto;
+}
+
+:root[data-theme="light"] .auth-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent 0 10%, rgba(255, 255, 255, 0.52) 28%, transparent 46%),
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.58), transparent 46%);
+  opacity: 0.72;
+}
+
+:root[data-theme="light"] .auth-card-panel {
+  box-shadow: 0 18px 42px -36px rgba(15, 23, 42, 0.22) !important;
+}
+
+:root[data-theme="light"] .auth-frame input,
+:root[data-theme="light"] .auth-frame select,
+:root[data-theme="light"] .auth-frame textarea {
+  background: color-mix(in srgb, #ffffff 72%, var(--color-background)) !important;
+  color: var(--slate-12) !important;
+  border-color: rgba(148, 163, 184, 0.24) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+}
+
+:root[data-theme="light"] .auth-frame input::placeholder,
+:root[data-theme="light"] .auth-frame textarea::placeholder {
+  color: color-mix(in srgb, var(--slate-10) 84%, var(--color-background)) !important;
+}
+
+:root[data-theme="dark"] .auth-frame input,
+:root[data-theme="dark"] .auth-frame select,
+:root[data-theme="dark"] .auth-frame textarea {
+  background: color-mix(in srgb, var(--glass-bg-strong) 88%, transparent) !important;
+  color: var(--color-text) !important;
+}
+
 .badge {
   font-weight: 700;
   background: color-mix(in srgb, var(--glass-bg-strong) 78%, transparent);
@@ -2668,9 +2231,9 @@ textarea.input:focus {
 }
 
 .site-navbar {
-  background: color-mix(in srgb, var(--glass-bg-strong) 80%, transparent) !important;
+  background: color-mix(in srgb, var(--glass-bg-strong) 72%, #F5EFE4) !important;
   border-bottom-color: var(--glass-border) !important;
-  box-shadow: 0 18px 52px -36px rgba(15, 23, 42, 0.5) !important;
+  box-shadow: 0 14px 42px -36px rgba(15, 23, 42, 0.34) !important;
   backdrop-filter: var(--glass-blur) !important;
   -webkit-backdrop-filter: var(--glass-blur) !important;
 }
@@ -2741,7 +2304,6 @@ textarea.input:focus {
   color: var(--color-text);
 }
 
-.auth-page,
 .hotels-page-main,
 .hotel-detail-page,
 .booking-page,
@@ -2749,11 +2311,6 @@ textarea.input:focus {
 .my-bookings-page,
 .about-page {
   color: var(--color-text);
-}
-
-.auth-card-accent {
-  opacity: 0.95;
-  filter: saturate(115%);
 }
 
 .home-hero-copy {
@@ -2866,11 +2423,6 @@ textarea.input:focus {
     margin-inline: -0.15rem;
     padding-bottom: 1rem;
   }
-}
-
-.logout-modal-backdrop {
-  backdrop-filter: blur(16px) saturate(145%);
-  -webkit-backdrop-filter: blur(16px) saturate(145%);
 }
 
 ::selection {
