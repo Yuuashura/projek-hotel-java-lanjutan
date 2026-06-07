@@ -237,27 +237,100 @@ const BookingCard = ({ booking, onCancel }) => {
 
       {/* Expanded details */}
       {expanded && (
-        <div style={{ background: 'var(--color-background)', border: '1px solid var(--color-accent)', padding: '1.5rem', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '1rem', borderRadius: 'var(--radius-sm)' }}>
-          <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.1rem', color: 'var(--color-text)', margin: 0, fontWeight: 300 }}>Detail Pemesan</h4>
-          <div className="booking-history-detail-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem 2rem' }}>
-            {[
-              { label: 'Nama Pemesan', val: booking.orderer_name },
-              { label: 'Email', val: booking.orderer_email },
-              { label: 'No. Telepon', val: booking.orderer_phone },
-              { label: 'Metode Bayar', val: booking.payment_method || '-' },
-              { label: 'ID Pesanan', val: `#${booking.id_booking || booking.id}` },
-              { label: 'Hotel', val: hotelName },
-              { label: 'Tipe Kamar', val: roomTypeName },
-              { label: 'Alamat Hotel', val: booking.hotel_address },
-            ].map(({ label, val }) => val && (
-              <div key={label}>
-                <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</div>
-                <div style={{ fontWeight: 400, color: 'var(--color-text)', marginTop: '0.15rem' }}>{val}</div>
-              </div>
-            ))}
+        <div style={{ background: 'var(--color-background)', border: '1px solid var(--color-accent)', padding: '1.5rem', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', borderRadius: 'var(--radius-sm)' }}>
+          
+          {/* Pemesan info */}
+          <div>
+            <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.1rem', color: 'var(--color-text)', margin: '0 0 1rem', fontWeight: 300 }}>Detail Pemesan</h4>
+            <div className="booking-history-detail-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem 2rem' }}>
+              {[
+                { label: 'Nama Pemesan', val: booking.orderer_name },
+                { label: 'Email', val: booking.orderer_email },
+                { label: 'No. Telepon', val: booking.orderer_phone },
+                { label: 'ID Pesanan', val: `#${booking.id_booking || booking.id}` },
+                { label: 'Hotel', val: hotelName },
+                { label: 'Tipe Kamar', val: roomTypeName },
+                { label: 'Alamat Hotel', val: booking.hotel_address },
+              ].map(({ label, val }) => val && (
+                <div key={label}>
+                  <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</div>
+                  <div style={{ fontWeight: 400, color: 'var(--color-text)', marginTop: '0.15rem' }}>{val}</div>
+                </div>
+              ))}
+            </div>
           </div>
+
+          {/* Xendit Invoice Detail */}
+          {booking.payment_method === 'XENDIT' && (
+            <div style={{ borderTop: '1px solid var(--color-accent)', paddingTop: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
+                <div style={{ width: 28, height: 28, background: '#0057FF', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="14" height="10" viewBox="0 0 22 16" fill="none">
+                    <path d="M 5 0 L 11 7 L 5 14 M 13 0 L 19 7 L 13 14" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                  </svg>
+                </div>
+                <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.1rem', color: 'var(--color-text)', margin: 0, fontWeight: 300 }}>Detail Invoice Xendit</h4>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem 2rem' }}>
+                {/* Payment Status */}
+                <div>
+                  <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.35rem' }}>Status Pembayaran</div>
+                  {booking.payment_status ? (
+                    <span style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                      padding: '0.25rem 0.75rem', borderRadius: 20, fontSize: '0.75rem', fontWeight: 600,
+                      background: booking.payment_status === 'PAID' || booking.payment_status === 'SETTLED'
+                        ? 'rgba(72,187,120,0.12)' : booking.payment_status === 'EXPIRED'
+                        ? 'rgba(229,62,62,0.1)' : 'rgba(212,175,55,0.12)',
+                      color: booking.payment_status === 'PAID' || booking.payment_status === 'SETTLED'
+                        ? '#276749' : booking.payment_status === 'EXPIRED'
+                        ? '#9B2C2C' : 'var(--color-primary)',
+                    }}>
+                      {booking.payment_status === 'PAID' || booking.payment_status === 'SETTLED' ? '✓ ' : ''}
+                      {booking.payment_status}
+                    </span>
+                  ) : (
+                    <span style={{ color: 'var(--color-muted)', fontSize: '0.8rem' }}>—</span>
+                  )}
+                </div>
+
+                {/* Paid At */}
+                {booking.paid_at && (
+                  <div>
+                    <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.35rem' }}>Dibayar Pada</div>
+                    <div style={{ fontWeight: 400, color: 'var(--color-text)', fontSize: '0.85rem' }}>
+                      {new Date(booking.paid_at).toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                  </div>
+                )}
+
+                {/* External ID */}
+                {booking.xendit_external_id && (
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.35rem' }}>ID Transaksi Xendit</div>
+                    <div style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'var(--color-text)', background: 'var(--color-surface)', padding: '0.4rem 0.75rem', borderRadius: 4, border: '1px solid var(--color-accent)', wordBreak: 'break-all' }}>
+                      {booking.xendit_external_id}
+                    </div>
+                  </div>
+                )}
+
+                {/* Invoice URL */}
+                {booking.xendit_invoice_url && (
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.35rem' }}>Link Invoice</div>
+                    <a href={booking.xendit_invoice_url} target="_blank" rel="noopener noreferrer"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#0057FF', fontSize: '0.8rem', fontWeight: 400, textDecoration: 'none', borderBottom: '1px solid #0057FF40' }}>
+                      🔗 Buka Halaman Pembayaran Xendit
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {booking.payment_proof && (
-            <div style={{ marginTop: '0.5rem' }}>
+            <div style={{ borderTop: '1px solid var(--color-accent)', paddingTop: '1rem' }}>
               <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.5rem' }}>Bukti Pembayaran</div>
               <a href={booking.payment_proof} target="_blank" rel="noopener noreferrer">
                 <img src={booking.payment_proof} alt="Bukti Bayar" style={{ maxHeight: 160, maxWidth: '100%', objectFit: 'contain', borderRadius: 2, border: '1px solid var(--color-accent)' }} />
@@ -269,14 +342,21 @@ const BookingCard = ({ booking, onCancel }) => {
 
       {/* Action Buttons */}
       <div className="booking-history-actions" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', borderTop: '1px solid var(--color-accent)', paddingTop: '1.25rem' }}>
-        {booking.status === 'PENDING' && !alreadyPaid && (
-          <Link to={`/payment/${booking.id_booking || booking.id}`} className="btn btn-primary btn-sm" style={{ background: 'var(--color-primary)' }}>
-            Bayar Sekarang
+        {booking.status === 'PENDING' && !booking.xendit_invoice_url && (
+          <Link to={`/payment/${booking.id_booking || booking.id}`} className="btn btn-primary btn-sm" style={{ background: '#0057FF', borderColor: '#0057FF' }}>
+            Bayar via Xendit
           </Link>
         )}
-        {booking.status === 'PENDING' && alreadyPaid && (
-          <Link to={`/payment/${booking.id_booking || booking.id}`} className="btn btn-white btn-sm" style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}>
-            Ganti Bukti Bayar
+        {booking.status === 'PENDING' && booking.xendit_invoice_url && booking.payment_status !== 'EXPIRED' && (
+          <>
+            <a href={booking.xendit_invoice_url} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm" style={{ background: '#0057FF', borderColor: '#0057FF', color: '#fff' }}>
+              Lanjutkan Pembayaran
+            </a>
+          </>
+        )}
+        {booking.status === 'PENDING' && (booking.payment_status === 'EXPIRED' || (!booking.xendit_invoice_url)) && (
+          <Link to={`/payment/${booking.id_booking || booking.id}`} className="btn btn-white btn-sm">
+            Buat Ulang Invoice
           </Link>
         )}
         {booking.status === 'COMPLETED' && (

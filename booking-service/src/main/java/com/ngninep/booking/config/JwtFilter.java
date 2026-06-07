@@ -36,7 +36,7 @@ public class JwtFilter extends OncePerRequestFilter {
             try {
                 username = jwtUtil.extractUsername(jwt);
             } catch (Exception e) {
-                logger.error("Token invalid / expired");
+                logger.error("Token invalid / expired: " + e.getMessage());
             }
         }
 
@@ -46,7 +46,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 // tanpa harus hit database UserDetailsService
                 Claims claims = jwtUtil.extractClaim(jwt, c -> c);
                 String role = claims.get("role", String.class);
-                
+
                 // Ekstrak ID user (opsional, berguna untuk Booking)
                 Integer userId = claims.get("userId", Integer.class);
 
@@ -54,7 +54,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         username, userId, Collections.singletonList(authority));
-                
+
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }

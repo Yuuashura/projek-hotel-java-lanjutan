@@ -23,15 +23,15 @@ public class Booking {
     // Referensi ke service lain (plain int, bukan @JoinColumn):
     @Column(name = "customer_id", nullable = false)
     @com.fasterxml.jackson.annotation.JsonProperty("customer_id")
-    private int customerId;       // User yang login & melakukan pemesanan
+    private int customerId;  
 
     @Column(name = "hotel_id", nullable = false)
     @com.fasterxml.jackson.annotation.JsonProperty("hotel_id")
-    private int hotelId;          // Hotel yang dipesan
+    private int hotelId;
 
     @Column(name = "room_type_id", nullable = false)
     @com.fasterxml.jackson.annotation.JsonProperty("room_type_id")
-    private int roomTypeId;      // Tipe kamar yang dipesan
+    private int roomTypeId;
 
     // Detail menginap:
     @Column(name = "check_in", nullable = false)
@@ -48,7 +48,7 @@ public class Booking {
 
     @Column(name = "total_price")
     @com.fasterxml.jackson.annotation.JsonProperty("total_price")
-    private Long totalPrice;      // (check_out - check_in) × room_type.price_per_night
+    private Long totalPrice;
 
     // Data pemesan
     @Column(name = "orderer_name")
@@ -78,6 +78,26 @@ public class Booking {
     @Column(name = "payment_proof", columnDefinition = "TEXT")
     @com.fasterxml.jackson.annotation.JsonProperty("payment_proof")
     private String paymentProof;
+
+    @Column(name = "payment_status")
+    @com.fasterxml.jackson.annotation.JsonProperty("payment_status")
+    private String paymentStatus;
+
+    @Column(name = "xendit_invoice_id")
+    @com.fasterxml.jackson.annotation.JsonProperty("xendit_invoice_id")
+    private String xenditInvoiceId;
+
+    @Column(name = "xendit_external_id", unique = true)
+    @com.fasterxml.jackson.annotation.JsonProperty("xendit_external_id")
+    private String xenditExternalId;
+
+    @Column(name = "xendit_invoice_url", columnDefinition = "TEXT")
+    @com.fasterxml.jackson.annotation.JsonProperty("xendit_invoice_url")
+    private String xenditInvoiceUrl;
+
+    @Column(name = "paid_at")
+    @com.fasterxml.jackson.annotation.JsonProperty("paid_at")
+    private LocalDateTime paidAt;
 
     @Column(name = "created_at")
     @com.fasterxml.jackson.annotation.JsonProperty("created_at")

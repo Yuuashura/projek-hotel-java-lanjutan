@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
     
@@ -29,6 +30,10 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     List<Booking> findByStatus(BookingStatus status);
 
     List<Booking> findByStatusAndPaymentDeadlineBefore(BookingStatus status, LocalDateTime paymentDeadline);
+
+    Optional<Booking> findByXenditExternalId(String xenditExternalId);
+
+    Optional<Booking> findByXenditInvoiceId(String xenditInvoiceId);
 
     long countByStatus(BookingStatus status);
 

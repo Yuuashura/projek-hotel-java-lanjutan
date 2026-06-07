@@ -3,13 +3,16 @@ package com.ngninep.booking.controller;
 import com.ngninep.booking.dto.req.BookingRequest;
 import com.ngninep.booking.dto.req.PaymentRequest;
 import com.ngninep.booking.dto.req.UpdateStatusRequest;
+import com.ngninep.booking.dto.req.XenditInvoiceWebhookRequest;
 import com.ngninep.booking.dto.res.BookingResponse;
 import com.ngninep.booking.dto.res.BookingStatsResponse;
 import com.ngninep.booking.dto.res.PagedResult;
 import com.ngninep.booking.dto.res.WebResponse;
+import com.ngninep.booking.dto.res.XenditInvoiceResponse;
 import com.ngninep.booking.entity.BookingStatus;
 import com.ngninep.booking.service.FileStorageService;
 import com.ngninep.booking.service.BookingService;
+import com.ngninep.booking.service.XenditPaymentService;
 import com.ngninep.booking.util.Message;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +38,7 @@ public class BookingController {
 
     private final BookingService bookingService;
     private final FileStorageService fileStorageService;
+    private final XenditPaymentService xenditPaymentService;
 
     // Helper untuk mengambil userId dari JWT
     private int getCurrentUserId() {
@@ -114,6 +118,30 @@ public class BookingController {
                 .status("200")
                 .message(Message.BOOKING_PAYMENT_PROCESSED)
                 .data(bookingService.payBooking(id, request, customerId))
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/xendit-invoice")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public ResponseEntity<WebResponse<XenditInvoiceResponse>> createXenditInvoice(@PathVariable int id) {
+        int customerId = getCurrentUserId();
+        WebResponse<XenditInvoiceResponse> response = WebResponse.<XenditInvoiceResponse>builder()
+                .status("200")
+                .message(Message.XENDIT_INVOICE_CREATED)
+                .data(xenditPaymentService.createInvoice(id, customerId))
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/xendit/webhook")
+    public ResponseEntity<WebResponse<Void>> handleXenditWebhook(
+            @RequestHeader(name = "X-CALLBACK-TOKEN", required = false) String callbackToken,
+            @RequestBody XenditInvoiceWebhookRequest request) {
+        xenditPaymentService.handleInvoiceWebhook(callbackToken, request);
+        WebResponse<Void> response = WebResponse.<Void>builder()
+                .status("200")
+                .message(Message.XENDIT_WEBHOOK_PROCESSED)
                 .build();
         return ResponseEntity.ok(response);
     }

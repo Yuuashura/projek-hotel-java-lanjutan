@@ -61,6 +61,22 @@ public class BookingResponse {
     @JsonProperty("payment_proof")
     private String paymentProof;
 
+    @JsonProperty("payment_status")
+    private String paymentStatus;
+
+    @JsonProperty("xendit_invoice_id")
+    private String xenditInvoiceId;
+
+    @JsonProperty("xendit_external_id")
+    private String xenditExternalId;
+
+    @JsonProperty("xendit_invoice_url")
+    private String xenditInvoiceUrl;
+
+    @JsonProperty("paid_at")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime paidAt;
+
     @JsonProperty("created_at")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;

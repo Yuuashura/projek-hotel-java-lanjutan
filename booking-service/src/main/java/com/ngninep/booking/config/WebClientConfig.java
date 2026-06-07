@@ -16,4 +16,18 @@ public class WebClientConfig {
         String baseUrl = hotelServiceUrl != null ? hotelServiceUrl.replaceAll("/+$", "") : "http://localhost:8082";
         return builder.baseUrl(baseUrl).build();
     }
+
+    @Bean
+    public WebClient xenditWebClient(
+            WebClient.Builder builder,
+            @Value("${xendit.base-url:https://api.xendit.co}") String xenditBaseUrl,
+            @Value("${xendit.api-key:}") String apiKey
+    ) {
+        String baseUrl = xenditBaseUrl != null ? xenditBaseUrl.replaceAll("/+$", "") : "https://api.xendit.co";
+        WebClient.Builder webClientBuilder = builder.baseUrl(baseUrl);
+        if (apiKey != null && !apiKey.isBlank()) {
+            webClientBuilder.defaultHeaders(headers -> headers.setBasicAuth(apiKey, ""));
+        }
+        return webClientBuilder.build();
+    }
 }

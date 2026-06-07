@@ -60,6 +60,11 @@ services:
       - JWT_SECRET=${JWT_SECRET:?Set JWT_SECRET in .env}
       - JWT_EXPIRATION=${JWT_EXPIRATION:-3600000}
       - HOTEL_SERVICE_URL=http://hotel-service:8082
+      - XENDIT_BASE_URL=${XENDIT_BASE_URL:-https://api.xendit.co}
+      - XENDIT_API_KEY=${XENDIT_API_KEY:-}
+      - XENDIT_CALLBACK_TOKEN=${XENDIT_CALLBACK_TOKEN:-}
+      - XENDIT_SUCCESS_REDIRECT_URL=${XENDIT_SUCCESS_REDIRECT_URL:-http://localhost:5173/my-bookings}
+      - XENDIT_FAILURE_REDIRECT_URL=${XENDIT_FAILURE_REDIRECT_URL:-http://localhost:5173/my-bookings}
     volumes:
       - ./booking-service/uploads:/app/uploads/booking-service
     restart: always

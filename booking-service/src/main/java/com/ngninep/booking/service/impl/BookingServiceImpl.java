@@ -12,6 +12,7 @@ import com.ngninep.booking.entity.Booking;
 import com.ngninep.booking.entity.BookingStatus;
 import com.ngninep.booking.repository.BookingRepository;
 import com.ngninep.booking.service.BookingService;
+import com.ngninep.booking.service.EmailNotificationService;
 import com.ngninep.booking.util.Message;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -20,6 +21,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -50,6 +52,9 @@ import java.util.stream.Collectors;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
+    private final EmailNotificationService emailNotificationService;
+
+    @Qualifier("hotelServiceWebClient")
     private final WebClient hotelServiceWebClient;
 
     private static final Duration HOTEL_SERVICE_TIMEOUT = Duration.ofSeconds(5);
@@ -77,6 +82,11 @@ public class BookingServiceImpl implements BookingService {
                 .status(booking.getStatus() != null ? booking.getStatus().name() : null)
                 .paymentMethod(booking.getPaymentMethod())
                 .paymentProof(booking.getPaymentProof())
+                .paymentStatus(booking.getPaymentStatus())
+                .xenditInvoiceId(booking.getXenditInvoiceId())
+                .xenditExternalId(booking.getXenditExternalId())
+                .xenditInvoiceUrl(booking.getXenditInvoiceUrl())
+                .paidAt(booking.getPaidAt())
                 .createdAt(booking.getCreatedAt())
                 .paymentDeadline(booking.getPaymentDeadline())
                 .build();
@@ -106,7 +116,7 @@ public class BookingServiceImpl implements BookingService {
                 .createdAt(LocalDateTime.now())
                 .paymentDeadline(LocalDateTime.now().plusHours(24))
                 .build();
-        
+
         return mapToResponse(bookingRepository.save(booking));
     }
 
@@ -174,11 +184,11 @@ public class BookingServiceImpl implements BookingService {
     public BookingResponse payBooking(int id, PaymentRequest request, int customerId) {
         expirePendingBookings();
         Booking booking = getBookingEntityById(id);
-        
+
         if (booking.getCustomerId() != customerId) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, Message.BOOKING_ACCESS_DENIED);
         }
-        
+
         if (booking.getStatus() != BookingStatus.PENDING) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.BOOKING_ALREADY_PROCESSED);
         }
@@ -188,10 +198,10 @@ public class BookingServiceImpl implements BookingService {
             bookingRepository.save(booking);
             throw new ResponseStatusException(HttpStatus.GONE, Message.BOOKING_PAYMENT_DEADLINE_PASSED);
         }
-        
+
         booking.setPaymentMethod(request.getPaymentMethod());
         booking.setPaymentProof(request.getPaymentProof());
-        
+
         return mapToResponse(bookingRepository.save(booking));
     }
 
@@ -210,17 +220,22 @@ public class BookingServiceImpl implements BookingService {
     public BookingResponse cancelBooking(int id, int customerId) {
         expirePendingBookings();
         Booking booking = getBookingEntityById(id);
-        
+
         if (booking.getCustomerId() != customerId) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, Message.BOOKING_ACCESS_DENIED);
         }
-        
+
         if (booking.getStatus() != BookingStatus.PENDING) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.BOOKING_ONLY_PENDING_CAN_BE_CANCELLED);
         }
-        
+
         booking.setStatus(BookingStatus.CANCELLED);
-        return mapToResponse(bookingRepository.save(booking));
+        BookingResponse result = mapToResponse(bookingRepository.save(booking));
+
+        // Kirim email notifikasi pembatalan secara async
+        emailNotificationService.sendCancellationEmail(booking);
+
+        return result;
     }
 
     @Override

@@ -20,6 +20,8 @@ public final class Message {
     public static final String BOOKING_STATS_FETCHED = "Berhasil mengambil statistik booking";
     public static final String BOOKING_STATUS_UPDATED = "Status pesanan berhasil diperbarui";
     public static final String BOOKING_DELETED = "Pesanan berhasil dihapus secara permanen";
+    public static final String XENDIT_INVOICE_CREATED = "Invoice Xendit berhasil dibuat";
+    public static final String XENDIT_WEBHOOK_PROCESSED = "Webhook Xendit berhasil diproses";
 
     public static final String BOOKING_NOT_FOUND = "Booking tidak ditemukan";
     public static final String BOOKING_ACCESS_DENIED = "Anda tidak memiliki akses ke booking ini";
@@ -54,6 +56,11 @@ public final class Message {
 
     public static final String PAYMENT_METHOD_REQUIRED = "Metode pembayaran tidak boleh kosong";
     public static final String PAYMENT_PROOF_REQUIRED = "Bukti pembayaran tidak boleh kosong";
+    public static final String XENDIT_API_KEY_NOT_CONFIGURED = "API key Xendit belum dikonfigurasi";
+    public static final String XENDIT_CALLBACK_TOKEN_NOT_CONFIGURED = "Callback token Xendit belum dikonfigurasi";
+    public static final String XENDIT_INVOICE_CREATE_FAILED = "Gagal membuat invoice Xendit";
+    public static final String XENDIT_WEBHOOK_INVALID = "Payload webhook Xendit tidak valid";
+    public static final String XENDIT_CALLBACK_TOKEN_INVALID = "Callback token Xendit tidak valid";
 
     public static final String FILE_SAVE_FAILED = "Gagal menyimpan file";
     public static final String IMAGE_FILE_EMPTY = "File gambar tidak boleh kosong";
