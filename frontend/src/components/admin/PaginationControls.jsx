@@ -1,6 +1,4 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import { usePreferences } from '../../context/PreferencesContext';
 
 const buildPageNumbers = (page, totalPages) => {
@@ -24,72 +22,77 @@ const PaginationControls = ({ page, totalPages, totalItems, pageSize, onPageChan
   const pageNumbers = buildPageNumbers(page, totalPages);
   const firstItem = page * pageSize + 1;
   const lastItem = Math.min((page + 1) * pageSize, totalItems);
-  const pageButtonClass = (active = false) => cn(
-    'h-9 min-w-9 px-3 text-xs',
-    active && 'border-[var(--color-primary)] bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary)]',
-  );
+
+  const buttonStyle = (active = false, disabled = false) => ({
+    minWidth: 36,
+    height: 36,
+    padding: '0 0.7rem',
+    border: active ? '1px solid var(--color-primary)' : '1px solid var(--color-accent)',
+    borderRadius: 'var(--radius-sm)',
+    background: active ? 'var(--color-primary)' : 'var(--color-surface)',
+    color: active ? 'white' : disabled ? 'var(--color-muted)' : 'var(--color-text)',
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    opacity: disabled ? 0.45 : 1,
+    fontFamily: 'var(--font-body)',
+    fontSize: '0.78rem',
+    fontWeight: active ? 400 : 300,
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.35rem',
+  });
 
   return (
-    <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-      <div className="text-sm font-medium text-[var(--color-muted)]">
-        {t('admin.pagination.page', { page: page + 1, totalPages })} - {t('admin.pagination.showing', { first: firstItem, last: lastItem, total: totalItems })} - {t('admin.pagination.perPage', { pageSize })}
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+      <div style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.82rem' }}>
+        {t('admin.pagination.page', { page: page + 1, totalPages })} · {t('admin.pagination.showing', { first: firstItem, last: lastItem, total: totalItems })} · {t('admin.pagination.perPage', { pageSize })}
       </div>
 
-      <div className="flex flex-wrap items-center gap-1.5">
-        <Button
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+        <button
           type="button"
-          variant="secondary"
-          size="sm"
           onClick={() => onPageChange(page - 1)}
           disabled={page === 0}
           title={t('admin.pagination.previous')}
-          className="h-9 px-3 text-xs"
+          style={buttonStyle(false, page === 0)}
         >
           <ChevronLeft size={14} /> {t('admin.pagination.prevShort')}
-        </Button>
+        </button>
 
         {pageNumbers[0] > 0 && (
           <>
-            <Button type="button" variant="secondary" size="sm" onClick={() => onPageChange(0)} className={pageButtonClass(page === 0)}>
-              1
-            </Button>
-            <span className="px-1 text-[var(--color-muted)]">...</span>
+            <button type="button" onClick={() => onPageChange(0)} style={buttonStyle(page === 0)}>1</button>
+            <span style={{ color: 'var(--color-muted)', padding: '0 0.25rem' }}>...</span>
           </>
         )}
 
         {pageNumbers.map(pageNumber => (
-          <Button
+          <button
             key={pageNumber}
             type="button"
-            variant="secondary"
-            size="sm"
             onClick={() => onPageChange(pageNumber)}
-            className={pageButtonClass(pageNumber === page)}
+            style={buttonStyle(pageNumber === page)}
           >
             {pageNumber + 1}
-          </Button>
+          </button>
         ))}
 
         {pageNumbers[pageNumbers.length - 1] < totalPages - 1 && (
           <>
-            <span className="px-1 text-[var(--color-muted)]">...</span>
-            <Button type="button" variant="secondary" size="sm" onClick={() => onPageChange(totalPages - 1)} className={pageButtonClass(page === totalPages - 1)}>
-              {totalPages}
-            </Button>
+            <span style={{ color: 'var(--color-muted)', padding: '0 0.25rem' }}>...</span>
+            <button type="button" onClick={() => onPageChange(totalPages - 1)} style={buttonStyle(page === totalPages - 1)}>{totalPages}</button>
           </>
         )}
 
-        <Button
+        <button
           type="button"
-          variant="secondary"
-          size="sm"
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages - 1}
           title={t('admin.pagination.next')}
-          className="h-9 px-3 text-xs"
+          style={buttonStyle(false, page >= totalPages - 1)}
         >
           {t('admin.pagination.nextShort')} <ChevronRight size={14} />
-        </Button>
+        </button>
       </div>
     </div>
   );

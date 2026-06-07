@@ -37,8 +37,6 @@ export const PreferencesProvider = ({ children }) => {
       didMountTheme.current = true;
     }
     document.documentElement.dataset.theme = safeTheme;
-    document.documentElement.classList.toggle('dark', safeTheme === 'dark');
-    document.documentElement.classList.toggle('light', safeTheme !== 'dark');
     document.documentElement.style.colorScheme = safeTheme;
     localStorage.setItem('ngninep-theme', safeTheme);
 
