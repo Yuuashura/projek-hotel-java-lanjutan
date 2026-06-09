@@ -1,7 +1,5 @@
 import axios from 'axios';
 
-// Gunakan URL relatif sehingga Vite dev proxy bisa meneruskan ke port 8080
-// Saat production build, ubah ke URL gateway langsung: 'http://localhost:8080'
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/',
   headers: { 
