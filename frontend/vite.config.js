@@ -12,8 +12,8 @@ export default defineConfig({
     allowedHosts: true,
     proxy: {
       '/api': {
-        // target: 'http://localhost:8080',
-        target: 'https://deciduous-unfurrowed-august.ngrok-free.dev',
+        target: 'http://localhost:8080',
+        // target: 'https://deciduous-unfurrowed-august.ngrok-free.dev',
         changeOrigin: true,
       }
     }

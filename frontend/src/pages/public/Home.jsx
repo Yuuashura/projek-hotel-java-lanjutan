@@ -15,8 +15,8 @@ const slides = [
   { id: 3, image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1600&h=1000', title: 'The Heritage Pavilion', city: 'Yogyakarta', desc: 'Ketenteraman arsitektur klasik Jawa berbalut layanan berstandar internasional modern', price: 1200000 },
 ];
 
-const FEATURED_LIMIT = 12;
-const SALE_LIMIT = 3;
+const FEATURED_LIMIT = 30;
+const SALE_LIMIT = 10;
 
 const getHotelMinPrice = (hotel) => {
   if (hotel.min_price != null) return hotel.min_price;
@@ -79,7 +79,10 @@ const Home = () => {
       params: { page: 0, size: FEATURED_LIMIT, sortBy: 'rating' },
       signal: controller.signal,
     })
-      .then(r => setFeaturedHotels(r.data.data || []))
+      .then(r => {
+        const list = r.data.data || [];
+        setFeaturedHotels(list.filter(h => !h.onSale && !h.on_sale && !h.discountPercent && !h.discount_percent).slice(0, 10));
+      })
       .catch(() => setFeaturedHotels([]))
       .finally(() => setFeaturedLoading(false));
 
@@ -102,7 +105,7 @@ const Home = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--background-luxury)', backgroundAttachment: 'fixed' }}>
+    <div style={{ minHeight: '100vh' }}>
 
       {/* ====== HERO SLIDER (FULL-BLEED 100VH) ====== */}
       <section
@@ -161,7 +164,7 @@ const Home = () => {
 
       {/* ====== FLOATING SEARCH BAR ====== */}
       <div style={{ maxWidth: 1000, margin: '0 auto', padding: '0 1.5rem', position: 'relative', marginTop: '-5rem', zIndex: 30 }}>
-        <form onSubmit={handleSearch} style={{ background: 'var(--color-surface)', borderRadius: 'var(--radius-sm)', padding: '1.25rem 2rem', boxShadow: 'var(--shadow-float)', border: '1px solid var(--color-accent)' }}>
+        <form onSubmit={handleSearch} style={{ background: 'var(--color-surface-solid)', borderRadius: 'var(--radius-sm)', padding: '1.25rem 2rem', boxShadow: 'var(--shadow-float)', border: '1px solid var(--color-accent)' }}>
           <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
             <div style={{ flex: 2, minWidth: 200 }}>
               <label className="label" style={{ fontSize: '0.7rem', letterSpacing: '1px', color: 'var(--color-text)', fontWeight: 500 }}>{t('home.searchDestination')}</label>
@@ -217,8 +220,8 @@ const Home = () => {
             </div>
             <Link to="/hotels?sale=true" className="btn btn-white btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>{t('home.viewAll')} <ArrowRight size={14} /></Link>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
-            {saleHotels.map(hotel => <HotelCard key={hotel.id_hotel} hotel={hotel} showDiscount />)}
+          <div className="home-featured-rail" aria-label={t('home.saleTitle')}>
+            {saleHotels.map(hotel => <HotelCard key={hotel.id_hotel} hotel={hotel} className="home-featured-card" />)}
           </div>
         </div>
       )}
@@ -254,12 +257,15 @@ const Home = () => {
 };
 
 // Reusable Hotel Card
-export const HotelCard = ({ hotel, showDiscount, className = '' }) => {
+export const HotelCard = ({ hotel, className = '' }) => {
   const { t } = usePreferences();
   const minPrice = getHotelMinPrice(hotel);
 
-  const discountedPrice = showDiscount && hotel.discount_percent
-    ? minPrice * (1 - hotel.discount_percent / 100)
+  const discountPercent = hotel.discount_percent || hotel.discountPercent || 0;
+  const hasDiscount = (hotel.onSale || hotel.on_sale) && discountPercent > 0;
+
+  const discountedPrice = hasDiscount
+    ? minPrice * (1 - discountPercent / 100)
     : minPrice;
 
   return (
@@ -274,11 +280,11 @@ export const HotelCard = ({ hotel, showDiscount, className = '' }) => {
           onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
           onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
         />
-        {showDiscount && hotel.discount_percent > 0 && (
-          <span className="badge badge-red" style={{ position: 'absolute', top: 15, left: 15 }}>-{hotel.discount_percent}%</span>
+        {hasDiscount && (
+          <span className="badge badge-red" style={{ position: 'absolute', top: 15, left: 15, background: '#C53030', color: 'white' }}>-{discountPercent}%</span>
         )}
         {hotel.featured && <span className="badge badge-yellow" style={{ position: 'absolute', top: 15, right: 15 }}>{t('common.featured')}</span>}
-        {hotel.roomTypes?.some(r => r.room_available <= 3) && (
+        {hotel.roomTypes?.some(r => (r.room_available ?? r.roomAvailable) <= 3) && (
           <span className="badge badge-orange" style={{ position: 'absolute', bottom: 15, left: 15, background: 'rgba(237,137,54,0.1)', color: '#DD6B20', borderColor: 'rgba(237,137,54,0.2)' }}>{t('home.limited')}</span>
         )}
       </div>
@@ -295,10 +301,10 @@ export const HotelCard = ({ hotel, showDiscount, className = '' }) => {
         </div>
         <div style={{ borderTop: '1px solid var(--color-accent)', paddingTop: '1rem', marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            {showDiscount && hotel.discount_percent > 0 && (
+            {hasDiscount && (
               <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', textDecoration: 'line-through', fontWeight: 300 }}>{formatCurrency(minPrice)}</div>
             )}
-            <div style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '1.05rem', color: 'var(--color-text)' }}>
+            <div style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '1.05rem', color: hasDiscount ? '#C53030' : 'var(--color-text)' }}>
               {formatCurrency(discountedPrice || minPrice || 0)}
               <span style={{ fontSize: '0.75rem', color: 'var(--color-muted)', fontWeight: 300 }}>{t('home.perNight')}</span>
             </div>

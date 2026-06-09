@@ -116,7 +116,15 @@ const Booking = () => {
   const selectedRoomUnavailable = selectedRoom && selectedRoomAvailable <= 0;
   const bookingBlocked = !selectedRoom || selectedRoomUnavailable;
   const nights = form.check_in && form.check_out ? diffDays(form.check_in, form.check_out) : 0;
-  const totalPrice = selectedRoom ? selectedRoom.price_per_night * Math.max(nights, 1) : 0;
+  
+  const hasDiscount = (selectedRoom?.onSale || selectedRoom?.on_sale || hotel?.onSale || hotel?.on_sale) && 
+    (selectedRoom?.discountPercent > 0 || selectedRoom?.discount_percent > 0 || hotel?.discountPercent > 0 || hotel?.discount_percent > 0);
+  const discountPercent = selectedRoom?.discountPercent || selectedRoom?.discount_percent || hotel?.discountPercent || hotel?.discount_percent || 0;
+
+  const basePricePerNight = selectedRoom ? (selectedRoom.price_per_night || selectedRoom.pricePerNight || 0) : 0;
+  const originalTotalPrice = basePricePerNight * Math.max(nights, 1);
+  const totalPrice = hasDiscount ? originalTotalPrice * (1 - discountPercent / 100) : originalTotalPrice;
+
   const checkOutMin = form.check_in ? addDays(form.check_in, 1) : tomorrow;
 
   const handleCheckInChange = (value) => {
@@ -406,8 +414,14 @@ const Booking = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--color-muted)' }}>
                     <span>Harga Kamar</span>
-                    <span>{formatCurrency(selectedRoom.price_per_night)} × {nights}</span>
+                    <span>{formatCurrency(basePricePerNight)} × {nights}</span>
                   </div>
+                  {hasDiscount && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#C53030' }}>
+                      <span>Diskon ({discountPercent}%)</span>
+                      <span>-{formatCurrency(originalTotalPrice * discountPercent / 100)}</span>
+                    </div>
+                  )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--color-muted)' }}>
                     <span>Pajak & Biaya</span>
                     <span>Termasuk</span>

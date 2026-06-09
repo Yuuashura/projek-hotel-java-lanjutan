@@ -24,6 +24,7 @@
   --color-warning: #B7791F;
   --color-warning-soft: rgba(237, 137, 54, 0.12);
   --color-warning-border: rgba(237, 137, 54, 0.24);
+  --color-surface-solid: #FFFFFF;
   --color-surface-glass: rgba(255, 255, 255, 0.68);
   --glass-bg: rgba(255, 255, 255, 0.68);
   --glass-bg-strong: rgba(255, 255, 255, 0.84);
@@ -84,6 +85,7 @@
   --color-warning: #FBBF24;
   --color-warning-soft: rgba(251, 191, 36, 0.16);
   --color-warning-border: rgba(251, 191, 36, 0.28);
+  --color-surface-solid: #0F172A;
   --color-surface-glass: rgba(15, 23, 42, 0.62);
   --glass-bg: rgba(15, 23, 42, 0.62);
   --glass-bg-strong: rgba(15, 23, 42, 0.78);
@@ -117,7 +119,6 @@
 body {
   background-color: var(--color-background);
   background-image: var(--background-luxury);
-  background-attachment: fixed;
   color: var(--color-text);
   font-family: var(--font-body);
   font-weight: 300;
@@ -129,7 +130,12 @@ body {
 #root {
   min-height: 100vh;
   background: var(--background-luxury);
-  background-attachment: fixed;
+}
+
+@media (min-width: 1024px) {
+  body, #root {
+    background-attachment: fixed;
+  }
 }
 
 #root > div {
@@ -340,7 +346,7 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-body);
   font-size: 0.95rem;
   font-weight: 300;
-  background: var(--color-surface);
+  background: var(--color-surface-solid);
   border: 1px solid var(--color-accent);
   color: var(--color-text);
   outline: none;
@@ -349,7 +355,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 .input:focus { 
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(44, 82, 130, 0.1);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
 }
 .input::placeholder { 
   color: var(--color-muted); 
@@ -362,7 +368,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 .input option {
   color: var(--color-text);
-  background: var(--color-surface);
+  background: var(--color-surface-solid);
 }
 
 .label {
@@ -1602,7 +1608,7 @@ h1, h2, h3, h4, h5, h6 {
   right: 0;
   top: calc(100% + 0.65rem);
   padding: 1rem;
-  background: var(--color-surface);
+  background: var(--color-surface-solid);
   border: 1px solid color-mix(in srgb, var(--color-accent) 62%, var(--color-text));
   box-shadow: var(--shadow-hover);
 }
@@ -1695,7 +1701,7 @@ h1, h2, h3, h4, h5, h6 {
 .booking-solid-input {
   height: 48px;
   font-weight: 400;
-  background: color-mix(in srgb, var(--color-surface) 80%, var(--color-background));
+  background: color-mix(in srgb, var(--color-surface-solid) 80%, var(--color-background));
 }
 
 .booking-guest-toggle {

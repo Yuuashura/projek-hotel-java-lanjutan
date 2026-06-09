@@ -52,6 +52,8 @@ public class RoomTypeServiceImpl implements RoomTypeService {
                 .roomAvailable(roomType.getRoom_available())
                 .images(images)
                 .facilities(new ArrayList<>())
+                .discountPercent(roomType.getHotel() != null ? roomType.getHotel().getDiscount_percent() : 0)
+                .onSale(roomType.getHotel() != null && roomType.getHotel().isOnSale())
                 .build();
     }
 

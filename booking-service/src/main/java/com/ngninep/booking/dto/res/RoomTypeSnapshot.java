@@ -26,4 +26,10 @@ public class RoomTypeSnapshot {
 
     @JsonProperty("room_available")
     private int roomAvailable;
+
+    @JsonProperty("discount_percent")
+    private Integer discountPercent;
+
+    @JsonProperty("is_on_sale")
+    private Boolean onSale;
 }

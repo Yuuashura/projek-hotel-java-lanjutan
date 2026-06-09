@@ -465,7 +465,17 @@ public class BookingServiceImpl implements BookingService {
         }
 
         long nights = ChronoUnit.DAYS.between(request.getCheckIn(), request.getCheckOut());
-        return roomType.getPricePerNight() * nights;
+        long baseTotal = roomType.getPricePerNight() * nights;
+
+        // Terapkan diskon jika hotel sedang on_sale dan memiliki discount_percent
+        boolean isOnSale = Boolean.TRUE.equals(roomType.getOnSale());
+        int discountPercent = roomType.getDiscountPercent() != null ? roomType.getDiscountPercent() : 0;
+        if (isOnSale && discountPercent > 0 && discountPercent <= 100) {
+            long discountAmount = baseTotal * discountPercent / 100;
+            return baseTotal - discountAmount;
+        }
+
+        return baseTotal;
     }
 
     private void validateStatusTransition(BookingStatus currentStatus, BookingStatus nextStatus) {

@@ -92,19 +92,19 @@ const Payment = () => {
 
         {/* Countdown timer banner */}
         {timeLeft > 0 && (
-          <div style={{ background: timeLeft < 3600 ? '#FFF5F5' : '#FFFDF3', border: `1px solid ${timeLeft < 3600 ? '#FEB2B2' : '#FEEBC8'}`, padding: '1.25rem 1.5rem', marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '1rem', borderRadius: 'var(--radius-sm)' }}>
-            <Clock size={24} style={{ color: timeLeft < 3600 ? '#E53E3E' : '#DD6B20', flexShrink: 0 }} />
+          <div style={{ background: timeLeft < 3600 ? 'var(--color-danger-soft)' : 'var(--color-warning-soft)', border: `1px solid ${timeLeft < 3600 ? 'var(--color-danger-border)' : 'var(--color-warning-border)'}`, padding: '1.25rem 1.5rem', marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '1rem', borderRadius: 'var(--radius-sm)' }}>
+            <Clock size={24} style={{ color: timeLeft < 3600 ? 'var(--color-danger)' : 'var(--color-warning)', flexShrink: 0 }} />
             <div>
               <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--color-muted)', letterSpacing: '1px' }}>Sisa Waktu Pembayaran</div>
-              <div style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '1.5rem', color: timeLeft < 3600 ? '#E53E3E' : '#DD6B20', marginTop: '0.15rem' }}>{formatCountdown(timeLeft)}</div>
+              <div style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '1.5rem', color: timeLeft < 3600 ? 'var(--color-danger)' : 'var(--color-warning)', marginTop: '0.15rem' }}>{formatCountdown(timeLeft)}</div>
             </div>
           </div>
         )}
 
         {timeLeft === 0 && (
-          <div style={{ background: '#FFF5F5', border: '1px solid #FEB2B2', padding: '1.25rem 1.5rem', marginBottom: '2.5rem', display: 'flex', gap: '0.75rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
-            <X size={20} style={{ color: '#E53E3E', flexShrink: 0 }} />
-            <span style={{ fontWeight: 300, color: '#C53030', fontSize: '0.9rem' }}>Batas waktu pembayaran telah habis. Silakan buat pesanan baru.</span>
+          <div style={{ background: 'var(--color-danger-soft)', border: '1px solid var(--color-danger-border)', padding: '1.25rem 1.5rem', marginBottom: '2.5rem', display: 'flex', gap: '0.75rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
+            <X size={20} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
+            <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.9rem' }}>Batas waktu pembayaran telah habis. Silakan buat pesanan baru.</span>
           </div>
         )}
 
@@ -139,9 +139,9 @@ const Payment = () => {
               </h3>
 
               {/* Xendit info panel */}
-              <div style={{ background: 'linear-gradient(135deg, #0057FF08 0%, #003CC908 100%)', border: '1px solid #0057FF30', borderRadius: 'var(--radius-sm)', padding: '1.5rem', marginBottom: '1.5rem' }}>
+              <div style={{ background: 'linear-gradient(135deg, rgba(0,87,255,0.06) 0%, rgba(0,60,201,0.06) 100%)', border: '1px solid rgba(0,87,255,0.22)', borderRadius: 'var(--radius-sm)', padding: '1.5rem', marginBottom: '1.5rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
-                  <div style={{ width: 40, height: 40, background: '#0057FF', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <div style={{ width: 40, height: 40, background: 'var(--color-primary)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <svg width="22" height="16" viewBox="0 0 22 16" fill="none">
                       <path d="M 5 0 L 11 7 L 5 14 M 13 0 L 19 7 L 13 14" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
                     </svg>
@@ -158,8 +158,8 @@ const Payment = () => {
                     { icon: <Zap size={14} />, label: 'E-Wallet (OVO, Dana)' },
                     { icon: <ShieldCheck size={14} />, label: 'QRIS & Gerai Retail' },
                   ].map(({ icon, label }) => (
-                    <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'white', borderRadius: 6, padding: '0.6rem 0.75rem', border: '1px solid #E2E8F0', fontSize: '0.72rem', color: 'var(--color-text)', fontWeight: 400 }}>
-                      <span style={{ color: '#0057FF', flexShrink: 0 }}>{icon}</span>
+                    <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'var(--color-surface-solid)', borderRadius: 6, padding: '0.6rem 0.75rem', border: '1px solid var(--color-accent)', fontSize: '0.72rem', color: 'var(--color-text)', fontWeight: 400 }}>
+                      <span style={{ color: 'var(--color-primary)', flexShrink: 0 }}>{icon}</span>
                       {label}
                     </div>
                   ))}
@@ -167,9 +167,9 @@ const Payment = () => {
               </div>
 
               {error && (
-                <div style={{ background: '#FFF5F5', border: '1px solid #FEB2B2', padding: '0.875rem', display: 'flex', gap: '0.5rem', borderRadius: 'var(--radius-sm)', marginBottom: '1rem' }}>
-                  <AlertCircle size={16} style={{ color: '#E53E3E', flexShrink: 0 }} />
-                  <span style={{ fontWeight: 300, color: '#C53030', fontSize: '0.8rem' }}>{error}</span>
+                <div style={{ background: 'var(--color-danger-soft)', border: '1px solid var(--color-danger-border)', padding: '0.875rem', display: 'flex', gap: '0.5rem', borderRadius: 'var(--radius-sm)', marginBottom: '1rem' }}>
+                  <AlertCircle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
+                  <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.8rem' }}>{error}</span>
                 </div>
               )}
 
@@ -177,14 +177,14 @@ const Payment = () => {
                 onClick={handlePayViaXendit}
                 disabled={submitting || timeLeft === 0}
                 style={{
-                  width: '100%', height: 52, background: submitting || timeLeft === 0 ? '#A0AEC0' : '#0057FF',
+                  width: '100%', height: 52, background: submitting || timeLeft === 0 ? '#A0AEC0' : 'var(--color-primary)',
                   color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-body)',
                   fontWeight: 600, fontSize: '1rem', cursor: submitting || timeLeft === 0 ? 'not-allowed' : 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
                   transition: 'all 0.3s ease', letterSpacing: '0.5px'
                 }}
-                onMouseEnter={e => { if (!submitting && timeLeft > 0) e.currentTarget.style.background = '#003CC9'; }}
-                onMouseLeave={e => { if (!submitting && timeLeft > 0) e.currentTarget.style.background = '#0057FF'; }}
+                onMouseEnter={e => { if (!submitting && timeLeft > 0) e.currentTarget.style.background = 'var(--color-primary-hover)'; }}
+                onMouseLeave={e => { if (!submitting && timeLeft > 0) e.currentTarget.style.background = 'var(--color-primary)'; }}
               >
                 {submitting ? (
                   <>
@@ -210,7 +210,7 @@ const Payment = () => {
 
           {/* Right Column: Order Pricing */}
           <div style={{ position: 'sticky', top: 120 }}>
-            <div className="flow-animate" style={{ background: '#F7FAFC', border: '1px solid var(--color-accent)', padding: '2rem', borderRadius: 'var(--radius-sm)' }}>
+            <div className="card flow-animate" style={{ padding: '2rem', border: '1px solid var(--color-accent)' }}>
               <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--color-text)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.75rem', fontWeight: 300 }}>Total Tagihan</h3>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--color-muted)', marginBottom: '1rem' }}>
@@ -229,9 +229,9 @@ const Payment = () => {
                   AWAITING PAYMENT
                 </span>
                 {booking.xendit_invoice_url && booking.payment_status !== 'EXPIRED' && (
-                  <div style={{ background: 'rgba(0,87,255,0.05)', border: '1px solid rgba(0,87,255,0.15)', borderRadius: 6, padding: '0.6rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Check size={12} style={{ color: '#0057FF', flexShrink: 0 }} />
-                    <span style={{ fontSize: '0.72rem', color: '#0057FF', fontWeight: 400 }}>Invoice Xendit sudah dibuat</span>
+                  <div style={{ background: 'var(--color-primary-soft)', border: '1px solid var(--color-accent)', borderRadius: 6, padding: '0.6rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Check size={12} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />
+                    <span style={{ fontSize: '0.72rem', color: 'var(--color-primary)', fontWeight: 400 }}>Invoice Xendit sudah dibuat</span>
                   </div>
                 )}
               </div>

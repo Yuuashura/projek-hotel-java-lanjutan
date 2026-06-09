@@ -122,6 +122,8 @@ const HotelDetail = () => {
   if (!hotel) return null;
 
   const roomTypes = hotel.roomTypes || hotel.room_types || [];
+  const hasDiscount = (hotel.onSale || hotel.on_sale) && (hotel.discountPercent > 0 || hotel.discount_percent > 0);
+  const discountPercent = hotel.discountPercent || hotel.discount_percent || 0;
   const selectedRoom = roomTypes.find(r => (r.id_room_type || r.idRoomType) === activeRoom);
   const selectedRoomAvailable = getRoomAvailability(selectedRoom);
   const selectedRoomUnavailable = selectedRoom && selectedRoomAvailable <= 0;
@@ -269,7 +271,22 @@ const HotelDetail = () => {
                           <div className="hotel-detail-room-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid var(--color-accent)', paddingTop: '0.75rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: 'var(--color-muted)', fontWeight: 300 }}><Users size={12} /> {t('hotelDetail.maxGuests', { count: room.max_guest ?? room.maxGuest })}</div>
                             <div style={{ textAlign: 'right' }}>
-                              <div style={{ fontSize: '0.95rem', fontWeight: 400, color: 'var(--color-primary)' }}>{formatCurrency(room.price_per_night ?? room.pricePerNight)}<span style={{ fontSize: '0.7rem', color: 'var(--color-muted)' }}>{t('home.perNight')}</span></div>
+                              {hasDiscount ? (
+                                <>
+                                  <div style={{ fontSize: '0.8rem', color: 'var(--color-muted)', textDecoration: 'line-through' }}>
+                                    {formatCurrency(room.price_per_night ?? room.pricePerNight)}
+                                  </div>
+                                  <div style={{ fontSize: '1rem', fontWeight: 500, color: '#C53030' }}>
+                                    {formatCurrency((room.price_per_night ?? room.pricePerNight) * (1 - discountPercent / 100))}
+                                    <span style={{ fontSize: '0.7rem', color: 'var(--color-muted)', fontWeight: 300 }}>{t('home.perNight')}</span>
+                                  </div>
+                                </>
+                              ) : (
+                                <div style={{ fontSize: '0.95rem', fontWeight: 400, color: 'var(--color-primary)' }}>
+                                  {formatCurrency(room.price_per_night ?? room.pricePerNight)}
+                                  <span style={{ fontSize: '0.7rem', color: 'var(--color-muted)' }}>{t('home.perNight')}</span>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -304,10 +321,10 @@ const HotelDetail = () => {
                       <span>{t('hotelDetail.priceNight')}</span>
                       <span>{formatCurrency(selectedRoom.price_per_night ?? selectedRoom.pricePerNight)}</span>
                     </div>
-                    {hotel.onSale && hotel.discountPercent > 0 && (
+                    {hasDiscount && (
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#C53030' }}>
-                        <span>{t('hotelDetail.discount', { percent: hotel.discountPercent })}</span>
-                        <span>-{formatCurrency((selectedRoom.price_per_night ?? selectedRoom.pricePerNight) * hotel.discountPercent / 100)}</span>
+                        <span>{t('hotelDetail.discount', { percent: discountPercent })}</span>
+                        <span>-{formatCurrency((selectedRoom.price_per_night ?? selectedRoom.pricePerNight) * discountPercent / 100)}</span>
                       </div>
                     )}
                   </div>

@@ -37,4 +37,10 @@ public class RoomTypeResponse {
     
     private List<Object> images;
     private List<Object> facilities;
+
+    @JsonProperty("discount_percent")
+    private Integer discountPercent;
+
+    @JsonProperty("is_on_sale")
+    private Boolean onSale;
 }

@@ -388,6 +388,9 @@ const FilterBadge = ({ label, onClear }) => (
 
 const PropertyHorizontalCard = ({ hotel, t }) => {
   const minPrice = getMinPrice(hotel);
+  const hasDiscount = (hotel.onSale || hotel.on_sale) && (hotel.discountPercent > 0 || hotel.discount_percent > 0);
+  const discountPercent = hotel.discountPercent || hotel.discount_percent || 0;
+  const discountedPrice = hasDiscount ? minPrice * (1 - discountPercent / 100) : minPrice;
 
   return (
     <div className="reveal active hotel-list-card" style={{ display: 'flex', minHeight: 240, overflow: 'hidden', borderBottom: '1px solid var(--color-accent)', paddingBottom: '1.5rem' }}>
@@ -418,9 +421,20 @@ const PropertyHorizontalCard = ({ hotel, t }) => {
         <div className="hotel-list-card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '1rem', borderTop: '1px solid var(--color-accent)', paddingTop: '0.75rem', flexWrap: 'wrap' }}>
           <div>
             <span style={{ fontSize: '0.7rem', color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('common.pricePerNight')}</span>
-            <div style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '1.1rem', color: 'var(--color-text)' }}>
-              {minPrice ? formatCurrency(minPrice) : t('common.unavailable')}
-            </div>
+            {hasDiscount ? (
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--color-muted)', textDecoration: 'line-through', lineHeight: 1 }}>
+                  {formatCurrency(minPrice)}
+                </span>
+                <span style={{ fontFamily: 'var(--font-body)', fontWeight: 500, fontSize: '1.15rem', color: '#C53030', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  {formatCurrency(discountedPrice)} <span style={{ fontSize: '0.65rem', background: '#C53030', color: 'white', padding: '0.05rem 0.25rem', borderRadius: '2px', fontWeight: 500 }}>-{discountPercent}%</span>
+                </span>
+              </div>
+            ) : (
+              <div style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '1.1rem', color: 'var(--color-text)' }}>
+                {minPrice ? formatCurrency(minPrice) : t('common.unavailable')}
+              </div>
+            )}
           </div>
           <Link to={`/hotels/${hotel.id_hotel}`} style={{ fontFamily: 'var(--font-body)', color: 'var(--color-primary)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 400, display: 'flex', alignItems: 'center', gap: '0.25rem', textDecoration: 'none' }}>
             {t('common.viewDetails')} {'->'}
