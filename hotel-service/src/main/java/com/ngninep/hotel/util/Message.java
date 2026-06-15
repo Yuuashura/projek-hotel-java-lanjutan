@@ -10,6 +10,7 @@ public final class Message {
 
     public static final String HOTEL_NOT_FOUND = "Hotel tidak ditemukan";
     public static final String HOTEL_INVALID = "Hotel tidak valid";
+    public static final String HOTEL_ACCESS_DENIED = "Anda tidak memiliki akses ke hotel ini";
     public static final String HOTEL_FACILITY_ADDED = "Fasilitas hotel berhasil ditambahkan";
     public static final String HOTEL_FACILITY_REMOVED = "Fasilitas hotel berhasil dihapus";
     public static final String HOTEL_IMAGE_UPLOADED = "Gambar hotel berhasil diunggah";

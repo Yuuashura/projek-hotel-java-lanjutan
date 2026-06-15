@@ -10,6 +10,7 @@ import CitySearchSelect from '../../components/CitySearchSelect';
 import { getErrorMessage, unwrapList } from '../../utils/response';
 import { uploadFile, validateImageFile, getImageUrl } from '../../utils/uploads';
 import { usePreferences } from '../../context/PreferencesContext';
+import { useAuth } from '../../context/AuthContext';
 
 const EMPTY_FORM = { name: '', city_id: '', address: '', type: '', description: '', is_featured: false, is_on_sale: false, discount_percent: 0, rating: 0, image_url: '' };
 const PAGE_SIZE = 25;
@@ -25,6 +26,7 @@ const normalizePagination = (pagination, fallbackPage, fallbackCount) => ({
 
 const AdminHotels = () => {
   const { t } = usePreferences();
+  const { user } = useAuth();
   const [hotels, setHotels] = useState([]);
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,21 +50,31 @@ const AdminHotels = () => {
   });
   const fileRef = useRef();
   const excelRef = useRef();
+  const getUserId = () => user?.id_customer ?? user?.idCustomer ?? user?.userId ?? user?.id;
+  const getHotelOwnerId = (hotel) => hotel?.admin_hotel_id ?? hotel?.adminHotelId;
+  const isAdminHotel = user?.role === 'ROLE_ADMIN_HOTEL';
 
   const load = () => {
     setLoading(true);
     setError('');
+    const hotelParams = isAdminHotel ? {} : { page, size: PAGE_SIZE };
     Promise.all([
-      api.get('/api/hotels', { params: { page, size: PAGE_SIZE } }),
+      api.get('/api/hotels', { params: hotelParams }),
       api.get('/api/cities'),
     ]).then(([h, c]) => {
-      setHotels(unwrapList(h.data));
-      setPagination(normalizePagination(h.data?.pagination, page, unwrapList(h.data).length));
+      const hotelList = unwrapList(h.data);
+      const visibleHotels = isAdminHotel
+        ? hotelList.filter(hotel => getHotelOwnerId(hotel) === getUserId())
+        : hotelList;
+      setHotels(visibleHotels);
+      setPagination(isAdminHotel
+        ? normalizePagination(null, 0, visibleHotels.length)
+        : normalizePagination(h.data?.pagination, page, visibleHotels.length));
       setCities(unwrapList(c.data));
     }).catch((err) => setError(getErrorMessage(err, t('admin.errors.loadHotels')))).finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, [page]);
+  useEffect(() => { load(); }, [page, user]);
 
   const openCreate = () => {
     setForm(EMPTY_FORM);
@@ -224,13 +236,17 @@ const AdminHotels = () => {
           <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', margin: '0.25rem 0 0' }}>{t('admin.hotels.count', { count: totalItems })}</p>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <button onClick={handleExcelDownload} className="btn btn-white btn-sm" disabled={excelDownloading}>
-            <Download size={14} /> {excelDownloading ? t('admin.actions.downloading') : t('admin.actions.downloadExcel')}
-          </button>
-          <button onClick={() => excelRef.current?.click()} className="btn btn-white btn-sm" disabled={excelUploading}>
-            <Upload size={14} /> {excelUploading ? t('admin.actions.uploading') : t('admin.actions.uploadExcel')}
-          </button>
-          <button onClick={openCreate} className="btn btn-primary btn-sm"><Plus size={14} /> {t('admin.actions.addHotel')}</button>
+          {!isAdminHotel && (
+            <>
+              <button onClick={handleExcelDownload} className="btn btn-white btn-sm" disabled={excelDownloading}>
+                <Download size={14} /> {excelDownloading ? t('admin.actions.downloading') : t('admin.actions.downloadExcel')}
+              </button>
+              <button onClick={() => excelRef.current?.click()} className="btn btn-white btn-sm" disabled={excelUploading}>
+                <Upload size={14} /> {excelUploading ? t('admin.actions.uploading') : t('admin.actions.uploadExcel')}
+              </button>
+              <button onClick={openCreate} className="btn btn-primary btn-sm"><Plus size={14} /> {t('admin.actions.addHotel')}</button>
+            </>
+          )}
           <input ref={excelRef} type="file" accept=".xlsx" style={{ display: 'none' }} onChange={handleExcelUpload} />
         </div>
       </div>
@@ -276,7 +292,7 @@ const AdminHotels = () => {
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                       <Link to={`/admin/hotels/${h.id_hotel}/rooms`} className="btn btn-white btn-sm" style={{ padding: '0.4rem 0.8rem' }} title={t('admin.hotels.manageRooms')}><Bed size={13} /></Link>
                       <button onClick={() => openEdit(h)} className="btn btn-white btn-sm" style={{ padding: '0.4rem 0.8rem' }} title={t('admin.hotels.editHotel')}><Pencil size={13} /></button>
-                      <button onClick={() => openDelete(h)} className="btn btn-white btn-sm" style={{ padding: '0.4rem 0.8rem', color: 'var(--color-danger)' }} title={t('admin.hotels.deleteHotel')}><Trash2 size={13} /></button>
+                       {!isAdminHotel && <button onClick={() => openDelete(h)} className="btn btn-white btn-sm" style={{ padding: '0.4rem 0.8rem', color: 'var(--color-danger)' }} title={t('admin.hotels.deleteHotel')}><Trash2 size={13} /></button>}
                     </div>
                   </td>
                 </tr>

@@ -162,7 +162,7 @@ public class BookingController {
 
     // Melihat semua pesanan
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_APP', 'ROLE_ADMIN_HOTEL')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN_APP')")
     public ResponseEntity<WebResponse<List<BookingResponse>>> getAllBookings(
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size) {
@@ -204,7 +204,7 @@ public class BookingController {
     }
 
     @GetMapping("/dashboard/stats")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_APP', 'ROLE_ADMIN_HOTEL')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN_APP')")
     public ResponseEntity<WebResponse<BookingStatsResponse>> getDashboardStats() {
         WebResponse<BookingStatsResponse> response = WebResponse.<BookingStatsResponse>builder()
                 .status("200")
@@ -215,7 +215,7 @@ public class BookingController {
     }
 
     @GetMapping("/download-excel")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_APP', 'ROLE_ADMIN_HOTEL')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN_APP')")
     public ResponseEntity<InputStreamResource> downloadExcel() throws Exception {
         ByteArrayInputStream stream = bookingService.downloadExcel();
         return ResponseEntity.ok()

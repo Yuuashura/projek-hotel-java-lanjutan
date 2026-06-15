@@ -13,6 +13,8 @@ import com.ngninep.hotel.service.RoomTypeService;
 import com.ngninep.hotel.util.Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -28,6 +30,27 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     private final RoomTypeRepository roomTypeRepository;
     private final HotelRepository hotelRepository;
     private final RoomTypeImageRepository roomTypeImageRepository;
+
+    private boolean isAdminHotel() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN_HOTEL".equals(authority.getAuthority()));
+    }
+
+    private int getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object credentials = authentication != null ? authentication.getCredentials() : null;
+        if (credentials instanceof Integer) {
+            return (Integer) credentials;
+        }
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, Message.HOTEL_ACCESS_DENIED);
+    }
+
+    private void validateHotelOwnership(Hotel hotel) {
+        if (isAdminHotel() && hotel.getAdmin_hotel_id() != getCurrentUserId()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, Message.HOTEL_ACCESS_DENIED);
+        }
+    }
 
     private RoomTypeResponse mapToResponse(RoomType roomType) {
         // Map gambar tipe kamar
@@ -76,7 +99,8 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     public RoomTypeResponse create(RoomTypeRequest request) {
         Hotel hotel = hotelRepository.findById(request.getHotelId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.HOTEL_INVALID));
-                
+        validateHotelOwnership(hotel);
+                 
         RoomType roomType = RoomType.builder()
                 .name(request.getName())
                 .hotel(hotel)
@@ -106,10 +130,12 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     public RoomTypeResponse update(int id, RoomTypeRequest request) {
         RoomType roomType = roomTypeRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.ROOM_TYPE_NOT_FOUND));
-                
+        validateHotelOwnership(roomType.getHotel());
+                 
         Hotel hotel = hotelRepository.findById(request.getHotelId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.HOTEL_INVALID));
-                
+        validateHotelOwnership(hotel);
+                 
         roomType.setName(request.getName());
         roomType.setHotel(hotel);
         roomType.setDescription(request.getDescription());
@@ -137,6 +163,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     public void delete(int id) {
         RoomType roomType = roomTypeRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.ROOM_TYPE_NOT_FOUND));
+        validateHotelOwnership(roomType.getHotel());
         roomTypeRepository.delete(roomType);
     }
 }

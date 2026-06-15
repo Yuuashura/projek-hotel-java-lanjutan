@@ -32,6 +32,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,6 +61,27 @@ public class HotelServiceImpl implements HotelService {
     private final HotelImageRepository hotelImageRepository;
     private final FacilityRepository facilityRepository;
     private final HotelFacilityRepository hotelFacilityRepository;
+
+    private boolean isAdminHotel() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN_HOTEL".equals(authority.getAuthority()));
+    }
+
+    private int getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object credentials = authentication != null ? authentication.getCredentials() : null;
+        if (credentials instanceof Integer) {
+            return (Integer) credentials;
+        }
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, Message.HOTEL_ACCESS_DENIED);
+    }
+
+    private void validateHotelOwnership(Hotel hotel) {
+        if (isAdminHotel() && hotel.getAdmin_hotel_id() != getCurrentUserId()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, Message.HOTEL_ACCESS_DENIED);
+        }
+    }
 
     private HotelResponse mapToResponse(Hotel hotel) {
         CityResponse cityResponse = null;
@@ -348,6 +371,7 @@ public class HotelServiceImpl implements HotelService {
     public HotelResponse addFacility(int hotelId, int facilityId) {
         Hotel hotel = hotelRepository.findById(hotelId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.HOTEL_NOT_FOUND));
+        validateHotelOwnership(hotel);
         Facility facility = facilityRepository.findById(facilityId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.FACILITY_INVALID));
 
@@ -364,9 +388,9 @@ public class HotelServiceImpl implements HotelService {
     @Override
     @Transactional
     public HotelResponse removeFacility(int hotelId, int facilityId) {
-        if (!hotelRepository.existsById(hotelId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, Message.HOTEL_NOT_FOUND);
-        }
+        Hotel hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.HOTEL_NOT_FOUND));
+        validateHotelOwnership(hotel);
         if (!facilityRepository.existsById(facilityId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.FACILITY_INVALID);
         }
@@ -387,7 +411,7 @@ public class HotelServiceImpl implements HotelService {
                 .address(request.getAddress())
                 .type(request.getType())
                 .description(request.getDescription())
-                .admin_hotel_id(request.getAdminHotelId())
+                .admin_hotel_id(isAdminHotel() ? getCurrentUserId() : request.getAdminHotelId())
                 .featured(request.isFeatured())
                 .onSale(request.isOnSale())
                 .discount_percent(request.getDiscountPercent())
@@ -419,6 +443,7 @@ public class HotelServiceImpl implements HotelService {
     public HotelResponse update(int id, HotelRequest request) {
         Hotel hotel = hotelRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.HOTEL_NOT_FOUND));
+        validateHotelOwnership(hotel);
 
         City city = cityRepository.findById(request.getCityId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.CITY_INVALID));
@@ -428,7 +453,7 @@ public class HotelServiceImpl implements HotelService {
         hotel.setAddress(request.getAddress());
         hotel.setType(request.getType());
         hotel.setDescription(request.getDescription());
-        hotel.setAdmin_hotel_id(request.getAdminHotelId());
+        hotel.setAdmin_hotel_id(isAdminHotel() ? getCurrentUserId() : request.getAdminHotelId());
         hotel.setFeatured(request.isFeatured());
         hotel.setOnSale(request.isOnSale());
         hotel.setDiscount_percent(request.getDiscountPercent());
@@ -460,6 +485,7 @@ public class HotelServiceImpl implements HotelService {
     public void delete(int id) {
         Hotel hotel = hotelRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.HOTEL_NOT_FOUND));
+        validateHotelOwnership(hotel);
         hotelRepository.delete(hotel);
     }
 

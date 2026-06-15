@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 public class LoginResponse {
 
     private String token;
+    private int id_customer;
     private String email;
     private String first_name;
     private String last_name;

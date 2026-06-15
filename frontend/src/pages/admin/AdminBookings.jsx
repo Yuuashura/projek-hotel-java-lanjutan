@@ -7,12 +7,14 @@ import LoadingState from '../../components/LoadingState';
 import api from '../../utils/api';
 import { getErrorMessage, unwrapList } from '../../utils/response';
 import { usePreferences } from '../../context/PreferencesContext';
+import { useAuth } from '../../context/AuthContext';
 
 const STATUS_OPTIONS = ['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED'];
 const PAGE_SIZE = 25;
 
 const AdminBookings = () => {
   const { t } = usePreferences();
+  const { user } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,6 +29,9 @@ const AdminBookings = () => {
   const [excelDownloading, setExcelDownloading] = useState(false);
 
   const getHotelId = (booking) => booking.hotel_id ?? booking.hotelId;
+  const getUserId = () => user?.id_customer ?? user?.idCustomer ?? user?.userId ?? user?.id;
+  const getHotelOwnerId = (hotel) => hotel?.admin_hotel_id ?? hotel?.adminHotelId;
+  const isAdminHotel = user?.role === 'ROLE_ADMIN_HOTEL';
 
   const enrichHotelNames = async (items) => {
     const hotelIds = [...new Set(items.map(getHotelId).filter(Boolean))];
@@ -47,18 +52,45 @@ const AdminBookings = () => {
     });
   };
 
-  const load = () => {
+  const load = async () => {
     setLoading(true);
     setError('');
-    api.get('/api/bookings').then(async r => {
+    try {
+      if (isAdminHotel) {
+        const hotelsRes = await api.get('/api/hotels');
+        const ownedHotels = unwrapList(hotelsRes.data).filter(hotel => getHotelOwnerId(hotel) === getUserId());
+        const bookingResults = await Promise.all(
+          ownedHotels.map(hotel => api.get(`/api/bookings/hotel/${hotel.id_hotel ?? hotel.idHotel}`)
+            .then(res => unwrapList(res.data))
+            .catch(() => []))
+        );
+        const hotelsById = Object.fromEntries(ownedHotels.map(hotel => [hotel.id_hotel ?? hotel.idHotel, hotel]));
+        const data = bookingResults.flat().map(booking => {
+          const hotel = hotelsById[getHotelId(booking)];
+          return {
+            ...booking,
+            hotel_name: hotel?.name || booking.hotel_name,
+            hotel_city: hotel?.city?.name || booking.hotel_city,
+          };
+        });
+        setBookings(data);
+        setFiltered(data);
+        return;
+      }
+
+      const r = await api.get('/api/bookings');
       const data = unwrapList(r.data);
       const enriched = await enrichHotelNames(data);
       setBookings(enriched);
       setFiltered(enriched);
-    }).catch((err) => setError(getErrorMessage(err, t('admin.errors.loadBookings')))).finally(() => setLoading(false));
+    } catch (err) {
+      setError(getErrorMessage(err, t('admin.errors.loadBookings')));
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [user]);
 
   useEffect(() => {
     const q = search.toLowerCase();
@@ -125,9 +157,11 @@ const AdminBookings = () => {
           <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', margin: '0.25rem 0 0' }}>{t('admin.bookings.count', { count: filtered.length })}</p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-          <button onClick={handleExcelDownload} className="btn btn-white btn-sm" disabled={excelDownloading}>
-            <Download size={14} /> {excelDownloading ? t('admin.actions.downloading') : t('admin.actions.downloadExcel')}
-          </button>
+          {!isAdminHotel && (
+            <button onClick={handleExcelDownload} className="btn btn-white btn-sm" disabled={excelDownloading}>
+              <Download size={14} /> {excelDownloading ? t('admin.actions.downloading') : t('admin.actions.downloadExcel')}
+            </button>
+          )}
           {['ALL', ...STATUS_OPTIONS].map(s => {
             const active = statusFilter === s;
             return (

@@ -122,7 +122,7 @@ public class HotelController {
     }
 
     @GetMapping("/download-excel")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_HOTEL', 'ROLE_ADMIN_APP')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN_APP')")
     public ResponseEntity<InputStreamResource> downloadExcel() throws Exception {
         ByteArrayInputStream stream = hotelService.downloadExcel();
         return ResponseEntity.ok()
@@ -199,7 +199,7 @@ public class HotelController {
     }
 
     @PostMapping("/uploadHotel")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_HOTEL', 'ROLE_ADMIN_APP')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN_APP')")
     public ResponseEntity<String> uploadExcel(@RequestParam("file") MultipartFile file) {
         try{
             hotelService.uploadExcel(file);
@@ -210,7 +210,7 @@ public class HotelController {
     }
 
     @PostMapping(value = "/upload-excel", consumes = "multipart/form-data")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_HOTEL', 'ROLE_ADMIN_APP')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN_APP')")
     public ResponseEntity<WebResponse<Void>> uploadExcelFile(@RequestParam("file") MultipartFile file) {
         try {
             hotelService.uploadExcel(file);

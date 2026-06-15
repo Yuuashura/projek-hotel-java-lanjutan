@@ -229,6 +229,7 @@ public class AuthServiceImpl implements AuthService {
 
         return LoginResponse.builder()
                 .token(token)
+                .id_customer(customer.getId_customer())
                 .email(customer.getEmail())
                 .first_name(customer.getFirst_name())
                 .last_name(customer.getLast_name())

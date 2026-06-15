@@ -6,6 +6,7 @@ import LoadingState from '../../components/LoadingState';
 import api from '../../utils/api';
 import { unwrapList } from '../../utils/response';
 import { usePreferences } from '../../context/PreferencesContext';
+import { useAuth } from '../../context/AuthContext';
 
 const StatCard = ({ label, value, icon: Icon, sub }) => (
   <div className="card" style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', position: 'relative', overflow: 'hidden', border: '1px solid var(--color-accent)', boxShadow: 'none' }}>
@@ -32,29 +33,48 @@ const StatLoadingDots = () => (
 
 const AdminDashboard = () => {
   const { t } = usePreferences();
+  const { user } = useAuth();
   const [stats, setStats] = useState({ hotels: 0, bookings: [], totalRevenue: 0 });
   const [loading, setLoading] = useState(true);
   const [excelUploading, setExcelUploading] = useState(false);
   const [error, setError] = useState('');
   const excelRef = React.useRef();
 
-  const loadStats = () => {
+  const getUserId = () => user?.id_customer ?? user?.idCustomer ?? user?.userId ?? user?.id;
+  const getHotelOwnerId = (hotel) => hotel?.admin_hotel_id ?? hotel?.adminHotelId;
+  const isAdminHotel = user?.role === 'ROLE_ADMIN_HOTEL';
+
+  const loadStats = async () => {
     setLoading(true);
-    Promise.all([
-      api.get('/api/hotels', { params: { page: 0, size: 100 } }).catch(() => ({ data: { data: [] } })),
-      api.get('/api/bookings', { params: { page: 0, size: 100 } }).catch(() => ({ data: { data: [] } })),
-    ]).then(([hotels, bookings]) => {
-      const hotelList = unwrapList(hotels.data);
-      const bs = unwrapList(bookings.data);
+    try {
+      const hotels = await api.get('/api/hotels', { params: isAdminHotel ? {} : { page: 0, size: 100 } }).catch(() => ({ data: { data: [] } }));
+      let hotelList = unwrapList(hotels.data);
+      let bs = [];
+
+      if (isAdminHotel) {
+        hotelList = hotelList.filter(hotel => getHotelOwnerId(hotel) === getUserId());
+        const bookingResults = await Promise.all(
+          hotelList.map(hotel => api.get(`/api/bookings/hotel/${hotel.id_hotel ?? hotel.idHotel}`)
+            .then(res => unwrapList(res.data))
+            .catch(() => []))
+        );
+        bs = bookingResults.flat();
+      } else {
+        const bookings = await api.get('/api/bookings', { params: { page: 0, size: 100 } }).catch(() => ({ data: { data: [] } }));
+        bs = unwrapList(bookings.data);
+      }
+
       const confirmed = bs.filter(b => b.status === 'CONFIRMED' || b.status === 'COMPLETED');
       const totalRevenue = confirmed.reduce((sum, b) => sum + (b.total_price || 0), 0);
       setStats({ hotels: hotelList.length, bookings: bs, totalRevenue });
-    }).finally(() => setLoading(false));
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     loadStats();
-  }, []);
+  }, [user]);
 
   const handleExcelUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -95,9 +115,11 @@ const AdminDashboard = () => {
             <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.75rem', textTransform: 'uppercase', letterSpacing: '1px', margin: 0, color: 'var(--color-text)' }}>{t('admin.dashboard.title')}</h2>
             <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', margin: '0.25rem 0 0' }}>{t('admin.dashboard.welcome')}</p>
           </div>
-          <button onClick={() => excelRef.current?.click()} className="btn btn-white btn-sm" disabled={excelUploading}>
-            <Upload size={14} /> {excelUploading ? t('admin.actions.uploading') : t('admin.actions.uploadHotelExcel')}
-          </button>
+          {!isAdminHotel && (
+            <button onClick={() => excelRef.current?.click()} className="btn btn-white btn-sm" disabled={excelUploading}>
+              <Upload size={14} /> {excelUploading ? t('admin.actions.uploading') : t('admin.actions.uploadHotelExcel')}
+            </button>
+          )}
           <input ref={excelRef} type="file" accept=".xlsx" style={{ display: 'none' }} onChange={handleExcelUpload} />
         </div>
 

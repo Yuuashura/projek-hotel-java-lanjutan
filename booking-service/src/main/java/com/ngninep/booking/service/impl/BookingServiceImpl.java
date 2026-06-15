@@ -30,6 +30,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -69,6 +71,33 @@ public class BookingServiceImpl implements BookingService {
             Arrays.asList(BookingStatus.CONFIRMED, BookingStatus.COMPLETED);
     private static final List<BookingStatus> HISTORY_STATUSES =
             Arrays.asList(BookingStatus.COMPLETED, BookingStatus.CANCELLED);
+
+    private boolean isAdminApp() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN_APP".equals(authority.getAuthority()));
+    }
+
+    private boolean isAdminHotel() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN_HOTEL".equals(authority.getAuthority()));
+    }
+
+    private int getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object credentials = authentication != null ? authentication.getCredentials() : null;
+        if (credentials instanceof Integer) {
+            return (Integer) credentials;
+        }
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, Message.BOOKING_ACCESS_DENIED);
+    }
+
+    private void requireAdminApp() {
+        if (!isAdminApp()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, Message.BOOKING_ACCESS_DENIED);
+        }
+    }
 
     private BookingResponse mapToResponse(Booking booking) {
         return BookingResponse.builder()
@@ -153,6 +182,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public PagedResult<BookingResponse> getAllBookings(Integer page, Integer size) {
+        requireAdminApp();
         expirePendingBookings();
         Pageable pageable = toPageable(page, size);
         if (pageable != null) {
@@ -164,6 +194,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public PagedResult<BookingResponse> getBookingsByHotel(int hotelId, Integer page, Integer size) {
+        validateHotelOwnershipForAdminHotel(hotelId);
         expirePendingBookings();
         Pageable pageable = toPageable(page, size);
         if (pageable != null) {
@@ -260,6 +291,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingResponse updateStatus(int id, BookingStatus status) {
         expirePendingBookings();
         Booking booking = getBookingEntityById(id);
+        validateHotelOwnershipForAdminHotel(booking.getHotelId());
         validateStatusTransition(booking.getStatus(), status);
         booking.setStatus(status);
         return mapToResponse(bookingRepository.save(booking));
@@ -298,6 +330,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingStatsResponse getDashboardStats() {
+        requireAdminApp();
         expirePendingBookings();
 
         long pending = bookingRepository.countByStatus(BookingStatus.PENDING);
@@ -320,6 +353,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional(readOnly = true)
     public ByteArrayInputStream downloadExcel() throws Exception {
+        requireAdminApp();
         String[] headers = {
                 "ID Booking",
                 "Customer ID",
@@ -531,6 +565,40 @@ public class BookingServiceImpl implements BookingService {
             cache.put(hotelId, fallback);
             return fallback;
         }
+    }
+
+    private void validateHotelOwnershipForAdminHotel(int hotelId) {
+        if (!isAdminHotel()) {
+            return;
+        }
+
+        int hotelAdminId = getHotelAdminId(hotelId);
+        if (hotelAdminId != getCurrentUserId()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, Message.BOOKING_ACCESS_DENIED);
+        }
+    }
+
+    private int getHotelAdminId(int hotelId) {
+        try {
+            WebResponse<Map<String, Object>> body = hotelServiceWebClient.get()
+                    .uri("/api/hotels/{hotelId}", hotelId)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<WebResponse<Map<String, Object>>>() {
+                    })
+                    .block(HOTEL_SERVICE_TIMEOUT);
+            Map<String, Object> data = body != null ? body.getData() : null;
+            Object adminHotelId = data != null ? data.get("admin_hotel_id") : null;
+            if (adminHotelId == null && data != null) {
+                adminHotelId = data.get("adminHotelId");
+            }
+            if (adminHotelId instanceof Number) {
+                return ((Number) adminHotelId).intValue();
+            }
+        } catch (RuntimeException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.ROOM_TYPE_INVALID_OR_UNAVAILABLE);
+        }
+
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, Message.BOOKING_ACCESS_DENIED);
     }
 
     private String getRoomTypeName(int roomTypeId, Map<Integer, String> cache) {
