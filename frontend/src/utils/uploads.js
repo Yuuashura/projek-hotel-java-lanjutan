@@ -11,9 +11,14 @@ export const validateImageFile = (file) => {
   return '';
 };
 
-export const uploadFile = async (url, file, fieldName = 'file') => {
+export const uploadFile = async (url, file, fieldName = 'file', fields = {}) => {
   const formData = new FormData();
   formData.append(fieldName, file);
+  Object.entries(fields).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      formData.append(key, value);
+    }
+  });
   const response = await api.post(url, formData);
   return response.data?.data?.url || response.data?.url;
 };

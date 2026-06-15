@@ -66,6 +66,29 @@ public class AuthServiceImpl implements AuthService {
         return "Registrasi berhasil. Silakan cek email untuk kode OTP.";
     }
 
+    @Override
+    public String createAdminHotel(CreateAdminHotelRequest request) {
+        if (customerRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email sudah terdaftar");
+        }
+
+        Customer adminHotel = Customer.builder()
+                .first_name(request.getFirst_name())
+                .last_name(request.getLast_name())
+                .age(request.getAge())
+                .city_id(request.getCity_id())
+                .phone(request.getPhone())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .verified(true)
+                .banned(false)
+                .role(Role.ROLE_ADMIN_HOTEL)
+                .build();
+
+        customerRepository.save(adminHotel);
+        return "Akun admin hotel berhasil dibuat.";
+    }
+
     // ==================== VERIFY OTP ====================
     @Override
     public String verifyOtp(VerifyOtpRequest request) {

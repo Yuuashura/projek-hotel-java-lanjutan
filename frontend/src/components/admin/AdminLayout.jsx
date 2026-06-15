@@ -8,7 +8,7 @@ import LogoutConfirmModal from '../LogoutConfirmModal';
 const adminMenu = [
   { path: '/admin/dashboard', labelKey: 'admin.menu.dashboard', icon: LayoutDashboard },
   { path: '/admin/hotels', labelKey: 'admin.menu.hotels', icon: Hotel },
-  { path: '/admin/visitors', labelKey: 'admin.menu.visitors', icon: Users },
+  { path: '/admin/visitors', labelKey: 'admin.menu.visitors', icon: Users, roles: ['ROLE_ADMIN_APP'] },
   { path: '/admin/bookings', labelKey: 'admin.menu.bookings', icon: Calendar },
 ];
 
@@ -21,7 +21,8 @@ const AdminLayout = ({ children }) => {
   const [logoutLoading, setLogoutLoading] = React.useState(false);
   const logoutTimerRef = React.useRef(null);
   const ThemeIcon = theme === 'dark' ? Sun : Moon;
-  const activeMenu = adminMenu.find(m => m.path === location.pathname);
+  const visibleMenu = adminMenu.filter(menu => !menu.roles || menu.roles.includes(user?.role));
+  const activeMenu = visibleMenu.find(m => m.path === location.pathname);
 
   React.useEffect(() => {
     return () => {
@@ -154,7 +155,7 @@ const AdminLayout = ({ children }) => {
 
         {/* Nav Links */}
         <nav style={{ flex: 1, padding: '1rem 0', overflowY: 'auto' }}>
-          {adminMenu.map(({ path, labelKey, icon: Icon }) => {
+          {visibleMenu.map(({ path, labelKey, icon: Icon }) => {
             const active = location.pathname === path;
             return (
               <Link key={path} to={path} onClick={() => setSidebarOpen(false)} className={`sidebar-link ${active ? 'active' : ''}`}>

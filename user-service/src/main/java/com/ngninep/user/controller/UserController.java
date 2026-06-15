@@ -62,7 +62,7 @@ public class UserController {
 
     // GET /api/users — Lihat semua pengguna (Admin)
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_APP', 'ROLE_ADMIN_HOTEL')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN_APP')")
     public ResponseEntity<java.util.List<UserProfileResponse>> getAllUsers(
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size) {
@@ -71,14 +71,14 @@ public class UserController {
 
     // PATCH /api/users/{id}/ban
     @PatchMapping("/{id}/ban")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_APP', 'ROLE_ADMIN_HOTEL')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN_APP')")
     public ResponseEntity<?> banUser(@PathVariable int id) {
         return ResponseEntity.ok(Map.of("message", userService.banUser(id)));
     }
 
     // PATCH /api/users/{id}/unban
     @PatchMapping("/{id}/unban")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_APP', 'ROLE_ADMIN_HOTEL')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN_APP')")
     public ResponseEntity<?> unbanUser(@PathVariable int id) {
         return ResponseEntity.ok(Map.of("message", userService.unbanUser(id)));
     }

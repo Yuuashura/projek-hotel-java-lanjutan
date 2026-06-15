@@ -301,7 +301,7 @@ const AdminRoomTypes = () => {
                 setError('');
                 setUploadingImage(true);
                 try {
-                  const imageUrl = await uploadFile('/api/room-types/upload-image', file);
+                  const imageUrl = await uploadFile('/api/room-types/upload-image', file, 'file', { hotel_id: hotelId });
                   setImgPreview(imageUrl);
                   setForm(f => ({ ...f, image_url: imageUrl }));
                 } catch (err) {

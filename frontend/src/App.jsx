@@ -52,6 +52,14 @@ const AdminRoute = ({ children }) => {
   return children;
 };
 
+const AdminAppRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return <RouteLoading />;
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role !== 'ROLE_ADMIN_APP') return <Navigate to="/admin/dashboard" replace />;
+  return children;
+};
+
 const RouteLoading = () => (
   <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: '2rem' }}>
     <LoadingState text="Menyiapkan sesi..." />
@@ -98,7 +106,7 @@ function AppRoutes() {
       <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
       <Route path="/admin/hotels" element={<AdminRoute><AdminHotels /></AdminRoute>} />
       <Route path="/admin/hotels/:hotelId/rooms" element={<AdminRoute><AdminRoomTypes /></AdminRoute>} />
-      <Route path="/admin/visitors" element={<AdminRoute><AdminVisitors /></AdminRoute>} />
+      <Route path="/admin/visitors" element={<AdminAppRoute><AdminVisitors /></AdminAppRoute>} />
       <Route path="/admin/bookings" element={<AdminRoute><AdminBookings /></AdminRoute>} />
 
       {/* Catch all */}

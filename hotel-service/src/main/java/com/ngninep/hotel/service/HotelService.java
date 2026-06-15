@@ -27,6 +27,7 @@ public interface HotelService {
     HotelResponse create(HotelRequest request);
     HotelResponse update(int id, HotelRequest request);
     void delete(int id);
+    void validateImageUploadAccess(Integer hotelId);
 
     // Excel
     public void uploadExcel(MultipartFile file) throws Exception;

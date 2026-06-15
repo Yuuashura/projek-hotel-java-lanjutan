@@ -5,6 +5,7 @@ import com.ngninep.user.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -20,6 +21,13 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
         String message = authService.register(request);
+        return ResponseEntity.ok(Map.of("message", message));
+    }
+
+    @PostMapping("/admin-hotels")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN_APP')")
+    public ResponseEntity<?> createAdminHotel(@Valid @RequestBody CreateAdminHotelRequest request) {
+        String message = authService.createAdminHotel(request);
         return ResponseEntity.ok(Map.of("message", message));
     }
 

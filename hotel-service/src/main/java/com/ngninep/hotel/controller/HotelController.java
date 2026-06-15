@@ -226,7 +226,10 @@ public class HotelController {
 
     @PostMapping(value = "/upload-image", consumes = "multipart/form-data")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_HOTEL', 'ROLE_ADMIN_APP')")
-    public ResponseEntity<WebResponse<Map<String, String>>> uploadImage(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<WebResponse<Map<String, String>>> uploadImage(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "hotel_id", required = false) Integer hotelId) {
+        hotelService.validateImageUploadAccess(hotelId);
         String imageUrl = fileStorageService.saveHotelImage(file);
         WebResponse<Map<String, String>> response = WebResponse.<Map<String, String>>builder()
                 .status("200")

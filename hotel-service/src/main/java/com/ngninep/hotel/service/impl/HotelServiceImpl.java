@@ -83,6 +83,21 @@ public class HotelServiceImpl implements HotelService {
         }
     }
 
+    @Override
+    public void validateImageUploadAccess(Integer hotelId) {
+        if (!isAdminHotel()) {
+            return;
+        }
+
+        if (hotelId == null) {
+            return;
+        }
+
+        Hotel hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.HOTEL_NOT_FOUND));
+        validateHotelOwnership(hotel);
+    }
+
     private HotelResponse mapToResponse(Hotel hotel) {
         CityResponse cityResponse = null;
         if (hotel.getCity() != null) {

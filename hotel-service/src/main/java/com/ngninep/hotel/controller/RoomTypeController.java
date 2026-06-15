@@ -4,6 +4,7 @@ import com.ngninep.hotel.dto.req.RoomTypeRequest;
 import com.ngninep.hotel.dto.res.RoomTypeResponse;
 import com.ngninep.hotel.dto.res.WebResponse;
 import com.ngninep.hotel.service.FileStorageService;
+import com.ngninep.hotel.service.HotelService;
 import com.ngninep.hotel.service.RoomTypeService;
 import com.ngninep.hotel.util.Message;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import java.util.Map;
 public class RoomTypeController {
 
     private final RoomTypeService roomTypeService;
+    private final HotelService hotelService;
     private final FileStorageService fileStorageService;
 
     // Endpoint publik untuk melihat daftar tipe kamar berdasarkan ID hotel
@@ -80,7 +82,10 @@ public class RoomTypeController {
 
     @PostMapping(value = "/upload-image", consumes = "multipart/form-data")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN_HOTEL', 'ROLE_ADMIN_APP')")
-    public ResponseEntity<WebResponse<Map<String, String>>> uploadImage(@RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+    public ResponseEntity<WebResponse<Map<String, String>>> uploadImage(
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+            @RequestParam("hotel_id") Integer hotelId) {
+        hotelService.validateImageUploadAccess(hotelId);
         String imageUrl = fileStorageService.saveRoomTypeImage(file);
         WebResponse<Map<String, String>> response = WebResponse.<Map<String, String>>builder()
                 .status("200")
