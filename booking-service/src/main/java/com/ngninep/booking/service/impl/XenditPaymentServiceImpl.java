@@ -53,10 +53,10 @@ public class XenditPaymentServiceImpl implements XenditPaymentService {
     @Value("${xendit.callback-token:}")
     private String callbackToken;
 
-    @Value("${xendit.success-redirect-url:http://localhost:5173/my-bookings}")
+    @Value("${xendit.success-redirect-url:https://deciduous-unfurrowed-august.ngrok-free.dev/my-bookings}")
     private String successRedirectUrl;
 
-    @Value("${xendit.failure-redirect-url:http://localhost:5173/my-bookings}")
+    @Value("${xendit.failure-redirect-url:https://deciduous-unfurrowed-august.ngrok-free.dev/my-bookings}")
     private String failureRedirectUrl;
 
     @Override
@@ -81,6 +81,9 @@ public class XenditPaymentServiceImpl implements XenditPaymentService {
         body.put("failure_redirect_url", failureRedirectUrl);
         body.put("currency", "IDR");
         body.put("expiry_duration", calculateExpiryDurationSeconds(booking));
+
+        logger.info("Creating Xendit invoice for booking #{} with success_redirect_url={} failure_redirect_url={}",
+                booking.getIdBooking(), successRedirectUrl, failureRedirectUrl);
 
         Map<String, Object> xenditResponse;
         try {

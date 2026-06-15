@@ -16,6 +16,7 @@ import {
   Coffee,
   Utensils,
   WashingMachine,
+  AlertCircle,
 } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 import { useAuth } from '../../context/AuthContext';
@@ -78,13 +79,15 @@ const HotelDetail = () => {
   const [activeRoom, setActiveRoom] = useState(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [allFacilities, setAllFacilities] = useState([]);
+  const [roomAvailability, setRoomAvailability] = useState([]);
 
   useEffect(() => {
     const fetchDetail = async () => {
       setLoading(true);
-      const [hotelResult, facilitiesResult] = await Promise.allSettled([
+      const [hotelResult, facilitiesResult, availabilityResult] = await Promise.allSettled([
         api.get(`/api/hotels/${id}`),
         api.get('/api/facilities'),
+        api.get(`/api/bookings/availability/hotel/${id}`),
       ]);
 
       if (hotelResult.status !== 'fulfilled') {
@@ -106,6 +109,13 @@ const HotelDetail = () => {
         }
       }
 
+      if (availabilityResult.status === 'fulfilled') {
+        const availabilityData = availabilityResult.value.data.data || [];
+        setRoomAvailability(Array.isArray(availabilityData) ? availabilityData : []);
+      } else {
+        setRoomAvailability([]);
+      }
+
       setLoading(false);
     };
 
@@ -122,9 +132,15 @@ const HotelDetail = () => {
   if (!hotel) return null;
 
   const roomTypes = hotel.roomTypes || hotel.room_types || [];
+  const roomFullPeriodsByRoom = roomAvailability.reduce((result, item) => {
+    const roomTypeId = item.room_type_id ?? item.roomTypeId;
+    if (roomTypeId) result[roomTypeId] = item.periods || [];
+    return result;
+  }, {});
   const hasDiscount = (hotel.onSale || hotel.on_sale) && (hotel.discountPercent > 0 || hotel.discount_percent > 0);
   const discountPercent = hotel.discountPercent || hotel.discount_percent || 0;
   const selectedRoom = roomTypes.find(r => (r.id_room_type || r.idRoomType) === activeRoom);
+  const selectedRoomFullPeriods = selectedRoom ? roomFullPeriodsByRoom[activeRoom] || [] : [];
   const selectedRoomAvailable = getRoomAvailability(selectedRoom);
   const selectedRoomUnavailable = selectedRoom && selectedRoomAvailable <= 0;
   const hotelFacilities = (hotel.facilities || hotel.hotelFacilities || [])
@@ -238,10 +254,11 @@ const HotelDetail = () => {
                     const isSelected = activeRoom === roomId;
                     const roomAvailable = getRoomAvailability(room);
                     const roomUnavailable = roomAvailable <= 0;
+                    const fullPeriods = roomFullPeriodsByRoom[roomId] || [];
                     return (
                       <div key={roomId} className="hotel-detail-room-card" onClick={() => setActiveRoom(roomId)}
                         style={{
-                          display: 'flex', height: 180, cursor: 'pointer', borderRadius: 'var(--radius-sm)', overflow: 'hidden',
+                          display: 'flex', minHeight: 180, cursor: 'pointer', borderRadius: 'var(--radius-sm)', overflow: 'hidden',
                           border: isSelected ? '1px solid var(--color-primary)' : '1px solid var(--color-accent)',
                           background: isSelected ? 'var(--color-surface)' : 'transparent',
                           boxShadow: isSelected ? 'var(--shadow-hover)' : 'none',
@@ -266,6 +283,21 @@ const HotelDetail = () => {
                               <span>-</span>
                               <span>{t('hotelDetail.bed')}</span>
                             </p>
+                            {fullPeriods.length > 0 && (
+                              <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                                {fullPeriods.slice(0, 2).map(period => (
+                                  <div key={`${period.start_date || period.startDate}-${period.end_date || period.endDate}`} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.4rem', color: 'var(--color-danger)', fontSize: '0.78rem', lineHeight: 1.45, fontWeight: 400 }}>
+                                    <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 1 }} />
+                                    <span>{period.message}</span>
+                                  </div>
+                                ))}
+                                {fullPeriods.length > 2 && (
+                                  <span style={{ color: 'var(--color-danger)', fontSize: '0.75rem', fontWeight: 400 }}>
+                                    +{fullPeriods.length - 2} periode penuh lainnya
+                                  </span>
+                                )}
+                              </div>
+                            )}
                           </div>
 
                           <div className="hotel-detail-room-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid var(--color-accent)', paddingTop: '0.75rem' }}>
@@ -312,6 +344,16 @@ const HotelDetail = () => {
                     {selectedRoomUnavailable && (
                       <div style={{ color: 'var(--color-danger)', fontSize: '0.8rem', marginTop: '0.5rem', fontWeight: 400 }}>
                         {t('hotelDetail.roomUnavailableMessage')}
+                      </div>
+                    )}
+                    {selectedRoomFullPeriods.length > 0 && (
+                      <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                        {selectedRoomFullPeriods.map(period => (
+                          <div key={`${period.start_date || period.startDate}-${period.end_date || period.endDate}`} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.45rem', color: 'var(--color-danger)', fontSize: '0.8rem', lineHeight: 1.5, fontWeight: 400 }}>
+                            <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 2 }} />
+                            <span>{period.message}</span>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>

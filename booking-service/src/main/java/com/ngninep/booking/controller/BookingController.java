@@ -7,6 +7,7 @@ import com.ngninep.booking.dto.req.XenditInvoiceWebhookRequest;
 import com.ngninep.booking.dto.res.BookingResponse;
 import com.ngninep.booking.dto.res.BookingStatsResponse;
 import com.ngninep.booking.dto.res.PagedResult;
+import com.ngninep.booking.dto.res.RoomAvailabilityResponse;
 import com.ngninep.booking.dto.res.WebResponse;
 import com.ngninep.booking.dto.res.XenditInvoiceResponse;
 import com.ngninep.booking.entity.BookingStatus;
@@ -188,6 +189,16 @@ public class BookingController {
                 .message(Message.BOOKING_BY_HOTEL_FETCHED)
                 .data(result.getData())
                 .pagination(result.getPagination())
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/availability/hotel/{hotelId}")
+    public ResponseEntity<WebResponse<List<RoomAvailabilityResponse>>> getRoomAvailabilityByHotel(@PathVariable int hotelId) {
+        WebResponse<List<RoomAvailabilityResponse>> response = WebResponse.<List<RoomAvailabilityResponse>>builder()
+                .status("200")
+                .message(Message.SUCCESS)
+                .data(bookingService.getRoomAvailabilityByHotel(hotelId))
                 .build();
         return ResponseEntity.ok(response);
     }

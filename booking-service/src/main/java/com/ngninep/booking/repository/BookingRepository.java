@@ -26,6 +26,8 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     List<Booking> findByHotelId(int hotelId);
 
     Page<Booking> findByHotelId(int hotelId, Pageable pageable);
+
+    List<Booking> findByHotelIdAndStatusInAndCheckOutAfter(int hotelId, List<BookingStatus> statuses, LocalDate checkOut);
     
     List<Booking> findByStatus(BookingStatus status);
 

@@ -51,7 +51,7 @@ public final class Message {
     public static final String ROOM_TYPE_NOT_MATCH_HOTEL = "Tipe kamar tidak sesuai dengan hotel";
     public static final String GUEST_EXCEEDS_ROOM_CAPACITY = "Jumlah tamu melebihi kapasitas kamar";
     public static final String ROOM_UNAVAILABLE = "Kamar tidak tersedia";
-    public static final String ROOM_FULL_ON_DATE = "Kamar sudah penuh pada tanggal tersebut";
+    public static final String ROOM_FULL_ON_DATE = "Hotel %s dengan kamar %s sedang penuh pada tanggal %s sampai %s";
     public static final String ROOM_TYPE_PRICE_INVALID = "Harga tipe kamar tidak valid";
 
     public static final String PAYMENT_METHOD_REQUIRED = "Metode pembayaran tidak boleh kosong";

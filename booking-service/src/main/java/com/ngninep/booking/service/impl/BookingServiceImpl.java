@@ -6,6 +6,8 @@ import com.ngninep.booking.dto.res.BookingResponse;
 import com.ngninep.booking.dto.res.BookingStatsResponse;
 import com.ngninep.booking.dto.res.PageMetadata;
 import com.ngninep.booking.dto.res.PagedResult;
+import com.ngninep.booking.dto.res.RoomAvailabilityResponse;
+import com.ngninep.booking.dto.res.RoomFullPeriodResponse;
 import com.ngninep.booking.dto.res.RoomTypeSnapshot;
 import com.ngninep.booking.dto.res.WebResponse;
 import com.ngninep.booking.entity.Booking;
@@ -39,7 +41,9 @@ import java.io.ByteArrayOutputStream;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -58,6 +62,7 @@ public class BookingServiceImpl implements BookingService {
     private final WebClient hotelServiceWebClient;
 
     private static final Duration HOTEL_SERVICE_TIMEOUT = Duration.ofSeconds(5);
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     private static final List<BookingStatus> ACTIVE_STATUSES =
             Arrays.asList(BookingStatus.PENDING, BookingStatus.CONFIRMED);
     private static final List<BookingStatus> REVENUE_STATUSES =
@@ -165,6 +170,51 @@ public class BookingServiceImpl implements BookingService {
             return mapPage(bookingRepository.findByHotelId(hotelId, pageable));
         }
         return mapList(bookingRepository.findByHotelId(hotelId));
+    }
+
+    @Override
+    @Transactional
+    public List<RoomAvailabilityResponse> getRoomAvailabilityByHotel(int hotelId) {
+        expirePendingBookings();
+
+        List<RoomTypeSnapshot> roomTypes = fetchRoomTypesByHotel(hotelId);
+        Map<Integer, RoomTypeSnapshot> roomTypesById = roomTypes.stream()
+                .collect(Collectors.toMap(RoomTypeSnapshot::getIdRoomType, roomType -> roomType, (first, second) -> first));
+        LocalDate today = LocalDate.now();
+        List<Booking> bookings = bookingRepository.findByHotelIdAndStatusInAndCheckOutAfter(hotelId, ACTIVE_STATUSES, today);
+        Map<Integer, Map<LocalDate, Long>> bookedByRoomAndDate = new HashMap<>();
+
+        for (Booking booking : bookings) {
+            RoomTypeSnapshot roomType = roomTypesById.get(booking.getRoomTypeId());
+            if (roomType == null || roomType.getRoomAvailable() <= 0) {
+                continue;
+            }
+
+            LocalDate date = booking.getCheckIn().isAfter(today) ? booking.getCheckIn() : today;
+            while (date.isBefore(booking.getCheckOut())) {
+                bookedByRoomAndDate
+                        .computeIfAbsent(booking.getRoomTypeId(), key -> new HashMap<>())
+                        .merge(date, 1L, Long::sum);
+                date = date.plusDays(1);
+            }
+        }
+
+        return roomTypes.stream()
+                .map(roomType -> {
+                    String roomName = getRoomTypeDisplayName(roomType);
+                    List<RoomFullPeriodResponse> periods = buildFullPeriods(
+                            bookedByRoomAndDate.getOrDefault(roomType.getIdRoomType(), new HashMap<>()),
+                            roomType.getRoomAvailable(),
+                            roomName
+                    );
+                    return RoomAvailabilityResponse.builder()
+                            .roomTypeId(roomType.getIdRoomType())
+                            .roomName(roomName)
+                            .periods(periods)
+                            .build();
+                })
+                .filter(roomAvailability -> !roomAvailability.getPeriods().isEmpty())
+                .collect(Collectors.toList());
     }
 
     private Booking getBookingEntityById(int id) {
@@ -394,6 +444,72 @@ public class BookingServiceImpl implements BookingService {
         return body.getData();
     }
 
+    private List<RoomTypeSnapshot> fetchRoomTypesByHotel(int hotelId) {
+        WebResponse<List<RoomTypeSnapshot>> body;
+        try {
+            body = hotelServiceWebClient.get()
+                    .uri("/api/room-types/hotel/{hotelId}", hotelId)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<WebResponse<List<RoomTypeSnapshot>>>() {
+                    })
+                    .block(HOTEL_SERVICE_TIMEOUT);
+        } catch (RuntimeException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.ROOM_TYPE_INVALID_OR_UNAVAILABLE);
+        }
+
+        if (body == null || body.getData() == null) {
+            return new ArrayList<>();
+        }
+
+        return body.getData();
+    }
+
+    private List<RoomFullPeriodResponse> buildFullPeriods(Map<LocalDate, Long> bookedByDate, int roomAvailable, String roomName) {
+        List<LocalDate> fullDates = bookedByDate.entrySet().stream()
+                .filter(entry -> entry.getValue() >= roomAvailable)
+                .map(Map.Entry::getKey)
+                .sorted()
+                .collect(Collectors.toList());
+
+        List<RoomFullPeriodResponse> periods = new ArrayList<>();
+        if (fullDates.isEmpty()) {
+            return periods;
+        }
+
+        LocalDate start = fullDates.get(0);
+        LocalDate end = start;
+        for (int i = 1; i < fullDates.size(); i++) {
+            LocalDate current = fullDates.get(i);
+            if (current.equals(end.plusDays(1))) {
+                end = current;
+            } else {
+                periods.add(buildFullPeriod(roomName, start, end));
+                start = current;
+                end = current;
+            }
+        }
+        periods.add(buildFullPeriod(roomName, start, end));
+
+        return periods;
+    }
+
+    private RoomFullPeriodResponse buildFullPeriod(String roomName, LocalDate start, LocalDate end) {
+        String startDate = start.format(DATE_FORMATTER);
+        String endDate = end.plusDays(1).format(DATE_FORMATTER);
+        return RoomFullPeriodResponse.builder()
+                .startDate(startDate)
+                .endDate(endDate)
+                .message(String.format("Kamar %s sedang penuh pada tanggal %s sampai %s", roomName, startDate, endDate))
+                .build();
+    }
+
+    private String getRoomTypeDisplayName(RoomTypeSnapshot roomType) {
+        if (roomType.getName() != null && !roomType.getName().isBlank()) {
+            return roomType.getName();
+        }
+        return "Tipe Kamar #" + roomType.getIdRoomType();
+    }
+
     private String getHotelName(int hotelId, Map<Integer, String> cache) {
         if (cache.containsKey(hotelId)) {
             return cache.get(hotelId);
@@ -455,7 +571,17 @@ public class BookingServiceImpl implements BookingService {
         );
 
         if (bookedRooms >= roomType.getRoomAvailable()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.ROOM_FULL_ON_DATE);
+            String hotelName = getHotelName(request.getHotelId(), new HashMap<>());
+            String roomTypeName = roomType.getName() != null && !roomType.getName().isBlank()
+                    ? roomType.getName()
+                    : "Tipe Kamar #" + request.getRoomTypeId();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(
+                    Message.ROOM_FULL_ON_DATE,
+                    hotelName,
+                    roomTypeName,
+                    request.getCheckIn().format(DATE_FORMATTER),
+                    request.getCheckOut().format(DATE_FORMATTER)
+            ));
         }
     }
 

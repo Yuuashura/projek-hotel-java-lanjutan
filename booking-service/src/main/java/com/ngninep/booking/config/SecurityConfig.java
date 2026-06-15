@@ -26,6 +26,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/health").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/bookings/uploads/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/bookings/availability/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/bookings/xendit/webhook").permitAll()
                 .requestMatchers("/api/bookings/**").authenticated()
                 .anyRequest().authenticated()
