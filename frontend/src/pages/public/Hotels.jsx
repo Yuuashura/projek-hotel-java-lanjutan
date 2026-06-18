@@ -398,7 +398,7 @@ const PropertyHorizontalCard = ({ hotel, t }) => {
         <img src={getPrimaryImage(hotel)} alt={hotel.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.8s ease' }} />
       </div>
 
-      <div className="hotel-list-card-body" style={{ padding: '0 0 0 1.5rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minWidth: 0 }}>
+       <div className="hotel-list-card-body" style={{ padding: '1rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minWidth: 0 }}>
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--color-primary)', letterSpacing: '1.5px', textTransform: 'uppercase', fontWeight: 400 }}>{hotel.city?.name || t('common.hotel')}</span>
@@ -436,9 +436,9 @@ const PropertyHorizontalCard = ({ hotel, t }) => {
               </div>
             )}
           </div>
-          <Link to={`/hotels/${hotel.id_hotel}`} style={{ fontFamily: 'var(--font-body)', color: 'var(--color-primary)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 400, display: 'flex', alignItems: 'center', gap: '0.25rem', textDecoration: 'none' }}>
-            {t('common.viewDetails')} {'->'}
-          </Link>
+           <Link to={`/hotels/${hotel.id_hotel}`} className="btn btn-primary btn-sm" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
+             {t('common.viewDetails')} {'→'}
+           </Link>
         </div>
       </div>
     </div>

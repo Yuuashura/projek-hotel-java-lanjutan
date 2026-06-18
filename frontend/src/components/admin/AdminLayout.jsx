@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Hotel, Users, Calendar, LogOut, Menu, Globe, Moon, Sun } from 'lucide-react';
+import { LayoutDashboard, Hotel, Users, Calendar, LogOut, Menu, Globe, Moon, Sun, House } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { usePreferences } from '../../context/PreferencesContext';
 import LogoutConfirmModal from '../LogoutConfirmModal';
@@ -141,10 +141,12 @@ const AdminLayout = ({ children }) => {
         boxShadow: sidebarOpen ? 'var(--shadow-hover)' : 'none',
       }} className={`sidebar-fixed ${sidebarOpen ? 'open' : ''}`}>
         {/* Logo */}
-        <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--admin-sidebar-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div className="brand-logo admin-sidebar-brand" style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.4rem', color: '#FFFFFF', fontStyle: 'italic', letterSpacing: '1px' }}>NgiNep.</div>
-          <span className="admin-sidebar-kicker" style={{ color: 'var(--admin-sidebar-muted)', fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Admin</span>
-        </div>
+         <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--admin-sidebar-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+           <Link to="/" style={{ textDecoration: 'none' }}>
+             <div className="brand-logo admin-sidebar-brand" style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.4rem', color: '#FFFFFF', fontStyle: 'italic', letterSpacing: '1px' }}>NgiNep.</div>
+           </Link>
+           <span className="admin-sidebar-kicker" style={{ color: 'var(--admin-sidebar-muted)', fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Admin</span>
+         </div>
 
         {/* User Info */}
         <div className="admin-sidebar-user" style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--admin-sidebar-border)', background: 'var(--admin-sidebar-user-bg)' }}>
@@ -153,18 +155,26 @@ const AdminLayout = ({ children }) => {
           <span className="badge badge-yellow" style={{ fontSize: '0.65rem' }}>{user?.role?.replace('ROLE_', '')}</span>
         </div>
 
-        {/* Nav Links */}
-        <nav style={{ flex: 1, padding: '1rem 0', overflowY: 'auto' }}>
-          {visibleMenu.map(({ path, labelKey, icon: Icon }) => {
-            const active = location.pathname === path;
-            return (
-              <Link key={path} to={path} onClick={() => setSidebarOpen(false)} className={`sidebar-link ${active ? 'active' : ''}`}>
-                <Icon size={16} />
-                {t(labelKey)}
-              </Link>
-            );
-          })}
-        </nav>
+         {/* Nav Links */}
+         <nav style={{ flex: 1, padding: '1rem 0', overflowY: 'auto' }}>
+           {visibleMenu.map(({ path, labelKey, icon: Icon }) => {
+             const active = location.pathname === path;
+             return (
+               <Link key={path} to={path} onClick={() => setSidebarOpen(false)} className={`sidebar-link ${active ? 'active' : ''}`}>
+                 <Icon size={16} />
+                 {t(labelKey)}
+               </Link>
+             );
+           })}
+         </nav>
+         
+         {/* Home Link */}
+         <Link to="/" onClick={() => setSidebarOpen(false)} style={{ display: 'flex', alignItems: 'center', padding: '1rem 1.5rem', textDecoration: 'none', color: 'var(--admin-sidebar-text)', borderTop: '1px solid var(--admin-sidebar-border)' }}>
+           <House size={16} />
+           <span style={{ marginLeft: '0.75rem', fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1.5px' }}>
+             {t('nav.home')}
+           </span>
+         </Link>
 
         {/* Logout */}
         <div style={{ borderTop: '1px solid var(--admin-sidebar-border)', padding: '1rem' }}>
