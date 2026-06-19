@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Hotel, Users, Calendar, LogOut, Menu, Globe, Moon, Sun, House, UserCog } from 'lucide-react';
+import { LayoutDashboard, Hotel, Users, Calendar, LogOut, Menu, Globe, House, UserCog } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { usePreferences } from '../../context/PreferencesContext';
 import LogoutConfirmModal from '../LogoutConfirmModal';
@@ -15,13 +15,12 @@ const adminMenu = [
 
 const AdminLayout = ({ children }) => {
   const { user, logout } = useAuth();
-  const { language, setLanguage, theme, toggleTheme, t } = usePreferences();
+  const { language, setLanguage, t } = usePreferences();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = React.useState(false);
   const [logoutLoading, setLogoutLoading] = React.useState(false);
   const logoutTimerRef = React.useRef(null);
-  const ThemeIcon = theme === 'dark' ? Sun : Moon;
   const visibleMenu = adminMenu.filter(menu => !menu.roles || menu.roles.includes(user?.role));
   const activeMenu = visibleMenu.find(m => m.path === location.pathname);
 
@@ -119,15 +118,6 @@ const AdminLayout = ({ children }) => {
           </button>
         ))}
       </div>
-      <button
-        type="button"
-        onClick={toggleTheme}
-        title="Theme"
-        className="btn btn-white btn-sm navbar-control-button"
-        style={{ height: 38, width: 42, padding: 0 }}
-      >
-        <ThemeIcon key={theme} size={15} className="theme-icon-rotate" />
-      </button>
     </div>
   );
 

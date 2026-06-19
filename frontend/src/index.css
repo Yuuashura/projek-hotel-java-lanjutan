@@ -6,67 +6,6 @@
    ============================================ */
 
 :root {
-  --color-primary: #2563EB;
-  --color-primary-hover: #1D4ED8;
-  --color-primary-soft: rgba(37, 99, 235, 0.11);
-  --color-background: #F7F9FC;
-  --color-surface: rgba(255, 255, 255, 0.76);
-  --color-text: #0F172A;
-  --color-muted: #475569;
-  --color-accent: rgba(148, 163, 184, 0.28);
-  --color-gold: #F59E0B;
-  --color-danger: #C53030;
-  --color-danger-soft: #FFF5F5;
-  --color-danger-border: #FEB2B2;
-  --color-success: #2F855A;
-  --color-success-soft: rgba(72, 187, 120, 0.12);
-  --color-success-border: rgba(72, 187, 120, 0.22);
-  --color-warning: #B7791F;
-  --color-warning-soft: rgba(237, 137, 54, 0.12);
-  --color-warning-border: rgba(237, 137, 54, 0.24);
-  --color-surface-solid: #FFFFFF;
-  --color-surface-glass: rgba(255, 255, 255, 0.68);
-  --glass-bg: rgba(255, 255, 255, 0.68);
-  --glass-bg-strong: rgba(255, 255, 255, 0.84);
-  --glass-border: rgba(148, 163, 184, 0.28);
-  --glass-blur: blur(18px) saturate(150%);
-  --background-luxury:
-    radial-gradient(circle, rgba(44, 82, 130, 0.13) 1px, transparent 1.3px),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0) 50%),
-    linear-gradient(155deg, rgba(37, 99, 235, 0.08) 0%, rgba(37, 99, 235, 0) 52%),
-    linear-gradient(28deg, rgba(14, 165, 233, 0.1) 0%, rgba(14, 165, 233, 0) 38%),
-    repeating-linear-gradient(90deg, rgba(15, 23, 42, 0.028) 0 1px, transparent 1px 126px),
-    repeating-linear-gradient(0deg, rgba(15, 23, 42, 0.022) 0 1px, transparent 1px 126px),
-    var(--color-background);
-  --background-luxury-overlay:
-    linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0) 36%),
-    linear-gradient(90deg, rgba(255,255,255,0.18), rgba(255,255,255,0) 44%);
-  
-  --font-heading: 'Plus Jakarta Sans', sans-serif;
-  --font-body: 'Inter', sans-serif;
-  
-  --radius-sm: 8px;
-  --radius-md: 8px;
-  
-  --shadow-float: 0 18px 44px -28px rgba(15, 23, 42, 0.36);
-  --shadow-hover: 0 24px 60px -30px rgba(15, 23, 42, 0.44);
-  
-  /* Backward compatibility for CSS variables used globally */
-  --neo-yellow: var(--color-primary);
-  --neo-orange: #3182CE;
-  --neo-purple: #1E2D4A;
-  --neo-blue: #2C5282;
-  --neo-green: #319795;
-  --neo-pink: #C53030;
-  --neo-dark: var(--color-text);
-  --neo-light: var(--color-background);
-  --neo-border: 1px solid var(--color-accent);
-  --neo-shadow: var(--shadow-float);
-  --neo-shadow-lg: var(--shadow-hover);
-  --neo-shadow-sm: 0 4px 12px rgba(26, 54, 93, 0.05);
-}
-
-:root[data-theme="dark"] {
   --color-primary: #60A5FA;
   --color-primary-hover: #93C5FD;
   --color-primary-soft: rgba(96, 165, 250, 0.14);
@@ -110,6 +49,26 @@
     linear-gradient(180deg, rgba(5,10,24,0.1), rgba(5,10,24,0) 34%);
   --shadow-float: 0 22px 58px -30px rgba(0, 0, 0, 0.72);
   --shadow-hover: 0 30px 72px -30px rgba(0, 0, 0, 0.82);
+  
+  --font-heading: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  
+  --radius-sm: 8px;
+  --radius-md: 8px;
+  
+  /* Backward compatibility for CSS variables used globally */
+  --neo-yellow: var(--color-primary);
+  --neo-orange: #3182CE;
+  --neo-purple: #1E2D4A;
+  --neo-blue: #2C5282;
+  --neo-green: #319795;
+  --neo-pink: #C53030;
+  --neo-dark: var(--color-text);
+  --neo-light: var(--color-background);
+  --neo-border: 1px solid var(--color-accent);
+  --neo-shadow: var(--shadow-float);
+  --neo-shadow-lg: var(--shadow-hover);
+  --neo-shadow-sm: 0 4px 12px rgba(26, 54, 93, 0.05);
 }
 
 * { 
@@ -173,25 +132,13 @@ body {
   animation: galaxyDrift 28s linear infinite;
 }
 
-:root[data-theme="dark"] #root > div::after {
+#root > div::after {
   opacity: 0.95;
 }
 
 #root > div > * {
   position: relative;
   z-index: 1;
-}
-
-html.theme-transitioning *,
-html.theme-transitioning *::before,
-html.theme-transitioning *::after {
-  transition:
-    background-color 0.35s ease,
-    border-color 0.35s ease,
-    color 0.35s ease,
-    box-shadow 0.35s ease,
-    fill 0.35s ease,
-    stroke 0.35s ease;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -272,9 +219,9 @@ h1, h2, h3, h4, h5, h6 {
 
 .hotel-login-book-btn {
   background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
-  color: #FFFFFF;
+  color: #061426;
   border-color: transparent;
-  box-shadow: 0 14px 28px rgba(44, 82, 130, 0.16);
+  box-shadow: 0 14px 32px rgba(122, 183, 240, 0.2);
 }
 
 .hotel-login-book-btn:hover {
@@ -282,24 +229,12 @@ h1, h2, h3, h4, h5, h6 {
   filter: brightness(1.04);
 }
 
-:root[data-theme="dark"] .hotel-login-book-btn {
-  color: #061426;
-  box-shadow: 0 14px 32px rgba(122, 183, 240, 0.2);
-}
-
 .about-cta-panel {
-  background:
-    radial-gradient(circle at 18% 20%, rgba(246, 211, 101, 0.18), transparent 34%),
-    linear-gradient(135deg, #102A43, #1E3A5F);
-  border: 1px solid rgba(255,255,255,0.12);
-}
-
-:root[data-theme="dark"] .about-cta-panel {
   background:
     radial-gradient(circle at 16% 18%, rgba(122,183,240,0.24) 0 1px, transparent 2px),
     radial-gradient(circle at 78% 32%, rgba(246,211,101,0.18), transparent 30%),
     linear-gradient(135deg, rgba(10, 22, 46, 0.98), rgba(15, 35, 72, 0.95));
-  border-color: rgba(122,183,240,0.24);
+  border: 1px solid rgba(122,183,240,0.24);
 }
 
 /* Fallback button colors to prevent broken links */
@@ -445,22 +380,12 @@ h1, h2, h3, h4, h5, h6 {
    ============================================ */
 :root {
   --admin-sidebar-bg:
-    linear-gradient(180deg, rgba(16, 58, 99, 0.98), rgba(10, 38, 74, 0.98) 48%, rgba(6, 23, 48, 0.99)),
-    radial-gradient(circle at 20% 0%, rgba(122, 183, 240, 0.34), transparent 32%);
-  --admin-sidebar-border: rgba(168, 204, 238, 0.24);
-  --admin-sidebar-text: #F4F8FF;
-  --admin-sidebar-muted: rgba(222, 234, 248, 0.72);
-  --admin-sidebar-hover: rgba(255, 255, 255, 0.11);
-  --admin-sidebar-active: linear-gradient(90deg, rgba(246, 211, 101, 0.24), rgba(122, 183, 240, 0.16));
-  --admin-sidebar-user-bg: rgba(255, 255, 255, 0.08);
-}
-
-:root[data-theme="dark"] {
-  --admin-sidebar-bg:
     linear-gradient(180deg, rgba(8, 19, 49, 0.98), rgba(8, 33, 74, 0.98) 52%, rgba(3, 10, 29, 0.99)),
     radial-gradient(circle at 18% 4%, rgba(122, 183, 240, 0.26), transparent 34%),
     radial-gradient(circle at 86% 22%, rgba(246, 211, 101, 0.14), transparent 28%);
   --admin-sidebar-border: rgba(122, 183, 240, 0.26);
+  --admin-sidebar-text: #F4F8FF;
+  --admin-sidebar-muted: rgba(222, 234, 248, 0.72);
   --admin-sidebar-hover: rgba(122, 183, 240, 0.12);
   --admin-sidebar-active: linear-gradient(90deg, rgba(122, 183, 240, 0.26), rgba(246, 211, 101, 0.14));
   --admin-sidebar-user-bg: rgba(122, 183, 240, 0.08);
@@ -1025,22 +950,12 @@ h1, h2, h3, h4, h5, h6 {
   animation: spin 0.75s linear infinite;
 }
 
-.theme-icon-rotate {
-  animation: logoThemeRotate 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-}
 
 .auth-page {
   min-height: 100vh;
   display: grid;
   place-items: center;
   padding: 5.5rem 1.25rem 2rem;
-  background:
-    linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0) 42%),
-    linear-gradient(160deg, rgba(44,82,130,0.13), rgba(44,82,130,0) 50%),
-    var(--background-luxury);
-}
-
-:root[data-theme="dark"] .auth-page {
   background:
     linear-gradient(135deg, rgba(122,183,240,0.1), rgba(122,183,240,0) 42%),
     linear-gradient(160deg, rgba(246,211,101,0.06), rgba(246,211,101,0) 50%),
@@ -1114,10 +1029,6 @@ h1, h2, h3, h4, h5, h6 {
   padding: 2.35rem;
   background: var(--color-surface);
   border: 1px solid color-mix(in srgb, var(--color-accent) 54%, var(--color-text));
-  box-shadow: 0 24px 70px -32px rgba(26,54,93,0.38);
-}
-
-:root[data-theme="dark"] .auth-card {
   box-shadow: 0 24px 70px -28px rgba(0,0,0,0.78);
 }
 
@@ -2414,11 +2325,6 @@ h1, h2, h3, h4, h5, h6 {
   50% { transform: translateY(-6px); }
 }
 
-@keyframes logoThemeRotate {
-  from { transform: rotate(0deg) scale(1); }
-  50% { transform: rotate(180deg) scale(1.08); }
-  to { transform: rotate(360deg) scale(1); }
-}
 
 @keyframes logoutBackdropIn {
   from { opacity: 0; }
@@ -2551,13 +2457,8 @@ textarea,
 .btn-dark {
   background:
     linear-gradient(135deg, var(--color-primary), var(--color-primary-hover)) !important;
-  color: #FFFFFF;
-  border-color: color-mix(in srgb, var(--color-primary) 46%, transparent);
-}
-
-:root[data-theme="dark"] .btn-primary,
-:root[data-theme="dark"] .btn-dark {
   color: #061426;
+  border-color: color-mix(in srgb, var(--color-primary) 46%, transparent);
 }
 
 .btn-white,
@@ -2587,32 +2488,11 @@ textarea,
 .admin-topbar,
 .logout-modal-card {
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--glass-bg-strong) 72%, transparent), color-mix(in srgb, var(--glass-bg) 92%, transparent)) !important;
+    linear-gradient(180deg, rgba(15, 23, 42, 0.76), rgba(15, 23, 42, 0.58)) !important;
   border-color: var(--glass-border) !important;
   box-shadow: var(--shadow-float);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-}
-
-:root[data-theme="dark"] .card,
-:root[data-theme="dark"] .neo-table,
-:root[data-theme="dark"] .hotel-filter-panel,
-:root[data-theme="dark"] .hotel-results-toolbar,
-:root[data-theme="dark"] .hotel-list-card,
-:root[data-theme="dark"] .hotel-detail-room-card,
-:root[data-theme="dark"] .hotel-detail-reservation,
-:root[data-theme="dark"] .booking-panel,
-:root[data-theme="dark"] .booking-summary-card,
-:root[data-theme="dark"] .booking-history-card,
-:root[data-theme="dark"] .auth-card,
-:root[data-theme="dark"] .payment-panel,
-:root[data-theme="dark"] .payment-summary-card,
-:root[data-theme="dark"] .about-story-card,
-:root[data-theme="dark"] .about-cta-panel,
-:root[data-theme="dark"] .admin-topbar,
-:root[data-theme="dark"] .logout-modal-card {
-  background:
-    linear-gradient(180deg, rgba(15, 23, 42, 0.76), rgba(15, 23, 42, 0.58)) !important;
 }
 
 .card-hover:hover,
@@ -2674,15 +2554,11 @@ textarea.input:focus {
 }
 
 .site-navbar {
-  background: color-mix(in srgb, var(--glass-bg-strong) 80%, transparent) !important;
+  background: rgba(6, 14, 32, 0.72) !important;
   border-bottom-color: var(--glass-border) !important;
   box-shadow: 0 18px 52px -36px rgba(15, 23, 42, 0.5) !important;
   backdrop-filter: var(--glass-blur) !important;
   -webkit-backdrop-filter: var(--glass-blur) !important;
-}
-
-:root[data-theme="dark"] .site-navbar {
-  background: rgba(6, 14, 32, 0.72) !important;
 }
 
 .site-navbar .brand-logo,
@@ -2699,18 +2575,9 @@ textarea.input:focus {
 .site-navbar .btn-white.navbar-control-button,
 .site-navbar .site-navbar-menu-button,
 .site-navbar svg {
-  color: var(--color-text) !important;
+  color: #F8FAFC !important;
   text-shadow: none !important;
   stroke: currentColor;
-}
-
-:root[data-theme="dark"] .site-navbar .brand-logo,
-:root[data-theme="dark"] .site-navbar .nav-link-luxury,
-:root[data-theme="dark"] .site-navbar .mobile-nav-link-luxury,
-:root[data-theme="dark"] .site-navbar .btn-white.navbar-control-button,
-:root[data-theme="dark"] .site-navbar .site-navbar-menu-button,
-:root[data-theme="dark"] .site-navbar svg {
-  color: #F8FAFC !important;
 }
 
 .site-navbar .btn-primary.navbar-control-button {

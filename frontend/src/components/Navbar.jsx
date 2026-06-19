@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { animate, stagger } from 'animejs';
 import { useAuth } from '../context/AuthContext';
 import { usePreferences } from '../context/PreferencesContext';
-import { LogOut, User, Calendar, Menu, X, ChevronDown, Globe, Moon, Sun } from 'lucide-react';
+import { LogOut, User, Calendar, Menu, X, ChevronDown, Globe } from 'lucide-react';
 import LogoutConfirmModal from './LogoutConfirmModal';
 
 const navLinkStyle = {
@@ -38,7 +38,7 @@ const frostedButtonStyle = {
 
 const Navbar = () => {
   const { user, logout } = useAuth();
-  const { language, setLanguage, theme, toggleTheme, t } = usePreferences();
+  const { language, setLanguage, t } = usePreferences();
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
@@ -92,8 +92,6 @@ const Navbar = () => {
   };
 
   const isAdmin = user?.role === 'ROLE_ADMIN_HOTEL' || user?.role === 'ROLE_ADMIN_APP';
-  const nextThemeLabel = theme === 'dark' ? t('nav.light') : t('nav.dark');
-  const ThemeIcon = theme === 'dark' ? Sun : Moon;
 
   const preferenceControls = (
     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -157,15 +155,6 @@ const Navbar = () => {
           </button>
         ))}
       </div>
-      <button
-        type="button"
-        onClick={toggleTheme}
-        title={`${t('nav.theme')}: ${nextThemeLabel}`}
-        className="btn btn-white btn-sm navbar-control-button"
-        style={{ ...frostedButtonStyle, height: 38, width: 42, padding: 0 }}
-      >
-        <ThemeIcon key={theme} size={15} className="theme-icon-rotate" />
-      </button>
     </div>
   );
 
