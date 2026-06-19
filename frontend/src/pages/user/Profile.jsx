@@ -5,6 +5,9 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import { getImageUrl, validateImageFile } from '../../utils/uploads';
 
+const PHONE_PATTERN = /^08\d{0,12}$/;
+const PHONE_ERROR = 'Nomor telepon harus diawali 08 dan maksimal 14 digit';
+
 const Profile = () => {
   const { user, login, token, logout } = useAuth();
   const navigate = useNavigate();
@@ -57,6 +60,10 @@ const Profile = () => {
 
   const handleProfileSave = async (e) => {
     e.preventDefault();
+    if (!PHONE_PATTERN.test(form.phone)) {
+      showMsg('error', PHONE_ERROR);
+      return;
+    }
     setLoading(true);
     try {
       const res = await api.put('/api/users/me', { first_name: form.first_name, last_name: form.last_name, age: parseInt(form.age), city_id: parseInt(form.city_id), phone: form.phone, profile_picture: form.profile_picture });
@@ -214,7 +221,7 @@ const Profile = () => {
                 </div>
                 <div>
                   <label className="label">No. Telepon *</label>
-                  <input type="tel" className="input" style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', background: 'transparent', borderRadius: 0, paddingLeft: 0 }} value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} required />
+                  <input type="tel" inputMode="numeric" maxLength={14} pattern="^08[0-9]{0,12}$" title={PHONE_ERROR} className="input" style={{ border: 'none', borderBottom: '1px solid var(--color-accent)', background: 'transparent', borderRadius: 0, paddingLeft: 0 }} value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value.replace(/\D/g, '').slice(0, 14) }))} required />
                 </div>
                 <div>
                   <label className="label">Foto Profil</label>

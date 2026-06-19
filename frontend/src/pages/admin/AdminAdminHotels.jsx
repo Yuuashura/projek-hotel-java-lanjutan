@@ -9,6 +9,8 @@ import { getErrorMessage, unwrapList } from '../../utils/response';
 import { usePreferences } from '../../context/PreferencesContext';
 
 const PAGE_SIZE = 25;
+const PHONE_PATTERN = /^08\d{0,12}$/;
+const PHONE_ERROR = 'Nomor telepon harus diawali 08 dan maksimal 14 digit';
 
 const EMPTY_ADMIN_FORM = {
   first_name: '',
@@ -100,8 +102,12 @@ const AdminAdminHotels = () => {
 
   const handleCreateAdminHotel = async (event) => {
     event.preventDefault();
-    setAdminSubmitting(true);
     setError('');
+    if (!PHONE_PATTERN.test(adminForm.phone)) {
+      setError(PHONE_ERROR);
+      return;
+    }
+    setAdminSubmitting(true);
     try {
       await api.post('/api/auth/admin-hotels', {
         ...adminForm,
@@ -262,7 +268,7 @@ const AdminAdminHotels = () => {
                 </div>
                 <div>
                   <label className="label">{t('admin.visitors.phone')}</label>
-                  <input className="input" value={adminForm.phone} onChange={e => setAdminForm(f => ({ ...f, phone: e.target.value }))} />
+                  <input className="input" type="tel" inputMode="numeric" maxLength={14} pattern="^08[0-9]{0,12}$" title={PHONE_ERROR} value={adminForm.phone} onChange={e => setAdminForm(f => ({ ...f, phone: e.target.value.replace(/\D/g, '').slice(0, 14) }))} />
                 </div>
               </div>
 

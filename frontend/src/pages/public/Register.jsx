@@ -5,6 +5,9 @@ import api from '../../utils/api';
 import CitySearchSelect from '../../components/CitySearchSelect';
 import { useAuth } from '../../context/AuthContext';
 
+const PHONE_PATTERN = /^08\d{0,12}$/;
+const PHONE_ERROR = 'Nomor telepon harus diawali 08 dan maksimal 14 digit';
+
 const Register = () => {
   const { token, user } = useAuth();
   const navigate = useNavigate();
@@ -32,6 +35,7 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!PHONE_PATTERN.test(form.phone)) return setError(PHONE_ERROR);
     if (form.password !== form.confirmPassword) return setError('Konfirmasi password tidak cocok!');
     setLoading(true);
     setError('');
@@ -148,7 +152,7 @@ const Register = () => {
 
             <div className="auth-field">
               <label className="label">No. Telepon *</label>
-              <input className="input" type="tel" placeholder="08123456789" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} required />
+              <input className="input" type="tel" inputMode="numeric" maxLength={14} pattern="^08[0-9]{0,12}$" title={PHONE_ERROR} placeholder="08123456789" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value.replace(/\D/g, '').slice(0, 14) }))} required />
             </div>
 
             <div className="auth-field">

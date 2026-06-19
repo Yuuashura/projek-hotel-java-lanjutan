@@ -3,6 +3,7 @@ package com.ngninep.user.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -19,6 +20,7 @@ public class CreateAdminHotelRequest {
 
     private int city_id;
 
+    @Pattern(regexp = "^08\\d{0,12}$", message = "Nomor telepon harus diawali 08 dan maksimal 14 digit")
     private String phone;
 
     @NotBlank(message = "Email wajib diisi")
