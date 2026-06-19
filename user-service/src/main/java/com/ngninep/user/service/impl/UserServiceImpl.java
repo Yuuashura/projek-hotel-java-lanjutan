@@ -4,10 +4,12 @@ import com.ngninep.user.dto.ChangePasswordRequest;
 import com.ngninep.user.dto.UpdateProfileRequest;
 import com.ngninep.user.dto.UserProfileResponse;
 import com.ngninep.user.entity.Customer;
+import com.ngninep.user.entity.Role;
 import com.ngninep.user.repository.CustomerRepository;
 import com.ngninep.user.service.FileStorageService;
 import com.ngninep.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -101,6 +103,21 @@ public class UserServiceImpl implements UserService {
         java.util.List<Customer> customers = pageable != null
                 ? customerRepository.findAll(pageable).getContent()
                 : customerRepository.findAll();
+        return customers.stream()
+                .map(this::toProfileResponse)
+                .toList();
+    }
+
+    @Override
+    public java.util.List<UserProfileResponse> getAdminHotels(Integer page, Integer size) {
+        Pageable pageable = toPageable(page, size);
+        java.util.List<Customer> customers;
+        if (pageable != null) {
+            Page<Customer> p = customerRepository.findByRole(Role.ROLE_ADMIN_HOTEL, pageable);
+            customers = p.getContent();
+        } else {
+            customers = customerRepository.findByRole(Role.ROLE_ADMIN_HOTEL);
+        }
         return customers.stream()
                 .map(this::toProfileResponse)
                 .toList();

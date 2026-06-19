@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Pencil, Trash2, X, Check, AlertCircle, Star, MapPin, Bed, ImageIcon, Upload, Download } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Check, AlertCircle, Star, MapPin, Bed, ImageIcon, Upload, Download, UserCog } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatCurrency } from '../../utils/formatters';
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -12,7 +12,7 @@ import { uploadFile, validateImageFile, getImageUrl } from '../../utils/uploads'
 import { usePreferences } from '../../context/PreferencesContext';
 import { useAuth } from '../../context/AuthContext';
 
-const EMPTY_FORM = { name: '', city_id: '', address: '', type: '', description: '', is_featured: false, is_on_sale: false, discount_percent: 0, rating: 0, image_url: '' };
+const EMPTY_FORM = { name: '', city_id: '', address: '', type: '', description: '', is_featured: false, is_on_sale: false, discount_percent: 0, rating: 0, image_url: '', admin_hotel_id: '' };
 const PAGE_SIZE = 25;
 
 const normalizePagination = (pagination, fallbackPage, fallbackCount) => ({
@@ -37,6 +37,7 @@ const AdminHotels = () => {
   const [error, setError] = useState('');
   const [imagesList, setImagesList] = useState([]);
   const [page, setPage] = useState(0);
+  const [adminHotelList, setAdminHotelList] = useState([]);
   const [imageUploading, setImageUploading] = useState(false);
   const [excelUploading, setExcelUploading] = useState(false);
   const [excelDownloading, setExcelDownloading] = useState(false);
@@ -61,7 +62,8 @@ const AdminHotels = () => {
     Promise.all([
       api.get('/api/hotels', { params: hotelParams }),
       api.get('/api/cities'),
-    ]).then(([h, c]) => {
+      !isAdminHotel ? api.get('/api/users/admin-hotels').catch(() => ({ data: { data: [] } })) : Promise.resolve({ data: { data: [] } }),
+    ]).then(([h, c, a]) => {
       const hotelList = unwrapList(h.data);
       const visibleHotels = isAdminHotel
         ? hotelList.filter(hotel => getHotelOwnerId(hotel) === getUserId())
@@ -71,6 +73,7 @@ const AdminHotels = () => {
         ? normalizePagination(null, 0, visibleHotels.length)
         : normalizePagination(h.data?.pagination, page, visibleHotels.length));
       setCities(unwrapList(c.data));
+      setAdminHotelList(unwrapList(a.data));
     }).catch((err) => setError(getErrorMessage(err, t('admin.errors.loadHotels')))).finally(() => setLoading(false));
   };
 
@@ -106,7 +109,8 @@ const AdminHotels = () => {
       is_on_sale: hotel.onSale,
       discount_percent: hotel.discount_percent || 0,
       rating: hotel.rating || 0,
-      image_url: hotelImgs.join('|||')
+      image_url: hotelImgs.join('|||'),
+      admin_hotel_id: hotel.admin_hotel_id ?? hotel.adminHotelId ?? '',
     });
     setModal('edit');
   };
@@ -129,7 +133,8 @@ const AdminHotels = () => {
         onSale: form.is_on_sale,
         discount_percent: parseInt(form.discount_percent || 0),
         rating: parseFloat(form.rating || 0),
-        image_url: imagesList.join('|||')
+        image_url: imagesList.join('|||'),
+        admin_hotel_id: Number(form.admin_hotel_id) || 0
       };
       if (modal === 'create') await api.post('/api/hotels', payload);
       if (modal === 'edit') await api.put(`/api/hotels/${selected.id_hotel}`, payload);
@@ -330,6 +335,15 @@ const AdminHotels = () => {
                 <div><label className="label">Rating (0-5)</label><input type="number" className="input" min={0} max={5} step={0.1} value={form.rating} onChange={e => setForm(f => ({ ...f, rating: e.target.value }))} /></div>
               </div>
               <div><label className="label">{t('admin.rooms.description')}</label><textarea className="input" rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} style={{ resize: 'vertical' }} /></div>
+
+              {!isAdminHotel && (
+                <div><label className="label"><UserCog size={12} style={{ display: 'inline', marginRight: '0.4rem', verticalAlign: 'middle' }} />{t('admin.hotels.adminHotel')}</label>
+                  <select className="input" value={form.admin_hotel_id} onChange={e => setForm(f => ({ ...f, admin_hotel_id: e.target.value }))}>
+                    <option value="">{t('admin.hotels.chooseAdminHotel')}</option>
+                    {adminHotelList.map(ah => <option key={ah.id_customer || ah.id} value={ah.id_customer || ah.id}>{ah.first_name} {ah.last_name} ({ah.email})</option>)}
+                  </select>
+                </div>
+              )}
               
               {/* Multiple Images Upload Section */}
               <div>

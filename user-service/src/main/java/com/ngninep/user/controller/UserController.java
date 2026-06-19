@@ -69,6 +69,15 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllUsers(page, size));
     }
 
+    // GET /api/users/admin-hotels — Lihat semua admin hotel (Admin App)
+    @GetMapping("/admin-hotels")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN_APP')")
+    public ResponseEntity<java.util.List<UserProfileResponse>> getAdminHotels(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
+        return ResponseEntity.ok(userService.getAdminHotels(page, size));
+    }
+
     // PATCH /api/users/{id}/ban
     @PatchMapping("/{id}/ban")
     @PreAuthorize("hasAuthority('ROLE_ADMIN_APP')")

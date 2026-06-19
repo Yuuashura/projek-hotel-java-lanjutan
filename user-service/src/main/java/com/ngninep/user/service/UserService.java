@@ -11,6 +11,7 @@ public interface UserService {
     UserProfileResponse updateProfile(String email, UpdateProfileRequest request);
     String changePassword(String email, ChangePasswordRequest request);
     List<UserProfileResponse> getAllUsers(Integer page, Integer size);
+    List<UserProfileResponse> getAdminHotels(Integer page, Integer size);
     UserProfileResponse updateProfilePicture(String email, MultipartFile file);
     String banUser(int userId);
     String unbanUser(int userId);

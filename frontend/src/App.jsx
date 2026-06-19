@@ -30,6 +30,7 @@ import Profile from './pages/user/Profile';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminHotels from './pages/admin/AdminHotels';
 import AdminVisitors from './pages/admin/AdminVisitors';
+import AdminAdminHotels from './pages/admin/AdminAdminHotels';
 import AdminBookings from './pages/admin/AdminBookings';
 import AdminRoomTypes from './pages/admin/AdminRoomTypes';
 
@@ -106,6 +107,7 @@ function AppRoutes() {
       <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
       <Route path="/admin/hotels" element={<AdminRoute><AdminHotels /></AdminRoute>} />
       <Route path="/admin/hotels/:hotelId/rooms" element={<AdminRoute><AdminRoomTypes /></AdminRoute>} />
+      <Route path="/admin/admin-hotels" element={<AdminAppRoute><AdminAdminHotels /></AdminAppRoute>} />
       <Route path="/admin/visitors" element={<AdminAppRoute><AdminVisitors /></AdminAppRoute>} />
       <Route path="/admin/bookings" element={<AdminRoute><AdminBookings /></AdminRoute>} />
 

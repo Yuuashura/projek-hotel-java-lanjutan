@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Shield, ShieldOff, AlertCircle, Plus, X } from 'lucide-react';
+import { Search, Shield, ShieldOff, AlertCircle } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import PaginationControls from '../../components/admin/PaginationControls';
 import LoadingState from '../../components/LoadingState';
@@ -9,16 +9,6 @@ import { getErrorMessage, unwrapList } from '../../utils/response';
 import { usePreferences } from '../../context/PreferencesContext';
 
 const PAGE_SIZE = 25;
-
-const EMPTY_ADMIN_FORM = {
-  first_name: '',
-  last_name: '',
-  age: '',
-  city_id: '',
-  phone: '',
-  email: '',
-  password: '',
-};
 
 const AdminVisitors = () => {
   const { t } = usePreferences();
@@ -30,9 +20,6 @@ const AdminVisitors = () => {
   const [actionLoading, setActionLoading] = useState(null);
   const [error, setError] = useState('');
   const [page, setPage] = useState(0);
-  const [adminModalOpen, setAdminModalOpen] = useState(false);
-  const [adminForm, setAdminForm] = useState(EMPTY_ADMIN_FORM);
-  const [adminSubmitting, setAdminSubmitting] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -73,36 +60,6 @@ const AdminVisitors = () => {
     } finally { setActionLoading(null); }
   };
 
-  const openAdminModal = () => {
-    setAdminForm(EMPTY_ADMIN_FORM);
-    setError('');
-    setAdminModalOpen(true);
-  };
-
-  const closeAdminModal = () => {
-    if (adminSubmitting) return;
-    setAdminModalOpen(false);
-  };
-
-  const handleCreateAdminHotel = async (event) => {
-    event.preventDefault();
-    setAdminSubmitting(true);
-    setError('');
-    try {
-      await api.post('/api/auth/admin-hotels', {
-        ...adminForm,
-        age: Number(adminForm.age),
-        city_id: Number(adminForm.city_id || 0),
-      });
-      setAdminModalOpen(false);
-      setAdminForm(EMPTY_ADMIN_FORM);
-    } catch (err) {
-      setError(getErrorMessage(err, t('admin.errors.createAdminHotelFailed')));
-    } finally {
-      setAdminSubmitting(false);
-    }
-  };
-
   return (
     <AdminLayout>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
@@ -111,9 +68,6 @@ const AdminVisitors = () => {
           <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', margin: '0.25rem 0 0' }}>{t('admin.visitors.count', { count: filtered.length })}</p>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          <button className="btn btn-primary btn-sm" onClick={openAdminModal}>
-            <Plus size={14} /> {t('admin.visitors.addAdminHotel')}
-          </button>
           <div style={{ position: 'relative', maxWidth: 300, width: '100%' }}>
             <Search size={14} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-muted)' }} />
             <input className="input" placeholder={t('admin.visitors.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: '2.25rem', height: '2.25rem' }} />
@@ -185,69 +139,6 @@ const AdminVisitors = () => {
             pageSize={PAGE_SIZE}
             onPageChange={setPage}
           />
-        </div>
-      )}
-
-      {adminModalOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(26,54,93,0.3)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1rem' }} onClick={closeAdminModal}>
-          <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-accent)', borderRadius: 'var(--radius-sm)', padding: '2rem', width: '100%', maxWidth: 560, maxHeight: '90vh', overflowY: 'auto', boxShadow: 'var(--shadow-hover)' }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <div>
-                <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, textTransform: 'uppercase', letterSpacing: '1px', margin: 0, color: 'var(--color-text)' }}>{t('admin.visitors.createAdminHotelTitle')}</h3>
-                <p style={{ margin: '0.25rem 0 0', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem' }}>{t('admin.visitors.createAdminHotelSubtitle')}</p>
-              </div>
-              <button className="btn btn-white btn-sm" type="button" onClick={closeAdminModal} disabled={adminSubmitting} style={{ padding: '0.5rem' }}>
-                <X size={16} />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateAdminHotel} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label className="label">{t('admin.visitors.firstName')}</label>
-                  <input className="input" value={adminForm.first_name} onChange={e => setAdminForm(f => ({ ...f, first_name: e.target.value }))} required />
-                </div>
-                <div>
-                  <label className="label">{t('admin.visitors.lastName')}</label>
-                  <input className="input" value={adminForm.last_name} onChange={e => setAdminForm(f => ({ ...f, last_name: e.target.value }))} />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label className="label">{t('admin.visitors.email')}</label>
-                  <input type="email" className="input" value={adminForm.email} onChange={e => setAdminForm(f => ({ ...f, email: e.target.value }))} required />
-                </div>
-                <div>
-                  <label className="label">{t('admin.visitors.password')}</label>
-                  <input type="password" className="input" minLength={6} value={adminForm.password} onChange={e => setAdminForm(f => ({ ...f, password: e.target.value }))} required />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label className="label">{t('admin.visitors.age')}</label>
-                  <input type="number" min="1" className="input" value={adminForm.age} onChange={e => setAdminForm(f => ({ ...f, age: e.target.value }))} required />
-                </div>
-                <div>
-                  <label className="label">{t('admin.visitors.city')}</label>
-                  <select className="input" value={adminForm.city_id} onChange={e => setAdminForm(f => ({ ...f, city_id: e.target.value }))}>
-                    <option value="">{t('admin.visitors.chooseCity')}</option>
-                    {cities.map(city => <option key={city.id_city} value={city.id_city}>{city.name}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="label">{t('admin.visitors.phone')}</label>
-                  <input className="input" value={adminForm.phone} onChange={e => setAdminForm(f => ({ ...f, phone: e.target.value }))} />
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
-                <button type="button" onClick={closeAdminModal} className="btn btn-white btn-sm" disabled={adminSubmitting}>{t('admin.actions.cancel')}</button>
-                <button type="submit" className="btn btn-primary btn-sm" disabled={adminSubmitting}>{adminSubmitting ? t('admin.actions.saving') : t('admin.visitors.saveAdminHotel')}</button>
-              </div>
-            </form>
-          </div>
         </div>
       )}
     </AdminLayout>

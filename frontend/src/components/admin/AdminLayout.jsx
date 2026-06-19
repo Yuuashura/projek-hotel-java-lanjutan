@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Hotel, Users, Calendar, LogOut, Menu, Globe, Moon, Sun, House } from 'lucide-react';
+import { LayoutDashboard, Hotel, Users, Calendar, LogOut, Menu, Globe, Moon, Sun, House, UserCog } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { usePreferences } from '../../context/PreferencesContext';
 import LogoutConfirmModal from '../LogoutConfirmModal';
@@ -8,6 +8,7 @@ import LogoutConfirmModal from '../LogoutConfirmModal';
 const adminMenu = [
   { path: '/admin/dashboard', labelKey: 'admin.menu.dashboard', icon: LayoutDashboard },
   { path: '/admin/hotels', labelKey: 'admin.menu.hotels', icon: Hotel },
+  { path: '/admin/admin-hotels', labelKey: 'admin.menu.adminHotels', icon: UserCog, roles: ['ROLE_ADMIN_APP'] },
   { path: '/admin/visitors', labelKey: 'admin.menu.visitors', icon: Users, roles: ['ROLE_ADMIN_APP'] },
   { path: '/admin/bookings', labelKey: 'admin.menu.bookings', icon: Calendar },
 ];
