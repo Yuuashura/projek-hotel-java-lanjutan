@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Hotel, Calendar, TrendingUp, CheckCircle, Clock, XCircle, Upload, AlertCircle, MapPin, UserPlus, DollarSign, Layout } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Hotel, Calendar, TrendingUp, CheckCircle, Clock, XCircle, Upload, AlertCircle, MapPin, UserPlus, DollarSign, Layout, Star } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 import AdminLayout from '../../components/admin/AdminLayout';
 import LoadingState from '../../components/LoadingState';
 import api from '../../utils/api';
+import { getImageUrl } from '../../utils/uploads';
 import { unwrapList } from '../../utils/response';
 import { usePreferences } from '../../context/PreferencesContext';
 import { useAuth } from '../../context/AuthContext';
@@ -136,124 +138,127 @@ const AdminDashboard = () => {
            </div>
 
            {error && (
-             <div className="alert-danger" style={{ borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-               <AlertCircle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
-               <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.85rem' }}>{error}</span>
-             </div>
-           )}
+              <div className="alert-danger" style={{ borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <AlertCircle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
+                <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.85rem' }}>{error}</span>
+              </div>
+            )}
 
-           {/* Hotel Cards Grid */}
-           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-              {loading ? (
-                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-muted)' }}>
-                  Loading hotel data...
-                </div>
-              ) : hotelList.length === 0 ? (
+            {/* Summary Stats */}
+            {!loading && stats.hotelList.length > 0 && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+                <StatCard label={t('admin.dashboard.totalHotels')} value={stats.hotels} icon={Hotel} />
+                <StatCard label={t('admin.dashboard.totalBookings')} value={stats.bookings.length} icon={Calendar} />
+                <StatCard label={t('admin.dashboard.totalRevenue')} value={formatCurrency(stats.totalRevenue)} icon={TrendingUp} sub={t('admin.dashboard.revenueSub')} />
+              </div>
+            )}
+
+            {/* Hotel Cards Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
+               {loading ? (
+                 <LoadingState text={t('admin.dashboard.loading')} compact />
+               ) : stats.hotelList.length === 0 ? (
                <div style={{ textAlign: 'center', color: 'var(--color-muted)', padding: '3rem 0', fontWeight: 300, fontSize: '1.1rem' }}>
                  {t('admin.hotel.nohotels')}
                </div>
              ) : (
-               hotelList.map(hotel => (
-                 <div key={hotel.id_hotel ?? hotel.idHotel} className="card" style={{ padding: '1.5rem', border: '1px solid var(--color-accent)' }}>
-                   {/* Hotel Info Header */}
-                   <div style={{ display: 'flex', alignItems: 'start', gap: '1.5rem', marginBottom: '1rem' }}>
+                stats.hotelList.map(hotel => {
+                  const hotelBookings = stats.bookings.filter(b => b.hotel_id === (hotel.id_hotel ?? hotel.idHotel));
+                  const confirmedBookings = hotelBookings.filter(b => b.status === 'CONFIRMED' || b.status === 'COMPLETED');
+                  return (
+                   <div key={hotel.id_hotel ?? hotel.idHotel} className="card" style={{ padding: 0, border: '1px solid var(--color-accent)', overflow: 'hidden', transition: 'box-shadow 0.2s', cursor: 'default' }} onMouseEnter={e => { e.currentTarget.style.boxShadow = 'var(--shadow-hover)' }} onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none' }}>
                      {/* Hotel Image */}
-                     <div style={{ width: 80, height: 60, borderRadius: '8px', overflow: 'hidden', background: 'var(--color-surface)' }}>
-                       {hotel.image_url ? (
-                         <img src={hotel.image_url} alt={hotel.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                     <div style={{ width: '100%', height: 160, overflow: 'hidden', background: 'var(--color-surface)', position: 'relative' }}>
+                       {hotel.images?.[0]?.image_url || hotel.image_url ? (
+                         <img src={getImageUrl(hotel.images?.[0]?.image_url || hotel.image_url)} alt={hotel.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                        ) : (
-                         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-muted)', fontSize: '0.75rem' }}>
-                           {t('admin.hotel.noimage')}
+                         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-muted)', fontSize: '0.85rem', background: 'var(--color-background)' }}>
+                           <Hotel size={32} style={{ opacity: 0.3 }} />
+                         </div>
+                       )}
+                       {hotel.type && <span className="badge badge-gray" style={{ position: 'absolute', top: '0.75rem', left: '0.75rem', fontSize: '0.65rem', fontWeight: 400 }}>{hotel.type}</span>}
+                       {hotel.rating > 0 && (
+                         <div style={{ position: 'absolute', top: '0.75rem', right: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'rgba(0,0,0,0.5)', padding: '0.2rem 0.5rem', borderRadius: 'var(--radius-sm)', fontSize: '0.75rem', color: 'white' }}>
+                           <Star size={12} fill="var(--color-primary)" style={{ stroke: 'var(--color-primary)' }} />
+                           {hotel.rating.toFixed(1)}
                          </div>
                        )}
                      </div>
-                     {/* Hotel Details */}
-                     <div style={{ flex: 1 }}>
-                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
-                         <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.25rem', margin: 0, color: 'var(--color-text)' }}>
+
+                     {/* Hotel Info */}
+                     <div style={{ padding: '1.25rem' }}>
+                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.75rem' }}>
+                         <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.2rem', margin: 0, color: 'var(--color-text)' }}>
                            {hotel.name}
                          </h3>
-                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
-                           <MapPin size={14} style={{ color: 'var(--color-primary)' }} />
-                           <span>{hotel.city ?? t('admin.hotel.unknowncity')}</span>
+                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: 'var(--color-primary)', whiteSpace: 'nowrap', marginLeft: '0.5rem' }}>
+                           <MapPin size={12} style={{ flexShrink: 0 }} />
+                           <span>{hotel.city?.name ?? t('admin.hotel.unknowncity')}</span>
                          </div>
                        </div>
-                       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.85rem', color: 'var(--color-muted)' }}>
-                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.8rem', color: 'var(--color-muted)', marginBottom: '1rem' }}>
+                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                            <UserPlus size={12} style={{ color: 'var(--color-success)' }} />
                            <span>{hotel.room_types?.length || 0} {t('admin.hotel.roomtypes')}</span>
                          </div>
-                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                            <DollarSign size={12} style={{ color: 'var(--color-warning)' }} />
-                           <span>{t('admin.hotel.avgprice')}: {formatCurrency(hotel.price_per_night ?? 0)}/malam</span>
+                           <span>{t('admin.hotel.avgprice')}: {formatCurrency(hotel.price_per_night ?? 0)}</span>
                          </div>
                        </div>
-                     </div>
-                   </div>
 
-                   {/* Hotel Stats */}
-                   <div style={{ marginBottom: '1.5rem' }}>
-                     {/* Get bookings for this specific hotel */}
-                     {(() => {
-                       const hotelBookings = stats.bookings.filter(b => b.hotel_id === (hotel.id_hotel ?? hotel.idHotel));
-                       const confirmedBookings = hotelBookings.filter(b => b.status === 'CONFIRMED' || b.status === 'COMPLETED');
-                       const totalRevenue = confirmedBookings.reduce((sum, b) => sum + (b.total_price || 0), 0);
-                       return {
-                         total: hotelBookings.length,
-                         pending: hotelBookings.filter(b => b.status === 'PENDING').length,
-                         confirmed: confirmedBookings.length,
-                         cancelled: hotelBookings.filter(b => b.status === 'CANCELLED').length,
-                         revenue: totalRevenue
-                       };
-                     })()}
-                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '1rem' }}>
-                       <div style={{ textAlign: 'center' }}>
-                         <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.5rem', color: 'var(--color-text)' }}>
-                           {stats.hotels > 1 ? hotelBookings.length : stats.bookings.length}
-                         </div>
-                         <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', textTransform: 'uppercase' }}>{t('admin.hotel.totalbookings')}</div>
-                       </div>
-                       <div style={{ textAlign: 'center' }}>
-                         <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.5rem', color: 'var(--color-warning)' }}>
-                           {hotelBookings.filter(b => b.status === 'PENDING').length}
-                         </div>
-                         <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', textTransform: 'uppercase' }}>{t('admin.hotel.pending')}</div>
-                       </div>
-                       <div style={{ textAlign: 'center' }}>
-                         <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.5rem', color: 'var(--color-success)' }}>
-                           {hotelBookings.filter(b => b.status === 'CONFIRMED').length}
-                         </div>
-                         <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', textTransform: 'uppercase' }}>{t('admin.hotel.confirmed')}</div>
-                       </div>
-                       <div style={{ textAlign: 'center' }}>
-                         <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.5rem', color: 'var(--color-danger)' }}>
-                           {hotelBookings.filter(b => b.status === 'CANCELLED').length}
-                         </div>
-                         <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', textTransform: 'uppercase' }}>{t('admin.hotel.cancelled')}</div>
-                       </div>
-                       <div style={{ textAlign: 'center' }}>
-                         <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.5rem', color: 'var(--color-primary)' }}>
-                           {formatCurrency(hotelBookings.reduce((sum, b) => sum + (b.total_price || 0), 0))}
-                         </div>
-                         <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', textTransform: 'uppercase' }}>{t('admin.hotel.revenue')}</div>
-                       </div>
-                     </div>
-                   </div>
+                    {/* Hotel Stats */}
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '1rem' }}>
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.5rem', color: 'var(--color-text)' }}>
+                            {stats.hotels > 1 ? hotelBookings.length : stats.bookings.length}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', textTransform: 'uppercase' }}>{t('admin.hotel.totalbookings')}</div>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.5rem', color: 'var(--color-warning)' }}>
+                            {hotelBookings.filter(b => b.status === 'PENDING').length}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', textTransform: 'uppercase' }}>{t('admin.hotel.pending')}</div>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.5rem', color: 'var(--color-success)' }}>
+                            {hotelBookings.filter(b => b.status === 'CONFIRMED').length}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', textTransform: 'uppercase' }}>{t('admin.hotel.confirmed')}</div>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.5rem', color: 'var(--color-danger)' }}>
+                            {hotelBookings.filter(b => b.status === 'CANCELLED').length}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', textTransform: 'uppercase' }}>{t('admin.hotel.cancelled')}</div>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 400, fontSize: '1.5rem', color: 'var(--color-primary)' }}>
+                            {formatCurrency(hotelBookings.reduce((sum, b) => sum + (b.total_price || 0), 0))}
+                          </div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)', textTransform: 'uppercase' }}>{t('admin.hotel.revenue')}</div>
+                        </div>
+                      </div>
+                    </div>
 
-                   {/* Quick Actions */}
-                   <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                     <Link to={`/admin/hotels/${hotel.id_hotel ?? hotel.idHotel}/rooms`} onClick={() => setSidebarOpen(false)} className="btn btn-outline btn-sm" style={{ flex: 1, minWidth: 80 }}>
-                       <Layout size={14} /> {t('admin.hotel.managerooms')}
-                     </Link>
-                     <Link to={`/admin/bookings?hotel_id=${hotel.id_hotel ?? hotel.idHotel}`} onClick={() => setSidebarOpen(false)} className="btn btn-outline btn-sm" style={{ flex: 1, minWidth: 80 }}>
-                       <Calendar size={14} /> {t('admin.hotel.viewbookings')}
-                     </Link>
-                     <Link to={`/admin/hotels/${hotel.id_hotel ?? hotel.idHotel}`} onClick={() => setSidebarOpen(false)} className="btn btn-outline btn-sm" style={{ flex: 1, minWidth: 80 }}>
-                       <Hotel size={14} /> {t('admin.hotel.edithotel')}
-                     </Link>
-                   </div>
-                 </div>
-               ))
+                    {/* Quick Actions */}
+                    <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                       <Link to={`/admin/hotels/${hotel.id_hotel ?? hotel.idHotel}/rooms`} className="btn btn-outline btn-sm" style={{ flex: 1, minWidth: 80 }}>
+                         <Layout size={14} /> {t('admin.hotel.managerooms')}
+                       </Link>
+                       <Link to={`/admin/bookings?hotel_id=${hotel.id_hotel ?? hotel.idHotel}`} className="btn btn-outline btn-sm" style={{ flex: 1, minWidth: 80 }}>
+                         <Calendar size={14} /> {t('admin.hotel.viewbookings')}
+                       </Link>
+                       <Link to={`/admin/hotels/${hotel.id_hotel ?? hotel.idHotel}`} className="btn btn-outline btn-sm" style={{ flex: 1, minWidth: 80 }}>
+                         <Hotel size={14} /> {t('admin.hotel.edithotel')}
+                       </Link>
+                     </div>
+                    </div>
+                  </div>
+                    );
+                  })
              )}
            </div>
          </div>

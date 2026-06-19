@@ -35,6 +35,7 @@ public class SecurityConfig {
                 // Endpoint publik — tidak butuh token
                 .requestMatchers("/", "/health").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/users/uploads/**").permitAll()
                 // Endpoint user — butuh login
                 .requestMatchers("/api/users/**").authenticated()
