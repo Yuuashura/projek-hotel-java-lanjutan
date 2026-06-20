@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Search, Shield, ShieldOff, AlertCircle } from 'lucide-react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import PaginationControls from '../../components/admin/PaginationControls';
@@ -7,13 +7,13 @@ import api from '../../utils/api';
 import { getImageUrl } from '../../utils/uploads';
 import { getErrorMessage, unwrapList } from '../../utils/response';
 import { usePreferences } from '../../context/PreferencesContext';
+import { cn } from '../../lib/utils';
 
 const PAGE_SIZE = 25;
 
 const AdminVisitors = () => {
   const { t } = usePreferences();
   const [users, setUsers] = useState([]);
-  const [filtered, setFiltered] = useState([]);
   const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -25,24 +25,26 @@ const AdminVisitors = () => {
     setLoading(true);
     setError('');
     Promise.all([
-      api.get('/api/users'),
-      api.get('/api/cities').catch(() => ({ data: { data: [] } })) // Fallback if cities fail
+    api.get('/api/users'),
+    api.get('/api/cities').catch(() => ({ data: { data: [] } })) // Fallback if cities fail
     ]).then(([resUsers, resCities]) => {
-      const data = unwrapList(resUsers.data).filter(u => u.role === 'ROLE_USER');
+      const data = unwrapList(resUsers.data).filter((u) => u.role === 'ROLE_USER');
       setUsers(data);
-      setFiltered(data);
       setCities(unwrapList(resCities.data));
     }).catch((err) => setError(getErrorMessage(err, t('admin.errors.loadVisitors')))).finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, []);
-
   useEffect(() => {
-    const q = search.toLowerCase();
-    setFiltered(users.filter(u => u.email?.toLowerCase().includes(q) || u.first_name?.toLowerCase().includes(q) || u.last_name?.toLowerCase().includes(q) || u.phone?.includes(q)));
-  }, [search, users]);
+    const timer = window.setTimeout(load, 0);
+    return () => window.clearTimeout(timer);
+    // Initial admin data load.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  useEffect(() => { setPage(0); }, [search]);
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return users.filter((u) => u.email?.toLowerCase().includes(q) || u.first_name?.toLowerCase().includes(q) || u.last_name?.toLowerCase().includes(q) || u.phone?.includes(q));
+  }, [search, users]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages - 1);
@@ -57,92 +59,91 @@ const AdminVisitors = () => {
       load();
     } catch (err) {
       setError(err.response?.data?.message || t('admin.errors.updateUserStatusFailed'));
-    } finally { setActionLoading(null); }
+    } finally {setActionLoading(null);}
   };
 
   return (
     <AdminLayout>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="[display:flex] [justify-content:space-between] [align-items:center] [margin-bottom:2rem] [flex-wrap:wrap] [gap:1rem]">
         <div>
-          <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.75rem', textTransform: 'uppercase', letterSpacing: '1px', margin: 0, color: 'var(--color-text)' }}>{t('admin.visitors.title')}</h2>
-          <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', margin: '0.25rem 0 0' }}>{t('admin.visitors.count', { count: filtered.length })}</p>
+          <h2 className="[font-family:var(--font-heading)] [font-weight:300] [font-size:1.75rem] [text-transform:uppercase] [letter-spacing:1px] [margin:0] [color:var(--color-text)]">{t('admin.visitors.title')}</h2>
+          <p className="[color:var(--color-muted)] [font-weight:300] [font-size:0.85rem] [margin:0.25rem_0_0]">{t('admin.visitors.count', { count: filtered.length })}</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          <div style={{ position: 'relative', maxWidth: 300, width: '100%' }}>
-            <Search size={14} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-muted)' }} />
-            <input className="input" placeholder={t('admin.visitors.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: '2.25rem', height: '2.25rem' }} />
+        <div className="[display:flex] [gap:0.75rem] [align-items:center] [flex-wrap:wrap] [justify-content:flex-end]">
+          <div className="[position:relative] [max-width:300px] [width:100%]">
+            <Search size={14} className="[position:absolute] [left:0.75rem] [top:50%] [transform:translateY(-50%)] [color:var(--color-muted)]" />
+            <input className="input [padding-left:2.25rem] [height:2.25rem]" placeholder={t('admin.visitors.searchPlaceholder')} value={search} onChange={(e) => { setSearch(e.target.value); setPage(0); }} />
           </div>
         </div>
       </div>
 
-      {error && (
-        <div className="alert-danger" style={{ borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <AlertCircle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
-          <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.85rem' }}>{error}</span>
+      {error &&
+      <div className="alert-danger [border-radius:var(--radius-sm)] [padding:0.75rem_1rem] [margin-bottom:1.25rem] [display:flex] [gap:0.5rem] [align-items:center]">
+          <AlertCircle size={16} className="[color:var(--color-danger)] [flex-shrink:0]" />
+          <span className="[font-weight:300] [color:var(--color-danger)] [font-size:0.85rem]">{error}</span>
         </div>
-      )}
+      }
 
-      {loading ? (
-        <LoadingState text={t('admin.visitors.loading')} compact />
-      ) : (
-        <div style={{ overflowX: 'auto' }}>
+      {loading ?
+      <LoadingState text={t('admin.visitors.loading')} compact /> :
+
+      <div className="[overflow-x:auto]">
           <table className="neo-table">
             <thead>
-              <tr>{[t('admin.table.number'), t('admin.table.name'), t('admin.table.email'), t('admin.table.phone'), t('admin.table.city'), t('admin.table.status'), t('admin.table.actions')].map(h => <th key={h}>{h}</th>)}</tr>
+              <tr>{[t('admin.table.number'), t('admin.table.name'), t('admin.table.email'), t('admin.table.phone'), t('admin.table.city'), t('admin.table.status'), t('admin.table.actions')].map((h) => <th key={h}>{h}</th>)}</tr>
             </thead>
             <tbody>
-              {paginated.map(u => (
-                <tr key={u.id_customer || u.id}>
-                  <td style={{ fontWeight: 400, color: 'var(--color-muted)', fontSize: '0.85rem' }}>#{u.id_customer || u.id}</td>
+              {paginated.map((u) =>
+            <tr key={u.id_customer || u.id}>
+                  <td className="[font-weight:400] [color:var(--color-muted)] [font-size:0.85rem]">#{u.id_customer || u.id}</td>
                   <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <div style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--color-accent)', background: 'var(--color-background)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden', fontWeight: 300, fontSize: '0.9rem', color: 'var(--color-text)' }}>
-                        {u.profile_picture ? <img src={getImageUrl(u.profile_picture)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (u.first_name?.[0] || '?')}
+                    <div className="[display:flex] [align-items:center] [gap:0.75rem]">
+                      <div className="[width:36px] [height:36px] [border-radius:50%] [border:1px_solid_var(--color-accent)] [background:var(--color-background)] [display:flex] [align-items:center] [justify-content:center] [flex-shrink:0] [overflow:hidden] [font-weight:300] [font-size:0.9rem] [color:var(--color-text)]">
+                        {u.profile_picture ? <img src={getImageUrl(u.profile_picture)} alt="" className="[width:100%] [height:100%] [object-fit:cover]" /> : u.first_name?.[0] || '?'}
                       </div>
                       <div>
-                        <div style={{ fontWeight: 400, fontSize: '0.9rem', color: 'var(--color-text)' }}>{u.first_name} {u.last_name}</div>
-                        <div style={{ fontSize: '0.75rem', fontWeight: 300, color: 'var(--color-muted)', marginTop: '0.1rem' }}>{t('admin.visitors.age')}: {u.age || '-'}</div>
+                        <div className="[font-weight:400] [font-size:0.9rem] [color:var(--color-text)]">{u.first_name} {u.last_name}</div>
+                        <div className="[font-size:0.75rem] [font-weight:300] [color:var(--color-muted)] [margin-top:0.1rem]">{t('admin.visitors.age')}: {u.age || '-'}</div>
                       </div>
                     </div>
                   </td>
-                  <td style={{ fontSize: '0.875rem', color: 'var(--color-text)', fontWeight: 300 }}>{u.email}</td>
-                  <td style={{ fontSize: '0.875rem', color: 'var(--color-text)', fontWeight: 300 }}>{u.phone || '-'}</td>
-                  <td><span className="badge badge-gray">{cities.find(c => c.id_city === u.city_id)?.name || '-'}</span></td>
+                  <td className="[font-size:0.875rem] [color:var(--color-text)] [font-weight:300]">{u.email}</td>
+                  <td className="[font-size:0.875rem] [color:var(--color-text)] [font-weight:300]">{u.phone || '-'}</td>
+                  <td><span className="badge badge-gray">{cities.find((c) => c.id_city === u.city_id)?.name || '-'}</span></td>
                   <td>
-                    {u.is_banned ? (
-                      <span className="badge badge-red">{t('admin.visitors.banned')}</span>
-                    ) : u.is_verified ? (
-                      <span className="badge badge-green">{t('admin.visitors.active')}</span>
-                    ) : (
-                      <span className="badge badge-orange">{t('admin.visitors.unverified')}</span>
-                    )}
+                    {u.is_banned ?
+                <span className="badge badge-red">{t('admin.visitors.banned')}</span> :
+                u.is_verified ?
+                <span className="badge badge-green">{t('admin.visitors.active')}</span> :
+
+                <span className="badge badge-orange">{t('admin.visitors.unverified')}</span>
+                }
                   </td>
                   <td>
                     <button
-                      onClick={() => handleToggleBan(u.id_customer || u.id, u.is_banned)}
-                      disabled={actionLoading === (u.id_customer || u.id)}
-                      className="btn btn-white btn-sm"
-                      style={{ padding: '0.4rem 0.8rem', color: u.is_banned ? 'var(--color-success)' : 'var(--color-danger)' }}
-                    >
-                      {actionLoading === (u.id_customer || u.id) ? '...' : u.is_banned ? <><ShieldOff size={12} style={{ marginRight: '0.25rem' }} /> Unban</> : <><Shield size={12} style={{ marginRight: '0.25rem' }} /> Ban</>}
+                  onClick={() => handleToggleBan(u.id_customer || u.id, u.is_banned)}
+                  disabled={actionLoading === (u.id_customer || u.id)}
+                  className={cn('btn btn-white btn-sm px-3 py-1.5', u.is_banned ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]')}>
+
+                      {actionLoading === (u.id_customer || u.id) ? '...' : u.is_banned ? <><ShieldOff size={12} className="[margin-right:0.25rem]" /> Unban</> : <><Shield size={12} className="[margin-right:0.25rem]" /> Ban</>}
                     </button>
                   </td>
                 </tr>
-              ))}
+            )}
             </tbody>
           </table>
-          {filtered.length === 0 && <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>{t('admin.visitors.empty')}</div>}
+          {filtered.length === 0 && <div className="card [text-align:center] [padding:3rem] [color:var(--color-muted)] [font-weight:300] [font-size:0.9rem]">{t('admin.visitors.empty')}</div>}
           <PaginationControls
-            page={currentPage}
-            totalPages={totalPages}
-            totalItems={filtered.length}
-            pageSize={PAGE_SIZE}
-            onPageChange={setPage}
-          />
+          page={currentPage}
+          totalPages={totalPages}
+          totalItems={filtered.length}
+          pageSize={PAGE_SIZE}
+          onPageChange={setPage} />
+
         </div>
-      )}
-    </AdminLayout>
-  );
+      }
+    </AdminLayout>);
+
 };
 
 export default AdminVisitors;

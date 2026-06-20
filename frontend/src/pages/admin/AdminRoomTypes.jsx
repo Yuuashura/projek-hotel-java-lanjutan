@@ -7,6 +7,7 @@ import LoadingState from '../../components/LoadingState';
 import api from '../../utils/api';
 import { uploadFile, validateImageFile } from '../../utils/uploads';
 import { usePreferences } from '../../context/PreferencesContext';
+import { cn } from '../../lib/utils';
 
 const EMPTY_FORM = {
   name: '',
@@ -16,7 +17,7 @@ const EMPTY_FORM = {
   room_available: '5',
   smoking: false,
   image_url: '',
-  facility_ids: [],
+  facility_ids: []
 };
 
 const AdminRoomTypes = () => {
@@ -39,10 +40,10 @@ const AdminRoomTypes = () => {
     setLoading(true);
     try {
       const [resRooms, resHotel, resFacilities] = await Promise.all([
-        api.get(`/api/room-types/hotel/${hotelId}`),
-        api.get(`/api/hotels/${hotelId}`),
-        api.get('/api/facilities'),
-      ]);
+      api.get(`/api/room-types/hotel/${hotelId}`),
+      api.get(`/api/hotels/${hotelId}`),
+      api.get('/api/facilities')]
+      );
       setRooms(resRooms.data.data || []);
       setHotel(resHotel.data.data);
       setFacilities(resFacilities.data.data || []);
@@ -61,10 +62,10 @@ const AdminRoomTypes = () => {
   const openEdit = (room) => {
     setSelected(room);
     const existingImg = room.images?.[0]?.imageUrl || '';
-    const roomFacilityIds = (room.facilities || [])
-      .map(facility => facility.id_facility ?? facility.idFacility ?? facility.id)
-      .filter(id => id != null)
-      .map(Number);
+    const roomFacilityIds = (room.facilities || []).
+    map((facility) => facility.id_facility ?? facility.idFacility ?? facility.id).
+    filter((id) => id != null).
+    map(Number);
     setForm({
       name: room.name,
       description: room.description || '',
@@ -73,7 +74,7 @@ const AdminRoomTypes = () => {
       room_available: room.room_available.toString(),
       smoking: room.is_smoking || room.smoking || false,
       image_url: existingImg,
-      facility_ids: roomFacilityIds,
+      facility_ids: roomFacilityIds
     });
     setImgPreview(existingImg);
     setError('');
@@ -112,7 +113,7 @@ const AdminRoomTypes = () => {
         room_available: parseInt(form.room_available),
         smoking: form.smoking,
         image_url: form.image_url,
-        facility_ids: form.facility_ids.map(Number),
+        facility_ids: form.facility_ids.map(Number)
       };
 
       if (modal === 'create') {
@@ -143,27 +144,27 @@ const AdminRoomTypes = () => {
   };
 
   const toggleFacility = (facilityId) => {
-    setForm(current => ({
+    setForm((current) => ({
       ...current,
-      facility_ids: current.facility_ids.includes(facilityId)
-        ? current.facility_ids.filter(id => id !== facilityId)
-        : [...current.facility_ids, facilityId],
+      facility_ids: current.facility_ids.includes(facilityId) ?
+      current.facility_ids.filter((id) => id !== facilityId) :
+      [...current.facility_ids, facilityId]
     }));
   };
 
   return (
     <AdminLayout>
       {/* Back Button & Header */}
-      <div style={{ marginBottom: '2rem' }}>
-        <Link to="/admin/hotels" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontFamily: 'var(--font-body)', fontWeight: 400, textDecoration: 'none', color: 'var(--color-text)', marginBottom: '1.25rem', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>
+      <div className="[margin-bottom:2rem]">
+        <Link to="/admin/hotels" className="[display:inline-flex] [align-items:center] [gap:0.5rem] [font-family:var(--font-body)] [font-weight:400] [text-decoration:none] [color:var(--color-text)] [margin-bottom:1.25rem] [text-transform:uppercase] [font-size:0.75rem] [letter-spacing:1px]">
           <ArrowLeft size={14} /> {t('admin.actions.backToHotels')}
         </Link>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+        <div className="[display:flex] [justify-content:space-between] [align-items:center] [flex-wrap:wrap] [gap:1rem]">
           <div>
-            <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.75rem', textTransform: 'uppercase', letterSpacing: '1px', margin: 0, color: 'var(--color-text)' }}>
+            <h2 className="[font-family:var(--font-heading)] [font-weight:300] [font-size:1.75rem] [text-transform:uppercase] [letter-spacing:1px] [margin:0] [color:var(--color-text)]">
               {t('admin.rooms.title')}
             </h2>
-            <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.85rem', margin: '0.25rem 0 0' }}>
+            <p className="[color:var(--color-muted)] [font-weight:300] [font-size:0.85rem] [margin:0.25rem_0_0]">
               {t('admin.rooms.subtitle', { hotel: hotel?.name || t('admin.rooms.loadingHotel'), count: rooms.length })}
             </p>
           </div>
@@ -173,235 +174,222 @@ const AdminRoomTypes = () => {
         </div>
       </div>
 
-      {error && (
-        <div className="alert-danger" style={{ borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <AlertCircle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
-          <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.85rem' }}>{error}</span>
+      {error &&
+      <div className="alert-danger [border-radius:var(--radius-sm)] [padding:0.75rem_1rem] [margin-bottom:1.25rem] [display:flex] [gap:0.5rem] [align-items:center]">
+          <AlertCircle size={16} className="[color:var(--color-danger)] [flex-shrink:0]" />
+          <span className="[font-weight:300] [color:var(--color-danger)] [font-size:0.85rem]">{error}</span>
         </div>
-      )}
+      }
 
-      {loading ? (
-        <LoadingState text={t('admin.rooms.loading')} compact />
-      ) : (
-        <div style={{ overflowX: 'auto' }}>
+      {loading ?
+      <LoadingState text={t('admin.rooms.loading')} compact /> :
+
+      <div className="[overflow-x:auto]">
           <table className="neo-table">
             <thead>
               <tr>
-                {[t('admin.table.number'), t('admin.table.image'), t('admin.table.roomType'), t('admin.table.pricePerNight'), t('admin.table.capacity'), t('admin.table.roomsAvailable'), t('admin.table.smoking'), t('admin.table.actions')].map(h => <th key={h}>{h}</th>)}
+                {[t('admin.table.number'), t('admin.table.image'), t('admin.table.roomType'), t('admin.table.pricePerNight'), t('admin.table.capacity'), t('admin.table.roomsAvailable'), t('admin.table.smoking'), t('admin.table.actions')].map((h) => <th key={h}>{h}</th>)}
               </tr>
             </thead>
             <tbody>
-              {rooms.map(r => {
-                const thumb = r.images?.[0]?.imageUrl || '';
-                return (
-                  <tr key={r.id_room_type}>
-                    <td style={{ fontWeight: 400, color: 'var(--color-muted)', fontSize: '0.85rem' }}>#{r.id_room_type}</td>
+              {rooms.map((r) => {
+              const thumb = r.images?.[0]?.imageUrl || '';
+              return (
+                <tr key={r.id_room_type}>
+                    <td className="[font-weight:400] [color:var(--color-muted)] [font-size:0.85rem]">#{r.id_room_type}</td>
                     <td>
-                      {thumb ? (
-                        <img src={thumb} alt={r.name} style={{ width: 60, height: 45, objectFit: 'cover', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-accent)' }} />
-                      ) : (
-                        <div style={{ width: 60, height: 45, background: 'var(--color-background)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <ImageIcon size={14} style={{ color: 'var(--color-muted)' }} />
+                      {thumb ?
+                    <img src={thumb} alt={r.name} className="[width:60px] [height:45px] [object-fit:cover] [border-radius:var(--radius-sm)] [border:1px_solid_var(--color-accent)]" /> :
+
+                    <div className="[width:60px] [height:45px] [background:var(--color-background)] [border-radius:var(--radius-sm)] [border:1px_solid_var(--color-accent)] [display:flex] [align-items:center] [justify-content:center]">
+                          <ImageIcon size={14} className="[color:var(--color-muted)]" />
                         </div>
-                      )}
+                    }
                     </td>
                     <td>
-                      <div style={{ fontWeight: 400, fontSize: '0.9rem', color: 'var(--color-text)' }}>
+                      <div className="[font-weight:400] [font-size:0.9rem] [color:var(--color-text)]">
                         {r.name}
                       </div>
-                      <div style={{ color: 'var(--color-muted)', fontSize: '0.75rem', fontWeight: 300, marginTop: '0.15rem' }}>
+                      <div className="[color:var(--color-muted)] [font-size:0.75rem] [font-weight:300] [margin-top:0.15rem]">
                         {r.description || t('admin.rooms.noDescription')}
                       </div>
-                      {(r.facilities || []).length > 0 && (
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginTop: '0.55rem' }}>
-                          {r.facilities.slice(0, 3).map(facility => (
-                            <span key={facility.id_facility ?? facility.idFacility ?? facility.name} className="badge badge-gray" style={{ fontSize: '0.62rem' }}>
+                      {(r.facilities || []).length > 0 &&
+                    <div className="[display:flex] [flex-wrap:wrap] [gap:0.3rem] [margin-top:0.55rem]">
+                          {r.facilities.slice(0, 3).map((facility) =>
+                      <span key={facility.id_facility ?? facility.idFacility ?? facility.name} className="badge badge-gray [font-size:0.62rem]">
                               {facility.name}
                             </span>
-                          ))}
-                          {r.facilities.length > 3 && (
-                            <span className="badge badge-gray" style={{ fontSize: '0.62rem' }}>+{r.facilities.length - 3}</span>
-                          )}
-                        </div>
                       )}
+                          {r.facilities.length > 3 &&
+                      <span className="badge badge-gray [font-size:0.62rem]">+{r.facilities.length - 3}</span>
+                      }
+                        </div>
+                    }
                     </td>
-                    <td style={{ fontWeight: 400, color: 'var(--color-primary)', fontSize: '0.875rem' }}>
+                    <td className="[font-weight:400] [color:var(--color-primary)] [font-size:0.875rem]">
                       {formatCurrency(r.price_per_night)}
                     </td>
-                    <td style={{ fontSize: '0.85rem', color: 'var(--color-text)', fontWeight: 300 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                        <Users size={12} style={{ color: 'var(--color-muted)' }} /> {t('admin.rooms.guests', { count: r.max_guest })}
+                    <td className="[font-size:0.85rem] [color:var(--color-text)] [font-weight:300]">
+                      <div className="[display:flex] [align-items:center] [gap:0.25rem]">
+                        <Users size={12} className="[color:var(--color-muted)]" /> {t('admin.rooms.guests', { count: r.max_guest })}
                       </div>
                     </td>
-                    <td style={{ fontSize: '0.85rem', color: 'var(--color-text)', fontWeight: 300 }}>
+                    <td className="[font-size:0.85rem] [color:var(--color-text)] [font-weight:300]">
                       {t('admin.rooms.rooms', { count: r.room_available })}
                     </td>
                     <td>
-                      {r.is_smoking || r.smoking ? (
-                        <span className="badge badge-gray" style={{ fontSize: '0.7rem' }}>{t('admin.rooms.smokeAllowed')}</span>
-                      ) : (
-                        <span className="badge badge-green" style={{ fontSize: '0.7rem' }}>{t('admin.rooms.smokeFree')}</span>
-                      )}
+                      {r.is_smoking || r.smoking ?
+                    <span className="badge badge-gray [font-size:0.7rem]">{t('admin.rooms.smokeAllowed')}</span> :
+
+                    <span className="badge badge-green [font-size:0.7rem]">{t('admin.rooms.smokeFree')}</span>
+                    }
                     </td>
                     <td>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button onClick={() => openEdit(r)} className="btn btn-white btn-sm" style={{ padding: '0.4rem 0.8rem' }} title={t('admin.rooms.editTitle')}>
+                      <div className="[display:flex] [gap:0.5rem]">
+                        <button onClick={() => openEdit(r)} className="btn btn-white btn-sm [padding:0.4rem_0.8rem]" title={t('admin.rooms.editTitle')}>
                           <Pencil size={13} />
                         </button>
-                        <button onClick={() => openDelete(r)} className="btn btn-white btn-sm" style={{ padding: '0.4rem 0.8rem', color: 'var(--color-danger)' }} title={t('admin.rooms.deleteRoomType')}>
+                        <button onClick={() => openDelete(r)} className="btn btn-white btn-sm [padding:0.4rem_0.8rem] [color:var(--color-danger)]" title={t('admin.rooms.deleteRoomType')}>
                           <Trash2 size={13} />
                         </button>
                       </div>
                     </td>
-                  </tr>
-                );
-              })}
+                  </tr>);
+
+            })}
             </tbody>
           </table>
-          {rooms.length === 0 && (
-            <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem' }}>
+          {rooms.length === 0 &&
+        <div className="card [text-align:center] [padding:3rem] [color:var(--color-muted)] [font-weight:300] [font-size:0.9rem]">
               {t('admin.rooms.empty')}
             </div>
-          )}
+        }
         </div>
-      )}
+      }
 
       {/* Create/Edit Modal */}
-      {(modal === 'create' || modal === 'edit') && (
-        <ModalOverlay onClose={closeModal}>
-          <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, textTransform: 'uppercase', letterSpacing: '1px', fontSize: '1.2rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'var(--color-text)' }}>
+      {(modal === 'create' || modal === 'edit') &&
+      <ModalOverlay onClose={closeModal}>
+          <div className="[font-family:var(--font-heading)] [font-weight:300] [text-transform:uppercase] [letter-spacing:1px] [font-size:1.2rem] [margin-bottom:1.5rem] [border-bottom:1px_solid_var(--color-accent)] [padding-bottom:0.75rem] [display:flex] [justify-content:space-between] [align-items:center] [color:var(--color-text)]">
             {modal === 'create' ? t('admin.rooms.createTitle') : t('admin.rooms.editTitle')}
-            <button onClick={closeModal} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)' }}><X size={18} /></button>
+            <button onClick={closeModal} className="[background:none] [border:none] [cursor:pointer] [color:var(--color-muted)]"><X size={18} /></button>
           </div>
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <form onSubmit={handleSubmit} className="[display:flex] [flex-direction:column] [gap:1.25rem]">
             <div>
               <label className="label">{t('admin.rooms.name')}</label>
-              <input className="input" placeholder="Standard Room, Suite Room..." value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
+              <input className="input" placeholder="Standard Room, Suite Room..." value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} required />
             </div>
             <div>
               <label className="label">{t('admin.rooms.description')}</label>
-              <textarea className="input" style={{ minHeight: 80, resize: 'vertical' }} placeholder={t('admin.rooms.description')} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
+              <textarea className="input [min-height:80px] [resize:vertical]" placeholder={t('admin.rooms.description')} value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+            <div className="[display:grid] [grid-template-columns:1fr_1fr] [gap:1.25rem]">
               <div>
                 <label className="label">{t('admin.rooms.price')}</label>
-                <input type="number" className="input" value={form.price_per_night} onChange={e => setForm(f => ({ ...f, price_per_night: e.target.value }))} required />
+                <input type="number" className="input" value={form.price_per_night} onChange={(e) => setForm((f) => ({ ...f, price_per_night: e.target.value }))} required />
               </div>
               <div>
                 <label className="label">{t('admin.rooms.capacity')}</label>
-                <input type="number" className="input" min="1" value={form.max_guest} onChange={e => setForm(f => ({ ...f, max_guest: e.target.value }))} required />
+                <input type="number" className="input" min="1" value={form.max_guest} onChange={(e) => setForm((f) => ({ ...f, max_guest: e.target.value }))} required />
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+            <div className="[display:grid] [grid-template-columns:1fr_1fr] [gap:1.25rem]">
               <div>
                 <label className="label">{t('admin.rooms.availableRooms')}</label>
-                <input type="number" className="input" min="0" value={form.room_available} onChange={e => setForm(f => ({ ...f, room_available: e.target.value }))} required />
+                <input type="number" className="input" min="0" value={form.room_available} onChange={(e) => setForm((f) => ({ ...f, room_available: e.target.value }))} required />
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', height: '100%', paddingTop: '1.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem', border: '1px solid var(--color-accent)', background: form.smoking ? 'var(--color-primary-soft)' : 'var(--color-surface)', cursor: 'pointer', borderRadius: 'var(--radius-sm)', transition: 'all 0.3s ease', width: '100%' }} onClick={() => setForm(f => ({ ...f, smoking: !f.smoking }))}>
-                  <input type="checkbox" checked={form.smoking} readOnly style={{ width: 15, height: 15, accentColor: 'var(--color-primary)' }} />
-                  <label className="label" style={{ margin: 0, cursor: 'pointer', color: 'var(--color-text)' }}>{t('admin.rooms.smokingRoom')}</label>
+              <div className="[display:flex] [align-items:center] [height:100%] [padding-top:1.5rem]">
+                <div className={cn('flex w-full cursor-pointer items-center gap-2 rounded-lg border border-[var(--color-accent)] p-3 transition', form.smoking ? 'bg-[var(--color-primary-soft)]' : 'bg-[var(--color-surface)]')} onClick={() => setForm((f) => ({ ...f, smoking: !f.smoking }))}>
+                  <input type="checkbox" checked={form.smoking} readOnly className="[width:15px] [height:15px] [accent-color:var(--color-primary)]" />
+                  <label className="label [margin:0] [cursor:pointer] [color:var(--color-text)]">{t('admin.rooms.smokingRoom')}</label>
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="label"><Sparkles size={12} style={{ display: 'inline', marginRight: '0.4rem', verticalAlign: 'middle' }} />{t('admin.rooms.facilities')}</label>
-              <p style={{ color: 'var(--color-muted)', fontSize: '0.78rem', lineHeight: 1.5, margin: '0 0 0.75rem' }}>
+              <label className="label"><Sparkles size={12} className="[display:inline] [margin-right:0.4rem] [vertical-align:middle]" />{t('admin.rooms.facilities')}</label>
+              <p className="[color:var(--color-muted)] [font-size:0.78rem] [line-height:1.5] [margin:0_0_0.75rem]">
                 {t('admin.rooms.facilitiesHint')}
               </p>
-              {facilities.length > 0 ? (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: '0.65rem' }}>
-                  {facilities.map(facility => {
-                    const facilityId = Number(facility.id_facility ?? facility.idFacility ?? facility.id);
-                    const selectedFacility = form.facility_ids.includes(facilityId);
-                    return (
-                      <button
-                        key={facilityId}
-                        type="button"
-                        onClick={() => toggleFacility(facilityId)}
-                        aria-pressed={selectedFacility}
-                        style={{
-                          minHeight: 42,
-                          padding: '0.65rem 0.75rem',
-                          border: selectedFacility ? '1px solid var(--color-primary)' : '1px solid var(--color-accent)',
-                          borderRadius: 'var(--radius-sm)',
-                          background: selectedFacility ? 'var(--color-primary-soft)' : 'var(--color-surface)',
-                          color: 'var(--color-text)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.55rem',
-                          cursor: 'pointer',
-                          textAlign: 'left',
-                          fontSize: '0.82rem',
-                        }}
-                      >
-                        <span style={{
-                          width: 18,
-                          height: 18,
-                          flexShrink: 0,
-                          display: 'grid',
-                          placeItems: 'center',
-                          borderRadius: 4,
-                          border: selectedFacility ? '1px solid var(--color-primary)' : '1px solid var(--color-muted)',
-                          background: selectedFacility ? 'var(--color-primary)' : 'transparent',
-                          color: '#fff',
-                        }}>
+              {facilities.length > 0 ?
+            <div className="[display:grid] [grid-template-columns:repeat(auto-fit,_minmax(145px,_1fr))] [gap:0.65rem]">
+                  {facilities.map((facility) => {
+                const facilityId = Number(facility.id_facility ?? facility.idFacility ?? facility.id);
+                const selectedFacility = form.facility_ids.includes(facilityId);
+                return (
+                  <button
+                    key={facilityId}
+                    type="button"
+                    onClick={() => toggleFacility(facilityId)}
+                    aria-pressed={selectedFacility}
+                    className={cn(
+                      'flex min-h-[42px] cursor-pointer items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-[0.82rem] text-[var(--color-text)]',
+                      selectedFacility
+                        ? 'border-[var(--color-primary)] bg-[var(--color-primary-soft)]'
+                        : 'border-[var(--color-accent)] bg-[var(--color-surface)]',
+                    )}>
+
+                        <span className={cn(
+                          'grid size-[18px] shrink-0 place-items-center rounded text-white',
+                          selectedFacility
+                            ? 'border border-[var(--color-primary)] bg-[var(--color-primary)]'
+                            : 'border border-[var(--color-muted)] bg-transparent',
+                        )}>
                           {selectedFacility && <Check size={12} />}
                         </span>
                         <span>{facility.name}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div style={{ color: 'var(--color-muted)', fontSize: '0.82rem', padding: '0.75rem', border: '1px dashed var(--color-accent)' }}>
+                      </button>);
+
+              })}
+                </div> :
+
+            <div className="[color:var(--color-muted)] [font-size:0.82rem] [padding:0.75rem] [border:1px_dashed_var(--color-accent)]">
                   {t('admin.rooms.noFacilities')}
                 </div>
-              )}
+            }
             </div>
 
             {/* Gambar Kamar */}
             <div>
-              <label className="label"><ImageIcon size={12} style={{ display: 'inline', marginRight: '0.4rem', verticalAlign: 'middle' }} />{t('admin.rooms.roomPhoto')}</label>
+              <label className="label"><ImageIcon size={12} className="[display:inline] [margin-right:0.4rem] [vertical-align:middle]" />{t('admin.rooms.roomPhoto')}</label>
               <div
-                onClick={() => fileRef.current?.click()}
-                style={{ border: '1px dashed var(--color-primary)', borderRadius: 'var(--radius-sm)', padding: '1.5rem 1rem', textAlign: 'center', cursor: 'pointer', background: imgPreview ? 'rgba(212,175,55,0.01)' : 'transparent', transition: 'all 0.2s' }}
-              >
-                {imgPreview ? (
-                  <div>
-                    <img src={imgPreview} alt="preview" style={{ maxHeight: 120, maxWidth: '100%', objectFit: 'cover', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-accent)', marginBottom: '0.5rem' }} />
-                    <div style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--color-primary)' }}>{t('admin.rooms.changePhoto')}</div>
+              onClick={() => fileRef.current?.click()}
+              className={cn('cursor-pointer rounded-lg border border-dashed border-[var(--color-primary)] px-4 py-6 text-center transition', imgPreview ? 'bg-amber-400/[0.01]' : 'bg-transparent')}>
+
+                {imgPreview ?
+              <div>
+                    <img src={imgPreview} alt="preview" className="[max-height:120px] [max-width:100%] [object-fit:cover] [border-radius:var(--radius-sm)] [border:1px_solid_var(--color-accent)] [margin-bottom:0.5rem]" />
+                    <div className="[font-size:0.75rem] [font-weight:400] [color:var(--color-primary)]">{t('admin.rooms.changePhoto')}</div>
+                  </div> :
+
+              <div>
+                    <ImageIcon size={28} className="[color:var(--color-muted)] [margin-bottom:0.4rem]" />
+                    <div className="[font-weight:300] [font-size:0.8rem] [color:var(--color-text)]">{uploadingImage ? t('admin.rooms.uploadingPhoto') : t('admin.rooms.uploadPhoto')}</div>
+                    <div className="[font-size:0.7rem] [color:var(--color-muted)] [margin-top:0.2rem]">JPG, PNG, WEBP · Maks 5MB</div>
                   </div>
-                ) : (
-                  <div>
-                    <ImageIcon size={28} style={{ color: 'var(--color-muted)', marginBottom: '0.4rem' }} />
-                    <div style={{ fontWeight: 300, fontSize: '0.8rem', color: 'var(--color-text)' }}>{uploadingImage ? t('admin.rooms.uploadingPhoto') : t('admin.rooms.uploadPhoto')}</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--color-muted)', marginTop: '0.2rem' }}>JPG, PNG, WEBP · Maks 5MB</div>
-                  </div>
-                )}
+              }
               </div>
-              <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: 'none' }} onChange={async e => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                const validationError = validateImageFile(file);
-                if (validationError) { setError(validationError); return; }
-                setError('');
-                setUploadingImage(true);
-                try {
-                  const imageUrl = await uploadFile('/api/room-types/upload-image', file, 'file', { hotel_id: hotelId });
-                  setImgPreview(imageUrl);
-                  setForm(f => ({ ...f, image_url: imageUrl }));
-                } catch (err) {
-                  setError(err.response?.data?.message || t('admin.errors.uploadRoomPhotoFailed'));
-                } finally {
-                  setUploadingImage(false);
-                  if (fileRef.current) fileRef.current.value = '';
-                }
-              }} />
+              <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              const validationError = validateImageFile(file);
+              if (validationError) {setError(validationError);return;}
+              setError('');
+              setUploadingImage(true);
+              try {
+                const imageUrl = await uploadFile('/api/room-types/upload-image', file, 'file', { hotel_id: hotelId });
+                setImgPreview(imageUrl);
+                setForm((f) => ({ ...f, image_url: imageUrl }));
+              } catch (err) {
+                setError(err.response?.data?.message || t('admin.errors.uploadRoomPhotoFailed'));
+              } finally {
+                setUploadingImage(false);
+                if (fileRef.current) fileRef.current.value = '';
+              }
+            }} className="[display:none]" />
             </div>
-            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-              <button type="submit" className="btn btn-primary btn-sm" style={{ flex: 1, justifyContent: 'center' }} disabled={submitting}>
+            <div className="[display:flex] [gap:0.75rem] [margin-top:0.5rem]">
+              <button type="submit" className="btn btn-primary btn-sm [flex:1] [justify-content:center]" disabled={submitting}>
                 {submitting ? t('admin.actions.saving') : <><Check size={14} /> {t('admin.rooms.saveRoomType')}</>}
               </button>
               <button type="button" onClick={closeModal} className="btn btn-white btn-sm" disabled={submitting}>
@@ -410,34 +398,37 @@ const AdminRoomTypes = () => {
             </div>
           </form>
         </ModalOverlay>
-      )}
+      }
 
       {/* Delete Modal */}
-      {modal === 'delete' && (
-        <ModalOverlay onClose={closeModal} maxWidth={400}>
-          <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🗑️</div>
-            <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, textTransform: 'uppercase', letterSpacing: '1px', fontSize: '1.25rem', marginBottom: '0.75rem', color: 'var(--color-text)' }}>{t('admin.rooms.deleteTitle')}</h3>
-            <p style={{ color: 'var(--color-muted)', fontWeight: 300, fontSize: '0.9rem', lineHeight: 1.5, marginBottom: '1.75rem' }}>{t('admin.rooms.deleteMessage', { name: selected?.name })}</p>
-            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+      {modal === 'delete' &&
+      <ModalOverlay onClose={closeModal} maxWidth={400}>
+          <div className="[text-align:center] [padding:1rem_0]">
+            <div className="[font-size:2.5rem] [margin-bottom:1rem]">🗑️</div>
+            <h3 className="[font-family:var(--font-heading)] [font-weight:300] [text-transform:uppercase] [letter-spacing:1px] [font-size:1.25rem] [margin-bottom:0.75rem] [color:var(--color-text)]">{t('admin.rooms.deleteTitle')}</h3>
+            <p className="[color:var(--color-muted)] [font-weight:300] [font-size:0.9rem] [line-height:1.5] [margin-bottom:1.75rem]">{t('admin.rooms.deleteMessage', { name: selected?.name })}</p>
+            <div className="[display:flex] [gap:0.75rem] [justify-content:center]">
               <button onClick={closeModal} className="btn btn-white btn-sm">{t('admin.actions.cancel')}</button>
-              <button onClick={handleDelete} className="btn btn-primary btn-sm" style={{ background: 'var(--color-danger)', color: '#FFFFFF' }} disabled={submitting}>{submitting ? t('admin.actions.deleting') : t('admin.actions.delete')}</button>
+              <button onClick={handleDelete} className="btn btn-primary btn-sm [background:var(--color-danger)] [color:#FFFFFF]" disabled={submitting}>{submitting ? t('admin.actions.deleting') : t('admin.actions.delete')}</button>
             </div>
           </div>
         </ModalOverlay>
-      )}
-    </AdminLayout>
-  );
+      }
+    </AdminLayout>);
+
 };
 
 const ModalOverlay = ({ children, onClose, maxWidth = 500 }) => {
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(26,54,93,0.3)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1rem' }} onClick={onClose}>
-      <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-accent)', borderRadius: 'var(--radius-sm)', padding: '2rem', width: '100%', maxWidth, maxHeight: '90vh', overflowY: 'auto', boxShadow: 'var(--shadow-hover)', animation: 'fadeIn 0.2s ease-out', position: 'relative' }} onClick={e => e.stopPropagation()}>
+    <div onClick={onClose} className="[position:fixed] [inset:0] [background:rgba(26,54,93,0.3)] [backdrop-filter:blur(4px)] [display:flex] [align-items:center] [justify-content:center] [z-index:100] [padding:1rem]">
+      <div className={cn(
+        'relative max-h-[90vh] w-full overflow-y-auto rounded-lg border border-[var(--color-accent)] bg-[var(--color-surface)] p-8 shadow-[var(--shadow-hover)] [animation:fadeIn_0.2s_ease-out]',
+        maxWidth <= 400 ? 'max-w-[400px]' : 'max-w-[500px]',
+      )} onClick={(e) => e.stopPropagation()}>
         {children}
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default AdminRoomTypes;
