@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Plus, Pencil, Trash2, X, AlertCircle, ArrowLeft, Users, ImageIcon, Check } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, AlertCircle, ArrowLeft, Users, ImageIcon, Check, Sparkles } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 import AdminLayout from '../../components/admin/AdminLayout';
 import LoadingState from '../../components/LoadingState';
@@ -16,6 +16,7 @@ const EMPTY_FORM = {
   room_available: '5',
   smoking: false,
   image_url: '',
+  facility_ids: [],
 };
 
 const AdminRoomTypes = () => {
@@ -23,6 +24,7 @@ const AdminRoomTypes = () => {
   const { hotelId } = useParams();
   const [rooms, setRooms] = useState([]);
   const [hotel, setHotel] = useState(null);
+  const [facilities, setFacilities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null); // null | 'create' | 'edit' | 'delete'
   const [selected, setSelected] = useState(null);
@@ -33,29 +35,36 @@ const AdminRoomTypes = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileRef = useRef();
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [resRooms, resHotel] = await Promise.all([
+      const [resRooms, resHotel, resFacilities] = await Promise.all([
         api.get(`/api/room-types/hotel/${hotelId}`),
-        api.get(`/api/hotels/${hotelId}`)
+        api.get(`/api/hotels/${hotelId}`),
+        api.get('/api/facilities'),
       ]);
       setRooms(resRooms.data.data || []);
       setHotel(resHotel.data.data);
-    } catch (err) {
+      setFacilities(resFacilities.data.data || []);
+    } catch {
       setError(t('admin.errors.loadRooms'));
     } finally {
       setLoading(false);
     }
-  };
+  }, [hotelId, t]);
 
   useEffect(() => {
-    loadData();
-  }, [hotelId]);
+    const timer = window.setTimeout(loadData, 0);
+    return () => window.clearTimeout(timer);
+  }, [loadData]);
 
   const openEdit = (room) => {
     setSelected(room);
     const existingImg = room.images?.[0]?.imageUrl || '';
+    const roomFacilityIds = (room.facilities || [])
+      .map(facility => facility.id_facility ?? facility.idFacility ?? facility.id)
+      .filter(id => id != null)
+      .map(Number);
     setForm({
       name: room.name,
       description: room.description || '',
@@ -64,6 +73,7 @@ const AdminRoomTypes = () => {
       room_available: room.room_available.toString(),
       smoking: room.is_smoking || room.smoking || false,
       image_url: existingImg,
+      facility_ids: roomFacilityIds,
     });
     setImgPreview(existingImg);
     setError('');
@@ -101,7 +111,8 @@ const AdminRoomTypes = () => {
         max_guest: parseInt(form.max_guest),
         room_available: parseInt(form.room_available),
         smoking: form.smoking,
-        image_url: form.image_url
+        image_url: form.image_url,
+        facility_ids: form.facility_ids.map(Number),
       };
 
       if (modal === 'create') {
@@ -129,6 +140,15 @@ const AdminRoomTypes = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const toggleFacility = (facilityId) => {
+    setForm(current => ({
+      ...current,
+      facility_ids: current.facility_ids.includes(facilityId)
+        ? current.facility_ids.filter(id => id !== facilityId)
+        : [...current.facility_ids, facilityId],
+    }));
   };
 
   return (
@@ -192,6 +212,18 @@ const AdminRoomTypes = () => {
                       <div style={{ color: 'var(--color-muted)', fontSize: '0.75rem', fontWeight: 300, marginTop: '0.15rem' }}>
                         {r.description || t('admin.rooms.noDescription')}
                       </div>
+                      {(r.facilities || []).length > 0 && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginTop: '0.55rem' }}>
+                          {r.facilities.slice(0, 3).map(facility => (
+                            <span key={facility.id_facility ?? facility.idFacility ?? facility.name} className="badge badge-gray" style={{ fontSize: '0.62rem' }}>
+                              {facility.name}
+                            </span>
+                          ))}
+                          {r.facilities.length > 3 && (
+                            <span className="badge badge-gray" style={{ fontSize: '0.62rem' }}>+{r.facilities.length - 3}</span>
+                          )}
+                        </div>
+                      )}
                     </td>
                     <td style={{ fontWeight: 400, color: 'var(--color-primary)', fontSize: '0.875rem' }}>
                       {formatCurrency(r.price_per_night)}
@@ -271,6 +303,62 @@ const AdminRoomTypes = () => {
                   <label className="label" style={{ margin: 0, cursor: 'pointer', color: 'var(--color-text)' }}>{t('admin.rooms.smokingRoom')}</label>
                 </div>
               </div>
+            </div>
+
+            <div>
+              <label className="label"><Sparkles size={12} style={{ display: 'inline', marginRight: '0.4rem', verticalAlign: 'middle' }} />{t('admin.rooms.facilities')}</label>
+              <p style={{ color: 'var(--color-muted)', fontSize: '0.78rem', lineHeight: 1.5, margin: '0 0 0.75rem' }}>
+                {t('admin.rooms.facilitiesHint')}
+              </p>
+              {facilities.length > 0 ? (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: '0.65rem' }}>
+                  {facilities.map(facility => {
+                    const facilityId = Number(facility.id_facility ?? facility.idFacility ?? facility.id);
+                    const selectedFacility = form.facility_ids.includes(facilityId);
+                    return (
+                      <button
+                        key={facilityId}
+                        type="button"
+                        onClick={() => toggleFacility(facilityId)}
+                        aria-pressed={selectedFacility}
+                        style={{
+                          minHeight: 42,
+                          padding: '0.65rem 0.75rem',
+                          border: selectedFacility ? '1px solid var(--color-primary)' : '1px solid var(--color-accent)',
+                          borderRadius: 'var(--radius-sm)',
+                          background: selectedFacility ? 'var(--color-primary-soft)' : 'var(--color-surface)',
+                          color: 'var(--color-text)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.55rem',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          fontSize: '0.82rem',
+                        }}
+                      >
+                        <span style={{
+                          width: 18,
+                          height: 18,
+                          flexShrink: 0,
+                          display: 'grid',
+                          placeItems: 'center',
+                          borderRadius: 4,
+                          border: selectedFacility ? '1px solid var(--color-primary)' : '1px solid var(--color-muted)',
+                          background: selectedFacility ? 'var(--color-primary)' : 'transparent',
+                          color: '#fff',
+                        }}>
+                          {selectedFacility && <Check size={12} />}
+                        </span>
+                        <span>{facility.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div style={{ color: 'var(--color-muted)', fontSize: '0.82rem', padding: '0.75rem', border: '1px dashed var(--color-accent)' }}>
+                  {t('admin.rooms.noFacilities')}
+                </div>
+              )}
             </div>
 
             {/* Gambar Kamar */}

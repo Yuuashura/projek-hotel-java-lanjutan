@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -37,4 +39,7 @@ public class RoomTypeRequest {
 
     @JsonProperty("image_url")
     private String imageUrl;  // URL atau base64 gambar utama kamar
+
+    @JsonProperty("facility_ids")
+    private List<Integer> facilityIds;
 }

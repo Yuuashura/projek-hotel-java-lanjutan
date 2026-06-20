@@ -1162,9 +1162,15 @@ Service:
 cek hotel ada
 -> jika Admin Hotel, cek hotel miliknya
 -> validasi harga, max guest, dan room available
+-> validasi facility_ids dari master facilities
 -> RoomTypeRepository.save/delete
+-> sinkronkan fasilitas khusus kamar ke room_type_facilities
 -> kelola gambar room type
 ```
+
+Setiap tipe kamar menyimpan pilihan fasilitas sendiri. Contohnya Standard dapat
+memiliki WiFi dan shower, sedangkan Deluxe dapat memiliki WiFi, AC, shower, dan
+area tempat duduk. Fasilitas hotel tidak otomatis disalin ke fasilitas kamar.
 
 Upload gambar kamar:
 

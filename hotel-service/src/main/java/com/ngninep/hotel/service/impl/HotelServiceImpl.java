@@ -156,7 +156,14 @@ public class HotelServiceImpl implements HotelService {
                             .imageUrl(img.getImage_url())
                             .sortOrder(img.getSort_order())
                             .build()).collect(Collectors.toList()) : new ArrayList<>())
-                    .facilities(new ArrayList<>()) // Can be mapped later if needed
+                    .facilities(rt.getFacilities() != null ? rt.getFacilities().stream()
+                            .filter(relation -> relation.getFacility() != null)
+                            .map(relation -> (Object) FacilityResponse.builder()
+                                    .idFacility(relation.getFacility().getIdFacility())
+                                    .name(relation.getFacility().getName())
+                                    .icon(relation.getFacility().getIcon())
+                                    .build())
+                            .collect(Collectors.toList()) : new ArrayList<>())
                     .build()).collect(Collectors.toList());
         }
 

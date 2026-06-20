@@ -377,10 +377,28 @@ Query utama `GET /api/hotels`:
 | --- | --- | --- | --- |
 | GET | `/api/room-types/hotel/{hotelId}` | Public | Tipe kamar berdasarkan hotel |
 | GET | `/api/room-types/{id}` | Public | Detail tipe kamar |
-| POST | `/api/room-types` | `ROLE_ADMIN_HOTEL`, `ROLE_ADMIN_APP` | Buat tipe kamar |
-| PUT | `/api/room-types/{id}` | `ROLE_ADMIN_HOTEL`, `ROLE_ADMIN_APP` | Update tipe kamar |
+| POST | `/api/room-types` | `ROLE_ADMIN_HOTEL`, `ROLE_ADMIN_APP` | Buat tipe kamar beserta fasilitasnya |
+| PUT | `/api/room-types/{id}` | `ROLE_ADMIN_HOTEL`, `ROLE_ADMIN_APP` | Update tipe kamar dan fasilitasnya |
 | DELETE | `/api/room-types/{id}` | `ROLE_ADMIN_HOTEL`, `ROLE_ADMIN_APP` | Hapus tipe kamar |
 | POST | `/api/room-types/upload-image` | `ROLE_ADMIN_HOTEL`, `ROLE_ADMIN_APP` | Upload gambar tipe kamar |
+
+Setiap tipe kamar memiliki fasilitas sendiri melalui `facility_ids`:
+
+```json
+{
+  "name": "Deluxe Room",
+  "hotel_id": 1,
+  "price_per_night": 500000,
+  "room_available": 5,
+  "max_guest": 2,
+  "facility_ids": [1, 2, 3]
+}
+```
+
+Fasilitas kamar disimpan pada `room_type_facilities` dan tidak otomatis
+diwariskan dari fasilitas hotel atau tipe kamar lain. Kirim `facility_ids: []`
+untuk mengosongkan fasilitas kamar. Jika field tidak dikirim saat update,
+relasi yang sudah ada dipertahankan.
 
 ### Cities (`hotel-service`)
 

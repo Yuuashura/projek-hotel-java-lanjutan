@@ -1,12 +1,17 @@
 package com.ngninep.hotel.service.impl;
 
 import com.ngninep.hotel.dto.req.RoomTypeRequest;
+import com.ngninep.hotel.dto.res.FacilityResponse;
 import com.ngninep.hotel.dto.res.RoomTypeImageResponse;
 import com.ngninep.hotel.dto.res.RoomTypeResponse;
+import com.ngninep.hotel.entity.Facility;
 import com.ngninep.hotel.entity.Hotel;
 import com.ngninep.hotel.entity.RoomType;
+import com.ngninep.hotel.entity.RoomTypeFacility;
 import com.ngninep.hotel.entity.RoomTypeImage;
+import com.ngninep.hotel.repository.FacilityRepository;
 import com.ngninep.hotel.repository.HotelRepository;
+import com.ngninep.hotel.repository.RoomTypeFacilityRepository;
 import com.ngninep.hotel.repository.RoomTypeImageRepository;
 import com.ngninep.hotel.repository.RoomTypeRepository;
 import com.ngninep.hotel.service.RoomTypeService;
@@ -19,8 +24,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +36,8 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     private final RoomTypeRepository roomTypeRepository;
     private final HotelRepository hotelRepository;
     private final RoomTypeImageRepository roomTypeImageRepository;
+    private final FacilityRepository facilityRepository;
+    private final RoomTypeFacilityRepository roomTypeFacilityRepository;
 
     private boolean isAdminHotel() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -53,6 +61,12 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     }
 
     private RoomTypeResponse mapToResponse(RoomType roomType) {
+        List<RoomTypeFacility> facilities = roomTypeFacilityRepository
+                .findByRoomType_IdRoomType(roomType.getIdRoomType());
+        return mapToResponse(roomType, facilities);
+    }
+
+    private RoomTypeResponse mapToResponse(RoomType roomType, List<RoomTypeFacility> roomFacilities) {
         // Map gambar tipe kamar
         List<Object> images = roomTypeImageRepository
                 .findByRoomTypeId(roomType.getIdRoomType())
@@ -61,6 +75,15 @@ public class RoomTypeServiceImpl implements RoomTypeService {
                         .idImage(img.getIdImage())
                         .imageUrl(img.getImage_url())
                         .sortOrder(img.getSort_order())
+                        .build())
+                .collect(Collectors.toList());
+
+        List<Object> facilities = roomFacilities.stream()
+                .filter(relation -> relation.getFacility() != null)
+                .map(relation -> (Object) FacilityResponse.builder()
+                        .idFacility(relation.getFacility().getIdFacility())
+                        .name(relation.getFacility().getName())
+                        .icon(relation.getFacility().getIcon())
                         .build())
                 .collect(Collectors.toList());
 
@@ -74,7 +97,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
                 .smoking(roomType.isSmoking())
                 .roomAvailable(roomType.getRoom_available())
                 .images(images)
-                .facilities(new ArrayList<>())
+                .facilities(facilities)
                 .discountPercent(roomType.getHotel() != null ? roomType.getHotel().getDiscount_percent() : 0)
                 .onSale(roomType.getHotel() != null && roomType.getHotel().isOnSale())
                 .build();
@@ -112,6 +135,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
                 .build();
         
         RoomType saved = roomTypeRepository.save(roomType);
+        List<RoomTypeFacility> facilities = syncRoomFacilities(saved, request.getFacilityIds());
 
         // Simpan gambar jika ada
         if (request.getImageUrl() != null && !request.getImageUrl().isBlank()) {
@@ -122,7 +146,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
                     .build());
         }
 
-        return mapToResponse(saved);
+        return mapToResponse(saved, facilities);
     }
 
     @Override
@@ -145,6 +169,10 @@ public class RoomTypeServiceImpl implements RoomTypeService {
         roomType.setRoom_available(request.getRoomAvailable());
         
         RoomType saved = roomTypeRepository.save(roomType);
+        List<RoomTypeFacility> facilities = null;
+        if (request.getFacilityIds() != null) {
+            facilities = syncRoomFacilities(saved, request.getFacilityIds());
+        }
 
         // Update gambar jika ada yang baru
         if (request.getImageUrl() != null && !request.getImageUrl().isBlank()) {
@@ -156,7 +184,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
                     .build());
         }
 
-        return mapToResponse(saved);
+        return facilities == null ? mapToResponse(saved) : mapToResponse(saved, facilities);
     }
 
     @Override
@@ -165,5 +193,30 @@ public class RoomTypeServiceImpl implements RoomTypeService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.ROOM_TYPE_NOT_FOUND));
         validateHotelOwnership(roomType.getHotel());
         roomTypeRepository.delete(roomType);
+    }
+
+    private List<RoomTypeFacility> syncRoomFacilities(RoomType roomType, List<Integer> facilityIds) {
+        Set<Integer> requestedIds = facilityIds == null
+                ? Set.of()
+                : facilityIds.stream()
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        List<Facility> facilities = facilityRepository.findAllById(requestedIds);
+        if (facilities.size() != requestedIds.size()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.FACILITY_IDS_INVALID);
+        }
+
+        roomTypeFacilityRepository.deleteByRoomType_IdRoomType(roomType.getIdRoomType());
+        roomTypeFacilityRepository.flush();
+
+        List<RoomTypeFacility> relations = facilities.stream()
+                .map(facility -> RoomTypeFacility.builder()
+                        .roomType(roomType)
+                        .facility(facility)
+                        .build())
+                .collect(Collectors.toList());
+
+        return relations.isEmpty() ? relations : roomTypeFacilityRepository.saveAll(relations);
     }
 }

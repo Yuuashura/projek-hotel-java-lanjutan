@@ -243,6 +243,9 @@ const HotelDetail = () => {
                     const roomAvailable = getRoomAvailability(room);
                     const roomUnavailable = roomAvailable <= 0;
                     const fullPeriods = roomFullPeriodsByRoom[roomId] || [];
+                    const roomFacilities = (room.facilities || [])
+                      .map(normalizeFacility)
+                      .filter(Boolean);
                     return (
                       <div key={roomId} className="hotel-detail-room-card" onClick={() => setActiveRoom(roomId)}
                         style={{
@@ -271,6 +274,23 @@ const HotelDetail = () => {
                               <span>-</span>
                               <span>{t('hotelDetail.bed')}</span>
                             </p>
+                            {roomFacilities.length > 0 && (
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.75rem' }}>
+                                {roomFacilities.map(facility => {
+                                  const RoomFacilityIcon = facilityIconMap[String(facility.icon || '').toLowerCase()] || Check;
+                                  return (
+                                    <span
+                                      key={facility.id}
+                                      className="badge badge-gray"
+                                      style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.65rem' }}
+                                    >
+                                      <RoomFacilityIcon size={11} />
+                                      {facility.name}
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            )}
                             {fullPeriods.length > 0 && (
                               <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                                 {fullPeriods.slice(0, 2).map(period => (
