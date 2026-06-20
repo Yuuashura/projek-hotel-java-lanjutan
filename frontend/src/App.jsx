@@ -61,22 +61,22 @@ const AdminAppRoute = ({ children }) => {
   return children;
 };
 
-const RouteLoading = () => (
-  <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: '2rem' }}>
+const RouteLoading = () =>
+<div className="[min-height:100vh] [display:grid] [place-items:center] [padding:2rem]">
     <LoadingState text="Menyiapkan sesi..." />
-  </div>
-);
+  </div>;
+
 
 // ==========================================
 // Public Layout (Navbar + Footer)
 // ==========================================
-const PublicLayout = ({ children }) => (
-  <>
+const PublicLayout = ({ children }) =>
+<>
     <Navbar />
     <main className="public-main">{children}</main>
     <Footer />
-  </>
-);
+  </>;
+
 
 // ==========================================
 // App Routes
@@ -113,8 +113,8 @@ function AppRoutes() {
 
       {/* Catch all */}
       <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  );
+    </Routes>);
+
 }
 
 const ScrollRevealManager = () => {
@@ -143,7 +143,7 @@ const ScrollRevealManager = () => {
         scale: [0.985, 1],
         duration: 520,
         delay: stagger(45),
-        ease: 'outCubic',
+        ease: 'outCubic'
       });
     }, 80);
 
@@ -207,8 +207,8 @@ function App() {
           <AppRoutes />
         </Router>
       </AuthProvider>
-    </PreferencesProvider>
-  );
+    </PreferencesProvider>);
+
 }
 
 export default App;

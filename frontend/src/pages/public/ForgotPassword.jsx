@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AlertCircle, CheckCircle, Mail } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -43,9 +43,9 @@ const ForgotPassword = () => {
     <div className="auth-page">
       <div className="auth-shell animate-slide-in">
         <div className="auth-header">
-          <Link to="/" style={{ textDecoration: 'none' }}>
+          <Link to="/" className="[text-decoration:none]">
             <div className="auth-brand">
-              NgiNep<span style={{ color: 'var(--color-primary)' }}>.</span>
+              NgiNep<span className="[color:var(--color-primary)]">.</span>
             </div>
           </Link>
           <h1>Lupa Password</h1>
@@ -55,30 +55,30 @@ const ForgotPassword = () => {
         <div className="card auth-card">
           <div className="auth-card-accent" />
 
-          {error && (
-            <div className="alert-danger" style={{ padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
-              <AlertCircle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
-              <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.85rem' }}>{error}</span>
+          {error &&
+          <div className="alert-danger [padding:0.875rem_1rem] [margin-bottom:1.5rem] [display:flex] [gap:0.5rem] [align-items:center] [border-radius:var(--radius-sm)]">
+              <AlertCircle size={16} className="[color:var(--color-danger)] [flex-shrink:0]" />
+              <span className="[font-weight:300] [color:var(--color-danger)] [font-size:0.85rem]">{error}</span>
             </div>
-          )}
+          }
 
-          {success && (
-            <div className="alert-success" style={{ padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
-              <CheckCircle size={16} style={{ color: 'var(--color-success)', flexShrink: 0 }} />
-              <span style={{ fontWeight: 300, color: 'var(--color-success)', fontSize: '0.85rem' }}>{success}</span>
+          {success &&
+          <div className="alert-success [padding:0.875rem_1rem] [margin-bottom:1.5rem] [display:flex] [gap:0.5rem] [align-items:center] [border-radius:var(--radius-sm)]">
+              <CheckCircle size={16} className="[color:var(--color-success)] [flex-shrink:0]" />
+              <span className="[font-weight:300] [color:var(--color-success)] [font-size:0.85rem]">{success}</span>
             </div>
-          )}
+          }
 
           <form onSubmit={handleSubmit}>
             <div className="auth-field">
               <label className="label">Alamat Email</label>
-              <div style={{ position: 'relative' }}>
-                <input className="input" style={{ paddingRight: '2.5rem' }} type="email" placeholder="nama@email.com" value={email} onChange={e => setEmail(e.target.value)} required />
-                <Mail size={16} style={{ position: 'absolute', right: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-muted)' }} />
+              <div className="[position:relative]">
+                <input className="input [padding-right:2.5rem]" type="email" placeholder="nama@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                <Mail size={16} className="[position:absolute] [right:0.875rem] [top:50%] [transform:translateY(-50%)] [color:var(--color-muted)]" />
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary btn-full" disabled={loading} style={{ height: 50, background: 'var(--color-primary)', opacity: loading ? 0.7 : 1 }}>
+            <button type="submit" className="btn btn-primary btn-full h-[50px] bg-[var(--color-primary)] disabled:opacity-70" disabled={loading}>
               {loading ? <><span className="btn-spinner" /> Mengirim...</> : 'Kirim Kode Reset'}
             </button>
           </form>
@@ -88,8 +88,8 @@ const ForgotPassword = () => {
           Ingat password Anda? <Link to="/login">Masuk kembali</Link>
         </p>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default ForgotPassword;

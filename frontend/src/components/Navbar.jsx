@@ -5,36 +5,11 @@ import { useAuth } from '../context/AuthContext';
 import { usePreferences } from '../context/PreferencesContext';
 import { LogOut, User, Calendar, Menu, X, ChevronDown, Globe } from 'lucide-react';
 import LogoutConfirmModal from './LogoutConfirmModal';
+import { cn } from '../lib/utils';
 
-const navLinkStyle = {
-  fontFamily: 'var(--font-body)',
-  fontWeight: 400,
-  color: 'rgba(255,255,255,0.92)',
-  textDecoration: 'none',
-  fontSize: '0.8rem',
-  textTransform: 'uppercase',
-  letterSpacing: '2px',
-  transition: 'color 0.3s, transform 0.3s'
-};
-
-const mobileLinkStyle = {
-  fontFamily: 'var(--font-body)',
-  fontWeight: 400,
-  textDecoration: 'none',
-  color: 'rgba(255,255,255,0.94)',
-  textTransform: 'uppercase',
-  fontSize: '0.85rem',
-  letterSpacing: '1px',
-  paddingBottom: '0.75rem',
-  borderBottom: '1px solid rgba(255,255,255,0.16)'
-};
-
-const frostedButtonStyle = {
-  background: 'rgba(255,255,255,0.13)',
-  color: 'white',
-  borderColor: 'rgba(255,255,255,0.28)',
-  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.14)'
-};
+const navLinkClass = 'nav-link-luxury font-[var(--font-body)] text-[0.8rem] font-normal uppercase tracking-[2px] text-white/90 no-underline transition hover:-translate-y-0.5 hover:text-[#F6D365]';
+const mobileLinkClass = 'mobile-nav-link-luxury border-b border-white/15 pb-3 font-[var(--font-body)] text-[0.85rem] font-normal uppercase tracking-[1px] text-white/95 no-underline';
+const frostedButtonClass = 'border-white/30 bg-white/15 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] hover:border-white/50 hover:bg-white/20';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -61,7 +36,7 @@ const Navbar = () => {
         translateY: [-8, 0],
         duration: 360,
         delay: stagger(36),
-        ease: 'outCubic',
+        ease: 'outCubic'
       });
     });
   }, [isOpen]);
@@ -93,215 +68,181 @@ const Navbar = () => {
 
   const isAdmin = user?.role === 'ROLE_ADMIN_HOTEL' || user?.role === 'ROLE_ADMIN_APP';
 
-  const preferenceControls = (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-      <div style={{
-        position: 'relative',
-        display: 'grid',
-        gridTemplateColumns: '30px 38px 38px',
-        alignItems: 'center',
-        height: 40,
-        padding: 3,
-        border: '1px solid rgba(255,255,255,0.26)',
-        background: 'linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.07))',
-        borderRadius: 999,
-        overflow: 'hidden',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.18), 0 10px 22px rgba(0,0,0,0.12)'
-      }}>
-        <Globe size={13} style={{ color: 'rgba(255,255,255,0.86)', justifySelf: 'center', zIndex: 2 }} />
-        <span style={{
-          position: 'absolute',
-          top: 3,
-          bottom: 3,
-          left: 33,
-          width: 38,
-          borderRadius: 999,
-          background: 'linear-gradient(135deg, #F6D365, #F9E39A)',
-          boxShadow: '0 6px 18px rgba(0,0,0,0.16)',
-          transform: language === 'id' ? 'translateX(0)' : 'translateX(38px)',
-          transition: 'transform 0.32s cubic-bezier(0.16, 1, 0.3, 1)',
-        }} />
-        {['id', 'en'].map((lang) => (
-          <button
-            key={lang}
-            type="button"
-            onClick={() => setLanguage(lang)}
-            title={t('nav.language')}
-            style={{
-              height: 34,
-              width: 38,
-              border: 'none',
-              cursor: 'pointer',
-              position: 'relative',
-              zIndex: 2,
-              borderRadius: 999,
-              background: 'transparent',
-              color: language === lang ? '#15314F' : 'rgba(255,255,255,0.9)',
-              fontFamily: 'var(--font-body)',
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              letterSpacing: '0.7px',
-              lineHeight: 1,
-              textTransform: 'uppercase',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'color 0.24s ease, transform 0.24s ease',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
-          >
+  const preferenceControls =
+  <div className="[display:flex] [align-items:center] [gap:0.5rem]">
+      <div className="[position:relative] [display:grid] [grid-template-columns:30px_38px_38px] [align-items:center] [height:40px] [padding:3px] [border:1px_solid_rgba(255,255,255,0.26)] [background:linear-gradient(135deg,_rgba(255,255,255,0.16),_rgba(255,255,255,0.07))] [border-radius:999px] [overflow:hidden] [box-shadow:inset_0_1px_0_rgba(255,255,255,0.18),_0_10px_22px_rgba(0,0,0,0.12)]">
+
+
+
+
+
+
+
+
+
+
+
+      
+        <Globe size={13} className="[color:rgba(255,255,255,0.86)] [justify-self:center] [z-index:2]" />
+        <span className={cn(
+          'absolute bottom-[3px] left-[33px] top-[3px] w-[38px] rounded-full bg-gradient-to-br from-[#F6D365] to-[#F9E39A]',
+          'shadow-[0_6px_18px_rgba(0,0,0,0.16)] transition-transform duration-300 ease-out',
+          language === 'id' ? 'translate-x-0' : 'translate-x-[38px]',
+        )} />
+        {['id', 'en'].map((lang) =>
+      <button
+        key={lang}
+        type="button"
+        onClick={() => setLanguage(lang)}
+        title={t('nav.language')}
+        className={cn(
+          'relative z-[2] flex h-[34px] w-[38px] cursor-pointer items-center justify-center rounded-full border-0 bg-transparent',
+          'font-[var(--font-body)] text-[0.7rem] font-bold uppercase leading-none tracking-[0.7px] transition hover:-translate-y-px',
+          language === lang ? 'text-[#15314F]' : 'text-white/90',
+        )}>
+        
             {lang}
           </button>
-        ))}
+      )}
       </div>
-    </div>
-  );
+    </div>;
+
 
   return (
     <>
-    <nav className="site-navbar" style={{
-      background: 'linear-gradient(135deg, rgba(9, 31, 59, 0.9), rgba(30, 78, 128, 0.76)), radial-gradient(circle at 18% 10%, rgba(246,211,101,0.18), transparent 32%), radial-gradient(circle at 82% 0%, rgba(122,183,240,0.18), transparent 30%)',
-      backdropFilter: 'blur(22px) saturate(165%)',
-      WebkitBackdropFilter: 'blur(22px) saturate(165%)',
-      borderBottom: '1px solid rgba(255,255,255,0.2)',
-      boxShadow: '0 16px 40px rgba(15, 48, 90, 0.22)',
-      position: 'sticky',
-      top: 0,
-      zIndex: 100
-    }}>
-      <div className="site-navbar-inner" style={{ maxWidth: 1280, margin: '0 auto', padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 76 }}>
+    <nav className="site-navbar [background:linear-gradient(135deg,_rgba(9,_31,_59,_0.9),_rgba(30,_78,_128,_0.76)),_radial-gradient(circle_at_18%_10%,_rgba(246,211,101,0.18),_transparent_32%),_radial-gradient(circle_at_82%_0%,_rgba(122,183,240,0.18),_transparent_30%)] [backdrop-filter:blur(22px)_saturate(165%)] [-webkit-backdrop-filter:blur(22px)_saturate(165%)] [border-bottom:1px_solid_rgba(255,255,255,0.2)] [box-shadow:0_16px_40px_rgba(15,_48,_90,_0.22)] [position:sticky] [top:0] [z-index:100]">
+
+
+
+
+
+
+
+
+        
+      <div className="site-navbar-inner [max-width:1280px] [margin:0_auto] [padding:0_1.5rem] [display:flex] [align-items:center] [justify-content:space-between] [height:76px]">
 
         {/* Logo */}
-        <Link to="/" style={{ textDecoration: 'none' }}>
-          <div className="brand-logo" style={{
-            fontFamily: 'var(--font-heading)',
-            fontWeight: 400,
-            fontSize: '1.8rem',
-            color: 'white',
-            letterSpacing: '1px',
-            textShadow: '0 10px 26px rgba(0,0,0,0.22)'
-          }}>
-            NgiNep<span style={{ color: '#F6D365' }}>.</span>
+        <Link to="/" className="[text-decoration:none]">
+          <div className="brand-logo [font-family:var(--font-heading)] [font-weight:400] [font-size:1.8rem] [color:white] [letter-spacing:1px] [text-shadow:0_10px_26px_rgba(0,0,0,0.22)]">
+
+
+
+
+
+
+              
+            NgiNep<span className="[color:#F6D365]">.</span>
           </div>
         </Link>
 
         {/* Desktop Nav */}
-        <div style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }} className="hidden-mobile site-navbar-links">
-          <Link to="/" className="nav-link-luxury" style={navLinkStyle}>{t('nav.home')}</Link>
-          <Link to="/hotels" className="nav-link-luxury" style={navLinkStyle}>{t('nav.hotels')}</Link>
-          <Link to="/about" className="nav-link-luxury" style={navLinkStyle}>{t('nav.about')}</Link>
-          {isAdmin && <Link to="/admin/dashboard" className="nav-link-luxury" style={{ ...navLinkStyle, color: '#F6D365' }}>{t('nav.admin')}</Link>}
+        <div className="hidden-mobile site-navbar-links [display:flex] [gap:2.5rem] [align-items:center]">
+          <Link to="/" className={navLinkClass}>{t('nav.home')}</Link>
+          <Link to="/hotels" className={navLinkClass}>{t('nav.hotels')}</Link>
+          <Link to="/about" className={navLinkClass}>{t('nav.about')}</Link>
+          {isAdmin && <Link to="/admin/dashboard" className={cn(navLinkClass, 'text-[#F6D365]')}>{t('nav.admin')}</Link>}
         </div>
 
         {/* Desktop Auth */}
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }} className="hidden-mobile site-navbar-actions">
+        <div className="hidden-mobile site-navbar-actions [display:flex] [gap:1rem] [align-items:center]">
           {preferenceControls}
-          {user ? (
-            <div style={{ position: 'relative' }}>
+          {user ?
+            <div className="[position:relative]">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="btn btn-white btn-sm navbar-control-button"
-                style={{ ...frostedButtonStyle, gap: '0.5rem', display: 'flex', alignItems: 'center', height: 40, padding: '0 1.25rem' }}
-              >
+                className={cn('btn btn-white btn-sm navbar-control-button flex h-10 items-center gap-2 px-5', frostedButtonClass)}>
+                
                 <User size={14} />
                 <span>{t('nav.greeting', { name: user.first_name })}</span>
                 <ChevronDown size={12} />
               </button>
-              <div style={{
-                position: 'absolute', right: 0, top: 'calc(100% + 8px)', width: 220,
-                background: 'var(--color-surface-solid)', border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-float)', zIndex: 100,
-                borderRadius: 'var(--radius-sm)', overflow: 'hidden',
-                transformOrigin: 'top right',
-                transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                opacity: dropdownOpen ? 1 : 0,
-                transform: dropdownOpen ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(-8px)',
-                pointerEvents: dropdownOpen ? 'auto' : 'none',
-              }}>
-                <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--color-accent)', background: 'var(--color-surface-solid)' }}>
-                  <p style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '0.85rem', margin: 0, color: 'var(--color-text)' }}>{user.first_name} {user.last_name}</p>
-                  <span className="badge" style={{ marginTop: 6, fontSize: '0.65rem', background: 'rgba(44,82,130,0.1)', color: 'var(--color-primary)', borderColor: 'transparent' }}>{user.role?.replace('ROLE_', '')}</span>
+              <div className={cn(
+                'absolute right-0 top-[calc(100%+8px)] z-[100] w-[220px] origin-top-right overflow-hidden rounded-lg',
+                'border border-[var(--color-accent)] bg-[var(--color-surface-solid)] shadow-[var(--shadow-float)] transition duration-300',
+                dropdownOpen ? 'pointer-events-auto translate-y-0 scale-100 opacity-100' : 'pointer-events-none -translate-y-2 scale-95 opacity-0',
+              )}>
+                <div className="[padding:1rem_1.25rem] [border-bottom:1px_solid_var(--color-accent)] [background:var(--color-surface-solid)]">
+                  <p className="[font-family:var(--font-body)] [font-weight:400] [font-size:0.85rem] [margin:0] [color:var(--color-text)]">{user.first_name} {user.last_name}</p>
+                  <span className="badge [margin-top:6px] [font-size:0.65rem] [background:rgba(44,82,130,0.1)] [color:var(--color-primary)] [border-color:transparent]">{user.role?.replace('ROLE_', '')}</span>
                 </div>
-                {user.role === 'ROLE_USER' && (
-                  <Link to="/my-bookings" onClick={() => setDropdownOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.85rem 1.25rem', textDecoration: 'none', color: 'var(--color-text)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', borderBottom: '1px solid var(--color-accent)', transition: 'background 0.3s' }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'var(--color-background)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                {user.role === 'ROLE_USER' &&
+                <Link to="/my-bookings" onClick={() => setDropdownOpen(false)}
+                className="flex items-center gap-2 border-b border-[var(--color-accent)] px-5 py-3.5 text-[0.8rem] uppercase tracking-[1px] text-[var(--color-text)] no-underline transition hover:bg-[var(--color-background)]">
                     <Calendar size={14} /> {t('nav.myBookings')}
                   </Link>
-                )}
-                <Link to="/profile" onClick={() => setDropdownOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.85rem 1.25rem', textDecoration: 'none', color: 'var(--color-text)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', borderBottom: '1px solid var(--color-accent)', transition: 'background 0.3s' }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'var(--color-background)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                }
+                <Link to="/profile" onClick={() => setDropdownOpen(false)}
+                className="flex items-center gap-2 border-b border-[var(--color-accent)] px-5 py-3.5 text-[0.8rem] uppercase tracking-[1px] text-[var(--color-text)] no-underline transition hover:bg-[var(--color-background)]">
                   <User size={14} /> {t('nav.profile')}
                 </Link>
-                <button onClick={requestLogout} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.85rem 1.25rem', background: 'none', border: 'none', cursor: 'pointer', color: '#E53E3E', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px', width: '100%', textAlign: 'left', transition: 'background 0.3s' }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'var(--color-background)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                <button onClick={requestLogout}
+                className="flex w-full cursor-pointer items-center gap-2 border-0 bg-transparent px-5 py-3.5 text-left text-[0.8rem] uppercase tracking-[1px] text-[#E53E3E] transition hover:bg-[var(--color-background)]">
                   <LogOut size={14} /> {t('nav.logout')}
                 </button>
               </div>
-            </div>
-          ) : (
+            </div> :
+
             <>
-              <Link to="/login" className="btn btn-white btn-sm navbar-control-button" style={{ ...frostedButtonStyle, height: 40, padding: '0 1.5rem', display: 'flex', alignItems: 'center' }}>{t('nav.signIn')}</Link>
-              <Link to="/register" className="btn btn-primary btn-sm navbar-control-button" style={{ height: 40, padding: '0 1.5rem', display: 'flex', alignItems: 'center', background: '#F6D365', color: '#15314F', borderColor: 'transparent' }}>{t('nav.signUp')}</Link>
+              <Link to="/login" className={cn('btn btn-white btn-sm navbar-control-button flex h-10 items-center px-6', frostedButtonClass)}>{t('nav.signIn')}</Link>
+              <Link to="/register" className="btn btn-primary btn-sm navbar-control-button [height:40px] [padding:0_1.5rem] [display:flex] [align-items:center] [background:#F6D365] [color:#15314F] [border-color:transparent]">{t('nav.signUp')}</Link>
             </>
-          )}
+            }
         </div>
 
         {/* Mobile Hamburger */}
-        <button onClick={() => setIsOpen(!isOpen)} style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)', padding: '0.5rem', cursor: 'pointer', display: 'none', borderRadius: 'var(--radius-sm)', color: 'white' }} className="show-mobile site-navbar-menu-button">
+        <button onClick={() => setIsOpen(!isOpen)} className="show-mobile site-navbar-menu-button [background:rgba(255,255,255,0.12)] [border:1px_solid_rgba(255,255,255,0.25)] [padding:0.5rem] [cursor:pointer] [display:none] [border-radius:var(--radius-sm)] [color:white]">
           {isOpen ? <X size={18} /> : <Menu size={18} />}
         </button>
       </div>
 
       {/* Mobile Menu */}
-      {isOpen && (
-        <div className="site-mobile-menu" style={{
-          borderTop: '1px solid rgba(255,255,255,0.16)',
-          background: 'linear-gradient(135deg, rgba(14,45,82,0.94), rgba(37,99,154,0.86))',
-          backdropFilter: 'blur(16px) saturate(140%)',
-          WebkitBackdropFilter: 'blur(16px) saturate(140%)',
-          padding: '1.5rem',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1.25rem',
-          boxShadow: '0 18px 35px rgba(15,48,90,0.22)'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+      {isOpen &&
+        <div className="site-mobile-menu [border-top:1px_solid_rgba(255,255,255,0.16)] [background:linear-gradient(135deg,_rgba(14,45,82,0.94),_rgba(37,99,154,0.86))] [backdrop-filter:blur(16px)_saturate(140%)] [-webkit-backdrop-filter:blur(16px)_saturate(140%)] [padding:1.5rem] [display:flex] [flex-direction:column] [gap:1.25rem] [box-shadow:0_18px_35px_rgba(15,48,90,0.22)]">
+
+
+
+
+
+
+
+
+
+          
+          <div className="[display:flex] [justify-content:space-between] [align-items:center] [gap:1rem]">
             {preferenceControls}
           </div>
-          <Link to="/" onClick={() => setIsOpen(false)} className="mobile-nav-link-luxury" style={mobileLinkStyle}>{t('nav.home')}</Link>
-          <Link to="/hotels" onClick={() => setIsOpen(false)} className="mobile-nav-link-luxury" style={mobileLinkStyle}>{t('nav.hotels')}</Link>
-          <Link to="/about" onClick={() => setIsOpen(false)} className="mobile-nav-link-luxury" style={mobileLinkStyle}>{t('nav.about')}</Link>
-          {user ? (
-            <>
-              {user.role === 'ROLE_USER' && <Link to="/my-bookings" onClick={() => setIsOpen(false)} className="btn btn-white btn-sm" style={{ ...frostedButtonStyle, textAlign: 'center', justifyContent: 'center' }}>{t('nav.myBookings')}</Link>}
-              <Link to="/profile" onClick={() => setIsOpen(false)} className="btn btn-white btn-sm" style={{ ...frostedButtonStyle, textAlign: 'center', justifyContent: 'center' }}>{t('nav.profile')}</Link>
-              <button onClick={requestLogout} className="btn btn-primary btn-sm navbar-control-button" style={{ background: '#E53E3E', color: 'white', justifyContent: 'center' }}>{t('nav.logout')}</button>
+          <Link to="/" onClick={() => setIsOpen(false)} className={mobileLinkClass}>{t('nav.home')}</Link>
+          <Link to="/hotels" onClick={() => setIsOpen(false)} className={mobileLinkClass}>{t('nav.hotels')}</Link>
+          <Link to="/about" onClick={() => setIsOpen(false)} className={mobileLinkClass}>{t('nav.about')}</Link>
+          {user ?
+          <>
+              {user.role === 'ROLE_USER' && <Link to="/my-bookings" onClick={() => setIsOpen(false)} className={cn('btn btn-white btn-sm justify-center text-center', frostedButtonClass)}>{t('nav.myBookings')}</Link>}
+              <Link to="/profile" onClick={() => setIsOpen(false)} className={cn('btn btn-white btn-sm justify-center text-center', frostedButtonClass)}>{t('nav.profile')}</Link>
+              <button onClick={requestLogout} className="btn btn-primary btn-sm navbar-control-button [background:#E53E3E] [color:white] [justify-content:center]">{t('nav.logout')}</button>
+            </> :
+
+          <>
+              <Link to="/login" onClick={() => setIsOpen(false)} className={cn('btn btn-white btn-sm navbar-control-button justify-center text-center', frostedButtonClass)}>{t('nav.signIn')}</Link>
+              <Link to="/register" onClick={() => setIsOpen(false)} className="btn btn-primary btn-sm navbar-control-button [text-align:center] [justify-content:center] [background:#F6D365] [color:#15314F] [border-color:transparent]">{t('nav.signUp')}</Link>
             </>
-          ) : (
-            <>
-              <Link to="/login" onClick={() => setIsOpen(false)} className="btn btn-white btn-sm navbar-control-button" style={{ ...frostedButtonStyle, textAlign: 'center', justifyContent: 'center' }}>{t('nav.signIn')}</Link>
-              <Link to="/register" onClick={() => setIsOpen(false)} className="btn btn-primary btn-sm navbar-control-button" style={{ textAlign: 'center', justifyContent: 'center', background: '#F6D365', color: '#15314F', borderColor: 'transparent' }}>{t('nav.signUp')}</Link>
-            </>
-          )}
+          }
         </div>
-      )}
+        }
     </nav>
     <LogoutConfirmModal
-      open={logoutConfirmOpen}
-      loading={logoutLoading}
-      title={t('nav.logoutConfirmTitle')}
-      message={t('nav.logoutConfirmMessage')}
-      confirmLabel={t('nav.logoutConfirmAction')}
-      cancelLabel={t('nav.logoutCancelAction')}
-      loadingLabel={t('nav.logoutLoading')}
-      onConfirm={confirmLogout}
-      onCancel={cancelLogout}
-    />
-    </>
-  );
+        open={logoutConfirmOpen}
+        loading={logoutLoading}
+        title={t('nav.logoutConfirmTitle')}
+        message={t('nav.logoutConfirmMessage')}
+        confirmLabel={t('nav.logoutConfirmAction')}
+        cancelLabel={t('nav.logoutCancelAction')}
+        loadingLabel={t('nav.logoutLoading')}
+        onConfirm={confirmLogout}
+        onCancel={cancelLogout} />
+      
+    </>);
+
 };
 
 export default Navbar;

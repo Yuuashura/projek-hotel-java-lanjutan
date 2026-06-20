@@ -17,21 +17,27 @@ const LogoutConfirmModal = ({
   const [closing, setClosing] = useState(false);
 
   useEffect(() => {
+    let openTimer;
     if (open) {
-      setVisible(true);
-      setClosing(false);
-      return undefined;
+      openTimer = window.setTimeout(() => {
+        setVisible(true);
+        setClosing(false);
+      }, 0);
+      return () => window.clearTimeout(openTimer);
     }
 
     if (!visible) return undefined;
 
-    setClosing(true);
+    openTimer = window.setTimeout(() => setClosing(true), 0);
     const timer = window.setTimeout(() => {
       setVisible(false);
       setClosing(false);
     }, 240);
 
-    return () => window.clearTimeout(timer);
+    return () => {
+      window.clearTimeout(openTimer);
+      window.clearTimeout(timer);
+    };
   }, [open, visible]);
 
   if (!visible || typeof document === 'undefined') return null;

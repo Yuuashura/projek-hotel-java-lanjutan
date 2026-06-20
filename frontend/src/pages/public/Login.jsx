@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Eye, EyeOff, AlertCircle } from 'lucide-react';
@@ -68,9 +68,9 @@ const Login = () => {
       <div className="auth-shell animate-slide-in">
         {/* Logo */}
         <div className="auth-header">
-          <Link to="/" style={{ textDecoration: 'none' }}>
+          <Link to="/" className="[text-decoration:none]">
             <div className="auth-brand">
-              NgiNep<span style={{ color: 'var(--color-primary)' }}>.</span>
+              NgiNep<span className="[color:var(--color-primary)]">.</span>
             </div>
           </Link>
           <h1>Masuk ke Akun Anda</h1>
@@ -82,34 +82,34 @@ const Login = () => {
           <div className="auth-card-accent" />
 
           {/* Error Alert */}
-          {error && (
-            <div className="alert-danger" style={{ padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
-              <AlertCircle size={16} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
-              <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.85rem' }}>{error}</span>
+          {error &&
+          <div className="alert-danger [padding:0.875rem_1rem] [margin-bottom:1.5rem] [display:flex] [gap:0.5rem] [align-items:center] [border-radius:var(--radius-sm)]">
+              <AlertCircle size={16} className="[color:var(--color-danger)] [flex-shrink:0]" />
+              <span className="[font-weight:300] [color:var(--color-danger)] [font-size:0.85rem]">{error}</span>
             </div>
-          )}
+          }
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <form onSubmit={handleSubmit} className="[display:flex] [flex-direction:column] [gap:1.5rem]">
             <div className="auth-field">
               <label className="label">Alamat Email</label>
-              <input className="input" type="email" placeholder="nama@email.com" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required />
+              <input className="input" type="email" placeholder="nama@email.com" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} required />
             </div>
             <div className="auth-field">
               <label className="label">Password</label>
-              <div style={{ position: 'relative' }}>
-                <input className="input" style={{ paddingRight: '2.5rem' }} type={showPw ? 'text' : 'password'} placeholder="Masukkan password Anda" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required />
-                <button type="button" onClick={() => setShowPw(!showPw)} style={{ position: 'absolute', right: '0.875rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)' }}>
+              <div className="[position:relative]">
+                <input className="input [padding-right:2.5rem]" type={showPw ? 'text' : 'password'} placeholder="Masukkan password Anda" value={form.password} onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))} required />
+                <button type="button" onClick={() => setShowPw(!showPw)} className="[position:absolute] [right:0.875rem] [top:50%] [transform:translateY(-50%)] [background:none] [border:none] [cursor:pointer] [color:var(--color-muted)]">
                   {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-              <div style={{ textAlign: 'right', marginTop: '0.65rem' }}>
-                <Link to="/forgot-password" style={{ color: 'var(--color-primary)', fontWeight: 700, fontSize: '0.82rem', textDecoration: 'none' }}>
+              <div className="[text-align:right] [margin-top:0.65rem]">
+                <Link to="/forgot-password" className="[color:var(--color-primary)] [font-weight:700] [font-size:0.82rem] [text-decoration:none]">
                   Lupa Password?
                 </Link>
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary btn-full" disabled={loading} style={{ height: 50, marginTop: '0.5rem', background: 'var(--color-primary)', opacity: loading ? 0.7 : 1 }}>
+            <button type="submit" className="btn btn-primary btn-full mt-2 h-[50px] bg-[var(--color-primary)] disabled:opacity-70" disabled={loading}>
               {loading ? <><span className="btn-spinner" /> Memproses...</> : 'Masuk Sekarang'}
             </button>
           </form>
@@ -119,8 +119,8 @@ const Login = () => {
           Dengan masuk, Anda menyetujui <a href="#">Syarat & Ketentuan</a> NgiNep.
         </p>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Login;

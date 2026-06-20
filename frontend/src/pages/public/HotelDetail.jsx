@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { cn } from '../../lib/utils';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   Star,
@@ -16,8 +17,8 @@ import {
   Coffee,
   Utensils,
   WashingMachine,
-  AlertCircle,
-} from 'lucide-react';
+  AlertCircle } from
+'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 import { useAuth } from '../../context/AuthContext';
 import { usePreferences } from '../../context/PreferencesContext';
@@ -29,7 +30,7 @@ const ROOM_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1590490360182-c33
 
 const getImageUrl = (image) => {
   if (!image) return '';
-  const path = typeof image === 'string' ? image : (image.image_url || image.imageUrl || image.url || '');
+  const path = typeof image === 'string' ? image : image.image_url || image.imageUrl || image.url || '';
   if (!path) return '';
   if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
     return path;
@@ -50,7 +51,7 @@ const facilityIconMap = {
   coffee: Coffee,
   elevator: Check,
   utensils: Utensils,
-  'washing-machine': WashingMachine,
+  'washing-machine': WashingMachine
 };
 
 const normalizeFacility = (item) => {
@@ -62,7 +63,7 @@ const normalizeFacility = (item) => {
   return {
     id: source.id_facility || source.idFacility || source.id || item.facility_id || item.facilityId || name,
     name,
-    icon: source.icon || item.icon || 'check',
+    icon: source.icon || item.icon || 'check'
   };
 };
 
@@ -84,9 +85,9 @@ const HotelDetail = () => {
     const fetchDetail = async () => {
       setLoading(true);
       const [hotelResult, availabilityResult] = await Promise.allSettled([
-        api.get(`/api/hotels/${id}`),
-        api.get(`/api/bookings/availability/hotel/${id}`),
-      ]);
+      api.get(`/api/hotels/${id}`),
+      api.get(`/api/bookings/availability/hotel/${id}`)]
+      );
 
       if (hotelResult.status !== 'fulfilled') {
         navigate('/hotels');
@@ -115,10 +116,10 @@ const HotelDetail = () => {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '70vh', display: 'grid', placeItems: 'center', padding: '2rem' }}>
+      <div className="[min-height:70vh] [display:grid] [place-items:center] [padding:2rem]">
         <LoadingState text={t('common.loadingHotel')} />
-      </div>
-    );
+      </div>);
+
   }
   if (!hotel) return null;
 
@@ -130,28 +131,28 @@ const HotelDetail = () => {
   }, {});
   const hasDiscount = (hotel.onSale || hotel.on_sale) && (hotel.discountPercent > 0 || hotel.discount_percent > 0);
   const discountPercent = hotel.discountPercent || hotel.discount_percent || 0;
-  const selectedRoom = roomTypes.find(r => (r.id_room_type || r.idRoomType) === activeRoom);
+  const selectedRoom = roomTypes.find((r) => (r.id_room_type || r.idRoomType) === activeRoom);
   const selectedRoomFullPeriods = selectedRoom ? roomFullPeriodsByRoom[activeRoom] || [] : [];
   const selectedRoomAvailable = getRoomAvailability(selectedRoom);
   const selectedRoomUnavailable = selectedRoom && selectedRoomAvailable <= 0;
-  const hotelFacilities = (hotel.facilities || hotel.hotelFacilities || [])
-    .map(normalizeFacility)
-    .filter(Boolean);
+  const hotelFacilities = (hotel.facilities || hotel.hotelFacilities || []).
+  map(normalizeFacility).
+  filter(Boolean);
 
   const uploadedImages = hotel.images?.map(getImageUrl).filter(Boolean) || [];
   const images = uploadedImages.length > 0 ? uploadedImages : [HOTEL_FALLBACK_IMAGE];
 
   return (
-    <div className="hotel-detail-page" style={{ background: 'var(--color-background)', minHeight: '100vh', padding: '4rem 1.5rem' }}>
-      <div style={{ maxWidth: 1300, margin: '0 auto' }}>
+    <div className="hotel-detail-page [background:var(--color-background)] [min-height:100vh] [padding:4rem_1.5rem]">
+      <div className="[max-width:1300px] [margin:0_auto]">
         
         {/* Back Link */}
-        <Link to="/hotels" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontFamily: 'var(--font-body)', fontWeight: 400, textDecoration: 'none', color: 'var(--color-text)', marginBottom: '2.5rem', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>
+        <Link to="/hotels" className="[display:inline-flex] [align-items:center] [gap:0.5rem] [font-family:var(--font-body)] [font-weight:400] [text-decoration:none] [color:var(--color-text)] [margin-bottom:2.5rem] [text-transform:uppercase] [font-size:0.75rem] [letter-spacing:1px]">
           <ArrowLeft size={14} /> {t('hotelDetail.back')}
         </Link>
 
         <section className={`hotel-gallery ${images.length === 1 ? 'single' : ''}`} aria-label={t('hotelDetail.gallery')}>
-          <button type="button" className="hotel-gallery-main" onClick={() => { setActiveImg(0); setLightboxOpen(true); }}>
+          <button type="button" className="hotel-gallery-main" onClick={() => {setActiveImg(0);setLightboxOpen(true);}}>
             <img src={images[0]} alt={`${hotel.name} - foto utama`} />
             <span className="hotel-gallery-shade" />
             <span className="hotel-gallery-caption">
@@ -160,250 +161,256 @@ const HotelDetail = () => {
             </span>
           </button>
 
-          {images.length > 1 && (
-            <div className="hotel-gallery-thumbs">
+          {images.length > 1 &&
+          <div className="hotel-gallery-thumbs">
               {[1, 2, 3, 4].map((slot) => {
-                const imageIndex = Math.min(slot, images.length - 1);
-                const showMore = slot === 4 && images.length > 5;
-                return (
-                  <button
-                    type="button"
-                    key={slot}
-                    className="hotel-gallery-thumb"
-                    onClick={() => { setActiveImg(imageIndex); setLightboxOpen(true); }}
-                  >
+              const imageIndex = Math.min(slot, images.length - 1);
+              const showMore = slot === 4 && images.length > 5;
+              return (
+                <button
+                  type="button"
+                  key={slot}
+                  className="hotel-gallery-thumb"
+                  onClick={() => {setActiveImg(imageIndex);setLightboxOpen(true);}}>
+                  
                     <img src={images[imageIndex]} alt={`${hotel.name} - foto ${imageIndex + 1}`} />
                     {showMore && <span className="hotel-gallery-more">{t('hotelDetail.morePhotos', { count: images.length - 4 })}</span>}
-                  </button>
-                );
-              })}
+                  </button>);
+
+            })}
             </div>
-          )}
+          }
         </section>
 
         {/* SPLIT LAYOUT */}
-        <div className="hotel-detail-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '3.5rem', alignItems: 'flex-start' }}>
+        <div className="hotel-detail-layout [display:grid] [grid-template-columns:1fr_400px] [gap:3.5rem] [align-items:flex-start]">
           
           {/* LEFT COLUMN: Info, Amenities, Room Matrix */}
           <div>
-            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+            <div className="[display:flex] [gap:0.75rem] [flex-wrap:wrap] [margin-bottom:1rem]">
               <span className="badge badge-yellow">{hotel.city?.name}</span>
               <span className="badge badge-gray">{hotel.type || t('hotelDetail.luxuryResort')}</span>
-              {hotel.featured && <span className="badge badge-yellow" style={{ background: 'var(--color-primary)', color: 'white' }}>{t('common.featured')}</span>}
+              {hotel.featured && <span className="badge badge-yellow [background:var(--color-primary)] [color:white]">{t('common.featured')}</span>}
             </div>
             
-            <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '3rem', margin: '0 0 1rem', color: 'var(--color-text)', lineHeight: 1.1 }}>{hotel.name}</h1>
+            <h1 className="[font-family:var(--font-heading)] [font-weight:300] [font-size:3rem] [margin:0_0_1rem] [color:var(--color-text)] [line-height:1.1]">{hotel.name}</h1>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap', marginBottom: '2rem', borderBottom: '1px solid var(--color-accent)', paddingBottom: '1.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--color-primary)', fontWeight: 400 }}>
+            <div className="[display:flex] [align-items:center] [gap:2rem] [flex-wrap:wrap] [margin-bottom:2rem] [border-bottom:1px_solid_var(--color-accent)] [padding-bottom:1.5rem]">
+              <div className="[display:flex] [align-items:center] [gap:0.25rem] [color:var(--color-primary)] [font-weight:400]">
                 <Star size={14} fill="var(--color-primary)" /> {hotel.rating?.toFixed(1) || '4.5'} {t('common.rating')}
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--color-muted)', fontSize: '0.9rem', fontWeight: 300 }}>
+              <div className="[display:flex] [align-items:center] [gap:0.25rem] [color:var(--color-muted)] [font-size:0.9rem] [font-weight:300]">
                 <MapPin size={14} /> {hotel.address}
               </div>
             </div>
 
-            <p style={{ color: 'var(--color-text)', lineHeight: 1.8, fontWeight: 300, fontSize: '1rem', marginBottom: '3rem' }}>
+            <p className="[color:var(--color-text)] [line-height:1.8] [font-weight:300] [font-size:1rem] [margin-bottom:3rem]">
               {hotel.description || t('hotelDetail.defaultDescription')}
             </p>
 
             {/* AMENITIES */}
-            <div style={{ marginBottom: '4rem' }}>
-              <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.8rem', marginBottom: '1.5rem', color: 'var(--color-text)' }}>{t('hotelDetail.facilities')}</h3>
-              {hotelFacilities.length > 0 ? (
-                <div className="hotel-detail-facilities-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
-                  {hotelFacilities.map(f => {
-                    const iconKey = String(f.icon || '').toLowerCase();
-                    const FacilityIcon = facilityIconMap[iconKey] || Check;
-                    return (
-                    <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--color-text)', fontSize: '0.9rem', fontWeight: 300 }}>
-                      <div style={{ background: 'var(--color-background)', width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--color-accent)' }}>
-                        <FacilityIcon size={14} style={{ color: 'var(--color-primary)' }} />
+            <div className="[margin-bottom:4rem]">
+              <h3 className="[font-family:var(--font-heading)] [font-weight:300] [font-size:1.8rem] [margin-bottom:1.5rem] [color:var(--color-text)]">{t('hotelDetail.facilities')}</h3>
+              {hotelFacilities.length > 0 ?
+              <div className="hotel-detail-facilities-grid [display:grid] [grid-template-columns:1fr_1fr] [gap:1.25rem]">
+                  {hotelFacilities.map((f) => {
+                  const iconKey = String(f.icon || '').toLowerCase();
+                  const FacilityIcon = facilityIconMap[iconKey] || Check;
+                  return (
+                    <div key={f.id} className="[display:flex] [align-items:center] [gap:0.75rem] [color:var(--color-text)] [font-size:0.9rem] [font-weight:300]">
+                      <div className="[background:var(--color-background)] [width:32px] [height:32px] [border-radius:50%] [display:flex] [align-items:center] [justify-content:center] [border:1px_solid_var(--color-accent)]">
+                        <FacilityIcon size={14} className="[color:var(--color-primary)]" />
                       </div>
                       <span>{f.name}</span>
-                    </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p style={{ color: 'var(--color-muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>
+                    </div>);
+
+                })}
+                </div> :
+
+              <p className="[color:var(--color-muted)] [font-size:0.9rem] [line-height:1.6]">
                   {t('hotelDetail.noFacilities')}
                 </p>
-              )}
+              }
             </div>
 
             {/* ROOM MATRIX */}
-            {roomTypes.length > 0 && (
-              <div>
-                <h3 id="room-matrix" style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.8rem', marginBottom: '1.5rem', color: 'var(--color-text)' }}>{t('hotelDetail.rooms')}</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                  {roomTypes.map(room => {
-                    const roomId = room.id_room_type || room.idRoomType;
-                    const isSelected = activeRoom === roomId;
-                    const roomAvailable = getRoomAvailability(room);
-                    const roomUnavailable = roomAvailable <= 0;
-                    const fullPeriods = roomFullPeriodsByRoom[roomId] || [];
-                    const roomFacilities = (room.facilities || [])
-                      .map(normalizeFacility)
-                      .filter(Boolean);
-                    return (
-                      <div key={roomId} className="hotel-detail-room-card" onClick={() => setActiveRoom(roomId)}
-                        style={{
-                          display: 'flex', minHeight: 180, cursor: 'pointer', borderRadius: 'var(--radius-sm)', overflow: 'hidden',
-                          border: isSelected ? '1px solid var(--color-primary)' : '1px solid var(--color-accent)',
-                          background: isSelected ? 'var(--color-surface)' : 'transparent',
-                          boxShadow: isSelected ? 'var(--shadow-hover)' : 'none',
-                          transition: 'all 0.3s ease'
-                        }}>
-                        <div className="hotel-detail-room-media" style={{ width: 220, height: '100%', flexShrink: 0, overflow: 'hidden' }}>
-                          <img src={getImageUrl(room.images?.[0]) || ROOM_FALLBACK_IMAGE} alt={room.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            {roomTypes.length > 0 &&
+            <div>
+                <h3 id="room-matrix" className="[font-family:var(--font-heading)] [font-weight:300] [font-size:1.8rem] [margin-bottom:1.5rem] [color:var(--color-text)]">{t('hotelDetail.rooms')}</h3>
+                <div className="[display:flex] [flex-direction:column] [gap:1.5rem]">
+                  {roomTypes.map((room) => {
+                  const roomId = room.id_room_type || room.idRoomType;
+                  const isSelected = activeRoom === roomId;
+                  const roomAvailable = getRoomAvailability(room);
+                  const roomUnavailable = roomAvailable <= 0;
+                  const fullPeriods = roomFullPeriodsByRoom[roomId] || [];
+                  const roomFacilities = (room.facilities || []).
+                  map(normalizeFacility).
+                  filter(Boolean);
+                  return (
+                    <div key={roomId} onClick={() => setActiveRoom(roomId)}
+                    className={cn(
+                      'hotel-detail-room-card flex min-h-[180px] cursor-pointer overflow-hidden rounded-lg border transition duration-300',
+                      isSelected
+                        ? 'border-[var(--color-primary)] bg-[var(--color-surface)] shadow-[var(--shadow-hover)]'
+                        : 'border-[var(--color-accent)] bg-transparent shadow-none',
+                    )}>
+                        <div className="hotel-detail-room-media [width:220px] [height:100%] [flex-shrink:0] [overflow:hidden]">
+                          <img src={getImageUrl(room.images?.[0]) || ROOM_FALLBACK_IMAGE} alt={room.name} className="[width:100%] [height:100%] [object-fit:cover]" />
                         </div>
                         {/* Room description */}
-                        <div className="hotel-detail-room-body" style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div className="hotel-detail-room-body [padding:1.5rem] [flex:1] [display:flex] [flex-direction:column] [justify-content:space-between]">
                           <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                              <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', margin: 0, fontWeight: 300, color: 'var(--color-text)' }}>{room.name}</h4>
-                              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <span className="badge" style={{ fontSize: '0.65rem', background: roomUnavailable ? 'rgba(229,62,62,0.1)' : roomAvailable > 3 ? 'rgba(72,187,120,0.1)' : 'rgba(237,137,54,0.1)', color: roomUnavailable ? '#C53030' : roomAvailable > 3 ? '#276749' : '#DD6B20', borderColor: 'transparent' }}>
+                            <div className="[display:flex] [justify-content:space-between] [align-items:flex-start]">
+                              <h4 className="[font-family:var(--font-heading)] [font-size:1.3rem] [margin:0] [font-weight:300] [color:var(--color-text)]">{room.name}</h4>
+                              <div className="[display:flex] [gap:0.5rem]">
+                                <span className={cn(
+                                  'badge border-transparent text-[0.65rem]',
+                                  roomUnavailable
+                                    ? 'bg-red-500/10 text-[#C53030]'
+                                    : roomAvailable > 3
+                                      ? 'bg-emerald-500/10 text-[#276749]'
+                                      : 'bg-orange-500/10 text-[#DD6B20]',
+                                )}>
                                   {roomUnavailable ? t('hotelDetail.unavailableRoom') : t('hotelDetail.available', { count: roomAvailable })}
                                 </span>
                               </div>
                             </div>
-                            <p style={{ color: 'var(--color-muted)', fontSize: '0.8rem', fontWeight: 300, marginTop: '0.5rem', display: 'flex', gap: '1rem' }}>
+                            <p className="[color:var(--color-muted)] [font-size:0.8rem] [font-weight:300] [margin-top:0.5rem] [display:flex] [gap:1rem]">
                               <span>{t('hotelDetail.roomSize')}</span>
                               <span>-</span>
                               <span>{t('hotelDetail.bed')}</span>
                             </p>
-                            {roomFacilities.length > 0 && (
-                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.75rem' }}>
-                                {roomFacilities.map(facility => {
-                                  const RoomFacilityIcon = facilityIconMap[String(facility.icon || '').toLowerCase()] || Check;
-                                  return (
-                                    <span
-                                      key={facility.id}
-                                      className="badge badge-gray"
-                                      style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.65rem' }}
-                                    >
+                            {roomFacilities.length > 0 &&
+                          <div className="[display:flex] [flex-wrap:wrap] [gap:0.4rem] [margin-top:0.75rem]">
+                                {roomFacilities.map((facility) => {
+                              const RoomFacilityIcon = facilityIconMap[String(facility.icon || '').toLowerCase()] || Check;
+                              return (
+                                <span
+                                  key={facility.id}
+                                  className="badge badge-gray [display:inline-flex] [align-items:center] [gap:0.3rem] [font-size:0.65rem]">
+
+                                  
                                       <RoomFacilityIcon size={11} />
                                       {facility.name}
-                                    </span>
-                                  );
-                                })}
+                                    </span>);
+
+                            })}
                               </div>
-                            )}
-                            {fullPeriods.length > 0 && (
-                              <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                                {fullPeriods.slice(0, 2).map(period => (
-                                  <div key={`${period.start_date || period.startDate}-${period.end_date || period.endDate}`} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.4rem', color: 'var(--color-danger)', fontSize: '0.78rem', lineHeight: 1.45, fontWeight: 400 }}>
-                                    <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 1 }} />
+                          }
+                            {fullPeriods.length > 0 &&
+                          <div className="[margin-top:0.75rem] [display:flex] [flex-direction:column] [gap:0.35rem]">
+                                {fullPeriods.slice(0, 2).map((period) =>
+                            <div key={`${period.start_date || period.startDate}-${period.end_date || period.endDate}`} className="[display:flex] [align-items:flex-start] [gap:0.4rem] [color:var(--color-danger)] [font-size:0.78rem] [line-height:1.45] [font-weight:400]">
+                                    <AlertCircle size={14} className="[flex-shrink:0] [margin-top:1px]" />
                                     <span>{period.message}</span>
                                   </div>
-                                ))}
-                                {fullPeriods.length > 2 && (
-                                  <span style={{ color: 'var(--color-danger)', fontSize: '0.75rem', fontWeight: 400 }}>
+                            )}
+                                {fullPeriods.length > 2 &&
+                            <span className="[color:var(--color-danger)] [font-size:0.75rem] [font-weight:400]">
                                     +{fullPeriods.length - 2} periode penuh lainnya
                                   </span>
-                                )}
+                            }
                               </div>
-                            )}
+                          }
                           </div>
 
-                          <div className="hotel-detail-room-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid var(--color-accent)', paddingTop: '0.75rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: 'var(--color-muted)', fontWeight: 300 }}><Users size={12} /> {t('hotelDetail.maxGuests', { count: room.max_guest ?? room.maxGuest })}</div>
-                            <div style={{ textAlign: 'right' }}>
-                              {hasDiscount ? (
-                                <>
-                                  <div style={{ fontSize: '0.8rem', color: 'var(--color-muted)', textDecoration: 'line-through' }}>
+                          <div className="hotel-detail-room-footer [display:flex] [justify-content:space-between] [align-items:flex-end] [border-top:1px_solid_var(--color-accent)] [padding-top:0.75rem]">
+                            <div className="[display:flex] [align-items:center] [gap:0.35rem] [font-size:0.8rem] [color:var(--color-muted)] [font-weight:300]"><Users size={12} /> {t('hotelDetail.maxGuests', { count: room.max_guest ?? room.maxGuest })}</div>
+                            <div className="[text-align:right]">
+                              {hasDiscount ?
+                            <>
+                                  <div className="[font-size:0.8rem] [color:var(--color-muted)] [text-decoration:line-through]">
                                     {formatCurrency(room.price_per_night ?? room.pricePerNight)}
                                   </div>
-                                  <div style={{ fontSize: '1rem', fontWeight: 500, color: '#C53030' }}>
+                                  <div className="[font-size:1rem] [font-weight:500] [color:#C53030]">
                                     {formatCurrency((room.price_per_night ?? room.pricePerNight) * (1 - discountPercent / 100))}
-                                    <span style={{ fontSize: '0.7rem', color: 'var(--color-muted)', fontWeight: 300 }}>{t('home.perNight')}</span>
+                                    <span className="[font-size:0.7rem] [color:var(--color-muted)] [font-weight:300]">{t('home.perNight')}</span>
                                   </div>
-                                </>
-                              ) : (
-                                <div style={{ fontSize: '0.95rem', fontWeight: 400, color: 'var(--color-primary)' }}>
+                                </> :
+
+                            <div className="[font-size:0.95rem] [font-weight:400] [color:var(--color-primary)]">
                                   {formatCurrency(room.price_per_night ?? room.pricePerNight)}
-                                  <span style={{ fontSize: '0.7rem', color: 'var(--color-muted)' }}>{t('home.perNight')}</span>
+                                  <span className="[font-size:0.7rem] [color:var(--color-muted)]">{t('home.perNight')}</span>
                                 </div>
-                              )}
+                            }
                             </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      </div>);
+
+                })}
                 </div>
               </div>
-            )}
+            }
 
           </div>
 
           {/* RIGHT COLUMN: Sticky Reserve Summary */}
-          <div className="hotel-detail-reservation" style={{ position: 'sticky', top: 120 }}>
-            <div className="card" style={{ padding: '2rem', border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-float)' }}>
-              <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', marginBottom: '1.5rem', color: 'var(--color-text)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '0.75rem', fontWeight: 300 }}>{t('hotelDetail.reservation')}</h3>
+          <div className="hotel-detail-reservation [position:sticky] [top:120px]">
+            <div className="card [padding:2rem] [border:1px_solid_var(--color-accent)] [box-shadow:var(--shadow-float)]">
+              <h3 className="[font-family:var(--font-heading)] [font-size:1.5rem] [margin-bottom:1.5rem] [color:var(--color-text)] [border-bottom:1px_solid_var(--color-accent)] [padding-bottom:0.75rem] [font-weight:300]">{t('hotelDetail.reservation')}</h3>
               
-              {selectedRoom ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '2rem' }}>
+              {selectedRoom ?
+              <div className="[display:flex] [flex-direction:column] [gap:1.25rem] [margin-bottom:2rem]">
                   <div>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('hotelDetail.roomType')}</span>
-                    <div style={{ fontWeight: 400, color: 'var(--color-text)', fontSize: '1rem', marginTop: '0.25rem' }}>{selectedRoom.name}</div>
-                    {selectedRoomUnavailable && (
-                      <div style={{ color: 'var(--color-danger)', fontSize: '0.8rem', marginTop: '0.5rem', fontWeight: 400 }}>
+                    <span className="[font-size:0.7rem] [color:var(--color-muted)] [text-transform:uppercase] [letter-spacing:0.5px]">{t('hotelDetail.roomType')}</span>
+                    <div className="[font-weight:400] [color:var(--color-text)] [font-size:1rem] [margin-top:0.25rem]">{selectedRoom.name}</div>
+                    {selectedRoomUnavailable &&
+                  <div className="[color:var(--color-danger)] [font-size:0.8rem] [margin-top:0.5rem] [font-weight:400]">
                         {t('hotelDetail.roomUnavailableMessage')}
                       </div>
-                    )}
-                    {selectedRoomFullPeriods.length > 0 && (
-                      <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                        {selectedRoomFullPeriods.map(period => (
-                          <div key={`${period.start_date || period.startDate}-${period.end_date || period.endDate}`} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.45rem', color: 'var(--color-danger)', fontSize: '0.8rem', lineHeight: 1.5, fontWeight: 400 }}>
-                            <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 2 }} />
+                  }
+                    {selectedRoomFullPeriods.length > 0 &&
+                  <div className="[margin-top:0.75rem] [display:flex] [flex-direction:column] [gap:0.4rem]">
+                        {selectedRoomFullPeriods.map((period) =>
+                    <div key={`${period.start_date || period.startDate}-${period.end_date || period.endDate}`} className="[display:flex] [align-items:flex-start] [gap:0.45rem] [color:var(--color-danger)] [font-size:0.8rem] [line-height:1.5] [font-weight:400]">
+                            <AlertCircle size={14} className="[flex-shrink:0] [margin-top:2px]" />
                             <span>{period.message}</span>
                           </div>
-                        ))}
-                      </div>
                     )}
+                      </div>
+                  }
                   </div>
                   
-                  <div style={{ background: 'var(--color-background)', border: '1px solid var(--color-accent)', padding: '1rem', borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--color-text)', marginBottom: '0.5rem' }}>
+                  <div className="[background:var(--color-background)] [border:1px_solid_var(--color-accent)] [padding:1rem] [border-radius:var(--radius-sm)]">
+                    <div className="[display:flex] [justify-content:space-between] [font-size:0.85rem] [color:var(--color-text)] [margin-bottom:0.5rem]">
                       <span>{t('hotelDetail.priceNight')}</span>
                       <span>{formatCurrency(selectedRoom.price_per_night ?? selectedRoom.pricePerNight)}</span>
                     </div>
-                    {hasDiscount && (
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#C53030' }}>
+                    {hasDiscount &&
+                  <div className="[display:flex] [justify-content:space-between] [font-size:0.85rem] [color:#C53030]">
                         <span>{t('hotelDetail.discount', { percent: discountPercent })}</span>
                         <span>-{formatCurrency((selectedRoom.price_per_night ?? selectedRoom.pricePerNight) * discountPercent / 100)}</span>
                       </div>
-                    )}
+                  }
                   </div>
-                </div>
-              ) : (
-                <p style={{ color: 'var(--color-muted)', fontSize: '0.85rem', marginBottom: '2rem', fontWeight: 300 }}>{t('hotelDetail.chooseRoom')}</p>
-              )}
+                </div> :
 
-              {user?.role === 'ROLE_USER' ? (
-                selectedRoomUnavailable ? (
-                  <button type="button" className="btn btn-primary btn-full" disabled style={{ justifyContent: 'center', height: 50, opacity: 0.55, cursor: 'not-allowed' }}>
+              <p className="[color:var(--color-muted)] [font-size:0.85rem] [margin-bottom:2rem] [font-weight:300]">{t('hotelDetail.chooseRoom')}</p>
+              }
+
+              {user?.role === 'ROLE_USER' ?
+              selectedRoomUnavailable ?
+              <button type="button" className="btn btn-primary btn-full [justify-content:center] [height:50px] [opacity:0.55] [cursor:not-allowed]" disabled>
                     {t('hotelDetail.unavailableRoom')}
-                  </button>
-                ) : (
-                <Link to={`/booking/${hotel.id_hotel}?roomTypeId=${activeRoom}`} className="btn btn-primary btn-full" style={{ justifyContent: 'center', height: 50, background: 'var(--color-primary)' }}>
+                  </button> :
+
+              <Link to={`/booking/${hotel.id_hotel}?roomTypeId=${activeRoom}`} className="btn btn-primary btn-full [justify-content:center] [height:50px] [background:var(--color-primary)]">
                   {t('hotelDetail.reserve')}
-                </Link>
-                )
-              ) : !user ? (
-                <Link to={`/login?redirect=/hotels/${hotel.id_hotel}`} className="btn btn-full hotel-login-book-btn" style={{ justifyContent: 'center', height: 50 }}>
+                </Link> :
+
+              !user ?
+              <Link to={`/login?redirect=/hotels/${hotel.id_hotel}`} className="btn btn-full hotel-login-book-btn [justify-content:center] [height:50px]">
                   {t('hotelDetail.signInToBook')}
-                </Link>
-              ) : (
-                <div style={{ background: 'var(--color-background)', border: '1px solid var(--color-accent)', padding: '1rem', textAlign: 'center', fontSize: '0.8rem', color: 'var(--color-muted)', fontWeight: 300 }}>
+                </Link> :
+
+              <div className="[background:var(--color-background)] [border:1px_solid_var(--color-accent)] [padding:1rem] [text-align:center] [font-size:0.8rem] [color:var(--color-muted)] [font-weight:300]">
                   {t('hotelDetail.adminCannotBook')}
                 </div>
-              )}
+              }
 
-              <p style={{ textAlign: 'center', color: 'var(--color-muted)', fontSize: '0.75rem', marginTop: '1rem', fontWeight: 300 }}>
+              <p className="[text-align:center] [color:var(--color-muted)] [font-size:0.75rem] [margin-top:1rem] [font-weight:300]">
                 {t('hotelDetail.secureCheckout')}
               </p>
             </div>
@@ -414,25 +421,25 @@ const HotelDetail = () => {
       </div>
 
       {/* LIGHTBOX MODAL */}
-      {lightboxOpen && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(26,54,93,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-          <button onClick={() => setLightboxOpen(false)} style={{ position: 'absolute', top: 30, right: 30, background: 'transparent', border: 'none', cursor: 'pointer', color: 'white' }}>
+      {lightboxOpen &&
+      <div className="[position:fixed] [inset:0] [z-index:1000] [background:rgba(26,54,93,0.95)] [display:flex] [align-items:center] [justify-content:center] [padding:2rem]">
+          <button onClick={() => setLightboxOpen(false)} className="[position:absolute] [top:30px] [right:30px] [background:transparent] [border:none] [cursor:pointer] [color:white]">
             <X size={32} />
           </button>
           
-          <button onClick={() => setActiveImg(c => (c - 1 + images.length) % images.length)} style={{ position: 'absolute', left: 40, background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', padding: '0.75rem', cursor: 'pointer', color: 'white' }}>
+          <button onClick={() => setActiveImg((c) => (c - 1 + images.length) % images.length)} className="[position:absolute] [left:40px] [background:transparent] [border:1px_solid_rgba(255,255,255,0.2)] [border-radius:50%] [padding:0.75rem] [cursor:pointer] [color:white]">
             <ArrowLeft size={24} />
           </button>
 
-          <div style={{ maxWidth: '80%', maxHeight: '80%', overflow: 'hidden' }}>
-            <img src={images[activeImg]} alt={`${hotel.name} - foto ${activeImg + 1}`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          <div className="[max-width:80%] [max-height:80%] [overflow:hidden]">
+            <img src={images[activeImg]} alt={`${hotel.name} - foto ${activeImg + 1}`} className="[width:100%] [height:100%] [object-fit:contain]" />
           </div>
 
-          <button onClick={() => setActiveImg(c => (c + 1) % images.length)} style={{ position: 'absolute', right: 40, background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%', padding: '0.75rem', cursor: 'pointer', color: 'white' }}>
-            <ArrowLeft size={24} style={{ transform: 'rotate(180deg)' }} />
+          <button onClick={() => setActiveImg((c) => (c + 1) % images.length)} className="[position:absolute] [right:40px] [background:transparent] [border:1px_solid_rgba(255,255,255,0.2)] [border-radius:50%] [padding:0.75rem] [cursor:pointer] [color:white]">
+            <ArrowLeft size={24} className="[transform:rotate(180deg)]" />
           </button>
         </div>
-      )}
+      }
 
       <style>{`
         .hotel-gallery {
@@ -562,8 +569,8 @@ const HotelDetail = () => {
         }
       `}</style>
 
-    </div>
-  );
+    </div>);
+
 };
 
 export default HotelDetail;

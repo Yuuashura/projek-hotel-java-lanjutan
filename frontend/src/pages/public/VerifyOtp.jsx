@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { MailCheck, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
 import api from '../../utils/api';
@@ -18,11 +18,14 @@ const VerifyOtp = () => {
 
   useEffect(() => {
     if (!email) navigate('/register');
-  }, [email]);
+  }, [email, navigate]);
 
   useEffect(() => {
-    if (timeLeft <= 0) { setCanResend(true); return; }
-    const t = setTimeout(() => setTimeLeft(l => l - 1), 1000);
+    if (timeLeft <= 0) {
+      const timer = window.setTimeout(() => setCanResend(true), 0);
+      return () => window.clearTimeout(timer);
+    }
+    const t = setTimeout(() => setTimeLeft((l) => l - 1), 1000);
     return () => clearTimeout(t);
   }, [timeLeft]);
 
@@ -85,83 +88,76 @@ const VerifyOtp = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-background)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+    <div className="[min-height:100vh] [background:var(--color-background)] [display:flex] [align-items:center] [justify-content:center] [padding:2rem]">
       
-      <div style={{ width: '100%', maxWidth: 420 }}>
-        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <div style={{ width: 64, height: 64, background: 'rgba(212,175,55,0.1)', margin: '0 auto 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>
-            <MailCheck size={32} style={{ color: 'var(--color-primary)' }} />
+      <div className="[width:100%] [max-width:420px]">
+        <div className="[text-align:center] [margin-bottom:2.5rem]">
+          <div className="[width:64px] [height:64px] [background:rgba(212,175,55,0.1)] [margin:0_auto_1.5rem] [display:flex] [align-items:center] [justify-content:center] [border-radius:50%]">
+            <MailCheck size={32} className="[color:var(--color-primary)]" />
           </div>
-          <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '2rem', margin: '0 0 0.5rem', color: 'var(--color-text)' }}>Verifikasi Email</h1>
-          <p style={{ fontWeight: 300, color: 'var(--color-muted)', fontSize: '0.9rem' }}>
-            Kode OTP 6 digit telah dikirim ke <strong style={{ color: 'var(--color-text)', fontWeight: 400 }}>{email}</strong>
+          <h1 className="[font-family:var(--font-heading)] [font-weight:300] [font-size:2rem] [margin:0_0_0.5rem] [color:var(--color-text)]">Verifikasi Email</h1>
+          <p className="[font-weight:300] [color:var(--color-muted)] [font-size:0.9rem]">
+            Kode OTP 6 digit telah dikirim ke <strong className="[color:var(--color-text)] [font-weight:400]">{email}</strong>
           </p>
         </div>
 
-        <div className="card" style={{ padding: '2.5rem 2rem', border: '1px solid var(--color-accent)', boxShadow: 'var(--shadow-float)' }}>
-          {error && (
-            <div style={{ background: '#FFF5F5', border: '1px solid #FEB2B2', padding: '0.875rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
-              <AlertCircle size={16} style={{ color: '#E53E3E', flexShrink: 0 }} />
-              <span style={{ fontWeight: 300, color: '#C53030', fontSize: '0.85rem' }}>{error}</span>
+        <div className="card [padding:2.5rem_2rem] [border:1px_solid_var(--color-accent)] [box-shadow:var(--shadow-float)]">
+          {error &&
+          <div className="[background:#FFF5F5] [border:1px_solid_#FEB2B2] [padding:0.875rem] [margin-bottom:1.5rem] [display:flex] [gap:0.5rem] [align-items:center] [border-radius:var(--radius-sm)]">
+              <AlertCircle size={16} className="[color:#E53E3E] [flex-shrink:0]" />
+              <span className="[font-weight:300] [color:#C53030] [font-size:0.85rem]">{error}</span>
             </div>
-          )}
-          {success && (
-            <div style={{ background: 'rgba(72,187,120,0.05)', border: '1px solid rgba(72,187,120,0.2)', padding: '0.875rem', marginBottom: '1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: 'var(--radius-sm)' }}>
-              <CheckCircle size={16} style={{ color: '#38A169', flexShrink: 0 }} />
-              <span style={{ fontWeight: 300, color: '#276749', fontSize: '0.85rem' }}>{success}</span>
+          }
+          {success &&
+          <div className="[background:rgba(72,187,120,0.05)] [border:1px_solid_rgba(72,187,120,0.2)] [padding:0.875rem] [margin-bottom:1.5rem] [display:flex] [gap:0.5rem] [align-items:center] [border-radius:var(--radius-sm)]">
+              <CheckCircle size={16} className="[color:#38A169] [flex-shrink:0]" />
+              <span className="[font-weight:300] [color:#276749] [font-size:0.85rem]">{success}</span>
             </div>
-          )}
+          }
 
           <form onSubmit={handleSubmit}>
             {/* OTP Input Boxes */}
-            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginBottom: '2rem' }}>
-              {otp.map((digit, i) => (
-                <input key={i} ref={el => inputRefs.current[i] = el}
-                  type="text" inputMode="numeric" maxLength={1} value={digit}
-                  onChange={e => handleChange(i, e.target.value)}
-                  onKeyDown={e => handleKeyDown(i, e)}
-                  onPaste={handlePaste}
-                  style={{
-                    width: 48, height: 56, textAlign: 'center',
-                    fontFamily: 'var(--font-body)', fontWeight: 300, fontSize: '1.5rem',
-                    border: 'none',
-                    borderBottom: digit ? '2px solid var(--color-primary)' : '1px solid var(--color-muted)',
-                    background: 'transparent',
-                    color: 'var(--color-text)',
-                    outline: 'none',
-                    transition: 'all 0.3s'
-                  }}
-                />
-              ))}
-            </div>
+            <div className="[display:flex] [gap:0.5rem] [justify-content:center] [margin-bottom:2rem]">
+              {otp.map((digit, i) =>
+              <input key={i} ref={(el) => inputRefs.current[i] = el}
+              type="text" inputMode="numeric" maxLength={1} value={digit}
+              onChange={(e) => handleChange(i, e.target.value)}
+              onKeyDown={(e) => handleKeyDown(i, e)}
+              onPaste={handlePaste}
+              className={`h-14 w-12 border-0 border-b bg-transparent text-center font-[var(--font-body)] text-2xl font-light text-[var(--color-text)] outline-none transition ${
+                digit ? 'border-b-2 border-[var(--color-primary)]' : 'border-[var(--color-muted)]'
+              }`} />
 
-            {/* Timer */}
-            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-              {!canResend ? (
-                <p style={{ fontSize: '0.8rem', color: 'var(--color-muted)', fontWeight: 300 }}>
-                  OTP kadaluarsa dalam&nbsp;
-                  <span style={{ color: timeLeft < 60 ? '#E53E3E' : 'var(--color-primary)', fontWeight: 400 }}>{formatTime(timeLeft)}</span>
-                </p>
-              ) : (
-                <button type="button" onClick={handleResend} disabled={resendLoading}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'underline' }}>
-                  <RefreshCw size={12} /> {resendLoading ? 'Mengirim...' : 'Kirim Ulang OTP'}
-                </button>
               )}
             </div>
 
-            <button type="submit" className="btn btn-primary btn-full" disabled={loading || otp.join('').length < 6} style={{ height: 50, background: 'var(--color-primary)', opacity: (loading || otp.join('').length < 6) ? 0.65 : 1 }}>
+            {/* Timer */}
+            <div className="[text-align:center] [margin-bottom:1.5rem]">
+              {!canResend ?
+              <p className="[font-size:0.8rem] [color:var(--color-muted)] [font-weight:300]">
+                  OTP kadaluarsa dalam&nbsp;
+                  <span className={timeLeft < 60 ? 'font-normal text-[#E53E3E]' : 'font-normal text-[var(--color-primary)]'}>{formatTime(timeLeft)}</span>
+                </p> :
+
+              <button type="button" onClick={handleResend} disabled={resendLoading} className="[background:none] [border:none] [cursor:pointer] [color:var(--color-primary)] [font-family:var(--font-body)] [font-weight:400] [font-size:0.85rem] [display:inline-flex] [align-items:center] [gap:0.4rem] [text-decoration:underline]">
+                
+                  <RefreshCw size={12} /> {resendLoading ? 'Mengirim...' : 'Kirim Ulang OTP'}
+                </button>
+              }
+            </div>
+
+            <button type="submit" className="btn btn-primary btn-full h-[50px] bg-[var(--color-primary)] disabled:opacity-65" disabled={loading || otp.join('').length < 6}>
               {loading ? 'Memverifikasi...' : 'Verifikasi OTP'}
             </button>
           </form>
 
-          <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-            <Link to="/register" style={{ fontFamily: 'var(--font-body)', fontSize: '0.8rem', color: 'var(--color-muted)', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.5px' }}>← Back to Register</Link>
+          <div className="[text-align:center] [margin-top:1.5rem]">
+            <Link to="/register" className="[font-family:var(--font-body)] [font-size:0.8rem] [color:var(--color-muted)] [text-decoration:none] [text-transform:uppercase] [letter-spacing:0.5px]">← Back to Register</Link>
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default VerifyOtp;

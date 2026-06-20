@@ -18,7 +18,7 @@ const DEFAULT_FILTERS = {
   maxPrice: '',
   minRating: '',
   featured: 'all',
-  sortBy: 'default',
+  sortBy: 'default'
 };
 
 const getRoomTypes = (hotel) => hotel.roomTypes || hotel.room_types || [];
@@ -29,7 +29,7 @@ const getMinPrice = (hotel) => {
   const summaryPrice = Number(hotel.min_price ?? hotel.minPrice ?? 0);
   if (summaryPrice > 0) return summaryPrice;
 
-  const prices = getRoomTypes(hotel).map(getRoomPrice).filter(price => price > 0);
+  const prices = getRoomTypes(hotel).map(getRoomPrice).filter((price) => price > 0);
   return prices.length ? Math.min(...prices) : 0;
 };
 
@@ -49,7 +49,7 @@ const normalizePagination = (pagination, fallbackPage, fallbackCount) => ({
   totalItems: pagination?.total_items ?? pagination?.totalItems ?? fallbackCount,
   totalPages: pagination?.total_pages ?? pagination?.totalPages ?? 1,
   hasNext: pagination?.has_next ?? pagination?.hasNext ?? false,
-  hasPrevious: pagination?.has_previous ?? pagination?.hasPrevious ?? false,
+  hasPrevious: pagination?.has_previous ?? pagination?.hasPrevious ?? false
 });
 
 const Hotels = () => {
@@ -57,7 +57,7 @@ const Hotels = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialSearch = {
     keyword: searchParams.get('keyword') || '',
-    cityId: searchParams.get('cityId') || '',
+    cityId: searchParams.get('cityId') || ''
   };
 
   const [hotels, setHotels] = useState([]);
@@ -70,7 +70,7 @@ const Hotels = () => {
     totalItems: 0,
     totalPages: 1,
     hasNext: false,
-    hasPrevious: false,
+    hasPrevious: false
   });
   const [filters, setFilters] = useState({
     ...DEFAULT_FILTERS,
@@ -79,12 +79,12 @@ const Hotels = () => {
     maxPrice: searchParams.get('maxPrice') || '',
     minRating: searchParams.get('minRating') || '',
     featured: searchParams.get('featured') || 'all',
-    sortBy: searchParams.get('sortBy') || 'default',
+    sortBy: searchParams.get('sortBy') || 'default'
   });
   const [submittedSearch, setSubmittedSearch] = useState(initialSearch);
 
   useEffect(() => {
-    api.get('/api/cities').then(r => setCities(r.data.data || [])).catch(() => {});
+    api.get('/api/cities').then((r) => setCities(r.data.data || [])).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -114,7 +114,7 @@ const Hotels = () => {
           totalItems: 0,
           totalPages: 1,
           hasNext: false,
-          hasPrevious: false,
+          hasPrevious: false
         });
       } finally {
         setLoading(false);
@@ -130,7 +130,7 @@ const Hotels = () => {
     if (key !== 'keyword' && key !== 'cityId') {
       setPage(0);
     }
-    setFilters(current => ({ ...current, [key]: value }));
+    setFilters((current) => ({ ...current, [key]: value }));
   };
 
   const syncSearchParams = (nextFilters) => {
@@ -145,7 +145,7 @@ const Hotels = () => {
     e.preventDefault();
     const nextFilters = {
       ...filters,
-      keyword: filters.keyword.trim(),
+      keyword: filters.keyword.trim()
     };
     setFilters(nextFilters);
     setPage(0);
@@ -170,7 +170,7 @@ const Hotels = () => {
     syncSearchParams(nextFilters);
   };
 
-  const selectedCity = cities.find(city => getCityId(city) === String(filters.cityId));
+  const selectedCity = cities.find((city) => getCityId(city) === String(filters.cityId));
   const hasActiveFilters = Boolean(
     filters.keyword ||
     filters.cityId ||
@@ -181,32 +181,32 @@ const Hotels = () => {
   );
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-background)', display: 'flex', flexDirection: 'column' }}>
-      <div className="flow-hero-band" style={{ background: 'var(--color-surface)', borderBottom: '1px solid var(--color-accent)', padding: '2.5rem 1.5rem 1.5rem' }}>
-        <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
+    <div className="[min-height:100vh] [background:var(--color-background)] [display:flex] [flex-direction:column]">
+      <div className="flow-hero-band [background:var(--color-surface)] [border-bottom:1px_solid_var(--color-accent)] [padding:2.5rem_1.5rem_1.5rem]">
+        <div className="[max-width:1400px] [margin:0_auto] [display:flex] [justify-content:space-between] [align-items:center] [flex-wrap:wrap] [gap:1.5rem]">
           <div>
-            <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '2rem', margin: 0, color: 'var(--color-text)' }}>{t('hotels.title')}</h1>
-            <p style={{ color: 'var(--color-muted)', fontSize: '0.85rem', fontWeight: 300, margin: '0.25rem 0 0' }}>
+            <h1 className="[font-family:var(--font-heading)] [font-weight:300] [font-size:2rem] [margin:0] [color:var(--color-text)]">{t('hotels.title')}</h1>
+            <p className="[color:var(--color-muted)] [font-size:0.85rem] [font-weight:300] [margin:0.25rem_0_0]">
               {t('hotels.count', { shown: visibleHotels.length, total: pagination.totalItems || visibleHotels.length })}
             </p>
           </div>
 
-          <form className="hotel-search-form" onSubmit={submitSearch} style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', flex: 1, justifyContent: 'flex-end', maxWidth: 820 }}>
+          <form className="hotel-search-form [display:flex] [gap:1rem] [flex-wrap:wrap] [flex:1] [justify-content:flex-end] [max-width:820px]" onSubmit={submitSearch}>
             <input
-              className="input"
-              style={{ width: 'auto', minWidth: 220, padding: '0.5rem 1rem', height: 42 }}
+              className="input [width:auto] [min-width:220px] [padding:0.5rem_1rem] [height:42px]"
+
               placeholder={t('hotels.keywordPlaceholder')}
               value={filters.keyword}
-              onChange={e => updateFilter('keyword', e.target.value)}
-            />
+              onChange={(e) => updateFilter('keyword', e.target.value)} />
+            
             <CitySearchSelect
               cities={cities}
               value={filters.cityId}
-              onChange={val => updateFilter('cityId', val)}
-              placeholder={t('home.allCities')}
-              style={{ width: 'auto', minWidth: 170 }}
-            />
-            <button type="submit" className="btn btn-primary" style={{ padding: '0 1.5rem', height: 42, background: 'var(--color-primary)' }}>
+              onChange={(val) => updateFilter('cityId', val)}
+              placeholder={t('home.allCities')} className="[width:auto] [min-width:170px]" />
+
+            
+            <button type="submit" className="btn btn-primary [padding:0_1.5rem] [height:42px] [background:var(--color-primary)]">
               <Search size={14} /> {t('common.search')}
             </button>
           </form>
@@ -224,11 +224,11 @@ const Hotels = () => {
                 <h2>{t('hotels.filterTitle')}</h2>
                 <p>{t('hotels.filterSubtitle')}</p>
               </div>
-              {hasActiveFilters && (
-                <button type="button" className="hotel-filter-reset" onClick={clearAllFilters}>
+              {hasActiveFilters &&
+              <button type="button" className="hotel-filter-reset" onClick={clearAllFilters}>
                   {t('common.reset')}
                 </button>
-              )}
+              }
             </div>
 
             <div className="hotel-filter-group">
@@ -242,8 +242,8 @@ const Hotels = () => {
                     min="0"
                     placeholder={t('hotels.minPlaceholder')}
                     value={filters.minPrice}
-                    onChange={e => updateFilter('minPrice', e.target.value)}
-                  />
+                    onChange={(e) => updateFilter('minPrice', e.target.value)} />
+                  
                 </div>
                 <div>
                   <label className="label">{t('hotels.maxPrice')}</label>
@@ -253,8 +253,8 @@ const Hotels = () => {
                     min="0"
                     placeholder={t('hotels.maxPlaceholder')}
                     value={filters.maxPrice}
-                    onChange={e => updateFilter('maxPrice', e.target.value)}
-                  />
+                    onChange={(e) => updateFilter('maxPrice', e.target.value)} />
+                  
                 </div>
               </div>
             </div>
@@ -263,22 +263,22 @@ const Hotels = () => {
               <span className="hotel-filter-group-title">{t('common.rating')}</span>
               <div className="hotel-filter-choice-list">
                 {[
-                  ['', t('hotels.allRatings')],
-                  ['3', t('hotels.starsPlus', { rating: 3 })],
-                  ['4', t('hotels.starsPlus', { rating: 4 })],
-                  ['4.5', t('hotels.starsPlus', { rating: 4.5 })],
-                  ['5', t('hotels.fiveStars')],
-                ].map(([value, label]) => (
-                  <button
-                    key={value || 'all'}
-                    type="button"
-                    className={`hotel-filter-choice ${filters.minRating === value ? 'active' : ''}`}
-                    onClick={() => updateFilter('minRating', value)}
-                  >
+                ['', t('hotels.allRatings')],
+                ['3', t('hotels.starsPlus', { rating: 3 })],
+                ['4', t('hotels.starsPlus', { rating: 4 })],
+                ['4.5', t('hotels.starsPlus', { rating: 4.5 })],
+                ['5', t('hotels.fiveStars')]].
+                map(([value, label]) =>
+                <button
+                  key={value || 'all'}
+                  type="button"
+                  className={`hotel-filter-choice ${filters.minRating === value ? 'active' : ''}`}
+                  onClick={() => updateFilter('minRating', value)}>
+                  
                     <span>{label}</span>
                     {value && <Star size={13} fill="currentColor" />}
                   </button>
-                ))}
+                )}
               </div>
             </div>
 
@@ -286,19 +286,19 @@ const Hotels = () => {
               <span className="hotel-filter-group-title">{t('hotels.stayType')}</span>
               <div className="hotel-filter-choice-list">
                 {[
-                  ['all', t('hotels.allHotels')],
-                  ['featured', t('common.featured')],
-                  ['regular', t('common.nonFeatured')],
-                ].map(([value, label]) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={`hotel-filter-choice ${filters.featured === value ? 'active' : ''}`}
-                    onClick={() => updateFilter('featured', value)}
-                  >
+                ['all', t('hotels.allHotels')],
+                ['featured', t('common.featured')],
+                ['regular', t('common.nonFeatured')]].
+                map(([value, label]) =>
+                <button
+                  key={value}
+                  type="button"
+                  className={`hotel-filter-choice ${filters.featured === value ? 'active' : ''}`}
+                  onClick={() => updateFilter('featured', value)}>
+                  
                     <span>{label}</span>
                   </button>
-                ))}
+                )}
               </div>
             </div>
 
@@ -307,8 +307,8 @@ const Hotels = () => {
               <select
                 className="input"
                 value={filters.sortBy}
-                onChange={e => updateFilter('sortBy', e.target.value)}
-              >
+                onChange={(e) => updateFilter('sortBy', e.target.value)}>
+                
                 <option value="default">{t('hotels.sortDefault')}</option>
                 <option value="price_asc">{t('hotels.sortPriceAsc')}</option>
                 <option value="price_desc">{t('hotels.sortPriceDesc')}</option>
@@ -325,45 +325,45 @@ const Hotels = () => {
               </div>
             </div>
 
-        {hasActiveFilters && (
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--color-muted)' }}>{t('hotels.activeFilters')}</span>
+        {hasActiveFilters &&
+            <div className="[display:flex] [gap:0.5rem] [flex-wrap:wrap] [align-items:center]">
+            <span className="[font-size:0.75rem] [text-transform:uppercase] [letter-spacing:1px] [color:var(--color-muted)]">{t('hotels.activeFilters')}</span>
             {filters.keyword && <FilterBadge label={`"${filters.keyword}"`} onClear={() => clearFilter('keyword')} />}
             {filters.cityId && <FilterBadge label={selectedCity?.name || t('hotels.selectedCity')} onClear={() => clearFilter('cityId')} />}
             {filters.minPrice && <FilterBadge label={`Min ${formatCurrency(Number(filters.minPrice))}`} onClear={() => clearFilter('minPrice')} />}
             {filters.maxPrice && <FilterBadge label={`Max ${formatCurrency(Number(filters.maxPrice))}`} onClear={() => clearFilter('maxPrice')} />}
             {filters.minRating && <FilterBadge label={t('hotels.starsPlus', { rating: filters.minRating })} onClear={() => clearFilter('minRating')} />}
             {filters.featured !== 'all' && <FilterBadge label={filters.featured === 'featured' ? t('common.featured') : t('common.nonFeatured')} onClear={() => clearFilter('featured')} />}
-            <button type="button" className="btn btn-white btn-sm" onClick={clearAllFilters} style={{ height: 30, padding: '0 0.75rem' }}>
+            <button type="button" className="btn btn-white btn-sm [height:30px] [padding:0_0.75rem]" onClick={clearAllFilters}>
               {t('common.reset')}
             </button>
           </div>
-        )}
+            }
 
-        {loading ? (
-          <LoadingState text={t('common.loadingHotel')} />
-        ) : visibleHotels.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '5rem 1rem' }}>
-            <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', marginBottom: '0.5rem', fontWeight: 300 }}>{t('hotels.emptyTitle')}</h3>
-            <p style={{ color: 'var(--color-muted)', fontSize: '0.875rem', marginBottom: '2rem', fontWeight: 300 }}>{t('hotels.emptyText')}</p>
-            <button onClick={clearAllFilters} className="btn btn-primary" style={{ background: 'var(--color-primary)' }}>{t('common.reset')}</button>
-          </div>
-        ) : (
-          <>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-              {visibleHotels.map(hotel => (
+        {loading ?
+            <LoadingState text={t('common.loadingHotel')} /> :
+            visibleHotels.length === 0 ?
+            <div className="[text-align:center] [padding:5rem_1rem]">
+            <h3 className="[font-family:var(--font-heading)] [font-size:1.5rem] [margin-bottom:0.5rem] [font-weight:300]">{t('hotels.emptyTitle')}</h3>
+            <p className="[color:var(--color-muted)] [font-size:0.875rem] [margin-bottom:2rem] [font-weight:300]">{t('hotels.emptyText')}</p>
+            <button onClick={clearAllFilters} className="btn btn-primary [background:var(--color-primary)]">{t('common.reset')}</button>
+          </div> :
+
+            <>
+            <div className="[display:flex] [flex-direction:column] [gap:2rem]">
+              {visibleHotels.map((hotel) =>
                 <PropertyHorizontalCard key={hotel.id_hotel} hotel={hotel} t={t} />
-              ))}
+                )}
             </div>
             <PaginationControls
-              page={pagination.currentPage ?? page}
-              totalPages={pagination.totalPages || 1}
-              totalItems={pagination.totalItems || visibleHotels.length}
-              pageSize={pagination.pageSize || PAGE_SIZE}
-              onPageChange={setPage}
-            />
+                page={pagination.currentPage ?? page}
+                totalPages={pagination.totalPages || 1}
+                totalItems={pagination.totalItems || visibleHotels.length}
+                pageSize={pagination.pageSize || PAGE_SIZE}
+                onPageChange={setPage} />
+              
           </>
-        )}
+            }
           </section>
         </div>
       </main>
@@ -371,20 +371,20 @@ const Hotels = () => {
       <style>{`
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
       `}</style>
-    </div>
-  );
+    </div>);
+
 };
 
-const FilterBadge = ({ label, onClear }) => (
-  <button
-    type="button"
-    className="badge"
-    onClick={onClear}
-    style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.75rem', cursor: 'pointer' }}
-  >
+const FilterBadge = ({ label, onClear }) =>
+<button
+  type="button"
+  className="badge [display:flex] [align-items:center] [gap:0.25rem] [padding:0.25rem_0.75rem] [cursor:pointer]"
+  onClick={onClear}>
+
+  
     {label} <X size={10} />
-  </button>
-);
+  </button>;
+
 
 const PropertyHorizontalCard = ({ hotel, t }) => {
   const minPrice = getMinPrice(hotel);
@@ -393,56 +393,56 @@ const PropertyHorizontalCard = ({ hotel, t }) => {
   const discountedPrice = hasDiscount ? minPrice * (1 - discountPercent / 100) : minPrice;
 
   return (
-    <div className="reveal active hotel-list-card" style={{ display: 'flex', minHeight: 240, overflow: 'hidden', borderBottom: '1px solid var(--color-accent)', paddingBottom: '1.5rem' }}>
-      <div className="hotel-list-card-media" style={{ width: 240, height: 240, flexShrink: 0, overflow: 'hidden', borderRadius: 'var(--radius-sm)' }}>
-        <img src={getPrimaryImage(hotel)} alt={hotel.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.8s ease' }} />
+    <div className="reveal active hotel-list-card [display:flex] [min-height:240px] [overflow:hidden] [border-bottom:1px_solid_var(--color-accent)] [padding-bottom:1.5rem]">
+      <div className="hotel-list-card-media [width:240px] [height:240px] [flex-shrink:0] [overflow:hidden] [border-radius:var(--radius-sm)]">
+        <img src={getPrimaryImage(hotel)} alt={hotel.name} className="[width:100%] [height:100%] [object-fit:cover] [transition:transform_0.8s_ease]" />
       </div>
 
-       <div className="hotel-list-card-body" style={{ padding: '1rem 1.5rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minWidth: 0 }}>
+       <div className="hotel-list-card-body [padding:1rem_1.5rem] [flex:1] [display:flex] [flex-direction:column] [justify-content:space-between] [min-width:0]">
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
-            <span style={{ fontSize: '0.7rem', color: 'var(--color-primary)', letterSpacing: '1.5px', textTransform: 'uppercase', fontWeight: 400 }}>{hotel.city?.name || t('common.hotel')}</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--color-primary)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+          <div className="[display:flex] [justify-content:space-between] [align-items:center] [gap:1rem]">
+            <span className="[font-size:0.7rem] [color:var(--color-primary)] [letter-spacing:1.5px] [text-transform:uppercase] [font-weight:400]">{hotel.city?.name || t('common.hotel')}</span>
+            <span className="[display:flex] [align-items:center] [gap:0.25rem] [color:var(--color-primary)] [font-size:0.85rem] [white-space:nowrap]">
               <Star size={12} fill="var(--color-primary)" /> {hotel.rating?.toFixed(1) || '0.0'}
             </span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.4rem', color: 'var(--color-text)', margin: '0.25rem 0 0.5rem', fontWeight: 300 }}>{hotel.name}</h2>
-            {isFeaturedHotel(hotel) && <span className="badge badge-yellow" style={{ background: 'var(--color-primary)', color: 'white', borderColor: 'transparent' }}>{t('common.featured')}</span>}
+          <div className="[display:flex] [align-items:center] [gap:0.5rem] [flex-wrap:wrap]">
+            <h2 className="[font-family:var(--font-heading)] [font-size:1.4rem] [color:var(--color-text)] [margin:0.25rem_0_0.5rem] [font-weight:300]">{hotel.name}</h2>
+            {isFeaturedHotel(hotel) && <span className="badge badge-yellow [background:var(--color-primary)] [color:white] [border-color:transparent]">{t('common.featured')}</span>}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--color-muted)', fontSize: '0.8rem', fontWeight: 300, marginBottom: '0.5rem' }}>
+          <div className="[display:flex] [align-items:center] [gap:0.25rem] [color:var(--color-muted)] [font-size:0.8rem] [font-weight:300] [margin-bottom:0.5rem]">
             <MapPin size={12} /> {hotel.address || hotel.city?.name}
           </div>
-          <p style={{ color: 'var(--color-muted)', fontSize: '0.85rem', fontWeight: 300, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.5 }}>
+          <p className="[color:var(--color-muted)] [font-size:0.85rem] [font-weight:300] [display:-webkit-box] [-webkit-line-clamp:2px] [-webkit-box-orient:vertical] [overflow:hidden] [text-overflow:ellipsis] [line-height:1.5]">
             {hotel.description || t('hotels.fallbackDescription')}
           </p>
         </div>
 
-        <div className="hotel-list-card-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '1rem', borderTop: '1px solid var(--color-accent)', paddingTop: '0.75rem', flexWrap: 'wrap' }}>
+        <div className="hotel-list-card-footer [display:flex] [justify-content:space-between] [align-items:flex-end] [gap:1rem] [border-top:1px_solid_var(--color-accent)] [padding-top:0.75rem] [flex-wrap:wrap]">
           <div>
-            <span style={{ fontSize: '0.7rem', color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{t('common.pricePerNight')}</span>
-            {hasDiscount ? (
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--color-muted)', textDecoration: 'line-through', lineHeight: 1 }}>
+            <span className="[font-size:0.7rem] [color:var(--color-muted)] [text-transform:uppercase] [letter-spacing:0.5px]">{t('common.pricePerNight')}</span>
+            {hasDiscount ?
+            <div className="[display:flex] [flex-direction:column]">
+                <span className="[font-size:0.8rem] [color:var(--color-muted)] [text-decoration:line-through] [line-height:1]">
                   {formatCurrency(minPrice)}
                 </span>
-                <span style={{ fontFamily: 'var(--font-body)', fontWeight: 500, fontSize: '1.15rem', color: '#C53030', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                  {formatCurrency(discountedPrice)} <span style={{ fontSize: '0.65rem', background: '#C53030', color: 'white', padding: '0.05rem 0.25rem', borderRadius: '2px', fontWeight: 500 }}>-{discountPercent}%</span>
+                <span className="[font-family:var(--font-body)] [font-weight:500] [font-size:1.15rem] [color:#C53030] [display:flex] [align-items:center] [gap:0.25rem]">
+                  {formatCurrency(discountedPrice)} <span className="[font-size:0.65rem] [background:#C53030] [color:white] [padding:0.05rem_0.25rem] [border-radius:2px] [font-weight:500]">-{discountPercent}%</span>
                 </span>
-              </div>
-            ) : (
-              <div style={{ fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '1.1rem', color: 'var(--color-text)' }}>
+              </div> :
+
+            <div className="[font-family:var(--font-body)] [font-weight:400] [font-size:1.1rem] [color:var(--color-text)]">
                 {minPrice ? formatCurrency(minPrice) : t('common.unavailable')}
               </div>
-            )}
+            }
           </div>
-           <Link to={`/hotels/${hotel.id_hotel}`} className="btn btn-primary btn-sm" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
+           <Link to={`/hotels/${hotel.id_hotel}`} className="btn btn-primary btn-sm [padding:0.5rem_1rem] [font-size:0.85rem]">
              {t('common.viewDetails')} {'→'}
            </Link>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Hotels;
