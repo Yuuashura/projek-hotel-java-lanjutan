@@ -36,7 +36,7 @@ public class Customer {
     @Column(nullable = false)
     private String password;  // BCrypt hash
 
-    // Field tanpa prefix is_ agar Lombok generate: isBanned() / setBanned()
+    // Field tanpa prefix is_ agar Lombok generate: isBanned()
     @Column(name = "is_banned")
     @Builder.Default
     private boolean banned = false;

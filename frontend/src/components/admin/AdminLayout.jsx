@@ -97,10 +97,11 @@ const AdminLayout = ({ children }) => {
 
 
   return (
-    <div className="min-w-0 [display:flex] [min-height:100vh] [background:var(--color-background)]">
+    <div className="flex h-dvh min-w-0 overflow-hidden bg-[var(--color-background)]">
       {/* Sidebar */}
       <aside className={cn(
-        "overflow-hidden shadow-[18px_0_45px_-34px_rgba(4,18,42,0.8)] fixed top-0 z-50 flex h-screen w-[260px] shrink-0 flex-col border-r border-[var(--admin-sidebar-border)] bg-[var(--admin-sidebar-bg)] transition-transform duration-300",
+        'fixed inset-y-0 left-0 z-50 flex h-dvh w-[260px] shrink-0 flex-col overflow-hidden border-r border-[var(--admin-sidebar-border)]',
+        'bg-[var(--admin-sidebar-bg)] shadow-[18px_0_45px_-34px_rgba(4,18,42,0.8)] transition-transform duration-300',
         'max-md:-translate-x-[264px]',
         sidebarOpen ? 'max-md:translate-x-0 max-md:shadow-[var(--shadow-hover)]' : 'shadow-none'
       )}>
@@ -163,10 +164,10 @@ const AdminLayout = ({ children }) => {
       {sidebarOpen && <div onClick={() => setSidebarOpen(false)} className="[position:fixed] [inset:0] [background:rgba(0,0,0,0.3)] [z-index:40]" />}
 
       {/* Main Content */}
-      <div className="min-w-0 [&_p]:font-normal [&_td]:font-normal [&_label]:font-normal [&_input]:font-normal [&_select]:font-normal [&_textarea]:font-normal ml-[260px] flex flex-1 flex-col max-md:ml-0">
+      <div className="ml-[260px] flex h-dvh min-w-0 flex-1 flex-col overflow-hidden max-md:ml-0 [&_input]:font-normal [&_label]:font-normal [&_p]:font-normal [&_select]:font-normal [&_td]:font-normal [&_textarea]:font-normal">
         {/* Top Bar */}
-        <div className="max-[920px]:!min-h-16 max-[920px]:!px-4 max-[920px]:!py-3 max-sm:flex-wrap max-sm:[&>h1]:order-2 max-sm:[&>h1]:basis-full [background:var(--color-surface)] [border-bottom:1px_solid_var(--color-accent)] [padding:1rem_2rem] [display:flex] [align-items:center] [gap:1rem] [position:sticky] [top:0] [z-index:30]">
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="hidden max-md:inline-flex max-md:items-center max-md:justify-center hidden cursor-pointer rounded-lg border border-[var(--color-accent)] bg-transparent p-2 max-md:block">
+        <div className="sticky top-0 z-30 flex shrink-0 items-center gap-4 border-b border-[var(--color-accent)] bg-[var(--color-surface)] px-6 py-4 max-[920px]:min-h-16 max-[920px]:px-4 max-[920px]:py-3 max-sm:flex-wrap max-sm:[&>h1]:order-2 max-sm:[&>h1]:basis-full">
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="hidden cursor-pointer items-center justify-center rounded-lg border border-[var(--color-accent)] bg-transparent p-2 max-md:inline-flex">
             <Menu size={16} />
           </button>
           <h1 className="[font-family:var(--font-heading)] [font-weight:300] [font-size:1.4rem] [text-transform:uppercase] [letter-spacing:1px] [flex:1] [margin:0] [color:var(--color-text)]">
@@ -177,7 +178,7 @@ const AdminLayout = ({ children }) => {
         </div>
 
         {/* Page Content */}
-        <main className="min-w-0 max-[920px]:!px-4 max-[920px]:!py-5 max-sm:!px-3.5 max-sm:!py-4 [flex:1] [padding:2.5rem_2rem]">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto px-6 py-6 max-[920px]:px-4 max-[920px]:py-5 max-sm:px-3.5 max-sm:py-4">
           {children}
         </main>
       </div>

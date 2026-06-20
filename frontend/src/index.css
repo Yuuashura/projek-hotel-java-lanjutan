@@ -113,13 +113,14 @@ h6 {
 
 #root > div {
   position: relative;
+  isolation: isolate;
 }
 
 #root > div::before,
 #root > div::after {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: -1;
   pointer-events: none;
   content: "";
 }
@@ -142,11 +143,6 @@ h6 {
   background-size: 360px 260px, 420px 320px, 520px 380px, 480px 300px, 560px 420px, 440px 360px, 520px 360px, 680px 440px;
   opacity: 0.95;
   animation: galaxyDrift 28s linear infinite;
-}
-
-#root > div > * {
-  position: relative;
-  z-index: 1;
 }
 
 .reveal {
