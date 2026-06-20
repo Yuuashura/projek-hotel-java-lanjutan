@@ -4,6 +4,7 @@ import com.ngninep.booking.dto.res.WebResponse;
 import com.ngninep.booking.util.Message;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -48,6 +49,15 @@ public class GlobalExceptionHandler {
                 .message(message)
                 .build();
         return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<WebResponse<String>> handleAccessDenied(AccessDeniedException ex) {
+        WebResponse<String> response = WebResponse.<String>builder()
+                .status("403")
+                .message(Message.ACCESS_DENIED)
+                .build();
+        return ResponseEntity.status(403).body(response);
     }
 
     @ExceptionHandler(Exception.class)

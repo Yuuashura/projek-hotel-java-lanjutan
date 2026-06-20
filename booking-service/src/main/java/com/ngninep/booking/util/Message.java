@@ -7,6 +7,7 @@ public final class Message {
 
     public static final String SUCCESS = "Success";
     public static final String GENERAL_ERROR_PREFIX = "Terjadi kesalahan: ";
+    public static final String ACCESS_DENIED = "Anda tidak memiliki izin untuk mengakses fitur ini";
 
     public static final String USER_ID_NOT_FOUND_IN_TOKEN = "User ID tidak ditemukan dalam token";
     public static final String STATUS_REQUIRED = "Status tidak boleh kosong";

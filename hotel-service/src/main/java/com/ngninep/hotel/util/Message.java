@@ -7,6 +7,7 @@ public final class Message {
 
     public static final String SUCCESS = "Success";
     public static final String GENERAL_ERROR_PREFIX = "Terjadi kesalahan: ";
+    public static final String ACCESS_DENIED = "Anda tidak memiliki izin untuk mengakses fitur ini";
 
     public static final String HOTEL_NOT_FOUND = "Hotel tidak ditemukan";
     public static final String HOTEL_INVALID = "Hotel tidak valid";
