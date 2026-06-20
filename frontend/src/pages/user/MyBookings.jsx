@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Calendar, Clock, CheckCircle, XCircle, AlertCircle, ArrowRight, ChevronDown, ChevronUp, MapPin, Users } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, ArrowRight, ChevronDown, ChevronUp, MapPin, Users } from 'lucide-react';
 import { formatCurrency, formatDate, diffDays, statusColor } from '../../utils/formatters';
 import { useAuth } from '../../context/AuthContext';
 import LoadingState from '../../components/LoadingState';
 import api from '../../utils/api';
+import { cn } from '../../lib/utils';
 
 const MyBookings = () => {
   const { user } = useAuth();
@@ -15,7 +16,7 @@ const MyBookings = () => {
 
   useEffect(() => {
     if (!user || user.role !== 'ROLE_USER') navigate('/login');
-  }, [user]);
+  }, [user, navigate]);
 
   const getHotelId = (booking) => booking.hotel_id ?? booking.hotelId;
   const getRoomTypeId = (booking) => booking.room_type_id ?? booking.roomTypeId;
@@ -25,46 +26,51 @@ const MyBookings = () => {
     const roomTypeIds = [...new Set(items.map(getRoomTypeId).filter(Boolean))];
 
     const [hotelResults, roomTypeResults] = await Promise.all([
-      Promise.all(hotelIds.map(id => api.get(`/api/hotels/${id}`).then(res => res.data?.data).catch(() => null))),
-      Promise.all(roomTypeIds.map(id => api.get(`/api/room-types/${id}`).then(res => res.data?.data).catch(() => null))),
-    ]);
+    Promise.all(hotelIds.map((id) => api.get(`/api/hotels/${id}`).then((res) => res.data?.data).catch(() => null))),
+    Promise.all(roomTypeIds.map((id) => api.get(`/api/room-types/${id}`).then((res) => res.data?.data).catch(() => null)))]
+    );
 
     const hotelsById = Object.fromEntries(
-      hotelResults.filter(Boolean).map(hotel => [hotel.id_hotel ?? hotel.idHotel, hotel])
+      hotelResults.filter(Boolean).map((hotel) => [hotel.id_hotel ?? hotel.idHotel, hotel])
     );
     const roomTypesById = Object.fromEntries(
-      roomTypeResults.filter(Boolean).map(room => [room.id_room_type ?? room.idRoomType, room])
+      roomTypeResults.filter(Boolean).map((room) => [room.id_room_type ?? room.idRoomType, room])
     );
 
-    return items.map(booking => {
+    return items.map((booking) => {
       const hotelId = getHotelId(booking);
       const roomTypeId = getRoomTypeId(booking);
       const hotel = hotelsById[hotelId];
-      const roomType = roomTypesById[roomTypeId]
-        || hotel?.roomTypes?.find(room => (room.id_room_type ?? room.idRoomType) === roomTypeId);
+      const roomType = roomTypesById[roomTypeId] ||
+      hotel?.roomTypes?.find((room) => (room.id_room_type ?? room.idRoomType) === roomTypeId);
 
       return {
         ...booking,
         hotel_name: hotel?.name || booking.hotel_name,
         room_type_name: roomType?.name || booking.room_type_name,
         hotel_city: hotel?.city?.name || booking.hotel_city,
-        hotel_address: hotel?.address || booking.hotel_address,
+        hotel_address: hotel?.address || booking.hotel_address
       };
     });
   };
 
   const loadBookings = () => {
     setLoading(true);
-    api.get(`/api/bookings/my?status=${tab}`)
-      .then(async r => {
-        const data = r.data.data || [];
-        setBookings(await enrichBookingDetails(data));
-      })
-      .catch(() => setBookings([]))
-      .finally(() => setLoading(false));
+    api.get(`/api/bookings/my?status=${tab}`).
+    then(async (r) => {
+      const data = r.data.data || [];
+      setBookings(await enrichBookingDetails(data));
+    }).
+    catch(() => setBookings([])).
+    finally(() => setLoading(false));
   };
 
-  useEffect(() => { loadBookings(); }, [tab]);
+  useEffect(() => {
+    const timer = window.setTimeout(loadBookings, 0);
+    return () => window.clearTimeout(timer);
+    // loadBookings intentionally follows the selected tab.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab]);
 
   const handleCancel = async (bookingId) => {
     if (!window.confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) return;
@@ -77,62 +83,55 @@ const MyBookings = () => {
   };
 
   const tabs = [
-    { key: 'active', label: 'Pesanan Aktif', icon: Clock },
-    { key: 'history', label: 'Riwayat Pesanan', icon: CheckCircle },
-  ];
+  { key: 'active', label: 'Pesanan Aktif', icon: Clock },
+  { key: 'history', label: 'Riwayat Pesanan', icon: CheckCircle }];
+
 
   return (
-    <div className="user-page my-bookings-page" style={{ background: 'var(--color-background)', minHeight: '100vh', padding: '6rem 1.5rem' }}>
-      <div className="user-page-shell" style={{ maxWidth: 900, margin: '0 auto' }}>
-        <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '2.5rem', marginBottom: '0.5rem', color: 'var(--color-text)' }}>Pesanan Saya</h1>
-        <p style={{ color: 'var(--color-muted)', fontWeight: 300, marginBottom: '3rem', fontSize: '0.9rem' }}>Kelola dan pantau status semua pemesanan hotel Anda</p>
+    <div className="user-page my-bookings-page [background:var(--color-background)] [min-height:100vh] [padding:6rem_1.5rem]">
+      <div className="user-page-shell [max-width:900px] [margin:0_auto]">
+        <h1 className="[font-family:var(--font-heading)] [font-weight:300] [font-size:2.5rem] [margin-bottom:0.5rem] [color:var(--color-text)]">Pesanan Saya</h1>
+        <p className="[color:var(--color-muted)] [font-weight:300] [margin-bottom:3rem] [font-size:0.9rem]">Kelola dan pantau status semua pemesanan hotel Anda</p>
 
         {/* Tabs */}
-        <div className="user-tabs" style={{ display: 'flex', borderBottom: '1px solid var(--color-accent)', marginBottom: '2.5rem', gap: '2rem' }}>
-          {tabs.map(({ key, label, icon: Icon }) => (
-            <button key={key} onClick={() => setTab(key)} 
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.5rem',
-                padding: '0.875rem 0', fontFamily: 'var(--font-body)', fontWeight: 400, fontSize: '0.875rem', textTransform: 'uppercase',
-                background: 'transparent',
-                color: tab === key ? 'var(--color-primary)' : 'var(--color-muted)',
-                border: 'none',
-                borderBottom: tab === key ? '2px solid var(--color-primary)' : '2px solid transparent',
-                cursor: 'pointer', transition: 'all 0.3s ease',
-                letterSpacing: '1px',
-                marginBottom: '-1px'
-              }}>
+        <div className="user-tabs [display:flex] [border-bottom:1px_solid_var(--color-accent)] [margin-bottom:2.5rem] [gap:2rem]">
+          {tabs.map(({ key, label, icon: Icon }) =>
+          <button key={key} onClick={() => setTab(key)}
+          className={cn(
+            '-mb-px flex cursor-pointer items-center gap-2 border-0 border-b-2 bg-transparent py-3.5 font-[var(--font-body)] text-sm font-normal uppercase tracking-[1px] transition',
+            tab === key ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-[var(--color-muted)]',
+          )}>
               <Icon size={14} /> {label}
             </button>
-          ))}
+          )}
         </div>
 
         {/* Content */}
-        {loading ? (
-          <LoadingState text="Memuat pesanan Anda..." />
-        ) : bookings.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '5rem 1.5rem', border: '1px dashed var(--color-accent)', borderRadius: 'var(--radius-sm)', background: 'var(--color-surface)' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1.5rem', opacity: 0.6 }}>🗓️</div>
-            <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.5rem', marginBottom: '0.5rem', color: 'var(--color-text)' }}>
+        {loading ?
+        <LoadingState text="Memuat pesanan Anda..." /> :
+        bookings.length === 0 ?
+        <div className="[text-align:center] [padding:5rem_1.5rem] [border:1px_dashed_var(--color-accent)] [border-radius:var(--radius-sm)] [background:var(--color-surface)]">
+            <div className="[font-size:3rem] [margin-bottom:1.5rem] [opacity:0.6]">🗓️</div>
+            <h3 className="[font-family:var(--font-heading)] [font-weight:300] [font-size:1.5rem] [margin-bottom:0.5rem] [color:var(--color-text)]">
               {tab === 'active' ? 'Tidak Ada Pesanan Aktif' : 'Belum Ada Riwayat'}
             </h3>
-            <p style={{ color: 'var(--color-muted)', fontWeight: 300, marginBottom: '2rem', fontSize: '0.9rem' }}>
+            <p className="[color:var(--color-muted)] [font-weight:300] [margin-bottom:2rem] [font-size:0.9rem]">
               {tab === 'active' ? 'Mulai pesan hotel impian Anda sekarang!' : 'Riwayat pemesanan akan muncul di sini.'}
             </p>
-            <Link to="/hotels" className="btn btn-primary" style={{ background: 'var(--color-primary)' }}>Cari Hotel <ArrowRight size={14} /></Link>
+            <Link to="/hotels" className="btn btn-primary [background:var(--color-primary)]">Cari Hotel <ArrowRight size={14} /></Link>
+          </div> :
+
+        <div className="flow-animate [display:flex] [flex-direction:column] [gap:1.5rem]">
+            {bookings.map((booking) => <BookingCard key={booking.id_booking || booking.id} booking={booking} onCancel={handleCancel} />)}
           </div>
-        ) : (
-          <div className="flow-animate" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {bookings.map(booking => <BookingCard key={booking.id_booking || booking.id} booking={booking} onCancel={handleCancel} />)}
-          </div>
-        )}
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 const BookingCard = ({ booking, onCancel }) => {
-  const { bg, color, label } = statusColor(booking.status);
+  const { label } = statusColor(booking.status);
   const [timeLeft, setTimeLeft] = useState(0);
   const [expanded, setExpanded] = useState(false);
 
@@ -141,14 +140,20 @@ const BookingCard = ({ booking, onCancel }) => {
   useEffect(() => {
     if (booking.payment_deadline && booking.status === 'PENDING') {
       const deadline = new Date(booking.payment_deadline).getTime();
-      setTimeLeft(Math.max(0, Math.floor((deadline - Date.now()) / 1000)));
-      const t = setInterval(() => setTimeLeft(l => Math.max(0, l - 1)), 1000);
-      return () => clearInterval(t);
+      const startTimer = window.setTimeout(
+        () => setTimeLeft(Math.max(0, Math.floor((deadline - Date.now()) / 1000))),
+        0,
+      );
+      const t = setInterval(() => setTimeLeft((l) => Math.max(0, l - 1)), 1000);
+      return () => {
+        window.clearTimeout(startTimer);
+        clearInterval(t);
+      };
     }
-  }, [booking]);
+  }, [booking.payment_deadline, booking.status]);
 
   const formatCount = (s) => {
-    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    const h = Math.floor(s / 3600),m = Math.floor(s % 3600 / 60),sec = s % 60;
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
   };
 
@@ -159,222 +164,218 @@ const BookingCard = ({ booking, onCancel }) => {
   const roomTypeName = booking.room_type_name || `Tipe Kamar #${roomTypeId}`;
 
   // Status badges colors matching Elegant Sanctuary theme
-  const getBadgeColor = (status) => {
+  const getBadgeClass = (status) => {
     switch (status) {
-      case 'PENDING': return { bg: 'rgba(212,175,55,0.1)', text: 'var(--color-primary)' };
-      case 'CONFIRMED': return { bg: 'rgba(72,187,120,0.1)', text: '#276749' };
-      case 'CANCELLED': return { bg: 'rgba(229,62,62,0.1)', text: '#9B2C2C' };
-      default: return { bg: 'var(--color-accent)', text: 'var(--color-muted)' };
+      case 'PENDING': return 'bg-amber-400/10 text-[var(--color-primary)]';
+      case 'CONFIRMED': return 'bg-emerald-500/10 text-[#276749]';
+      case 'CANCELLED': return 'bg-red-500/10 text-[#9B2C2C]';
+      default: return 'bg-[var(--color-accent)] text-[var(--color-muted)]';
     }
   };
 
-  const statusBadge = getBadgeColor(booking.status);
+  const statusBadgeClass = getBadgeClass(booking.status);
 
   return (
-    <div className="card card-hover booking-history-card flow-animate" style={{ padding: '2rem', border: '1px solid var(--color-accent)', display: 'flex', flexDirection: 'column', gap: '1.5rem', background: 'var(--color-surface)' }}>
+    <div className="card card-hover booking-history-card flow-animate [padding:2rem] [border:1px_solid_var(--color-accent)] [display:flex] [flex-direction:column] [gap:1.5rem] [background:var(--color-surface)]">
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="[display:flex] [justify-content:space-between] [align-items:flex-start] [flex-wrap:wrap] [gap:1rem]">
         <div>
-          <span style={{ color: 'var(--color-muted)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
+          <span className="[color:var(--color-muted)] [font-size:0.75rem] [text-transform:uppercase] [letter-spacing:1px]">
             Pesanan #{booking.id_booking || booking.id}
           </span>
-          <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.4rem', margin: '0.25rem 0 0', color: 'var(--color-text)' }}>
+          <h3 className="[font-family:var(--font-heading)] [font-weight:300] [font-size:1.4rem] [margin:0.25rem_0_0] [color:var(--color-text)]">
             {hotelName}
           </h3>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginTop: '0.5rem', color: 'var(--color-muted)', fontSize: '0.8rem', fontWeight: 300 }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+          <div className="[display:flex] [flex-wrap:wrap] [gap:0.75rem] [margin-top:0.5rem] [color:var(--color-muted)] [font-size:0.8rem] [font-weight:300]">
+            <span className="[display:inline-flex] [align-items:center] [gap:0.35rem]">
               <Users size={13} /> {roomTypeName}
             </span>
-            {booking.hotel_city && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            {booking.hotel_city &&
+            <span className="[display:inline-flex] [align-items:center] [gap:0.35rem]">
                 <MapPin size={13} /> {booking.hotel_city}
               </span>
-            )}
+            }
           </div>
         </div>
-        <span className="badge" style={{ background: statusBadge.bg, color: statusBadge.text, borderColor: 'transparent', padding: '0.4rem 1rem' }}>{label}</span>
+        <span className={cn('badge border-transparent px-4 py-1.5', statusBadgeClass)}>{label}</span>
       </div>
 
       {/* Summary Grid */}
-      <div className="booking-history-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '1.5rem', padding: '1.25rem', background: 'var(--color-background)', border: '1px solid var(--color-accent)', borderRadius: 'var(--radius-sm)' }}>
+      <div className="booking-history-grid [display:grid] [grid-template-columns:repeat(auto-fit,_minmax(130px,_1fr))] [gap:1.5rem] [padding:1.25rem] [background:var(--color-background)] [border:1px_solid_var(--color-accent)] [border-radius:var(--radius-sm)]">
         <div>
-          <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Check-In</div>
-          <div style={{ fontWeight: 400, fontSize: '0.85rem', color: 'var(--color-text)' }}>{formatDate(booking.check_in)}</div>
+          <div className="[color:var(--color-muted)] [font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.5px] [margin-bottom:0.25rem]">Check-In</div>
+          <div className="[font-weight:400] [font-size:0.85rem] [color:var(--color-text)]">{formatDate(booking.check_in)}</div>
         </div>
         <div>
-          <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Check-Out</div>
-          <div style={{ fontWeight: 400, fontSize: '0.85rem', color: 'var(--color-text)' }}>{formatDate(booking.check_out)}</div>
+          <div className="[color:var(--color-muted)] [font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.5px] [margin-bottom:0.25rem]">Check-Out</div>
+          <div className="[font-weight:400] [font-size:0.85rem] [color:var(--color-text)]">{formatDate(booking.check_out)}</div>
         </div>
         <div>
-          <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Durasi</div>
-          <div style={{ fontWeight: 400, fontSize: '0.85rem', color: 'var(--color-text)' }}>{nights} malam</div>
+          <div className="[color:var(--color-muted)] [font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.5px] [margin-bottom:0.25rem]">Durasi</div>
+          <div className="[font-weight:400] [font-size:0.85rem] [color:var(--color-text)]">{nights} malam</div>
         </div>
         <div>
-          <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Tamu</div>
-          <div style={{ fontWeight: 400, fontSize: '0.85rem', color: 'var(--color-text)' }}>{booking.number_of_guest} orang</div>
+          <div className="[color:var(--color-muted)] [font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.5px] [margin-bottom:0.25rem]">Tamu</div>
+          <div className="[font-weight:400] [font-size:0.85rem] [color:var(--color-text)]">{booking.number_of_guest} orang</div>
         </div>
         <div>
-          <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.25rem' }}>Total</div>
-          <div style={{ fontWeight: 400, fontSize: '0.95rem', color: 'var(--color-primary)' }}>{formatCurrency(booking.total_price)}</div>
+          <div className="[color:var(--color-muted)] [font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.5px] [margin-bottom:0.25rem]">Total</div>
+          <div className="[font-weight:400] [font-size:0.95rem] [color:var(--color-primary)]">{formatCurrency(booking.total_price)}</div>
         </div>
       </div>
 
       {/* Bukti Upload status message */}
-      {alreadyPaid && (
-        <div style={{ background: 'rgba(72,187,120,0.05)', border: '1px solid rgba(72,187,120,0.2)', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: '#276749', borderRadius: 'var(--radius-sm)' }}>
-          <CheckCircle size={14} style={{ color: '#38A169', flexShrink: 0 }} />
+      {alreadyPaid &&
+      <div className="[background:rgba(72,187,120,0.05)] [border:1px_solid_rgba(72,187,120,0.2)] [padding:0.75rem_1rem] [display:flex] [align-items:center] [gap:0.5rem] [font-size:0.8rem] [color:#276749] [border-radius:var(--radius-sm)]">
+          <CheckCircle size={14} className="[color:#38A169] [flex-shrink:0]" />
           Bukti pembayaran sudah dikirim — menunggu konfirmasi admin hotel.
         </div>
-      )}
+      }
 
       {/* Pending Countdown */}
-      {booking.status === 'PENDING' && timeLeft > 0 && (
-        <div style={{ background: 'rgba(212,175,55,0.05)', border: '1px solid rgba(212,175,55,0.2)', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', borderRadius: 'var(--radius-sm)' }}>
-          <Clock size={14} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />
-          <span style={{ fontSize: '0.8rem', color: 'var(--color-text)', fontWeight: 300 }}>Batas bayar: <strong style={{ color: 'var(--color-primary)', fontWeight: 500 }}>{formatCount(timeLeft)}</strong></span>
+      {booking.status === 'PENDING' && timeLeft > 0 &&
+      <div className="[background:rgba(212,175,55,0.05)] [border:1px_solid_rgba(212,175,55,0.2)] [padding:0.75rem_1rem] [display:flex] [align-items:center] [gap:0.5rem] [border-radius:var(--radius-sm)]">
+          <Clock size={14} className="[color:var(--color-primary)] [flex-shrink:0]" />
+          <span className="[font-size:0.8rem] [color:var(--color-text)] [font-weight:300]">Batas bayar: <strong className="[color:var(--color-primary)] [font-weight:500]">{formatCount(timeLeft)}</strong></span>
         </div>
-      )}
+      }
 
       {/* Expanded details */}
-      {expanded && (
-        <div style={{ background: 'var(--color-background)', border: '1px solid var(--color-accent)', padding: '1.5rem', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', borderRadius: 'var(--radius-sm)' }}>
+      {expanded &&
+      <div className="[background:var(--color-background)] [border:1px_solid_var(--color-accent)] [padding:1.5rem] [font-size:0.85rem] [display:flex] [flex-direction:column] [gap:1.5rem] [border-radius:var(--radius-sm)]">
           
           {/* Pemesan info */}
           <div>
-            <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.1rem', color: 'var(--color-text)', margin: '0 0 1rem', fontWeight: 300 }}>Detail Pemesan</h4>
-            <div className="booking-history-detail-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem 2rem' }}>
+            <h4 className="[font-family:var(--font-heading)] [font-size:1.1rem] [color:var(--color-text)] [margin:0_0_1rem] [font-weight:300]">Detail Pemesan</h4>
+            <div className="booking-history-detail-grid [display:grid] [grid-template-columns:1fr_1fr] [gap:1rem_2rem]">
               {[
-                { label: 'Nama Pemesan', val: booking.orderer_name },
-                { label: 'Email', val: booking.orderer_email },
-                { label: 'No. Telepon', val: booking.orderer_phone },
-                { label: 'ID Pesanan', val: `#${booking.id_booking || booking.id}` },
-                { label: 'Hotel', val: hotelName },
-                { label: 'Tipe Kamar', val: roomTypeName },
-                { label: 'Alamat Hotel', val: booking.hotel_address },
-              ].map(({ label, val }) => val && (
-                <div key={label}>
-                  <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</div>
-                  <div style={{ fontWeight: 400, color: 'var(--color-text)', marginTop: '0.15rem' }}>{val}</div>
+            { label: 'Nama Pemesan', val: booking.orderer_name },
+            { label: 'Email', val: booking.orderer_email },
+            { label: 'No. Telepon', val: booking.orderer_phone },
+            { label: 'ID Pesanan', val: `#${booking.id_booking || booking.id}` },
+            { label: 'Hotel', val: hotelName },
+            { label: 'Tipe Kamar', val: roomTypeName },
+            { label: 'Alamat Hotel', val: booking.hotel_address }].
+            map(({ label, val }) => val &&
+            <div key={label}>
+                  <div className="[color:var(--color-muted)] [font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.5px]">{label}</div>
+                  <div className="[font-weight:400] [color:var(--color-text)] [margin-top:0.15rem]">{val}</div>
                 </div>
-              ))}
+            )}
             </div>
           </div>
 
           {/* Xendit Invoice Detail */}
-          {booking.payment_method === 'XENDIT' && (
-            <div style={{ borderTop: '1px solid var(--color-accent)', paddingTop: '1.25rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
-                <div style={{ width: 28, height: 28, background: '#0057FF', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          {booking.payment_method === 'XENDIT' &&
+        <div className="[border-top:1px_solid_var(--color-accent)] [padding-top:1.25rem]">
+              <div className="[display:flex] [align-items:center] [gap:0.6rem] [margin-bottom:1rem]">
+                <div className="[width:28px] [height:28px] [background:#0057FF] [border-radius:6px] [display:flex] [align-items:center] [justify-content:center] [flex-shrink:0]">
                   <svg width="14" height="10" viewBox="0 0 22 16" fill="none">
-                    <path d="M 5 0 L 11 7 L 5 14 M 13 0 L 19 7 L 13 14" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                    <path d="M 5 0 L 11 7 L 5 14 M 13 0 L 19 7 L 13 14" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
                   </svg>
                 </div>
-                <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.1rem', color: 'var(--color-text)', margin: 0, fontWeight: 300 }}>Detail Invoice Xendit</h4>
+                <h4 className="[font-family:var(--font-heading)] [font-size:1.1rem] [color:var(--color-text)] [margin:0] [font-weight:300]">Detail Invoice Xendit</h4>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem 2rem' }}>
+              <div className="[display:grid] [grid-template-columns:1fr_1fr] [gap:1rem_2rem]">
                 {/* Payment Status */}
                 <div>
-                  <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.35rem' }}>Status Pembayaran</div>
-                  {booking.payment_status ? (
-                    <span style={{
-                      display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-                      padding: '0.25rem 0.75rem', borderRadius: 20, fontSize: '0.75rem', fontWeight: 600,
-                      background: booking.payment_status === 'PAID' || booking.payment_status === 'SETTLED'
-                        ? 'rgba(72,187,120,0.12)' : booking.payment_status === 'EXPIRED'
-                        ? 'rgba(229,62,62,0.1)' : 'rgba(212,175,55,0.12)',
-                      color: booking.payment_status === 'PAID' || booking.payment_status === 'SETTLED'
-                        ? '#276749' : booking.payment_status === 'EXPIRED'
-                        ? '#9B2C2C' : 'var(--color-primary)',
-                    }}>
+                  <div className="[color:var(--color-muted)] [font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.5px] [margin-bottom:0.35rem]">Status Pembayaran</div>
+                  {booking.payment_status ?
+              <span className={cn(
+                'inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold',
+                booking.payment_status === 'PAID' || booking.payment_status === 'SETTLED'
+                  ? 'bg-emerald-500/10 text-[#276749]'
+                  : booking.payment_status === 'EXPIRED'
+                    ? 'bg-red-500/10 text-[#9B2C2C]'
+                    : 'bg-amber-400/10 text-[var(--color-primary)]',
+              )}>
                       {booking.payment_status === 'PAID' || booking.payment_status === 'SETTLED' ? '✓ ' : ''}
                       {booking.payment_status}
-                    </span>
-                  ) : (
-                    <span style={{ color: 'var(--color-muted)', fontSize: '0.8rem' }}>—</span>
-                  )}
+                    </span> :
+
+              <span className="[color:var(--color-muted)] [font-size:0.8rem]">—</span>
+              }
                 </div>
 
                 {/* Paid At */}
-                {booking.paid_at && (
-                  <div>
-                    <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.35rem' }}>Dibayar Pada</div>
-                    <div style={{ fontWeight: 400, color: 'var(--color-text)', fontSize: '0.85rem' }}>
+                {booking.paid_at &&
+            <div>
+                    <div className="[color:var(--color-muted)] [font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.5px] [margin-bottom:0.35rem]">Dibayar Pada</div>
+                    <div className="[font-weight:400] [color:var(--color-text)] [font-size:0.85rem]">
                       {new Date(booking.paid_at).toLocaleString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
-                )}
+            }
 
                 {/* External ID */}
-                {booking.xendit_external_id && (
-                  <div style={{ gridColumn: '1 / -1' }}>
-                    <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.35rem' }}>ID Transaksi Xendit</div>
-                    <div style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'var(--color-text)', background: 'var(--color-surface)', padding: '0.4rem 0.75rem', borderRadius: 4, border: '1px solid var(--color-accent)', wordBreak: 'break-all' }}>
+                {booking.xendit_external_id &&
+            <div className="[grid-column:1_/_-1]">
+                    <div className="[color:var(--color-muted)] [font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.5px] [margin-bottom:0.35rem]">ID Transaksi Xendit</div>
+                    <div className="[font-family:monospace] [font-size:0.78rem] [color:var(--color-text)] [background:var(--color-surface)] [padding:0.4rem_0.75rem] [border-radius:4px] [border:1px_solid_var(--color-accent)] [word-break:break-all]">
                       {booking.xendit_external_id}
                     </div>
                   </div>
-                )}
+            }
 
                 {/* Invoice URL */}
-                {booking.xendit_invoice_url && (
-                  <div style={{ gridColumn: '1 / -1' }}>
-                    <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.35rem' }}>Link Invoice</div>
-                    <a href={booking.xendit_invoice_url} target="_blank" rel="noopener noreferrer"
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: '#0057FF', fontSize: '0.8rem', fontWeight: 400, textDecoration: 'none', borderBottom: '1px solid #0057FF40' }}>
+                {booking.xendit_invoice_url &&
+            <div className="[grid-column:1_/_-1]">
+                    <div className="[color:var(--color-muted)] [font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.5px] [margin-bottom:0.35rem]">Link Invoice</div>
+                    <a href={booking.xendit_invoice_url} target="_blank" rel="noopener noreferrer" className="[display:inline-flex] [align-items:center] [gap:0.4rem] [color:#0057FF] [font-size:0.8rem] [font-weight:400] [text-decoration:none] [border-bottom:1px_solid_#0057FF40]">
+                
                       🔗 Buka Halaman Pembayaran Xendit
                     </a>
                   </div>
-                )}
+            }
               </div>
             </div>
-          )}
+        }
 
-          {booking.payment_proof && (
-            <div style={{ borderTop: '1px solid var(--color-accent)', paddingTop: '1rem' }}>
-              <div style={{ color: 'var(--color-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.5rem' }}>Bukti Pembayaran</div>
+          {booking.payment_proof &&
+        <div className="[border-top:1px_solid_var(--color-accent)] [padding-top:1rem]">
+              <div className="[color:var(--color-muted)] [font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.5px] [margin-bottom:0.5rem]">Bukti Pembayaran</div>
               <a href={booking.payment_proof} target="_blank" rel="noopener noreferrer">
-                <img src={booking.payment_proof} alt="Bukti Bayar" style={{ maxHeight: 160, maxWidth: '100%', objectFit: 'contain', borderRadius: 2, border: '1px solid var(--color-accent)' }} />
+                <img src={booking.payment_proof} alt="Bukti Bayar" className="[max-height:160px] [max-width:100%] [object-fit:contain] [border-radius:2px] [border:1px_solid_var(--color-accent)]" />
               </a>
             </div>
-          )}
+        }
         </div>
-      )}
+      }
 
       {/* Action Buttons */}
-      <div className="booking-history-actions" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', borderTop: '1px solid var(--color-accent)', paddingTop: '1.25rem' }}>
-        {booking.status === 'PENDING' && !booking.xendit_invoice_url && (
-          <Link to={`/payment/${booking.id_booking || booking.id}`} className="btn btn-primary btn-sm" style={{ background: '#0057FF', borderColor: '#0057FF' }}>
+      <div className="booking-history-actions [display:flex] [gap:1rem] [flex-wrap:wrap] [border-top:1px_solid_var(--color-accent)] [padding-top:1.25rem]">
+        {booking.status === 'PENDING' && !booking.xendit_invoice_url &&
+        <Link to={`/payment/${booking.id_booking || booking.id}`} className="btn btn-primary btn-sm [background:#0057FF] [border-color:#0057FF]">
             Bayar via Xendit
           </Link>
-        )}
-        {booking.status === 'PENDING' && booking.xendit_invoice_url && booking.payment_status !== 'EXPIRED' && (
-          <>
-            <a href={booking.xendit_invoice_url} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm" style={{ background: '#0057FF', borderColor: '#0057FF', color: '#fff' }}>
+        }
+        {booking.status === 'PENDING' && booking.xendit_invoice_url && booking.payment_status !== 'EXPIRED' &&
+        <>
+            <a href={booking.xendit_invoice_url} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm [background:#0057FF] [border-color:#0057FF] [color:#fff]">
               Lanjutkan Pembayaran
             </a>
           </>
-        )}
-        {booking.status === 'PENDING' && (booking.payment_status === 'EXPIRED' || (!booking.xendit_invoice_url)) && (
-          <Link to={`/payment/${booking.id_booking || booking.id}`} className="btn btn-white btn-sm">
+        }
+        {booking.status === 'PENDING' && (booking.payment_status === 'EXPIRED' || !booking.xendit_invoice_url) &&
+        <Link to={`/payment/${booking.id_booking || booking.id}`} className="btn btn-white btn-sm">
             Buat Ulang Invoice
           </Link>
-        )}
-        {booking.status === 'COMPLETED' && (
-          <Link to={`/hotels/${hotelId}`} className="btn btn-primary btn-sm" style={{ background: 'var(--color-primary)' }}>Pesan Lagi</Link>
-        )}
-        <button onClick={() => setExpanded(e => !e)} className="btn btn-white btn-sm">
+        }
+        {booking.status === 'COMPLETED' &&
+        <Link to={`/hotels/${hotelId}`} className="btn btn-primary btn-sm [background:var(--color-primary)]">Pesan Lagi</Link>
+        }
+        <button onClick={() => setExpanded((e) => !e)} className="btn btn-white btn-sm">
           {expanded ? <><ChevronUp size={12} /> Sembunyikan</> : <><ChevronDown size={12} /> Lihat Detail</>}
         </button>
-        {booking.status === 'PENDING' && (
-          <button onClick={() => onCancel(booking.id_booking || booking.id)} className="btn btn-white btn-sm" style={{ color: '#E53E3E', borderColor: 'rgba(229,62,62,0.3)' }}
-            onMouseEnter={e => e.currentTarget.style.background = '#FFF5F5'}
-            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-            <XCircle size={12} style={{ color: '#E53E3E' }} /> Batalkan
+        {booking.status === 'PENDING' &&
+        <button onClick={() => onCancel(booking.id_booking || booking.id)} className="btn btn-white btn-sm border-red-500/30 text-[#E53E3E] hover:bg-[#FFF5F5]">
+            <XCircle size={12} className="[color:#E53E3E]" /> Batalkan
           </button>
-        )}
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default MyBookings;

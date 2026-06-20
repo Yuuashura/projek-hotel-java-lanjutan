@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { cn } from '../../lib/utils';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { CalendarDays, User, AlertCircle, BedDouble, ShieldCheck } from 'lucide-react';
 import { formatCurrency, formatDate, diffDays } from '../../utils/formatters';
@@ -43,7 +44,7 @@ const getCalendarCells = (monthDate) => {
     return {
       value: toDateInputValue(date),
       day: date.getDate(),
-      isCurrentMonth: date.getMonth() === month,
+      isCurrentMonth: date.getMonth() === month
     };
   });
 };
@@ -74,7 +75,7 @@ const Booking = () => {
     for_self: true,
     orderer_name: '',
     orderer_phone: '',
-    orderer_email: '',
+    orderer_email: ''
   });
   const [calendarMonth, setCalendarMonth] = useState(dateFromInput(initialCheckIn));
 
@@ -82,70 +83,73 @@ const Booking = () => {
 
   useEffect(() => {
     if (!user || user.role !== 'ROLE_USER') navigate('/login');
-  }, [user]);
+  }, [user, navigate]);
 
   useEffect(() => {
     Promise.all([
-      api.get(`/api/hotels/${hotelId}`),
-      api.get(`/api/room-types/hotel/${hotelId}`)
-    ]).then(([hotelRes, roomsRes]) => {
+    api.get(`/api/hotels/${hotelId}`),
+    api.get(`/api/room-types/hotel/${hotelId}`)]
+    ).then(([hotelRes, roomsRes]) => {
       setHotel(hotelRes.data.data);
       setRooms(roomsRes.data.data || []);
       if (!form.room_type_id && roomsRes.data.data?.length > 0) {
-        setForm(f => ({ ...f, room_type_id: roomsRes.data.data[0].id_room_type }));
+        setForm((f) => ({ ...f, room_type_id: roomsRes.data.data[0].id_room_type }));
       }
     }).catch(() => navigate('/hotels')).finally(() => setLoading(false));
-  }, [hotelId]);
+  }, [hotelId, form.room_type_id, navigate]);
 
   // Auto-fill for self
   useEffect(() => {
-    if (form.for_self && user) {
-      setForm(f => ({ 
-        ...f, 
-        orderer_name: `${user.first_name} ${user.last_name}`.trim(), 
-        orderer_phone: user.phone || '', 
-        orderer_email: user.email || '' 
-      }));
-    } else if (!form.for_self) {
-      setForm(f => ({ ...f, orderer_name: '', orderer_phone: '', orderer_email: '' }));
-    }
+    const timer = window.setTimeout(() => {
+      if (form.for_self && user) {
+        setForm((f) => ({
+          ...f,
+          orderer_name: `${user.first_name} ${user.last_name}`.trim(),
+          orderer_phone: user.phone || '',
+          orderer_email: user.email || ''
+        }));
+      } else if (!form.for_self) {
+        setForm((f) => ({ ...f, orderer_name: '', orderer_phone: '', orderer_email: '' }));
+      }
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [form.for_self, user]);
 
-  const selectedRoom = rooms.find(r => r.id_room_type === parseInt(form.room_type_id));
+  const selectedRoom = rooms.find((r) => r.id_room_type === parseInt(form.room_type_id));
   const selectedRoomAvailable = getRoomAvailability(selectedRoom);
   const selectedRoomUnavailable = selectedRoom && selectedRoomAvailable <= 0;
   const bookingBlocked = !selectedRoom || selectedRoomUnavailable;
   const nights = form.check_in && form.check_out ? diffDays(form.check_in, form.check_out) : 0;
-  
-  const hasDiscount = (selectedRoom?.onSale || selectedRoom?.on_sale || hotel?.onSale || hotel?.on_sale) && 
-    (selectedRoom?.discountPercent > 0 || selectedRoom?.discount_percent > 0 || hotel?.discountPercent > 0 || hotel?.discount_percent > 0);
+
+  const hasDiscount = (selectedRoom?.onSale || selectedRoom?.on_sale || hotel?.onSale || hotel?.on_sale) && (
+  selectedRoom?.discountPercent > 0 || selectedRoom?.discount_percent > 0 || hotel?.discountPercent > 0 || hotel?.discount_percent > 0);
   const discountPercent = selectedRoom?.discountPercent || selectedRoom?.discount_percent || hotel?.discountPercent || hotel?.discount_percent || 0;
 
-  const basePricePerNight = selectedRoom ? (selectedRoom.price_per_night || selectedRoom.pricePerNight || 0) : 0;
+  const basePricePerNight = selectedRoom ? selectedRoom.price_per_night || selectedRoom.pricePerNight || 0 : 0;
   const originalTotalPrice = basePricePerNight * Math.max(nights, 1);
   const totalPrice = hasDiscount ? originalTotalPrice * (1 - discountPercent / 100) : originalTotalPrice;
 
   const checkOutMin = form.check_in ? addDays(form.check_in, 1) : tomorrow;
 
   const handleCheckInChange = (value) => {
-    setForm(f => ({
+    setForm((f) => ({
       ...f,
       check_in: value,
-      check_out: value ? addDays(value, 1) : '',
+      check_out: value ? addDays(value, 1) : ''
     }));
   };
 
   const handleCheckOutChange = (value) => {
-    setForm(f => ({
+    setForm((f) => ({
       ...f,
-      check_out: value <= f.check_in ? addDays(f.check_in, 1) : value,
+      check_out: value <= f.check_in ? addDays(f.check_in, 1) : value
     }));
   };
 
   const openDatePicker = (field) => {
     const value = field === 'check_in' ? form.check_in : form.check_out || checkOutMin;
     setCalendarMonth(dateFromInput(value));
-    setOpenCalendar(current => current === field ? null : field);
+    setOpenCalendar((current) => current === field ? null : field);
   };
 
   const selectDate = (field, value) => {
@@ -176,7 +180,7 @@ const Booking = () => {
         orderer_name: form.orderer_name,
         orderer_phone: form.orderer_phone,
         orderer_email: form.orderer_email,
-        is_for_self: form.for_self,
+        is_for_self: form.for_self
       });
       const bookingId = res.data.data?.id_booking;
       navigate(`/payment/${bookingId}`);
@@ -189,10 +193,10 @@ const Booking = () => {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '70vh', display: 'grid', placeItems: 'center', padding: '2rem' }}>
+      <div className="[min-height:70vh] [display:grid] [place-items:center] [padding:2rem]">
         <LoadingState text="Memuat data booking..." />
-      </div>
-    );
+      </div>);
+
   }
 
 
@@ -206,20 +210,20 @@ const Booking = () => {
           <p>Pastikan tanggal, tipe kamar, dan data tamu sudah benar sebelum melanjutkan pembayaran.</p>
         </div>
 
-        {error && (
-          <div className="alert-danger" style={{ padding: '1rem', marginBottom: '2.5rem', display: 'flex', gap: '0.6rem', borderRadius: 'var(--radius-sm)' }}>
-            <AlertCircle size={18} style={{ color: 'var(--color-danger)', flexShrink: 0 }} />
-            <span style={{ fontWeight: 300, color: 'var(--color-danger)', fontSize: '0.9rem' }}>{error}</span>
+        {error &&
+        <div className="alert-danger [padding:1rem] [margin-bottom:2.5rem] [display:flex] [gap:0.6rem] [border-radius:var(--radius-sm)]">
+            <AlertCircle size={18} className="[color:var(--color-danger)] [flex-shrink:0]" />
+            <span className="[font-weight:300] [color:var(--color-danger)] [font-size:0.9rem]">{error}</span>
           </div>
-        )}
+        }
 
-        <form onSubmit={handleSubmit} className="booking-form-grid">
+        <form onSubmit={handleSubmit} className="booking-form-grid max-[900px]:!grid-cols-1 max-[900px]:!gap-12">
           
           {/* Left Column (65%): Form */}
           <div className="booking-main-column">
             
             {/* Stay Details */}
-            <div className="booking-panel" style={{ zIndex: 2 }}>
+            <div className="booking-panel [z-index:2]">
               <div className="booking-section-title">
                 <CalendarDays size={18} />
                 <div>
@@ -228,8 +232,8 @@ const Booking = () => {
                 </div>
               </div>
               
-              <div className="booking-date-grid" >
-                <div className={`booking-date-card ${openCalendar === 'check_in' ? 'is-open' : ''}`} style={{ zIndex: 2 }}>
+              <div className="booking-date-grid">
+                <div className={cn(`booking-date-card ${openCalendar === 'check_in' ? 'is-open' : ''}`, "[z-index:2]")}>
                   <div className="booking-date-icon"><CalendarDays size={18} /></div>
                   <div className="booking-date-body">
                     <label>Check-In</label>
@@ -238,17 +242,17 @@ const Booking = () => {
                     </button>
                     <span>{form.check_in ? formatDate(form.check_in) : 'Pilih tanggal datang'}</span>
                   </div>
-                  {openCalendar === 'check_in' && (
-                    <CalendarPopover
-                      month={calendarMonth}
-                      setMonth={setCalendarMonth}
-                      selected={form.check_in}
-                      minDate={today}
-                      onSelect={(value) => selectDate('check_in', value)}
-                    />
-                  )}
+                  {openCalendar === 'check_in' &&
+                  <CalendarPopover
+                    month={calendarMonth}
+                    setMonth={setCalendarMonth}
+                    selected={form.check_in}
+                    minDate={today}
+                    onSelect={(value) => selectDate('check_in', value)} />
+
+                  }
                 </div>
-                <div className={`booking-date-card ${openCalendar === 'check_out' ? 'is-open' : ''}`} style={{ zIndex: 2 }}>
+                <div className={cn(`booking-date-card ${openCalendar === 'check_out' ? 'is-open' : ''}`, "[z-index:2]")}>
                   <div className="booking-date-icon"><CalendarDays size={18} /></div>
                   <div className="booking-date-body">
                     <label>Check-Out</label>
@@ -257,46 +261,46 @@ const Booking = () => {
                     </button>
                     <span>{form.check_out ? formatDate(form.check_out) : 'Otomatis esok hari'}</span>
                   </div>
-                  {openCalendar === 'check_out' && (
-                    <CalendarPopover
-                      month={calendarMonth}
-                      setMonth={setCalendarMonth}
-                      selected={form.check_out}
-                      minDate={checkOutMin}
-                      onSelect={(value) => selectDate('check_out', value)}
-                    />
-                  )}
+                  {openCalendar === 'check_out' &&
+                  <CalendarPopover
+                    month={calendarMonth}
+                    setMonth={setCalendarMonth}
+                    selected={form.check_out}
+                    minDate={checkOutMin}
+                    onSelect={(value) => selectDate('check_out', value)} />
+
+                  }
                 </div>
               </div>
 
               <div className="booking-field-grid">
                 <div>
                   <label className="label">Tipe Kamar *</label>
-                  <select className="input booking-solid-input" value={form.room_type_id} onChange={e => setForm(f => ({ ...f, room_type_id: parseInt(e.target.value) }))} required>
-                    {rooms.map(r => {
+                  <select className="input booking-solid-input" value={form.room_type_id} onChange={(e) => setForm((f) => ({ ...f, room_type_id: parseInt(e.target.value) }))} required>
+                    {rooms.map((r) => {
                       const available = getRoomAvailability(r);
                       return (
                         <option key={r.id_room_type} value={r.id_room_type} disabled={available <= 0}>
                           {r.name}{available <= 0 ? ' - Tidak tersedia' : ` - ${available} tersedia`}
-                        </option>
-                      );
+                        </option>);
+
                     })}
                   </select>
-                  {selectedRoomUnavailable && (
-                    <p style={{ color: 'var(--color-danger)', fontSize: '0.8rem', marginTop: '0.5rem', fontWeight: 400 }}>
+                  {selectedRoomUnavailable &&
+                  <p className="[color:var(--color-danger)] [font-size:0.8rem] [margin-top:0.5rem] [font-weight:400]">
                       Tipe kamar ini sedang tidak tersedia. Silakan pilih tipe kamar lain.
                     </p>
-                  )}
+                  }
                 </div>
                 <div>
                   <label className="label">Jumlah Tamu *</label>
-                  <input type="number" className="input booking-solid-input" min={1} max={selectedRoom?.max_guest || 10} value={form.number_of_guest} onChange={e => setForm(f => ({ ...f, number_of_guest: parseInt(e.target.value) }))} required />
+                  <input type="number" className="input booking-solid-input" min={1} max={selectedRoom?.max_guest || 10} value={form.number_of_guest} onChange={(e) => setForm((f) => ({ ...f, number_of_guest: parseInt(e.target.value) }))} required />
                 </div>
               </div>
             </div>
 
             {/* Guest Details */}
-            <div className="booking-panel" >
+            <div className="booking-panel">
               <div className="booking-section-title">
                 <User size={18} />
                 <div>
@@ -307,55 +311,55 @@ const Booking = () => {
 
               {/* Toggle option for self booking */}
               <div className="booking-guest-toggle">
-                {[{ val: true, label: 'Saya tamunya' }, { val: false, label: 'Pesan untuk orang lain' }].map(({ val, label }) => (
-                  <label key={label} className={form.for_self === val ? 'active' : ''}>
-                    <input type="radio" checked={form.for_self === val} onChange={() => setForm(f => ({ ...f, for_self: val }))} />
+                {[{ val: true, label: 'Saya tamunya' }, { val: false, label: 'Pesan untuk orang lain' }].map(({ val, label }) =>
+                <label key={label} className={form.for_self === val ? 'active' : ''}>
+                    <input type="radio" checked={form.for_self === val} onChange={() => setForm((f) => ({ ...f, for_self: val }))} />
                     {label}
                   </label>
-                ))}
+                )}
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginTop: '1.5rem' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                  <label style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+              <div className="[display:flex] [flex-direction:column] [gap:1.25rem] [margin-top:1.5rem]">
+                <div className="[display:flex] [flex-direction:column] [gap:0.4rem]">
+                  <label className="[font-size:0.72rem] [font-weight:600] [color:var(--color-muted)] [text-transform:uppercase] [letter-spacing:1px]">
                     Nama Lengkap *
                   </label>
-                  <input 
-                    className="input booking-solid-input" 
-                    value={form.orderer_name} 
-                    onChange={e => setForm(f => ({ ...f, orderer_name: e.target.value }))} 
-                    required 
-                    disabled={form.for_self} 
-                  />
+                  <input
+                    className="input booking-solid-input"
+                    value={form.orderer_name}
+                    onChange={(e) => setForm((f) => ({ ...f, orderer_name: e.target.value }))}
+                    required
+                    disabled={form.for_self} />
+                  
                 </div>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                    <label style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                <div className="[display:grid] [grid-template-columns:1fr_1fr] [gap:1.25rem]">
+                  <div className="[display:flex] [flex-direction:column] [gap:0.4rem]">
+                    <label className="[font-size:0.72rem] [font-weight:600] [color:var(--color-muted)] [text-transform:uppercase] [letter-spacing:1px]">
                       Nomor Telepon *
                     </label>
-                    <input 
-                      type="tel" 
-                      className="input booking-solid-input" 
-                      value={form.orderer_phone} 
-                      onChange={e => setForm(f => ({ ...f, orderer_phone: e.target.value }))} 
-                      required 
-                      disabled={form.for_self} 
-                    />
+                    <input
+                      type="tel"
+                      className="input booking-solid-input"
+                      value={form.orderer_phone}
+                      onChange={(e) => setForm((f) => ({ ...f, orderer_phone: e.target.value }))}
+                      required
+                      disabled={form.for_self} />
+                    
                   </div>
                   
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                    <label style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                  <div className="[display:flex] [flex-direction:column] [gap:0.4rem]">
+                    <label className="[font-size:0.72rem] [font-weight:600] [color:var(--color-muted)] [text-transform:uppercase] [letter-spacing:1px]">
                       Alamat Email *
                     </label>
-                    <input 
-                      type="email" 
-                      className="input booking-solid-input" 
-                      value={form.orderer_email} 
-                      onChange={e => setForm(f => ({ ...f, orderer_email: e.target.value }))} 
-                      required 
-                      disabled={form.for_self} 
-                    />
+                    <input
+                      type="email"
+                      className="input booking-solid-input"
+                      value={form.orderer_email}
+                      onChange={(e) => setForm((f) => ({ ...f, orderer_email: e.target.value }))}
+                      required
+                      disabled={form.for_self} />
+                    
                   </div>
                 </div>
               </div>
@@ -371,78 +375,69 @@ const Booking = () => {
                 <h3>Ringkasan Pesanan</h3>
               </div>
               
-              <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
-                <div style={{ width: 64, height: 64, overflow: 'hidden', borderRadius: 2 }}>
-                  <img src={hotel?.images?.[0]?.image_url || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=150'} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <div className="[display:flex] [gap:1rem] [margin-bottom:2rem]">
+                <div className="[width:64px] [height:64px] [overflow:hidden] [border-radius:2px]">
+                  <img src={hotel?.images?.[0]?.image_url || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=150'} alt="" className="[width:100%] [height:100%] [object-fit:cover]" />
                 </div>
                 <div>
-                  <div style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', color: 'var(--color-text)', fontWeight: 300 }}>{hotel?.name}</div>
-                  <div style={{ color: 'var(--color-muted)', fontSize: '0.8rem', fontWeight: 300, marginTop: '0.25rem' }}>{hotel?.city?.name}</div>
+                  <div className="[font-family:var(--font-heading)] [font-size:1.25rem] [color:var(--color-text)] [font-weight:300]">{hotel?.name}</div>
+                  <div className="[color:var(--color-muted)] [font-size:0.8rem] [font-weight:300] [margin-top:0.25rem]">{hotel?.city?.name}</div>
                 </div>
               </div>
 
-              {selectedRoom && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.85rem', color: 'var(--color-muted)', borderBottom: '1px solid var(--color-accent)', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--color-text)', fontWeight: 400 }}>
+              {selectedRoom &&
+              <div className="[display:flex] [flex-direction:column] [gap:0.75rem] [font-size:0.85rem] [color:var(--color-muted)] [border-bottom:1px_solid_var(--color-accent)] [padding-bottom:1.5rem] [margin-bottom:1.5rem]">
+                  <div className="[display:flex] [justify-content:space-between] [color:var(--color-text)] [font-weight:400]">
                     <span>Tipe Kamar</span>
                     <span>{selectedRoom.name}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: selectedRoomUnavailable ? 'var(--color-danger)' : 'var(--color-muted)' }}>
+                  <div className={cn('flex justify-between', selectedRoomUnavailable ? 'text-[var(--color-danger)]' : 'text-[var(--color-muted)]')}>
                     <span>Ketersediaan</span>
                     <span>{selectedRoomUnavailable ? 'Tidak tersedia' : `${selectedRoomAvailable} kamar`}</span>
                   </div>
-                  {form.check_in && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  {form.check_in &&
+                <div className="[display:flex] [justify-content:space-between]">
                       <span>Tanggal</span>
                       <span>{formatDate(form.check_in)} - {form.check_out ? formatDate(form.check_out) : '?'}</span>
                     </div>
-                  )}
-                  {nights > 0 && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                }
+                  {nights > 0 &&
+                <div className="[display:flex] [justify-content:space-between]">
                       <span>Malam</span>
                       <span>{nights} malam</span>
                     </div>
-                  )}
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                }
+                  <div className="[display:flex] [justify-content:space-between]">
                     <span>Tamu</span>
                     <span>{form.number_of_guest} tamu</span>
                   </div>
                 </div>
-              )}
+              }
 
-              {nights > 0 && selectedRoom && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--color-muted)' }}>
+              {nights > 0 && selectedRoom &&
+              <div className="[display:flex] [flex-direction:column] [gap:0.75rem]">
+                  <div className="[display:flex] [justify-content:space-between] [font-size:0.85rem] [color:var(--color-muted)]">
                     <span>Harga Kamar</span>
                     <span>{formatCurrency(basePricePerNight)} × {nights}</span>
                   </div>
-                  {hasDiscount && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: '#C53030' }}>
+                  {hasDiscount &&
+                <div className="[display:flex] [justify-content:space-between] [font-size:0.85rem] [color:#C53030]">
                       <span>Diskon ({discountPercent}%)</span>
                       <span>-{formatCurrency(originalTotalPrice * discountPercent / 100)}</span>
                     </div>
-                  )}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--color-muted)' }}>
+                }
+                  <div className="[display:flex] [justify-content:space-between] [font-size:0.85rem] [color:var(--color-muted)]">
                     <span>Pajak & Biaya</span>
                     <span>Termasuk</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-heading)', fontSize: '1.6rem', color: 'var(--color-text)', borderTop: '1px solid var(--color-accent)', paddingTop: '1rem', marginTop: '0.5rem', fontWeight: 300 }}>
+                  <div className="[display:flex] [justify-content:space-between] [font-family:var(--font-heading)] [font-size:1.6rem] [color:var(--color-text)] [border-top:1px_solid_var(--color-accent)] [padding-top:1rem] [margin-top:0.5rem] [font-weight:300]">
                     <span>Total</span>
-                    <span style={{ color: 'var(--color-primary)' }}>{formatCurrency(totalPrice)}</span>
+                    <span className="[color:var(--color-primary)]">{formatCurrency(totalPrice)}</span>
                   </div>
                 </div>
-              )}
+              }
 
-              <button type="submit" className="btn btn-primary btn-full animate-float" disabled={submitting || bookingBlocked}
-                style={{ 
-                  marginTop: '2rem', 
-                  justifyContent: 'center', 
-                  height: 56, 
-                  background: 'var(--color-primary)', 
-                  opacity: submitting || bookingBlocked ? 0.55 : 1,
-                  cursor: submitting || bookingBlocked ? 'not-allowed' : 'pointer',
-                  animation: 'none'
-                }}>
+              <button type="submit" className="btn btn-primary btn-full mt-8 h-14 justify-center bg-[var(--color-primary)] [animation:none] disabled:cursor-not-allowed disabled:opacity-55" disabled={submitting || bookingBlocked}>
                 {!selectedRoom ? 'Pilih Tipe Kamar' : selectedRoomUnavailable ? 'Kamar Tidak Tersedia' : submitting ? 'Processing...' : 'Lanjutkan Pembayaran'}
               </button>
               <div className="booking-secure-note">
@@ -455,13 +450,8 @@ const Booking = () => {
         </form>
       </div>
 
-      <style>{`
-        @media (max-width: 900px) { 
-          form { grid-template-columns: 1fr !important; gap: 3rem !important; } 
-        }
-      `}</style>
-    </div>
-  );
+    </div>);
+
 };
 
 const CalendarPopover = ({ month, setMonth, selected, minDate, onSelect }) => {
@@ -469,7 +459,7 @@ const CalendarPopover = ({ month, setMonth, selected, minDate, onSelect }) => {
   const weekdays = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
 
   const changeMonth = (offset) => {
-    setMonth(current => new Date(current.getFullYear(), current.getMonth() + offset, 1));
+    setMonth((current) => new Date(current.getFullYear(), current.getMonth() + offset, 1));
   };
 
   return (
@@ -485,32 +475,32 @@ const CalendarPopover = ({ month, setMonth, selected, minDate, onSelect }) => {
       </div>
 
       <div className="booking-calendar-week" aria-hidden="true">
-        {weekdays.map(day => <span key={day}>{day}</span>)}
+        {weekdays.map((day) => <span key={day}>{day}</span>)}
       </div>
 
       <div className="booking-calendar-grid">
-        {cells.map(cell => {
+        {cells.map((cell) => {
           const disabled = isBeforeDate(cell.value, minDate);
           return (
             <button
               type="button"
               key={cell.value}
               className={[
-                'booking-calendar-day',
-                !cell.isCurrentMonth ? 'is-muted' : '',
-                selected === cell.value ? 'is-selected' : '',
-                disabled ? 'is-disabled' : '',
-              ].filter(Boolean).join(' ')}
+              'booking-calendar-day',
+              !cell.isCurrentMonth ? 'is-muted' : '',
+              selected === cell.value ? 'is-selected' : '',
+              disabled ? 'is-disabled' : ''].
+              filter(Boolean).join(' ')}
               disabled={disabled}
-              onClick={() => onSelect(cell.value)}
-            >
+              onClick={() => onSelect(cell.value)}>
+              
               {cell.day}
-            </button>
-          );
+            </button>);
+
         })}
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Booking;
