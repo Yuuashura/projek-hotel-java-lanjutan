@@ -23,6 +23,8 @@ import com.ngninep.hotel.util.Message;
 import lombok.RequiredArgsConstructor;
 
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -47,9 +49,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -99,6 +103,10 @@ public class HotelServiceImpl implements HotelService {
     }
 
     private HotelResponse mapToResponse(Hotel hotel) {
+        return mapToResponse(hotel, hotel.getFacilities());
+    }
+
+    private HotelResponse mapToResponse(Hotel hotel, List<HotelFacility> hotelFacilities) {
         CityResponse cityResponse = null;
         if (hotel.getCity() != null) {
             cityResponse = CityResponse.builder()
@@ -118,8 +126,8 @@ public class HotelServiceImpl implements HotelService {
         }
 
         List<Object> facilitiesResponse = new ArrayList<>();
-        if (hotel.getFacilities() != null) {
-            facilitiesResponse = hotel.getFacilities().stream().map(hf -> {
+        if (hotelFacilities != null) {
+            facilitiesResponse = hotelFacilities.stream().map(hf -> {
                 if (hf.getFacility() != null) {
                     return FacilityResponse.builder()
                             .idFacility(hf.getFacility().getIdFacility())
@@ -450,7 +458,8 @@ public class HotelServiceImpl implements HotelService {
             }
         }
 
-        return mapToResponse(hotelRepository.findById(saved.getIdHotel()).orElse(saved));
+        List<HotelFacility> facilities = syncHotelFacilities(saved, request.getFacilityIds());
+        return mapToResponse(saved, facilities);
     }
 
     @Override
@@ -475,6 +484,10 @@ public class HotelServiceImpl implements HotelService {
         hotel.setRating(request.getRating());
 
         Hotel saved = hotelRepository.save(hotel);
+        List<HotelFacility> facilities = null;
+        if (request.getFacilityIds() != null) {
+            facilities = syncHotelFacilities(saved, request.getFacilityIds());
+        }
 
         // Update gambar jika ada yang baru
         if (request.getImageUrl() != null && !request.getImageUrl().isBlank()) {
@@ -493,7 +506,9 @@ public class HotelServiceImpl implements HotelService {
             }
         }
 
-        return mapToResponse(hotelRepository.findById(saved.getIdHotel()).orElse(saved));
+        return facilities == null
+                ? mapToResponse(hotelRepository.findById(saved.getIdHotel()).orElse(saved))
+                : mapToResponse(saved, facilities);
     }
 
     @Override
@@ -509,6 +524,7 @@ public class HotelServiceImpl implements HotelService {
     private String uploadPath;
 
     @Override
+    @Transactional
     public void uploadExcel(MultipartFile file) throws Exception {
         // validasi file kosong
         if (file.isEmpty()) {
@@ -602,7 +618,8 @@ public class HotelServiceImpl implements HotelService {
                 newHotel.setRating((float) row.getCell(9).getNumericCellValue());
             }
 
-            hotelRepository.save(newHotel);
+            Hotel saved = hotelRepository.save(newHotel);
+            syncHotelFacilities(saved, parseFacilityIds(row.getCell(10)));
         }
 
         // workbook Excel harus ditutup setelah digunakan, agar tidak menghabiskan memory
@@ -679,7 +696,98 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     public java.io.ByteArrayInputStream generateUploadTemplate() throws Exception {
-        return null;
+        String[] headers = {
+                "Nama Hotel",
+                "City ID",
+                "Alamat",
+                "Tipe",
+                "Deskripsi",
+                "Admin Hotel ID",
+                "Featured",
+                "On Sale",
+                "Diskon (%)",
+                "Rating",
+                "Facility IDs"
+        };
+
+        try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            Sheet sheet = workbook.createSheet("Template Hotel");
+            CellStyle headerStyle = workbook.createCellStyle();
+            Font headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerStyle.setFont(headerFont);
+
+            Row headerRow = sheet.createRow(0);
+            for (int i = 0; i < headers.length; i++) {
+                headerRow.createCell(i).setCellValue(headers[i]);
+                headerRow.getCell(i).setCellStyle(headerStyle);
+            }
+
+            Row exampleRow = sheet.createRow(1);
+            exampleRow.createCell(0).setCellValue("Contoh Hotel");
+            exampleRow.createCell(1).setCellValue(1);
+            exampleRow.createCell(2).setCellValue("Jl. Contoh No. 1");
+            exampleRow.createCell(3).setCellValue("Bintang 4");
+            exampleRow.createCell(4).setCellValue("Deskripsi hotel");
+            exampleRow.createCell(5).setCellValue(1);
+            exampleRow.createCell(6).setCellValue(true);
+            exampleRow.createCell(7).setCellValue(false);
+            exampleRow.createCell(8).setCellValue(0);
+            exampleRow.createCell(9).setCellValue(4.5);
+            exampleRow.createCell(10).setCellValue("1,2,5");
+
+            for (int i = 0; i < headers.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            workbook.write(outputStream);
+            return new ByteArrayInputStream(outputStream.toByteArray());
+        }
+    }
+
+    private List<HotelFacility> syncHotelFacilities(Hotel hotel, List<Integer> facilityIds) {
+        Set<Integer> requestedIds = facilityIds == null
+                ? Set.of()
+                : facilityIds.stream()
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        List<Facility> facilities = facilityRepository.findAllById(requestedIds);
+        if (facilities.size() != requestedIds.size()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.FACILITY_IDS_INVALID);
+        }
+
+        hotelFacilityRepository.deleteByHotel_IdHotel(hotel.getIdHotel());
+        hotelFacilityRepository.flush();
+
+        List<HotelFacility> relations = facilities.stream()
+                .map(facility -> HotelFacility.builder()
+                        .hotel(hotel)
+                        .facility(facility)
+                        .build())
+                .collect(Collectors.toList());
+
+        return relations.isEmpty() ? relations : hotelFacilityRepository.saveAll(relations);
+    }
+
+    private List<Integer> parseFacilityIds(Cell cell) {
+        if (cell == null || cell.getCellType() == CellType.BLANK) {
+            return List.of();
+        }
+
+        String value = cell.getCellType() == CellType.NUMERIC
+                ? String.valueOf((int) cell.getNumericCellValue())
+                : cell.toString();
+
+        try {
+            return java.util.Arrays.stream(value.split(","))
+                    .map(String::trim)
+                    .filter(item -> !item.isEmpty())
+                    .map(Integer::valueOf)
+                    .collect(Collectors.toList());
+        } catch (NumberFormatException exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.FACILITY_IDS_INVALID);
+        }
     }
 
     private boolean matchesKeyword(Hotel hotel, String keyword) {

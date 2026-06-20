@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Pencil, Trash2, X, Check, AlertCircle, Star, MapPin, Bed, ImageIcon, Upload, Download, UserCog } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Plus, Pencil, Trash2, X, Check, AlertCircle, Star, MapPin, Bed, ImageIcon, Upload, Download, UserCog, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { formatCurrency } from '../../utils/formatters';
 import AdminLayout from '../../components/admin/AdminLayout';
 import PaginationControls from '../../components/admin/PaginationControls';
 import LoadingState from '../../components/LoadingState';
@@ -12,7 +11,7 @@ import { uploadFile, validateImageFile, getImageUrl } from '../../utils/uploads'
 import { usePreferences } from '../../context/PreferencesContext';
 import { useAuth } from '../../context/AuthContext';
 
-const EMPTY_FORM = { name: '', city_id: '', address: '', type: '', description: '', is_featured: false, is_on_sale: false, discount_percent: 0, rating: 0, image_url: '', admin_hotel_id: '' };
+const EMPTY_FORM = { name: '', city_id: '', address: '', type: '', description: '', is_featured: false, is_on_sale: false, discount_percent: 0, rating: 0, image_url: '', admin_hotel_id: '', facility_ids: [] };
 const PAGE_SIZE = 25;
 
 const normalizePagination = (pagination, fallbackPage, fallbackCount) => ({
@@ -29,6 +28,7 @@ const AdminHotels = () => {
   const { user } = useAuth();
   const [hotels, setHotels] = useState([]);
   const [cities, setCities] = useState([]);
+  const [facilities, setFacilities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null); // null | 'create' | 'edit' | 'delete'
   const [selected, setSelected] = useState(null);
@@ -51,33 +51,37 @@ const AdminHotels = () => {
   });
   const fileRef = useRef();
   const excelRef = useRef();
-  const getUserId = () => user?.id_customer ?? user?.idCustomer ?? user?.userId ?? user?.id;
-  const getHotelOwnerId = (hotel) => hotel?.admin_hotel_id ?? hotel?.adminHotelId;
   const isAdminHotel = user?.role === 'ROLE_ADMIN_HOTEL';
 
-  const load = () => {
+  const load = useCallback(() => {
     setLoading(true);
     setError('');
     const hotelParams = isAdminHotel ? {} : { page, size: PAGE_SIZE };
     Promise.all([
       api.get('/api/hotels', { params: hotelParams }),
       api.get('/api/cities'),
+      api.get('/api/facilities'),
       !isAdminHotel ? api.get('/api/users/admin-hotels').catch(() => ({ data: { data: [] } })) : Promise.resolve({ data: { data: [] } }),
-    ]).then(([h, c, a]) => {
+    ]).then(([h, c, f, a]) => {
       const hotelList = unwrapList(h.data);
+      const userId = user?.id_customer ?? user?.idCustomer ?? user?.userId ?? user?.id;
       const visibleHotels = isAdminHotel
-        ? hotelList.filter(hotel => getHotelOwnerId(hotel) === getUserId())
+        ? hotelList.filter(hotel => (hotel?.admin_hotel_id ?? hotel?.adminHotelId) === userId)
         : hotelList;
       setHotels(visibleHotels);
       setPagination(isAdminHotel
         ? normalizePagination(null, 0, visibleHotels.length)
         : normalizePagination(h.data?.pagination, page, visibleHotels.length));
       setCities(unwrapList(c.data));
+      setFacilities(unwrapList(f.data));
       setAdminHotelList(unwrapList(a.data));
     }).catch((err) => setError(getErrorMessage(err, t('admin.errors.loadHotels')))).finally(() => setLoading(false));
-  };
+  }, [isAdminHotel, page, t, user]);
 
-  useEffect(() => { load(); }, [page, user]);
+  useEffect(() => {
+    const timer = window.setTimeout(load, 0);
+    return () => window.clearTimeout(timer);
+  }, [load]);
 
   const openCreate = () => {
     setForm(EMPTY_FORM);
@@ -88,7 +92,7 @@ const AdminHotels = () => {
 
   const openEdit = async (h) => {
     setError('');
-    let hotel = h;
+    let hotel;
     try {
       const res = await api.get(`/api/hotels/${h.id_hotel}`);
       hotel = res.data?.data || h;
@@ -98,6 +102,10 @@ const AdminHotels = () => {
 
     setSelected(hotel);
     const hotelImgs = hotel.images?.map(img => img.imageUrl || img.image_url).filter(Boolean) || [];
+    const hotelFacilityIds = (hotel.facilities || [])
+      .map(facility => facility.id_facility ?? facility.idFacility ?? facility.id)
+      .filter(id => id != null)
+      .map(Number);
     setImagesList(hotelImgs);
     setForm({
       name: hotel.name,
@@ -111,6 +119,7 @@ const AdminHotels = () => {
       rating: hotel.rating || 0,
       image_url: hotelImgs.join('|||'),
       admin_hotel_id: hotel.admin_hotel_id ?? hotel.adminHotelId ?? '',
+      facility_ids: hotelFacilityIds,
     });
     setModal('edit');
   };
@@ -134,7 +143,8 @@ const AdminHotels = () => {
         discount_percent: parseInt(form.discount_percent || 0),
         rating: parseFloat(form.rating || 0),
         image_url: imagesList.join('|||'),
-        admin_hotel_id: Number(form.admin_hotel_id) || 0
+        admin_hotel_id: Number(form.admin_hotel_id) || 0,
+        facility_ids: form.facility_ids.map(Number),
       };
       if (modal === 'create') await api.post('/api/hotels', payload);
       if (modal === 'edit') await api.put(`/api/hotels/${selected.id_hotel}`, payload);
@@ -232,6 +242,14 @@ const AdminHotels = () => {
   const currentPage = Math.min(pagination.currentPage ?? page, totalPages - 1);
   const totalItems = pagination.totalItems ?? hotels.length;
   const paginatedHotels = hotels;
+  const toggleFacility = (facilityId) => {
+    setForm(current => ({
+      ...current,
+      facility_ids: current.facility_ids.includes(facilityId)
+        ? current.facility_ids.filter(id => id !== facilityId)
+        : [...current.facility_ids, facilityId],
+    }));
+  };
 
   return (
     <AdminLayout>
@@ -335,6 +353,62 @@ const AdminHotels = () => {
                 <div><label className="label">Rating (0-5)</label><input type="number" className="input" min={0} max={5} step={0.1} value={form.rating} onChange={e => setForm(f => ({ ...f, rating: e.target.value }))} /></div>
               </div>
               <div><label className="label">{t('admin.rooms.description')}</label><textarea className="input" rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} style={{ resize: 'vertical' }} /></div>
+
+              <div>
+                <label className="label"><Sparkles size={12} style={{ display: 'inline', marginRight: '0.4rem', verticalAlign: 'middle' }} />{t('admin.hotels.facilities')}</label>
+                <p style={{ color: 'var(--color-muted)', fontSize: '0.78rem', lineHeight: 1.5, margin: '0 0 0.75rem' }}>
+                  {t('admin.hotels.facilitiesHint')}
+                </p>
+                {facilities.length > 0 ? (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.65rem' }}>
+                    {facilities.map(facility => {
+                      const facilityId = Number(facility.id_facility ?? facility.idFacility ?? facility.id);
+                      const selectedFacility = form.facility_ids.includes(facilityId);
+                      return (
+                        <button
+                          key={facilityId}
+                          type="button"
+                          onClick={() => toggleFacility(facilityId)}
+                          aria-pressed={selectedFacility}
+                          style={{
+                            minHeight: 42,
+                            padding: '0.65rem 0.75rem',
+                            border: selectedFacility ? '1px solid var(--color-primary)' : '1px solid var(--color-accent)',
+                            borderRadius: 'var(--radius-sm)',
+                            background: selectedFacility ? 'var(--color-primary-soft)' : 'var(--color-surface)',
+                            color: 'var(--color-text)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.55rem',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            fontSize: '0.82rem',
+                          }}
+                        >
+                          <span style={{
+                            width: 18,
+                            height: 18,
+                            flexShrink: 0,
+                            display: 'grid',
+                            placeItems: 'center',
+                            borderRadius: 4,
+                            border: selectedFacility ? '1px solid var(--color-primary)' : '1px solid var(--color-muted)',
+                            background: selectedFacility ? 'var(--color-primary)' : 'transparent',
+                            color: '#fff',
+                          }}>
+                            {selectedFacility && <Check size={12} />}
+                          </span>
+                          <span>{facility.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div style={{ color: 'var(--color-muted)', fontSize: '0.82rem', padding: '0.75rem', border: '1px dashed var(--color-accent)' }}>
+                    {t('admin.hotels.noFacilities')}
+                  </div>
+                )}
+              </div>
 
               {!isAdminHotel && (
                 <div><label className="label"><UserCog size={12} style={{ display: 'inline', marginRight: '0.4rem', verticalAlign: 'middle' }} />{t('admin.hotels.adminHotel')}</label>

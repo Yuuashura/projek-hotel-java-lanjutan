@@ -78,15 +78,13 @@ const HotelDetail = () => {
   const [activeImg, setActiveImg] = useState(0);
   const [activeRoom, setActiveRoom] = useState(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [allFacilities, setAllFacilities] = useState([]);
   const [roomAvailability, setRoomAvailability] = useState([]);
 
   useEffect(() => {
     const fetchDetail = async () => {
       setLoading(true);
-      const [hotelResult, facilitiesResult, availabilityResult] = await Promise.allSettled([
+      const [hotelResult, availabilityResult] = await Promise.allSettled([
         api.get(`/api/hotels/${id}`),
-        api.get('/api/facilities'),
         api.get(`/api/bookings/availability/hotel/${id}`),
       ]);
 
@@ -100,13 +98,6 @@ const HotelDetail = () => {
       setHotel(hotelData);
       if (roomTypes.length > 0) {
         setActiveRoom(roomTypes[0].id_room_type || roomTypes[0].idRoomType);
-      }
-
-      if (facilitiesResult.status === 'fulfilled') {
-        const facilityData = facilitiesResult.value.data.data || facilitiesResult.value.data || [];
-        if (Array.isArray(facilityData)) {
-          setAllFacilities(facilityData.map(normalizeFacility).filter(Boolean));
-        }
       }
 
       if (availabilityResult.status === 'fulfilled') {
@@ -146,8 +137,6 @@ const HotelDetail = () => {
   const hotelFacilities = (hotel.facilities || hotel.hotelFacilities || [])
     .map(normalizeFacility)
     .filter(Boolean);
-  const displayFacilities = hotelFacilities.length > 0 ? hotelFacilities : allFacilities;
-  const usingFacilityFallback = hotelFacilities.length === 0 && displayFacilities.length > 0;
 
   const uploadedImages = hotel.images?.map(getImageUrl).filter(Boolean) || [];
   const images = uploadedImages.length > 0 ? uploadedImages : [HOTEL_FALLBACK_IMAGE];
@@ -219,16 +208,11 @@ const HotelDetail = () => {
             </p>
 
             {/* AMENITIES */}
-            {displayFacilities.length > 0 && (
-              <div style={{ marginBottom: '4rem' }}>
-                <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.8rem', marginBottom: '1.5rem', color: 'var(--color-text)' }}>{t('hotelDetail.facilities')}</h3>
-                {usingFacilityFallback && (
-                  <p style={{ color: 'var(--color-muted)', fontSize: '0.85rem', fontWeight: 400, lineHeight: 1.6, margin: '-0.75rem 0 1.5rem' }}>
-                    {t('hotelDetail.facilityFallbackNote')}
-                  </p>
-                )}
+            <div style={{ marginBottom: '4rem' }}>
+              <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 300, fontSize: '1.8rem', marginBottom: '1.5rem', color: 'var(--color-text)' }}>{t('hotelDetail.facilities')}</h3>
+              {hotelFacilities.length > 0 ? (
                 <div className="hotel-detail-facilities-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
-                  {displayFacilities.map(f => {
+                  {hotelFacilities.map(f => {
                     const iconKey = String(f.icon || '').toLowerCase();
                     const FacilityIcon = facilityIconMap[iconKey] || Check;
                     return (
@@ -241,8 +225,12 @@ const HotelDetail = () => {
                     );
                   })}
                 </div>
-              </div>
-            )}
+              ) : (
+                <p style={{ color: 'var(--color-muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>
+                  {t('hotelDetail.noFacilities')}
+                </p>
+              )}
+            </div>
 
             {/* ROOM MATRIX */}
             {roomTypes.length > 0 && (

@@ -26,6 +26,7 @@ public final class Message {
 
     public static final String FACILITY_NOT_FOUND = "Fasilitas tidak ditemukan";
     public static final String FACILITY_INVALID = "Fasilitas tidak valid";
+    public static final String FACILITY_IDS_INVALID = "Satu atau lebih fasilitas tidak valid";
     public static final String FACILITY_NAME_REQUIRED = "Nama fasilitas tidak boleh kosong";
 
     public static final String ROOM_TYPE_NOT_FOUND = "Tipe kamar tidak ditemukan";

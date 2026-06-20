@@ -326,8 +326,8 @@ Gunakan base URL gateway untuk frontend dan client umum: `http://localhost:8080`
 | GET | `/api/hotels/popular-facilities` | Public | Fasilitas populer |
 | GET | `/api/hotels/stats` | Public | Statistik hotel publik |
 | GET | `/api/hotels/{id}` | Public | Detail hotel |
-| POST | `/api/hotels` | `ROLE_ADMIN_HOTEL`, `ROLE_ADMIN_APP` | Buat hotel |
-| PUT | `/api/hotels/{id}` | `ROLE_ADMIN_HOTEL`, `ROLE_ADMIN_APP` | Update hotel |
+| POST | `/api/hotels` | `ROLE_ADMIN_HOTEL`, `ROLE_ADMIN_APP` | Buat hotel beserta pilihan fasilitas |
+| PUT | `/api/hotels/{id}` | `ROLE_ADMIN_HOTEL`, `ROLE_ADMIN_APP` | Update hotel dan sinkronkan pilihan fasilitas |
 | DELETE | `/api/hotels/{id}` | `ROLE_ADMIN_HOTEL`, `ROLE_ADMIN_APP` | Hapus hotel |
 | POST | `/api/hotels/{id}/facilities/{facilityId}` | `ROLE_ADMIN_HOTEL`, `ROLE_ADMIN_APP` | Tambah fasilitas hotel |
 | DELETE | `/api/hotels/{id}/facilities/{facilityId}` | `ROLE_ADMIN_HOTEL`, `ROLE_ADMIN_APP` | Hapus fasilitas hotel |
@@ -335,6 +335,27 @@ Gunakan base URL gateway untuk frontend dan client umum: `http://localhost:8080`
 | POST | `/api/hotels/upload-excel` | `ROLE_ADMIN_APP` | Import hotel dari Excel |
 | POST | `/api/hotels/uploadHotel` | `ROLE_ADMIN_APP` | Import hotel dari Excel, endpoint lama |
 | GET | `/api/hotels/download-excel` | `ROLE_ADMIN_APP` | Export hotel ke Excel |
+
+Payload tambah/edit hotel menerima `facility_ids` sebagai daftar ID dari master
+fasilitas:
+
+```json
+{
+  "name": "NgiNep Grand Hotel",
+  "city_id": 1,
+  "featured": true,
+  "facility_ids": [1, 2, 5, 6]
+}
+```
+
+`featured` hanya menentukan apakah hotel ditampilkan sebagai hotel unggulan.
+Field tersebut tidak menambahkan semua fasilitas secara otomatis. Kirim
+`facility_ids: []` untuk mengosongkan fasilitas hotel. Pada update, jika
+`facility_ids` tidak dikirim, relasi fasilitas yang sudah ada dipertahankan.
+
+Import Excel mendukung kolom ke-11 bernama `Facility IDs`, berisi ID fasilitas
+yang dipisahkan koma, misalnya `1,2,5`. Export Excel menampilkan nama fasilitas
+yang benar-benar terhubung ke masing-masing hotel.
 
 Query utama `GET /api/hotels`:
 
