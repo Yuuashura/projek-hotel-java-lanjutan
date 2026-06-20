@@ -38,7 +38,7 @@ const Footer = () => {
               type="button"
 
               className="flex size-9 cursor-pointer items-center justify-center rounded-full border border-[#374151] bg-transparent text-[#9CA3AF] transition hover:border-[var(--color-gold)] hover:text-white">
-              
+
                 <Icon size={14} />
               </button>
             )}
@@ -86,7 +86,7 @@ const FooterLinks = ({ title, links }) =>
     to={link.to}
 
     className="mb-3 block text-[0.85rem] text-[#9CA3AF] no-underline transition-colors hover:text-[var(--color-gold)]">
-    
+
         {link.text}
       </Link>
   )}

@@ -143,26 +143,31 @@ const HotelDetail = () => {
   const images = uploadedImages.length > 0 ? uploadedImages : [HOTEL_FALLBACK_IMAGE];
 
   return (
-    <div className="hotel-detail-page [background:var(--color-background)] [min-height:100vh] [padding:4rem_1.5rem]">
+    <div className="max-[920px]:!px-4 max-[920px]:!py-8 [background:var(--color-background)] [min-height:100vh] [padding:4rem_1.5rem]">
       <div className="[max-width:1300px] [margin:0_auto]">
-        
+
         {/* Back Link */}
         <Link to="/hotels" className="[display:inline-flex] [align-items:center] [gap:0.5rem] [font-family:var(--font-body)] [font-weight:400] [text-decoration:none] [color:var(--color-text)] [margin-bottom:2.5rem] [text-transform:uppercase] [font-size:0.75rem] [letter-spacing:1px]">
           <ArrowLeft size={14} /> {t('hotelDetail.back')}
         </Link>
 
-        <section className={`hotel-gallery ${images.length === 1 ? 'single' : ''}`} aria-label={t('hotelDetail.gallery')}>
-          <button type="button" className="hotel-gallery-main" onClick={() => {setActiveImg(0);setLightboxOpen(true);}}>
-            <img src={images[0]} alt={`${hotel.name} - foto utama`} />
-            <span className="hotel-gallery-shade" />
-            <span className="hotel-gallery-caption">
-              <span>{t('hotelDetail.gallery')}</span>
-              <strong>{hotel.name}</strong>
+        <section className={cn(
+          'mb-11 grid gap-3.5 max-[900px]:h-auto max-[900px]:grid-cols-1',
+          images.length === 1 ?
+          'h-[clamp(360px,48vw,620px)] grid-cols-1' :
+          'h-[clamp(360px,45vw,560px)] grid-cols-[minmax(0,1.65fr)_minmax(280px,0.75fr)]'
+        )} aria-label={t('hotelDetail.gallery')}>
+          <button type="button" className="group relative block h-full w-full cursor-zoom-in overflow-hidden rounded-lg border-0 bg-[var(--color-background)] p-0 max-[900px]:aspect-[16/10] max-[560px]:aspect-[4/3]" onClick={() => {setActiveImg(0);setLightboxOpen(true);}}>
+            <img src={images[0]} alt={`${hotel.name} - foto utama`} className="block h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]" />
+            <span className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/[0.02] from-35% to-black/50" />
+            <span className="absolute bottom-4 left-5 right-5 flex flex-col gap-1 text-left text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.35)]">
+              <span className="text-[0.72rem] uppercase tracking-[1.5px] opacity-85">{t('hotelDetail.gallery')}</span>
+              <strong className="font-[var(--font-heading)] text-[clamp(1.5rem,3vw,2.6rem)] font-light leading-[1.05]">{hotel.name}</strong>
             </span>
           </button>
 
           {images.length > 1 &&
-          <div className="hotel-gallery-thumbs">
+          <div className="grid min-h-0 grid-cols-2 grid-rows-2 gap-3.5 max-[900px]:grid-cols-4 max-[900px]:grid-rows-none max-[560px]:grid-cols-2">
               {[1, 2, 3, 4].map((slot) => {
               const imageIndex = Math.min(slot, images.length - 1);
               const showMore = slot === 4 && images.length > 5;
@@ -170,11 +175,11 @@ const HotelDetail = () => {
                 <button
                   type="button"
                   key={slot}
-                  className="hotel-gallery-thumb"
+                  className="group relative block h-full w-full cursor-zoom-in overflow-hidden rounded-lg border-0 bg-[var(--color-background)] p-0 max-[900px]:aspect-square"
                   onClick={() => {setActiveImg(imageIndex);setLightboxOpen(true);}}>
-                  
-                    <img src={images[imageIndex]} alt={`${hotel.name} - foto ${imageIndex + 1}`} />
-                    {showMore && <span className="hotel-gallery-more">{t('hotelDetail.morePhotos', { count: images.length - 4 })}</span>}
+
+                    <img src={images[imageIndex]} alt={`${hotel.name} - foto ${imageIndex + 1}`} className="block h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]" />
+                    {showMore && <span className="absolute inset-0 flex items-center justify-center bg-[rgba(26,54,93,0.64)] text-[0.78rem] uppercase tracking-[1px] text-white">{t('hotelDetail.morePhotos', { count: images.length - 4 })}</span>}
                   </button>);
 
             })}
@@ -183,18 +188,18 @@ const HotelDetail = () => {
         </section>
 
         {/* SPLIT LAYOUT */}
-        <div className="hotel-detail-layout [display:grid] [grid-template-columns:1fr_400px] [gap:3.5rem] [align-items:flex-start]">
-          
+        <div className="max-[920px]:!grid-cols-1 max-[920px]:!gap-8 [display:grid] [grid-template-columns:1fr_400px] [gap:3.5rem] [align-items:flex-start]">
+
           {/* LEFT COLUMN: Info, Amenities, Room Matrix */}
           <div>
             <div className="[display:flex] [gap:0.75rem] [flex-wrap:wrap] [margin-bottom:1rem]">
-              <span className="badge badge-yellow">{hotel.city?.name}</span>
-              <span className="badge badge-gray">{hotel.type || t('hotelDetail.luxuryResort')}</span>
-              {hotel.featured && <span className="badge badge-yellow [background:var(--color-primary)] [color:white]">{t('common.featured')}</span>}
+              <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-accent)] bg-[var(--color-background)] px-3 py-1 text-[0.7rem] font-medium uppercase text-[var(--color-text)] max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.64rem] border-[var(--color-primary-soft)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]">{hotel.city?.name}</span>
+              <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-accent)] bg-[var(--color-background)] px-3 py-1 text-[0.7rem] font-medium uppercase text-[var(--color-text)] max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.64rem] border-[var(--color-accent)] bg-[var(--color-accent)] text-[var(--color-muted)]">{hotel.type || t('hotelDetail.luxuryResort')}</span>
+              {hotel.featured && <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-accent)] bg-[var(--color-background)] px-3 py-1 text-[0.7rem] font-medium uppercase text-[var(--color-text)] max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.64rem] border-[var(--color-primary-soft)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] [background:var(--color-primary)] [color:white]">{t('common.featured')}</span>}
             </div>
-            
+
             <h1 className="[font-family:var(--font-heading)] [font-weight:300] [font-size:3rem] [margin:0_0_1rem] [color:var(--color-text)] [line-height:1.1]">{hotel.name}</h1>
-            
+
             <div className="[display:flex] [align-items:center] [gap:2rem] [flex-wrap:wrap] [margin-bottom:2rem] [border-bottom:1px_solid_var(--color-accent)] [padding-bottom:1.5rem]">
               <div className="[display:flex] [align-items:center] [gap:0.25rem] [color:var(--color-primary)] [font-weight:400]">
                 <Star size={14} fill="var(--color-primary)" /> {hotel.rating?.toFixed(1) || '4.5'} {t('common.rating')}
@@ -212,7 +217,7 @@ const HotelDetail = () => {
             <div className="[margin-bottom:4rem]">
               <h3 className="[font-family:var(--font-heading)] [font-weight:300] [font-size:1.8rem] [margin-bottom:1.5rem] [color:var(--color-text)]">{t('hotelDetail.facilities')}</h3>
               {hotelFacilities.length > 0 ?
-              <div className="hotel-detail-facilities-grid [display:grid] [grid-template-columns:1fr_1fr] [gap:1.25rem]">
+              <div className="max-sm:!grid-cols-1 [display:grid] [grid-template-columns:1fr_1fr] [gap:1.25rem]">
                   {hotelFacilities.map((f) => {
                   const iconKey = String(f.icon || '').toLowerCase();
                   const FacilityIcon = facilityIconMap[iconKey] || Check;
@@ -250,28 +255,28 @@ const HotelDetail = () => {
                   return (
                     <div key={roomId} onClick={() => setActiveRoom(roomId)}
                     className={cn(
-                      'hotel-detail-room-card flex min-h-[180px] cursor-pointer overflow-hidden rounded-lg border transition duration-300',
-                      isSelected
-                        ? 'border-[var(--color-primary)] bg-[var(--color-surface)] shadow-[var(--shadow-hover)]'
-                        : 'border-[var(--color-accent)] bg-transparent shadow-none',
+                      'flex min-h-[180px] cursor-pointer overflow-hidden rounded-lg border transition duration-300 max-sm:min-h-0 max-sm:flex-col',
+                      isSelected ?
+                      'border-[var(--color-primary)] bg-[var(--color-surface)] shadow-[var(--shadow-hover)]' :
+                      'border-[var(--color-accent)] bg-transparent shadow-none'
                     )}>
-                        <div className="hotel-detail-room-media [width:220px] [height:100%] [flex-shrink:0] [overflow:hidden]">
+                        <div className="max-sm:!h-auto max-sm:!w-full max-sm:aspect-video [width:220px] [height:100%] [flex-shrink:0] [overflow:hidden]">
                           <img src={getImageUrl(room.images?.[0]) || ROOM_FALLBACK_IMAGE} alt={room.name} className="[width:100%] [height:100%] [object-fit:cover]" />
                         </div>
                         {/* Room description */}
-                        <div className="hotel-detail-room-body [padding:1.5rem] [flex:1] [display:flex] [flex-direction:column] [justify-content:space-between]">
+                        <div className="max-sm:!p-4 [padding:1.5rem] [flex:1] [display:flex] [flex-direction:column] [justify-content:space-between]">
                           <div>
                             <div className="[display:flex] [justify-content:space-between] [align-items:flex-start]">
                               <h4 className="[font-family:var(--font-heading)] [font-size:1.3rem] [margin:0] [font-weight:300] [color:var(--color-text)]">{room.name}</h4>
                               <div className="[display:flex] [gap:0.5rem]">
                                 <span className={cn(
-                                  'badge border-transparent text-[0.65rem]',
-                                  roomUnavailable
-                                    ? 'bg-red-500/10 text-[#C53030]'
-                                    : roomAvailable > 3
-                                      ? 'bg-emerald-500/10 text-[#276749]'
-                                      : 'bg-orange-500/10 text-[#DD6B20]',
-                                )}>
+                                "inline-flex items-center gap-1 rounded-full border border-[var(--color-accent)] bg-[var(--color-background)] px-3 py-1 text-[0.7rem] font-medium uppercase text-[var(--color-text)] max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.64rem] border-transparent text-[0.65rem]",
+                                roomUnavailable ?
+                                'bg-red-500/10 text-[#C53030]' :
+                                roomAvailable > 3 ?
+                                'bg-emerald-500/10 text-[#276749]' :
+                                'bg-orange-500/10 text-[#DD6B20]'
+                              )}>
                                   {roomUnavailable ? t('hotelDetail.unavailableRoom') : t('hotelDetail.available', { count: roomAvailable })}
                                 </span>
                               </div>
@@ -288,9 +293,9 @@ const HotelDetail = () => {
                               return (
                                 <span
                                   key={facility.id}
-                                  className="badge badge-gray [display:inline-flex] [align-items:center] [gap:0.3rem] [font-size:0.65rem]">
+                                  className="inline-flex items-center gap-1 rounded-full border border-[var(--color-accent)] bg-[var(--color-background)] px-3 py-1 text-[0.7rem] font-medium uppercase text-[var(--color-text)] max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.64rem] border-[var(--color-accent)] bg-[var(--color-accent)] text-[var(--color-muted)] [display:inline-flex] [align-items:center] [gap:0.3rem] [font-size:0.65rem]">
 
-                                  
+
                                       <RoomFacilityIcon size={11} />
                                       {facility.name}
                                     </span>);
@@ -315,7 +320,7 @@ const HotelDetail = () => {
                           }
                           </div>
 
-                          <div className="hotel-detail-room-footer [display:flex] [justify-content:space-between] [align-items:flex-end] [border-top:1px_solid_var(--color-accent)] [padding-top:0.75rem]">
+                          <div className="max-sm:flex-col max-sm:!items-start [display:flex] [justify-content:space-between] [align-items:flex-end] [border-top:1px_solid_var(--color-accent)] [padding-top:0.75rem]">
                             <div className="[display:flex] [align-items:center] [gap:0.35rem] [font-size:0.8rem] [color:var(--color-muted)] [font-weight:300]"><Users size={12} /> {t('hotelDetail.maxGuests', { count: room.max_guest ?? room.maxGuest })}</div>
                             <div className="[text-align:right]">
                               {hasDiscount ?
@@ -347,10 +352,10 @@ const HotelDetail = () => {
           </div>
 
           {/* RIGHT COLUMN: Sticky Reserve Summary */}
-          <div className="hotel-detail-reservation [position:sticky] [top:120px]">
-            <div className="card [padding:2rem] [border:1px_solid_var(--color-accent)] [box-shadow:var(--shadow-float)]">
+          <div className="max-[920px]:!static [position:sticky] [top:120px]">
+            <div className="rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--color-text)] shadow-[var(--shadow-float)] backdrop-blur-xl transition-all duration-300 [padding:2rem] [border:1px_solid_var(--color-accent)] [box-shadow:var(--shadow-float)]">
               <h3 className="[font-family:var(--font-heading)] [font-size:1.5rem] [margin-bottom:1.5rem] [color:var(--color-text)] [border-bottom:1px_solid_var(--color-accent)] [padding-bottom:0.75rem] [font-weight:300]">{t('hotelDetail.reservation')}</h3>
-              
+
               {selectedRoom ?
               <div className="[display:flex] [flex-direction:column] [gap:1.25rem] [margin-bottom:2rem]">
                   <div>
@@ -372,7 +377,7 @@ const HotelDetail = () => {
                       </div>
                   }
                   </div>
-                  
+
                   <div className="[background:var(--color-background)] [border:1px_solid_var(--color-accent)] [padding:1rem] [border-radius:var(--radius-sm)]">
                     <div className="[display:flex] [justify-content:space-between] [font-size:0.85rem] [color:var(--color-text)] [margin-bottom:0.5rem]">
                       <span>{t('hotelDetail.priceNight')}</span>
@@ -392,16 +397,16 @@ const HotelDetail = () => {
 
               {user?.role === 'ROLE_USER' ?
               selectedRoomUnavailable ?
-              <button type="button" className="btn btn-primary btn-full [justify-content:center] [height:50px] [opacity:0.55] [cursor:not-allowed]" disabled>
+              <button type="button" className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 w-full [justify-content:center] [height:50px] [opacity:0.55] [cursor:not-allowed]" disabled>
                     {t('hotelDetail.unavailableRoom')}
                   </button> :
 
-              <Link to={`/booking/${hotel.id_hotel}?roomTypeId=${activeRoom}`} className="btn btn-primary btn-full [justify-content:center] [height:50px] [background:var(--color-primary)]">
+              <Link to={`/booking/${hotel.id_hotel}?roomTypeId=${activeRoom}`} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 w-full [justify-content:center] [height:50px] [background:var(--color-primary)]">
                   {t('hotelDetail.reserve')}
                 </Link> :
 
               !user ?
-              <Link to={`/login?redirect=/hotels/${hotel.id_hotel}`} className="btn btn-full hotel-login-book-btn [justify-content:center] [height:50px]">
+              <Link to={`/login?redirect=/hotels/${hotel.id_hotel}`} className="inline-flex h-[50px] w-full items-center justify-center rounded-lg border border-transparent bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] px-6 font-bold text-[#061426] shadow-[0_14px_32px_rgba(122,183,240,0.2)] transition hover:-translate-y-px hover:brightness-105">
                   {t('hotelDetail.signInToBook')}
                 </Link> :
 
@@ -426,7 +431,7 @@ const HotelDetail = () => {
           <button onClick={() => setLightboxOpen(false)} className="[position:absolute] [top:30px] [right:30px] [background:transparent] [border:none] [cursor:pointer] [color:white]">
             <X size={32} />
           </button>
-          
+
           <button onClick={() => setActiveImg((c) => (c - 1 + images.length) % images.length)} className="[position:absolute] [left:40px] [background:transparent] [border:1px_solid_rgba(255,255,255,0.2)] [border-radius:50%] [padding:0.75rem] [cursor:pointer] [color:white]">
             <ArrowLeft size={24} />
           </button>
@@ -440,134 +445,6 @@ const HotelDetail = () => {
           </button>
         </div>
       }
-
-      <style>{`
-        .hotel-gallery {
-          display: grid;
-          grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.75fr);
-          gap: 0.85rem;
-          height: clamp(360px, 45vw, 560px);
-          margin-bottom: 2.75rem;
-        }
-
-        .hotel-gallery.single {
-          grid-template-columns: 1fr;
-          height: clamp(360px, 48vw, 620px);
-        }
-
-        .hotel-gallery-main,
-        .hotel-gallery-thumb {
-          position: relative;
-          display: block;
-          width: 100%;
-          height: 100%;
-          padding: 0;
-          border: 0;
-          background: var(--color-background);
-          overflow: hidden;
-          cursor: zoom-in;
-          border-radius: var(--radius-sm);
-        }
-
-        .hotel-gallery-main img,
-        .hotel-gallery-thumb img {
-          width: 100%;
-          height: 100%;
-          display: block;
-          object-fit: cover;
-          transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .hotel-gallery-main:hover img,
-        .hotel-gallery-thumb:hover img {
-          transform: scale(1.035);
-        }
-
-        .hotel-gallery-shade {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(180deg, rgba(0,0,0,0.02) 35%, rgba(0,0,0,0.48) 100%);
-          pointer-events: none;
-        }
-
-        .hotel-gallery-caption {
-          position: absolute;
-          left: 1.25rem;
-          right: 1.25rem;
-          bottom: 1.1rem;
-          color: white;
-          text-align: left;
-          display: flex;
-          flex-direction: column;
-          gap: 0.25rem;
-          text-shadow: 0 2px 12px rgba(0,0,0,0.35);
-        }
-
-        .hotel-gallery-caption span {
-          font-size: 0.72rem;
-          text-transform: uppercase;
-          letter-spacing: 1.5px;
-          opacity: 0.84;
-        }
-
-        .hotel-gallery-caption strong {
-          font-family: var(--font-heading);
-          font-size: clamp(1.5rem, 3vw, 2.6rem);
-          font-weight: 300;
-          line-height: 1.05;
-        }
-
-        .hotel-gallery-thumbs {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          grid-template-rows: 1fr 1fr;
-          gap: 0.85rem;
-          min-height: 0;
-        }
-
-        .hotel-gallery-more {
-          position: absolute;
-          inset: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(26,54,93,0.64);
-          color: white;
-          font-size: 0.78rem;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-        }
-
-        @media (max-width: 900px) {
-          .hotel-gallery {
-            grid-template-columns: 1fr;
-            height: auto;
-          }
-
-          .hotel-gallery-main {
-            aspect-ratio: 16 / 10;
-          }
-
-          .hotel-gallery-thumbs {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            grid-template-rows: none;
-          }
-
-          .hotel-gallery-thumb {
-            aspect-ratio: 1 / 1;
-          }
-        }
-
-        @media (max-width: 560px) {
-          .hotel-gallery-main {
-            aspect-ratio: 4 / 3;
-          }
-
-          .hotel-gallery-thumbs {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
-        }
-      `}</style>
 
     </div>);
 

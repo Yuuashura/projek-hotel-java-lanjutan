@@ -89,7 +89,7 @@ const VerifyOtp = () => {
 
   return (
     <div className="[min-height:100vh] [background:var(--color-background)] [display:flex] [align-items:center] [justify-content:center] [padding:2rem]">
-      
+
       <div className="[width:100%] [max-width:420px]">
         <div className="[text-align:center] [margin-bottom:2.5rem]">
           <div className="[width:64px] [height:64px] [background:rgba(212,175,55,0.1)] [margin:0_auto_1.5rem] [display:flex] [align-items:center] [justify-content:center] [border-radius:50%]">
@@ -101,7 +101,7 @@ const VerifyOtp = () => {
           </p>
         </div>
 
-        <div className="card [padding:2.5rem_2rem] [border:1px_solid_var(--color-accent)] [box-shadow:var(--shadow-float)]">
+        <div className="rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--color-text)] shadow-[var(--shadow-float)] backdrop-blur-xl transition-all duration-300 [padding:2.5rem_2rem] [border:1px_solid_var(--color-accent)] [box-shadow:var(--shadow-float)]">
           {error &&
           <div className="[background:#FFF5F5] [border:1px_solid_#FEB2B2] [padding:0.875rem] [margin-bottom:1.5rem] [display:flex] [gap:0.5rem] [align-items:center] [border-radius:var(--radius-sm)]">
               <AlertCircle size={16} className="[color:#E53E3E] [flex-shrink:0]" />
@@ -125,8 +125,8 @@ const VerifyOtp = () => {
               onKeyDown={(e) => handleKeyDown(i, e)}
               onPaste={handlePaste}
               className={`h-14 w-12 border-0 border-b bg-transparent text-center font-[var(--font-body)] text-2xl font-light text-[var(--color-text)] outline-none transition ${
-                digit ? 'border-b-2 border-[var(--color-primary)]' : 'border-[var(--color-muted)]'
-              }`} />
+              digit ? 'border-b-2 border-[var(--color-primary)]' : 'border-[var(--color-muted)]'}`
+              } />
 
               )}
             </div>
@@ -140,13 +140,13 @@ const VerifyOtp = () => {
                 </p> :
 
               <button type="button" onClick={handleResend} disabled={resendLoading} className="[background:none] [border:none] [cursor:pointer] [color:var(--color-primary)] [font-family:var(--font-body)] [font-weight:400] [font-size:0.85rem] [display:inline-flex] [align-items:center] [gap:0.4rem] [text-decoration:underline]">
-                
+
                   <RefreshCw size={12} /> {resendLoading ? 'Mengirim...' : 'Kirim Ulang OTP'}
                 </button>
               }
             </div>
 
-            <button type="submit" className="btn btn-primary btn-full h-[50px] bg-[var(--color-primary)] disabled:opacity-65" disabled={loading || otp.join('').length < 6}>
+            <button type="submit" className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 w-full h-[50px] bg-[var(--color-primary)] disabled:opacity-65" disabled={loading || otp.join('').length < 6}>
               {loading ? 'Memverifikasi...' : 'Verifikasi OTP'}
             </button>
           </form>

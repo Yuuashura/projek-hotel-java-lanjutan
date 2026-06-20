@@ -85,8 +85,8 @@ const Payment = () => {
   const nights = diffDays(booking.check_in, booking.check_out);
 
   return (
-    <div className="user-page payment-page [background:var(--color-background)] [min-height:100vh] [padding:6rem_1.5rem]">
-      <div className="payment-shell [max-width:900px] [margin:0_auto]">
+    <div className="px-6 py-16 max-[920px]:px-4 max-[920px]:py-12 max-sm:px-3.5 max-sm:py-8 px-6 py-16 max-[920px]:px-4 max-[920px]:py-12 max-sm:px-3.5 max-sm:py-8 [background:var(--color-background)] [min-height:100vh] [padding:6rem_1.5rem]">
+      <div className="mx-auto max-w-[900px]">
         <h1 className="[font-family:var(--font-heading)] [font-weight:300] [font-size:2.5rem] [margin-bottom:3rem] [color:var(--color-text)]">
           Informasi Pembayaran
         </h1>
@@ -95,9 +95,9 @@ const Payment = () => {
         {timeLeft > 0 &&
         <div className={cn(
           'mb-10 flex items-center gap-4 rounded-lg border px-6 py-5',
-          timeLeft < 3600
-            ? 'border-[var(--color-danger-border)] bg-[var(--color-danger-soft)]'
-            : 'border-[var(--color-warning-border)] bg-[var(--color-warning-soft)]',
+          timeLeft < 3600 ?
+          'border-[var(--color-danger-border)] bg-[var(--color-danger-soft)]' :
+          'border-[var(--color-warning-border)] bg-[var(--color-warning-soft)]'
         )}>
             <Clock size={24} className={cn('shrink-0', timeLeft < 3600 ? 'text-[var(--color-danger)]' : 'text-[var(--color-warning)]')} />
             <div>
@@ -114,12 +114,12 @@ const Payment = () => {
           </div>
         }
 
-        <div className="payment-layout [display:grid] [grid-template-columns:62%_38%] [gap:3.5rem] [align-items:flex-start]">
+        <div className="max-[920px]:!grid-cols-1 max-[920px]:!gap-6 [display:grid] [grid-template-columns:62%_38%] [gap:3.5rem] [align-items:flex-start]">
           {/* Left Column */}
           <div className="[display:flex] [flex-direction:column] [gap:2.5rem]">
 
             {/* Order Details */}
-            <div className="card flow-animate payment-panel [padding:2rem] [border:1px_solid_var(--color-accent)]">
+            <div className="rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--color-text)] shadow-[var(--shadow-float)] backdrop-blur-xl transition-all duration-300 will-change-[transform,opacity] max-sm:!p-4 [padding:2rem] [border:1px_solid_var(--color-accent)]">
               <h3 className="[font-family:var(--font-heading)] [font-weight:300] [font-size:1.5rem] [margin-bottom:1.5rem] [color:var(--color-text)] [border-bottom:1px_solid_var(--color-accent)] [padding-bottom:0.5rem]">Detail Reservasi</h3>
               <div className="[display:grid] [grid-template-columns:1fr_1fr] [gap:1.5rem] [font-size:0.85rem]">
                 {[
@@ -139,7 +139,7 @@ const Payment = () => {
             </div>
 
             {/* Xendit Payment Card */}
-            <div className="card flow-animate payment-panel [padding:2rem] [border:1px_solid_var(--color-accent)]">
+            <div className="rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--color-text)] shadow-[var(--shadow-float)] backdrop-blur-xl transition-all duration-300 will-change-[transform,opacity] max-sm:!p-4 [padding:2rem] [border:1px_solid_var(--color-accent)]">
               <h3 className="[font-family:var(--font-heading)] [font-weight:300] [font-size:1.5rem] [margin-bottom:1.5rem] [color:var(--color-text)] [border-bottom:1px_solid_var(--color-accent)] [padding-bottom:0.5rem]">
                 Metode Pembayaran
               </h3>
@@ -183,7 +183,7 @@ const Payment = () => {
                 onClick={handlePayViaXendit}
                 disabled={submitting || timeLeft === 0}
                 className="flex h-[52px] w-full items-center justify-center gap-2 rounded-lg border-0 bg-[var(--color-primary)] font-[var(--font-body)] text-base font-semibold tracking-[0.5px] text-white transition hover:bg-[var(--color-primary-hover)] disabled:cursor-not-allowed disabled:bg-[#A0AEC0]">
-                
+
                 {submitting ?
                 <>
                     <div className="[width:18px] [height:18px] [border:2px_solid_rgba(255,255,255,0.3)] [border-top-color:white] [border-radius:50%] [animation:spin_0.8s_linear_infinite]" />
@@ -208,7 +208,7 @@ const Payment = () => {
 
           {/* Right Column: Order Pricing */}
           <div className="[position:sticky] [top:120px]">
-            <div className="card flow-animate [padding:2rem] [border:1px_solid_var(--color-accent)]">
+            <div className="rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--color-text)] shadow-[var(--shadow-float)] backdrop-blur-xl transition-all duration-300 will-change-[transform,opacity] [padding:2rem] [border:1px_solid_var(--color-accent)]">
               <h3 className="[font-family:var(--font-heading)] [font-size:1.5rem] [margin-bottom:1.5rem] [color:var(--color-text)] [border-bottom:1px_solid_var(--color-accent)] [padding-bottom:0.75rem] [font-weight:300]">Total Tagihan</h3>
 
               <div className="[display:flex] [justify-content:space-between] [font-size:0.85rem] [color:var(--color-muted)] [margin-bottom:1rem]">
@@ -223,7 +223,7 @@ const Payment = () => {
 
               {/* Payment status */}
               <div className="[margin-top:1.5rem] [display:flex] [flex-direction:column] [gap:0.5rem]">
-                <span className="badge [background:rgba(212,175,55,0.1)] [color:var(--color-primary)] [border-color:transparent] [height:32px] [display:flex] [align-items:center] [justify-content:center] [font-size:0.7rem] [letter-spacing:1px]">
+                <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-accent)] bg-[var(--color-background)] px-3 py-1 text-[0.7rem] font-medium uppercase text-[var(--color-text)] max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.64rem] [background:rgba(212,175,55,0.1)] [color:var(--color-primary)] [border-color:transparent] [height:32px] [display:flex] [align-items:center] [justify-content:center] [font-size:0.7rem] [letter-spacing:1px]">
                   AWAITING PAYMENT
                 </span>
                 {booking.xendit_invoice_url && booking.payment_status !== 'EXPIRED' &&

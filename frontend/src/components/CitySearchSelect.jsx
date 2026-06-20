@@ -23,8 +23,8 @@ const CitySearchSelect = ({ cities, value, onChange, placeholder = "Pilih Kota",
   // Sync search input when selected city changes
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      if (selectedCity && !isOpen) setSearch(selectedCity.name);
-      else if (!value) setSearch('');
+      if (selectedCity && !isOpen) setSearch(selectedCity.name);else
+      if (!value) setSearch('');
     }, 0);
     return () => window.clearTimeout(timer);
   }, [value, selectedCity, isOpen]);
@@ -53,7 +53,7 @@ const CitySearchSelect = ({ cities, value, onChange, placeholder = "Pilih Kota",
       <div className="[position:relative] [display:flex] [align-items:center]">
         <input
           type="text"
-          className="input [width:100%] [padding-right:3rem] [border:none] [border-bottom:1px_solid_var(--color-accent)] [background:transparent] [border-radius:0] [color:var(--color-text)] [font-size:0.9rem] [font-weight:400] [padding-left:0] [height:100%] [min-height:38px]"
+          className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm [width:100%] [padding-right:3rem] [border:none] [border-bottom:1px_solid_var(--color-accent)] [background:transparent] [border-radius:0] [color:var(--color-text)] [font-size:0.9rem] [font-weight:400] [padding-left:0] [height:100%] [min-height:38px]"
 
 
 
@@ -78,7 +78,7 @@ const CitySearchSelect = ({ cities, value, onChange, placeholder = "Pilih Kota",
             setSearch(e.target.value);
             setIsOpen(true);
           }} />
-        
+
         {value ?
         <button
           type="button"
@@ -94,14 +94,14 @@ const CitySearchSelect = ({ cities, value, onChange, placeholder = "Pilih Kota",
 
 
 
-          
+
             <X size={14} />
           </button> :
         null}
         <ChevronDown
           size={14}
           className={cn('pointer-events-none absolute right-0 text-[var(--color-muted)] transition-transform', isOpen && 'rotate-180')} />
-        
+
       </div>
 
       {isOpen &&
@@ -120,7 +120,7 @@ const CitySearchSelect = ({ cities, value, onChange, placeholder = "Pilih Kota",
 
 
 
-        
+
           {filteredCities.length > 0 ?
         filteredCities.map((city) => {
           const id = city.id_city || city.id;
@@ -131,9 +131,9 @@ const CitySearchSelect = ({ cities, value, onChange, placeholder = "Pilih Kota",
               onClick={() => handleSelect(city)}
               className={cn(
                 'cursor-pointer border-b border-[rgba(212,175,55,0.05)] px-4 py-3 text-left text-[0.85rem] transition hover:bg-[rgba(212,175,55,0.08)]',
-                isSelected ? 'bg-[rgba(212,175,55,0.05)] text-[var(--color-primary)]' : 'bg-transparent text-[var(--color-text)]',
+                isSelected ? 'bg-[rgba(212,175,55,0.05)] text-[var(--color-primary)]' : 'bg-transparent text-[var(--color-text)]'
               )}>
-              
+
                   <div className="[font-weight:400]">{city.name}</div>
                   {city.province &&
               <div className="[font-size:0.7rem] [color:var(--color-muted)] [font-weight:300]">

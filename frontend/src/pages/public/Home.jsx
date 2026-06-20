@@ -112,24 +112,24 @@ const Home = () => {
 
         onMouseEnter={() => setHovering(true)}
         onMouseLeave={() => setHovering(false)} className="[position:relative] [height:100vh] [overflow:hidden]">
-        
+
         {slides.map((s, i) =>
         <div key={s.id} className={cn('absolute inset-0 transition-opacity duration-1000 ease-out', i === current ? 'z-[1] opacity-100' : 'z-0 opacity-0')}>
             <img src={s.image} alt={s.title} className={cn('h-full w-full object-cover transition-transform duration-[6000ms]', i === current ? 'scale-[1.02]' : 'scale-100')} />
             {/* Dark luxury navy overlay */}
             <div className="[position:absolute] [inset:0] [background:linear-gradient(90deg,_rgba(7,22,38,0.74)_0%,_rgba(7,22,38,0.48)_42%,_rgba(7,22,38,0.16)_100%)]" />
             <div className="[position:absolute] [inset:0] [background:linear-gradient(to_top,_rgba(7,22,38,0.74)_0%,_rgba(7,22,38,0.2)_58%,_rgba(7,22,38,0.34)_100%)]" />
-            <div className="home-hero-copy [position:absolute] [bottom:12rem] [left:5%] [right:5%] [z-index:2] [color:#FFFFFF] [max-width:800px] [text-shadow:0_3px_18px_rgba(0,0,0,0.38)]">
-              <span className="badge badge-yellow animate-fade-in [margin-bottom:1rem] [background:rgba(246,211,101,0.95)] [border:1px_solid_rgba(246,211,101,0.95)] [color:#15314F] [padding:0.4rem_1rem] [text-shadow:none]">{s.city}</span>
-              <h1 className="home-hero-title animate-slide-in [font-family:var(--font-heading)] [font-weight:400] [font-size:clamp(2rem,_6vw,_4.5rem)] [text-transform:none] [margin:0.5rem_0] [line-height:1.05] [color:#FFFFFF] [text-shadow:0_4px_24px_rgba(0,0,0,0.5)]">
+            <div className="absolute bottom-48 left-[5%] right-[5%] z-[2] flex max-w-[820px] flex-col items-start gap-3.5 text-white max-sm:bottom-[8.5rem] max-sm:gap-3">
+              <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-accent)] bg-[var(--color-background)] px-3 py-1 text-[0.7rem] font-medium uppercase text-[var(--color-text)] max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.64rem] border-[var(--color-primary-soft)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] animate-[fadeIn_1s_cubic-bezier(0.16,1,0.3,1)_forwards] [margin-bottom:1rem] [background:rgba(246,211,101,0.95)] [border:1px_solid_rgba(246,211,101,0.95)] [color:#15314F] [padding:0.4rem_1rem] [text-shadow:none]">{s.city}</span>
+              <h1 className="m-0 animate-[fadeInUp_0.8s_cubic-bezier(0.16,1,0.3,1)_forwards] font-[var(--font-heading)] text-[clamp(2.4rem,5.2vw,4rem)] font-extrabold leading-[1.04] text-white [text-shadow:0_16px_42px_rgba(0,0,0,0.42)] max-sm:text-[clamp(2rem,12vw,3.2rem)]">
                 {s.title}
               </h1>
-              <p className="home-hero-description animate-slide-in [font-family:var(--font-body)] [font-weight:400] [color:rgba(255,255,255,0.94)] [margin-bottom:2rem] [font-size:clamp(1rem,_1.5vw,_1.25rem)] [letter-spacing:0.5px] [max-width:720px]">
+              <p className="mb-3 max-w-[700px] animate-[fadeInUp_0.8s_cubic-bezier(0.16,1,0.3,1)_forwards] text-[clamp(1rem,1.5vw,1.25rem)] font-normal leading-relaxed text-white/95 [text-shadow:0_8px_24px_rgba(0,0,0,0.34)] max-sm:text-[0.98rem]">
                 {s.desc}
               </p>
-              <div className="home-hero-actions animate-slide-in [display:flex] [gap:1.5rem] [flex-wrap:wrap] [align-items:center]">
-                <span className="home-hero-price [font-family:var(--font-body)] [font-weight:500] [font-size:1.1rem] [letter-spacing:1px] [color:#FFFFFF]">{t('home.heroPrice', { price: formatCurrency(s.price) })}</span>
-                <Link to="/hotels" className="btn btn-primary [background:var(--color-primary)] [color:#FFFFFF]">{t('home.heroCta')}</Link>
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-3 animate-[fadeInUp_0.8s_cubic-bezier(0.16,1,0.3,1)_forwards] max-sm:w-full max-sm:gap-3 max-sm:[&_a]:w-full max-sm:[&_a]:max-w-[260px]">
+                <span className="text-[1.1rem] font-medium leading-snug text-white [text-shadow:0_8px_24px_rgba(0,0,0,0.36)]">{t('home.heroPrice', { price: formatCurrency(s.price) })}</span>
+                <Link to="/hotels" className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 [background:var(--color-primary)] [color:#FFFFFF]">{t('home.heroCta')}</Link>
               </div>
             </div>
           </div>
@@ -160,19 +160,19 @@ const Home = () => {
         <form onSubmit={handleSearch} className="[background:var(--color-surface-solid)] [border-radius:var(--radius-sm)] [padding:1.25rem_2rem] [box-shadow:var(--shadow-float)] [border:1px_solid_var(--color-accent)]">
           <div className="[display:flex] [gap:1.5rem] [align-items:center] [flex-wrap:wrap]">
             <div className="[flex:2] [min-width:200px]">
-              <label className="label [font-size:0.7rem] [letter-spacing:1px] [color:var(--color-text)] [font-weight:500]">{t('home.searchDestination')}</label>
-              <input className="input [border:none] [border-bottom:1px_solid_var(--color-accent)] [padding:0.5rem_0] [background:transparent] [border-radius:0] [color:var(--color-text)] [font-weight:400]" placeholder={t('home.searchPlaceholder')} value={search.keyword} onChange={(e) => setSearch((s) => ({ ...s, keyword: e.target.value }))} />
+              <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem] [font-size:0.7rem] [letter-spacing:1px] [color:var(--color-text)] [font-weight:500]">{t('home.searchDestination')}</label>
+              <input className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm [border:none] [border-bottom:1px_solid_var(--color-accent)] [padding:0.5rem_0] [background:transparent] [border-radius:0] [color:var(--color-text)] [font-weight:400]" placeholder={t('home.searchPlaceholder')} value={search.keyword} onChange={(e) => setSearch((s) => ({ ...s, keyword: e.target.value }))} />
             </div>
             <div className="[flex:1] [min-width:150px]">
-              <label className="label [font-size:0.7rem] [letter-spacing:1px] [color:var(--color-text)] [font-weight:500]">{t('common.city')}</label>
+              <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem] [font-size:0.7rem] [letter-spacing:1px] [color:var(--color-text)] [font-weight:500]">{t('common.city')}</label>
               <CitySearchSelect
                 cities={cities}
                 value={search.city}
                 onChange={(val) => setSearch((s) => ({ ...s, city: val }))}
                 placeholder={t('home.allCities')} />
-              
+
             </div>
-            <button type="submit" className="btn btn-primary btn-lg [height:56px] [flex-shrink:0] [padding:0_2.5rem] [background:var(--color-primary)]">
+            <button type="submit" className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 min-h-12 px-10 py-4 text-base [height:56px] [flex-shrink:0] [padding:0_2.5rem] [background:var(--color-primary)]">
               {t('home.discover')}
             </button>
           </div>
@@ -186,17 +186,17 @@ const Home = () => {
             <span className="[font-family:var(--font-body)] [font-weight:400] [color:var(--color-primary)] [text-transform:uppercase] [letter-spacing:2px] [font-size:0.8rem]">{t('home.editorPick')}</span>
             <h2 className="[font-size:clamp(2rem,_3.5vw,_2.8rem)] [margin:0.5rem_0_0] [font-weight:300]">{t('home.featuredTitle')}</h2>
           </div>
-          <Link to="/hotels" className="btn btn-white btn-sm [display:flex] [align-items:center] [gap:0.5rem]">{t('home.viewAll')} <ArrowRight size={14} /></Link>
+          <Link to="/hotels" className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-[var(--color-text)] backdrop-blur-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-background)] min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem] [display:flex] [align-items:center] [gap:0.5rem]">{t('home.viewAll')} <ArrowRight size={14} /></Link>
         </div>
 
         {featuredLoading ?
         <LoadingState text={t('common.loadingHotel')} /> :
         featuredHotels.length > 0 ?
-        <div className="home-featured-rail" aria-label={t('home.featuredTitle')}>
-            {featuredHotels.map((hotel) => <HotelCard key={hotel.id_hotel} hotel={hotel} className="home-featured-card" />)}
+        <div className="grid auto-cols-[minmax(292px,360px)] grid-flow-col gap-5 overflow-x-auto overflow-y-hidden px-0.5 pb-5 pt-1 [scroll-snap-type:x_proximity] max-sm:auto-cols-[minmax(260px,82vw)] max-sm:gap-3.5" aria-label={t('home.featuredTitle')}>
+            {featuredHotels.map((hotel) => <HotelCard key={hotel.id_hotel} hotel={hotel} className="h-full min-w-0 [scroll-snap-align:start]" />)}
           </div> :
 
-        <div className="card [padding:3rem_2rem] [text-align:center]">
+        <div className="rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--color-text)] shadow-[var(--shadow-float)] backdrop-blur-xl transition-all duration-300 [padding:3rem_2rem] [text-align:center]">
             <h3 className="[margin:0] [font-size:1.35rem] [color:var(--color-text)]">{t('hotels.emptyTitle')}</h3>
             <p className="[margin:0.75rem_auto_0] [max-width:520px] [color:var(--color-muted)] [font-weight:400] [line-height:1.6]">{t('hotels.emptyText')}</p>
           </div>
@@ -211,10 +211,10 @@ const Home = () => {
               <span className="[font-family:var(--font-body)] [font-weight:400] [color:#C53030] [text-transform:uppercase] [letter-spacing:2px] [font-size:0.8rem]">{t('home.saleEyebrow')}</span>
               <h2 className="[font-size:clamp(2rem,_3.5vw,_2.8rem)] [margin:0.5rem_0_0] [font-weight:300]">{t('home.saleTitle')}</h2>
             </div>
-            <Link to="/hotels?sale=true" className="btn btn-white btn-sm [display:flex] [align-items:center] [gap:0.5rem]">{t('home.viewAll')} <ArrowRight size={14} /></Link>
+            <Link to="/hotels?sale=true" className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-[var(--color-text)] backdrop-blur-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-background)] min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem] [display:flex] [align-items:center] [gap:0.5rem]">{t('home.viewAll')} <ArrowRight size={14} /></Link>
           </div>
-          <div className="home-featured-rail" aria-label={t('home.saleTitle')}>
-            {saleHotels.map((hotel) => <HotelCard key={hotel.id_hotel} hotel={hotel} className="home-featured-card" />)}
+          <div className="grid auto-cols-[minmax(292px,360px)] grid-flow-col gap-5 overflow-x-auto overflow-y-hidden px-0.5 pb-5 pt-1 [scroll-snap-type:x_proximity] max-sm:auto-cols-[minmax(260px,82vw)] max-sm:gap-3.5" aria-label={t('home.saleTitle')}>
+            {saleHotels.map((hotel) => <HotelCard key={hotel.id_hotel} hotel={hotel} className="h-full min-w-0 [scroll-snap-align:start]" />)}
           </div>
         </div>
       }
@@ -227,7 +227,7 @@ const Home = () => {
         </div>
         <div className="[display:grid] [grid-template-columns:repeat(auto-fit,_minmax(260px,_1fr))] [gap:2.5rem]">
           {t('home.benefits').map((f, index) =>
-          <div key={f.title} className="card-hover [background:var(--color-surface)] [padding:2.5rem] [border-radius:var(--radius-sm)] [border:1px_solid_var(--color-accent)] [box-shadow:var(--shadow-float)] [display:flex] [flex-direction:column] [gap:1rem]">
+          <div key={f.title} className="hover:-translate-y-1 hover:border-[var(--color-primary)] hover:shadow-[var(--shadow-hover)] [background:var(--color-surface)] [padding:2.5rem] [border-radius:var(--radius-sm)] [border:1px_solid_var(--color-accent)] [box-shadow:var(--shadow-float)] [display:flex] [flex-direction:column] [gap:1rem]">
               <div className={cn('flex size-16 items-center justify-center rounded-full text-[2.5rem]', ['bg-amber-400/10', 'bg-blue-500/10', 'bg-emerald-500/10'][index % 3])}>{f.emoji}</div>
               <h3 className="[font-family:var(--font-heading)] [font-weight:400] [font-size:1.25rem] [margin:0.5rem_0_0] [color:var(--color-text)]">{f.title}</h3>
               <p className="[color:var(--color-muted)] [font-weight:300] [line-height:1.7] [font-size:0.875rem] [margin:0]">{f.desc}</p>
@@ -262,7 +262,7 @@ export const HotelCard = ({ hotel, className = '' }) => {
   minPrice;
 
   return (
-    <div className={cn(`card card-hover ${className}`, "[overflow:hidden] [display:flex] [flex-direction:column] [border:1px_solid_var(--color-accent)]")}>
+    <div className={cn(`rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--color-text)] shadow-[var(--shadow-float)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-[var(--color-primary)] hover:shadow-[var(--shadow-hover)] ${className}`, "[overflow:hidden] [display:flex] [flex-direction:column] [border:1px_solid_var(--color-accent)]")}>
       <div className="[height:220px] [overflow:hidden] [position:relative]">
         <img
           src={getImageUrl(hotel.images?.[0]?.image_url, `https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=400`)}
@@ -271,18 +271,18 @@ export const HotelCard = ({ hotel, className = '' }) => {
           decoding="async"
 
           className="h-full w-full object-cover transition-transform duration-700 ease-out hover:scale-105" />
-        
+
         {hasDiscount &&
-        <span className="badge badge-red [position:absolute] [top:15px] [left:15px] [background:#C53030] [color:white]">-{discountPercent}%</span>
+        <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-accent)] bg-[var(--color-background)] px-3 py-1 text-[0.7rem] font-medium uppercase text-[var(--color-text)] max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.64rem] border-[var(--color-danger-border)] bg-[var(--color-danger-soft)] text-[var(--color-danger)] [position:absolute] [top:15px] [left:15px] [background:#C53030] [color:white]">-{discountPercent}%</span>
         }
-        {hotel.featured && <span className="badge badge-yellow [position:absolute] [top:15px] [right:15px]">{t('common.featured')}</span>}
+        {hotel.featured && <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-accent)] bg-[var(--color-background)] px-3 py-1 text-[0.7rem] font-medium uppercase text-[var(--color-text)] max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.64rem] border-[var(--color-primary-soft)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] [position:absolute] [top:15px] [right:15px]">{t('common.featured')}</span>}
         {hotel.roomTypes?.some((r) => (r.room_available ?? r.roomAvailable) <= 3) &&
-        <span className="badge badge-orange [position:absolute] [bottom:15px] [left:15px] [background:rgba(237,137,54,0.1)] [color:#DD6B20] [border-color:rgba(237,137,54,0.2)]">{t('home.limited')}</span>
+        <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-accent)] bg-[var(--color-background)] px-3 py-1 text-[0.7rem] font-medium uppercase text-[var(--color-text)] max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.64rem] border-[var(--color-warning-border)] bg-[var(--color-warning-soft)] text-[var(--color-warning)] [position:absolute] [bottom:15px] [left:15px] [background:rgba(237,137,54,0.1)] [color:#DD6B20] [border-color:rgba(237,137,54,0.2)]">{t('home.limited')}</span>
         }
       </div>
       <div className="[padding:1.5rem] [display:flex] [flex-direction:column] [gap:0.5rem] [flex:1]">
         <div className="[display:flex] [justify-content:space-between] [align-items:center]">
-          <span className="badge badge-yellow [font-size:0.7rem]">{hotel.city?.name || 'Indonesia'}</span>
+          <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-accent)] bg-[var(--color-background)] px-3 py-1 text-[0.7rem] font-medium uppercase text-[var(--color-text)] max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.64rem] border-[var(--color-primary-soft)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] [font-size:0.7rem]">{hotel.city?.name || 'Indonesia'}</span>
           <span className="[display:flex] [align-items:center] [gap:0.25rem] [color:var(--color-primary)] [font-weight:400] [font-size:0.85rem]">
             <Star size={13} fill="var(--color-primary)" />{hotel.rating?.toFixed(1) || '4.5'}
           </span>
@@ -301,7 +301,7 @@ export const HotelCard = ({ hotel, className = '' }) => {
               <span className="[font-size:0.75rem] [color:var(--color-muted)] [font-weight:300]">{t('home.perNight')}</span>
             </div>
           </div>
-          <Link to={`/hotels/${hotel.id_hotel}`} className="btn btn-primary btn-sm [background:var(--color-primary)]">{t('common.details')}</Link>
+          <Link to={`/hotels/${hotel.id_hotel}`} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem] [background:var(--color-primary)]">{t('common.details')}</Link>
         </div>
       </div>
     </div>);

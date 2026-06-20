@@ -168,14 +168,14 @@ const AdminRoomTypes = () => {
               {t('admin.rooms.subtitle', { hotel: hotel?.name || t('admin.rooms.loadingHotel'), count: rooms.length })}
             </p>
           </div>
-          <button onClick={openCreate} className="btn btn-primary btn-sm">
+          <button onClick={openCreate} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem]">
             <Plus size={14} /> {t('admin.actions.addRoomType')}
           </button>
         </div>
       </div>
 
       {error &&
-      <div className="alert-danger [border-radius:var(--radius-sm)] [padding:0.75rem_1rem] [margin-bottom:1.25rem] [display:flex] [gap:0.5rem] [align-items:center]">
+      <div className="rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-soft)] text-[var(--color-danger)] [border-radius:var(--radius-sm)] [padding:0.75rem_1rem] [margin-bottom:1.25rem] [display:flex] [gap:0.5rem] [align-items:center]">
           <AlertCircle size={16} className="[color:var(--color-danger)] [flex-shrink:0]" />
           <span className="[font-weight:300] [color:var(--color-danger)] [font-size:0.85rem]">{error}</span>
         </div>
@@ -185,7 +185,7 @@ const AdminRoomTypes = () => {
       <LoadingState text={t('admin.rooms.loading')} compact /> :
 
       <div className="[overflow-x:auto]">
-          <table className="neo-table">
+          <table className="w-full min-w-[720px] border-collapse overflow-hidden rounded-lg border border-[var(--color-accent)] bg-[var(--glass-bg)] text-left text-sm [&_th]:border-b-2 [&_th]:border-[var(--color-accent)] [&_th]:bg-[var(--color-background)] [&_th]:px-4 [&_th]:py-3 [&_th]:text-xs [&_th]:font-semibold [&_th]:uppercase [&_th]:text-[var(--color-text)] [&_td]:border-b [&_td]:border-[var(--color-accent)] [&_td]:px-4 [&_td]:py-3 [&_td]:text-[var(--color-text)] [&_td]:align-middle [&_tbody_tr:hover_td]:bg-[var(--color-background)] max-sm:[&_th]:px-3 max-sm:[&_th]:py-3 max-sm:[&_td]:px-3 max-sm:[&_td]:py-3">
             <thead>
               <tr>
                 {[t('admin.table.number'), t('admin.table.image'), t('admin.table.roomType'), t('admin.table.pricePerNight'), t('admin.table.capacity'), t('admin.table.roomsAvailable'), t('admin.table.smoking'), t('admin.table.actions')].map((h) => <th key={h}>{h}</th>)}
@@ -216,12 +216,12 @@ const AdminRoomTypes = () => {
                       {(r.facilities || []).length > 0 &&
                     <div className="[display:flex] [flex-wrap:wrap] [gap:0.3rem] [margin-top:0.55rem]">
                           {r.facilities.slice(0, 3).map((facility) =>
-                      <span key={facility.id_facility ?? facility.idFacility ?? facility.name} className="badge badge-gray [font-size:0.62rem]">
+                      <span key={facility.id_facility ?? facility.idFacility ?? facility.name} className="inline-flex items-center gap-1 rounded-full border border-[var(--color-accent)] bg-[var(--color-background)] px-3 py-1 text-[0.7rem] font-medium uppercase text-[var(--color-text)] max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.64rem] border-[var(--color-accent)] bg-[var(--color-accent)] text-[var(--color-muted)] [font-size:0.62rem]">
                               {facility.name}
                             </span>
                       )}
                           {r.facilities.length > 3 &&
-                      <span className="badge badge-gray [font-size:0.62rem]">+{r.facilities.length - 3}</span>
+                      <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-accent)] bg-[var(--color-background)] px-3 py-1 text-[0.7rem] font-medium uppercase text-[var(--color-text)] max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.64rem] border-[var(--color-accent)] bg-[var(--color-accent)] text-[var(--color-muted)] [font-size:0.62rem]">+{r.facilities.length - 3}</span>
                       }
                         </div>
                     }
@@ -239,17 +239,17 @@ const AdminRoomTypes = () => {
                     </td>
                     <td>
                       {r.is_smoking || r.smoking ?
-                    <span className="badge badge-gray [font-size:0.7rem]">{t('admin.rooms.smokeAllowed')}</span> :
+                    <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-accent)] bg-[var(--color-background)] px-3 py-1 text-[0.7rem] font-medium uppercase text-[var(--color-text)] max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.64rem] border-[var(--color-accent)] bg-[var(--color-accent)] text-[var(--color-muted)] [font-size:0.7rem]">{t('admin.rooms.smokeAllowed')}</span> :
 
-                    <span className="badge badge-green [font-size:0.7rem]">{t('admin.rooms.smokeFree')}</span>
+                    <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-accent)] bg-[var(--color-background)] px-3 py-1 text-[0.7rem] font-medium uppercase text-[var(--color-text)] max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.64rem] border-[var(--color-success-border)] bg-[var(--color-success-soft)] text-[var(--color-success)] [font-size:0.7rem]">{t('admin.rooms.smokeFree')}</span>
                     }
                     </td>
                     <td>
                       <div className="[display:flex] [gap:0.5rem]">
-                        <button onClick={() => openEdit(r)} className="btn btn-white btn-sm [padding:0.4rem_0.8rem]" title={t('admin.rooms.editTitle')}>
+                        <button onClick={() => openEdit(r)} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-[var(--color-text)] backdrop-blur-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-background)] min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem] [padding:0.4rem_0.8rem]" title={t('admin.rooms.editTitle')}>
                           <Pencil size={13} />
                         </button>
-                        <button onClick={() => openDelete(r)} className="btn btn-white btn-sm [padding:0.4rem_0.8rem] [color:var(--color-danger)]" title={t('admin.rooms.deleteRoomType')}>
+                        <button onClick={() => openDelete(r)} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-[var(--color-text)] backdrop-blur-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-background)] min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem] [padding:0.4rem_0.8rem] [color:var(--color-danger)]" title={t('admin.rooms.deleteRoomType')}>
                           <Trash2 size={13} />
                         </button>
                       </div>
@@ -260,7 +260,7 @@ const AdminRoomTypes = () => {
             </tbody>
           </table>
           {rooms.length === 0 &&
-        <div className="card [text-align:center] [padding:3rem] [color:var(--color-muted)] [font-weight:300] [font-size:0.9rem]">
+        <div className="rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--color-text)] shadow-[var(--shadow-float)] backdrop-blur-xl transition-all duration-300 [text-align:center] [padding:3rem] [color:var(--color-muted)] [font-weight:300] [font-size:0.9rem]">
               {t('admin.rooms.empty')}
             </div>
         }
@@ -276,38 +276,38 @@ const AdminRoomTypes = () => {
           </div>
           <form onSubmit={handleSubmit} className="[display:flex] [flex-direction:column] [gap:1.25rem]">
             <div>
-              <label className="label">{t('admin.rooms.name')}</label>
-              <input className="input" placeholder="Standard Room, Suite Room..." value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} required />
+              <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem]">{t('admin.rooms.name')}</label>
+              <input className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm" placeholder="Standard Room, Suite Room..." value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} required />
             </div>
             <div>
-              <label className="label">{t('admin.rooms.description')}</label>
-              <textarea className="input [min-height:80px] [resize:vertical]" placeholder={t('admin.rooms.description')} value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
+              <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem]">{t('admin.rooms.description')}</label>
+              <textarea className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm [min-height:80px] [resize:vertical]" placeholder={t('admin.rooms.description')} value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
             </div>
             <div className="[display:grid] [grid-template-columns:1fr_1fr] [gap:1.25rem]">
               <div>
-                <label className="label">{t('admin.rooms.price')}</label>
-                <input type="number" className="input" value={form.price_per_night} onChange={(e) => setForm((f) => ({ ...f, price_per_night: e.target.value }))} required />
+                <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem]">{t('admin.rooms.price')}</label>
+                <input type="number" className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm" value={form.price_per_night} onChange={(e) => setForm((f) => ({ ...f, price_per_night: e.target.value }))} required />
               </div>
               <div>
-                <label className="label">{t('admin.rooms.capacity')}</label>
-                <input type="number" className="input" min="1" value={form.max_guest} onChange={(e) => setForm((f) => ({ ...f, max_guest: e.target.value }))} required />
+                <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem]">{t('admin.rooms.capacity')}</label>
+                <input type="number" className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm" min="1" value={form.max_guest} onChange={(e) => setForm((f) => ({ ...f, max_guest: e.target.value }))} required />
               </div>
             </div>
             <div className="[display:grid] [grid-template-columns:1fr_1fr] [gap:1.25rem]">
               <div>
-                <label className="label">{t('admin.rooms.availableRooms')}</label>
-                <input type="number" className="input" min="0" value={form.room_available} onChange={(e) => setForm((f) => ({ ...f, room_available: e.target.value }))} required />
+                <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem]">{t('admin.rooms.availableRooms')}</label>
+                <input type="number" className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm" min="0" value={form.room_available} onChange={(e) => setForm((f) => ({ ...f, room_available: e.target.value }))} required />
               </div>
               <div className="[display:flex] [align-items:center] [height:100%] [padding-top:1.5rem]">
                 <div className={cn('flex w-full cursor-pointer items-center gap-2 rounded-lg border border-[var(--color-accent)] p-3 transition', form.smoking ? 'bg-[var(--color-primary-soft)]' : 'bg-[var(--color-surface)]')} onClick={() => setForm((f) => ({ ...f, smoking: !f.smoking }))}>
                   <input type="checkbox" checked={form.smoking} readOnly className="[width:15px] [height:15px] [accent-color:var(--color-primary)]" />
-                  <label className="label [margin:0] [cursor:pointer] [color:var(--color-text)]">{t('admin.rooms.smokingRoom')}</label>
+                  <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem] [margin:0] [cursor:pointer] [color:var(--color-text)]">{t('admin.rooms.smokingRoom')}</label>
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="label"><Sparkles size={12} className="[display:inline] [margin-right:0.4rem] [vertical-align:middle]" />{t('admin.rooms.facilities')}</label>
+              <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem]"><Sparkles size={12} className="[display:inline] [margin-right:0.4rem] [vertical-align:middle]" />{t('admin.rooms.facilities')}</label>
               <p className="[color:var(--color-muted)] [font-size:0.78rem] [line-height:1.5] [margin:0_0_0.75rem]">
                 {t('admin.rooms.facilitiesHint')}
               </p>
@@ -324,17 +324,17 @@ const AdminRoomTypes = () => {
                     aria-pressed={selectedFacility}
                     className={cn(
                       'flex min-h-[42px] cursor-pointer items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-[0.82rem] text-[var(--color-text)]',
-                      selectedFacility
-                        ? 'border-[var(--color-primary)] bg-[var(--color-primary-soft)]'
-                        : 'border-[var(--color-accent)] bg-[var(--color-surface)]',
+                      selectedFacility ?
+                      'border-[var(--color-primary)] bg-[var(--color-primary-soft)]' :
+                      'border-[var(--color-accent)] bg-[var(--color-surface)]'
                     )}>
 
                         <span className={cn(
-                          'grid size-[18px] shrink-0 place-items-center rounded text-white',
-                          selectedFacility
-                            ? 'border border-[var(--color-primary)] bg-[var(--color-primary)]'
-                            : 'border border-[var(--color-muted)] bg-transparent',
-                        )}>
+                      'grid size-[18px] shrink-0 place-items-center rounded text-white',
+                      selectedFacility ?
+                      'border border-[var(--color-primary)] bg-[var(--color-primary)]' :
+                      'border border-[var(--color-muted)] bg-transparent'
+                    )}>
                           {selectedFacility && <Check size={12} />}
                         </span>
                         <span>{facility.name}</span>
@@ -351,7 +351,7 @@ const AdminRoomTypes = () => {
 
             {/* Gambar Kamar */}
             <div>
-              <label className="label"><ImageIcon size={12} className="[display:inline] [margin-right:0.4rem] [vertical-align:middle]" />{t('admin.rooms.roomPhoto')}</label>
+              <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem]"><ImageIcon size={12} className="[display:inline] [margin-right:0.4rem] [vertical-align:middle]" />{t('admin.rooms.roomPhoto')}</label>
               <div
               onClick={() => fileRef.current?.click()}
               className={cn('cursor-pointer rounded-lg border border-dashed border-[var(--color-primary)] px-4 py-6 text-center transition', imgPreview ? 'bg-amber-400/[0.01]' : 'bg-transparent')}>
@@ -389,10 +389,10 @@ const AdminRoomTypes = () => {
             }} className="[display:none]" />
             </div>
             <div className="[display:flex] [gap:0.75rem] [margin-top:0.5rem]">
-              <button type="submit" className="btn btn-primary btn-sm [flex:1] [justify-content:center]" disabled={submitting}>
+              <button type="submit" className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem] [flex:1] [justify-content:center]" disabled={submitting}>
                 {submitting ? t('admin.actions.saving') : <><Check size={14} /> {t('admin.rooms.saveRoomType')}</>}
               </button>
-              <button type="button" onClick={closeModal} className="btn btn-white btn-sm" disabled={submitting}>
+              <button type="button" onClick={closeModal} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-[var(--color-text)] backdrop-blur-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-background)] min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem]" disabled={submitting}>
                 {t('admin.actions.cancel')}
               </button>
             </div>
@@ -408,8 +408,8 @@ const AdminRoomTypes = () => {
             <h3 className="[font-family:var(--font-heading)] [font-weight:300] [text-transform:uppercase] [letter-spacing:1px] [font-size:1.25rem] [margin-bottom:0.75rem] [color:var(--color-text)]">{t('admin.rooms.deleteTitle')}</h3>
             <p className="[color:var(--color-muted)] [font-weight:300] [font-size:0.9rem] [line-height:1.5] [margin-bottom:1.75rem]">{t('admin.rooms.deleteMessage', { name: selected?.name })}</p>
             <div className="[display:flex] [gap:0.75rem] [justify-content:center]">
-              <button onClick={closeModal} className="btn btn-white btn-sm">{t('admin.actions.cancel')}</button>
-              <button onClick={handleDelete} className="btn btn-primary btn-sm [background:var(--color-danger)] [color:#FFFFFF]" disabled={submitting}>{submitting ? t('admin.actions.deleting') : t('admin.actions.delete')}</button>
+              <button onClick={closeModal} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-[var(--color-text)] backdrop-blur-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-background)] min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem]">{t('admin.actions.cancel')}</button>
+              <button onClick={handleDelete} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem] [background:var(--color-danger)] [color:#FFFFFF]" disabled={submitting}>{submitting ? t('admin.actions.deleting') : t('admin.actions.delete')}</button>
             </div>
           </div>
         </ModalOverlay>
@@ -423,7 +423,7 @@ const ModalOverlay = ({ children, onClose, maxWidth = 500 }) => {
     <div onClick={onClose} className="[position:fixed] [inset:0] [background:rgba(26,54,93,0.3)] [backdrop-filter:blur(4px)] [display:flex] [align-items:center] [justify-content:center] [z-index:100] [padding:1rem]">
       <div className={cn(
         'relative max-h-[90vh] w-full overflow-y-auto rounded-lg border border-[var(--color-accent)] bg-[var(--color-surface)] p-8 shadow-[var(--shadow-hover)] [animation:fadeIn_0.2s_ease-out]',
-        maxWidth <= 400 ? 'max-w-[400px]' : 'max-w-[500px]',
+        maxWidth <= 400 ? 'max-w-[400px]' : 'max-w-[500px]'
       )} onClick={(e) => e.stopPropagation()}>
         {children}
       </div>

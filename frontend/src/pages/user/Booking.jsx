@@ -202,42 +202,47 @@ const Booking = () => {
 
 
   return (
-    <div className="booking-page">
-      <div className="booking-shell">
-        <div className="booking-heading">
+    <div className="min-h-screen bg-transparent px-6 py-24 max-[920px]:px-4 max-[920px]:py-14 max-sm:px-3.5 max-sm:py-10">
+      <div className="mx-auto w-full max-w-[1200px]">
+        <div className="mb-10 max-w-[680px] max-[920px]:mb-6 [&>span]:mb-2 [&>span]:inline-block [&>span]:text-xs [&>span]:font-bold [&>span]:uppercase [&>span]:text-[var(--color-primary)] [&>h1]:m-0 [&>h1]:text-[clamp(2.2rem,5vw,3.6rem)] [&>h1]:font-light [&>h1]:leading-none [&>p]:mt-3.5 [&>p]:text-[0.96rem] [&>p]:leading-relaxed [&>p]:text-[var(--color-muted)] max-sm:[&>h1]:text-[2rem]">
           <span>Reservation</span>
           <h1>Lengkapi Data Booking</h1>
           <p>Pastikan tanggal, tipe kamar, dan data tamu sudah benar sebelum melanjutkan pembayaran.</p>
         </div>
 
         {error &&
-        <div className="alert-danger [padding:1rem] [margin-bottom:2.5rem] [display:flex] [gap:0.6rem] [border-radius:var(--radius-sm)]">
+        <div className="rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-soft)] text-[var(--color-danger)] [padding:1rem] [margin-bottom:2.5rem] [display:flex] [gap:0.6rem] [border-radius:var(--radius-sm)]">
             <AlertCircle size={18} className="[color:var(--color-danger)] [flex-shrink:0]" />
             <span className="[font-weight:300] [color:var(--color-danger)] [font-size:0.9rem]">{error}</span>
           </div>
         }
 
-        <form onSubmit={handleSubmit} className="booking-form-grid max-[900px]:!grid-cols-1 max-[900px]:!gap-12">
-          
+        <form onSubmit={handleSubmit} className="grid grid-cols-[minmax(0,1fr)_390px] items-start gap-8 max-[980px]:grid-cols-1 max-[900px]:!grid-cols-1 max-[900px]:!gap-12">
+
           {/* Left Column (65%): Form */}
-          <div className="booking-main-column">
-            
+          <div className="flex min-w-0 flex-col gap-6">
+
             {/* Stay Details */}
-            <div className="booking-panel [z-index:2]">
-              <div className="booking-section-title">
+            <div className="rounded-lg border border-[var(--color-accent)] bg-[linear-gradient(145deg,color-mix(in_srgb,var(--color-primary-soft)_55%,transparent),transparent_34%),var(--color-surface)] p-6 shadow-[var(--shadow-float)] max-[920px]:p-5 max-sm:p-4 [z-index:2]">
+              <div className="mb-5 flex items-center gap-3 border-b border-[var(--color-accent)] pb-4 max-sm:items-start max-sm:gap-2.5 [&>svg]:size-[38px] [&>svg]:shrink-0 [&>svg]:rounded-full [&>svg]:border [&>svg]:border-[var(--color-accent)] [&>svg]:bg-[var(--color-primary-soft)] [&>svg]:p-2.5 [&>svg]:text-[var(--color-primary)] [&_span]:block [&_span]:text-[0.68rem] [&_span]:font-bold [&_span]:uppercase [&_span]:text-[var(--color-primary)] [&_h3]:mt-0.5 [&_h3]:text-2xl [&_h3]:font-light max-sm:[&_h3]:text-xl">
                 <CalendarDays size={18} />
                 <div>
                   <span>Langkah 1</span>
                   <h3>Detail Menginap</h3>
                 </div>
               </div>
-              
-              <div className="booking-date-grid">
-                <div className={cn(`booking-date-card ${openCalendar === 'check_in' ? 'is-open' : ''}`, "[z-index:2]")}>
-                  <div className="booking-date-icon"><CalendarDays size={18} /></div>
-                  <div className="booking-date-body">
+
+              <div className="grid grid-cols-2 gap-4 max-[620px]:grid-cols-1">
+                <div className={cn(
+                  'relative z-[2] grid min-h-[118px] grid-cols-[42px_minmax(0,1fr)] items-center gap-3.5 rounded-lg border border-[var(--color-accent)]',
+                  'bg-[color-mix(in_srgb,var(--color-surface)_78%,var(--color-background))] p-4 transition hover:-translate-y-0.5 hover:border-[var(--color-primary)] hover:shadow-[var(--shadow-hover)]',
+                  'focus-within:border-[var(--color-primary)] max-sm:min-h-[98px] max-sm:grid-cols-[36px_minmax(0,1fr)] max-sm:p-3.5',
+                  openCalendar === 'check_in' && 'border-[var(--color-primary)] shadow-[var(--shadow-hover)]',
+                )}>
+                  <div className="grid size-[42px] place-items-center rounded-full bg-[var(--color-primary-soft)] text-[var(--color-primary)] max-sm:size-9"><CalendarDays size={18} /></div>
+                  <div className="flex min-w-0 flex-col gap-1 [&>label]:text-[0.68rem] [&>label]:font-bold [&>label]:uppercase [&>label]:text-[var(--color-muted)] [&>span]:text-[0.78rem] [&>span]:text-[var(--color-muted)]">
                     <label>Check-In</label>
-                    <button type="button" className="booking-date-trigger" onClick={() => openDatePicker('check_in')}>
+                    <button type="button" className="w-full min-w-0 cursor-pointer border-0 bg-transparent p-0 text-left text-base font-semibold text-[var(--color-text)] outline-none" onClick={() => openDatePicker('check_in')}>
                       {form.check_in ? formatDate(form.check_in) : 'Pilih tanggal'}
                     </button>
                     <span>{form.check_in ? formatDate(form.check_in) : 'Pilih tanggal datang'}</span>
@@ -252,11 +257,16 @@ const Booking = () => {
 
                   }
                 </div>
-                <div className={cn(`booking-date-card ${openCalendar === 'check_out' ? 'is-open' : ''}`, "[z-index:2]")}>
-                  <div className="booking-date-icon"><CalendarDays size={18} /></div>
-                  <div className="booking-date-body">
+                <div className={cn(
+                  'relative z-[2] grid min-h-[118px] grid-cols-[42px_minmax(0,1fr)] items-center gap-3.5 rounded-lg border border-[var(--color-accent)]',
+                  'bg-[color-mix(in_srgb,var(--color-surface)_78%,var(--color-background))] p-4 transition hover:-translate-y-0.5 hover:border-[var(--color-primary)] hover:shadow-[var(--shadow-hover)]',
+                  'focus-within:border-[var(--color-primary)] max-sm:min-h-[98px] max-sm:grid-cols-[36px_minmax(0,1fr)] max-sm:p-3.5',
+                  openCalendar === 'check_out' && 'border-[var(--color-primary)] shadow-[var(--shadow-hover)]',
+                )}>
+                  <div className="grid size-[42px] place-items-center rounded-full bg-[var(--color-primary-soft)] text-[var(--color-primary)] max-sm:size-9"><CalendarDays size={18} /></div>
+                  <div className="flex min-w-0 flex-col gap-1 [&>label]:text-[0.68rem] [&>label]:font-bold [&>label]:uppercase [&>label]:text-[var(--color-muted)] [&>span]:text-[0.78rem] [&>span]:text-[var(--color-muted)]">
                     <label>Check-Out</label>
-                    <button type="button" className="booking-date-trigger" onClick={() => openDatePicker('check_out')}>
+                    <button type="button" className="w-full min-w-0 cursor-pointer border-0 bg-transparent p-0 text-left text-base font-semibold text-[var(--color-text)] outline-none" onClick={() => openDatePicker('check_out')}>
                       {form.check_out ? formatDate(form.check_out) : 'Pilih tanggal'}
                     </button>
                     <span>{form.check_out ? formatDate(form.check_out) : 'Otomatis esok hari'}</span>
@@ -273,10 +283,10 @@ const Booking = () => {
                 </div>
               </div>
 
-              <div className="booking-field-grid">
+              <div className="mt-5 grid grid-cols-2 gap-4 max-[620px]:grid-cols-1">
                 <div>
-                  <label className="label">Tipe Kamar *</label>
-                  <select className="input booking-solid-input" value={form.room_type_id} onChange={(e) => setForm((f) => ({ ...f, room_type_id: parseInt(e.target.value) }))} required>
+                  <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem]">Tipe Kamar *</label>
+                  <select className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm h-12 bg-[var(--color-surface-solid)] font-normal" value={form.room_type_id} onChange={(e) => setForm((f) => ({ ...f, room_type_id: parseInt(e.target.value) }))} required>
                     {rooms.map((r) => {
                       const available = getRoomAvailability(r);
                       return (
@@ -293,15 +303,15 @@ const Booking = () => {
                   }
                 </div>
                 <div>
-                  <label className="label">Jumlah Tamu *</label>
-                  <input type="number" className="input booking-solid-input" min={1} max={selectedRoom?.max_guest || 10} value={form.number_of_guest} onChange={(e) => setForm((f) => ({ ...f, number_of_guest: parseInt(e.target.value) }))} required />
+                  <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem]">Jumlah Tamu *</label>
+                  <input type="number" className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm h-12 bg-[var(--color-surface-solid)] font-normal" min={1} max={selectedRoom?.max_guest || 10} value={form.number_of_guest} onChange={(e) => setForm((f) => ({ ...f, number_of_guest: parseInt(e.target.value) }))} required />
                 </div>
               </div>
             </div>
 
             {/* Guest Details */}
-            <div className="booking-panel">
-              <div className="booking-section-title">
+            <div className="rounded-lg border border-[var(--color-accent)] bg-[linear-gradient(145deg,color-mix(in_srgb,var(--color-primary-soft)_55%,transparent),transparent_34%),var(--color-surface)] p-6 shadow-[var(--shadow-float)] max-[920px]:p-5 max-sm:p-4">
+              <div className="mb-5 flex items-center gap-3 border-b border-[var(--color-accent)] pb-4 max-sm:items-start max-sm:gap-2.5 [&>svg]:size-[38px] [&>svg]:shrink-0 [&>svg]:rounded-full [&>svg]:border [&>svg]:border-[var(--color-accent)] [&>svg]:bg-[var(--color-primary-soft)] [&>svg]:p-2.5 [&>svg]:text-[var(--color-primary)] [&_span]:block [&_span]:text-[0.68rem] [&_span]:font-bold [&_span]:uppercase [&_span]:text-[var(--color-primary)] [&_h3]:mt-0.5 [&_h3]:text-2xl [&_h3]:font-light max-sm:[&_h3]:text-xl">
                 <User size={18} />
                 <div>
                   <span>Langkah 2</span>
@@ -310,9 +320,17 @@ const Booking = () => {
               </div>
 
               {/* Toggle option for self booking */}
-              <div className="booking-guest-toggle">
+              <div className="mb-6 grid grid-cols-2 gap-3 max-[620px]:grid-cols-1 [&_input]:size-4 [&_input]:accent-[var(--color-primary)]">
                 {[{ val: true, label: 'Saya tamunya' }, { val: false, label: 'Pesan untuk orang lain' }].map(({ val, label }) =>
-                <label key={label} className={form.for_self === val ? 'active' : ''}>
+                <label
+                  key={label}
+                  className={cn(
+                    'flex min-h-12 cursor-pointer items-center gap-2.5 rounded-lg border border-[var(--color-accent)] px-3.5 py-3 text-[0.86rem] font-medium transition',
+                    form.for_self === val
+                      ? 'border-[var(--color-primary)] bg-[var(--color-primary)] text-white'
+                      : 'bg-[var(--color-surface)] text-[var(--color-text)]',
+                  )}
+                >
                     <input type="radio" checked={form.for_self === val} onChange={() => setForm((f) => ({ ...f, for_self: val }))} />
                     {label}
                   </label>
@@ -325,14 +343,14 @@ const Booking = () => {
                     Nama Lengkap *
                   </label>
                   <input
-                    className="input booking-solid-input"
+                    className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm h-12 bg-[var(--color-surface-solid)] font-normal"
                     value={form.orderer_name}
                     onChange={(e) => setForm((f) => ({ ...f, orderer_name: e.target.value }))}
                     required
                     disabled={form.for_self} />
-                  
+
                 </div>
-                
+
                 <div className="[display:grid] [grid-template-columns:1fr_1fr] [gap:1.25rem]">
                   <div className="[display:flex] [flex-direction:column] [gap:0.4rem]">
                     <label className="[font-size:0.72rem] [font-weight:600] [color:var(--color-muted)] [text-transform:uppercase] [letter-spacing:1px]">
@@ -340,26 +358,26 @@ const Booking = () => {
                     </label>
                     <input
                       type="tel"
-                      className="input booking-solid-input"
+                      className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm h-12 bg-[var(--color-surface-solid)] font-normal"
                       value={form.orderer_phone}
                       onChange={(e) => setForm((f) => ({ ...f, orderer_phone: e.target.value }))}
                       required
                       disabled={form.for_self} />
-                    
+
                   </div>
-                  
+
                   <div className="[display:flex] [flex-direction:column] [gap:0.4rem]">
                     <label className="[font-size:0.72rem] [font-weight:600] [color:var(--color-muted)] [text-transform:uppercase] [letter-spacing:1px]">
                       Alamat Email *
                     </label>
                     <input
                       type="email"
-                      className="input booking-solid-input"
+                      className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm h-12 bg-[var(--color-surface-solid)] font-normal"
                       value={form.orderer_email}
                       onChange={(e) => setForm((f) => ({ ...f, orderer_email: e.target.value }))}
                       required
                       disabled={form.for_self} />
-                    
+
                   </div>
                 </div>
               </div>
@@ -368,13 +386,13 @@ const Booking = () => {
           </div>
 
           {/* Right Column (35%): Order Summary */}
-          <div className="booking-summary-sticky">
-            <div className="booking-summary-card card">
-              <div className="booking-summary-title">
+          <div className="sticky top-[120px] max-[980px]:static">
+            <div className="rounded-lg border border-[var(--color-accent)] bg-[linear-gradient(145deg,color-mix(in_srgb,var(--color-primary-soft)_55%,transparent),transparent_34%),var(--color-surface)] p-6 shadow-[var(--shadow-float)] max-[920px]:p-5 max-sm:p-4 rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--color-text)] shadow-[var(--shadow-float)] backdrop-blur-xl transition-all duration-300">
+              <div className="mb-6 flex items-center gap-3 border-b border-[var(--color-accent)] pb-4 max-sm:items-start max-sm:gap-2.5 [&>svg]:size-[38px] [&>svg]:shrink-0 [&>svg]:rounded-full [&>svg]:border [&>svg]:border-[var(--color-accent)] [&>svg]:bg-[var(--color-primary-soft)] [&>svg]:p-2.5 [&>svg]:text-[var(--color-primary)] [&_h3]:text-2xl [&_h3]:font-light max-sm:[&_h3]:text-xl">
                 <BedDouble size={18} />
                 <h3>Ringkasan Pesanan</h3>
               </div>
-              
+
               <div className="[display:flex] [gap:1rem] [margin-bottom:2rem]">
                 <div className="[width:64px] [height:64px] [overflow:hidden] [border-radius:2px]">
                   <img src={hotel?.images?.[0]?.image_url || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=150'} alt="" className="[width:100%] [height:100%] [object-fit:cover]" />
@@ -437,16 +455,16 @@ const Booking = () => {
                 </div>
               }
 
-              <button type="submit" className="btn btn-primary btn-full mt-8 h-14 justify-center bg-[var(--color-primary)] [animation:none] disabled:cursor-not-allowed disabled:opacity-55" disabled={submitting || bookingBlocked}>
+              <button type="submit" className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 w-full mt-8 h-14 justify-center bg-[var(--color-primary)] [animation:none] disabled:cursor-not-allowed disabled:opacity-55" disabled={submitting || bookingBlocked}>
                 {!selectedRoom ? 'Pilih Tipe Kamar' : selectedRoomUnavailable ? 'Kamar Tidak Tersedia' : submitting ? 'Processing...' : 'Lanjutkan Pembayaran'}
               </button>
-              <div className="booking-secure-note">
+              <div className="mt-4 flex items-start gap-2 rounded-lg border border-[var(--color-accent)] bg-[var(--color-primary-soft)] p-3.5 text-[0.78rem] leading-relaxed text-[var(--color-muted)] [&>svg]:mt-0.5 [&>svg]:shrink-0 [&>svg]:text-[var(--color-primary)]">
                 <ShieldCheck size={14} />
                 <span>Data reservasi dilindungi dan akan diverifikasi sebelum pembayaran.</span>
               </div>
             </div>
           </div>
-          
+
         </form>
       </div>
 
@@ -463,8 +481,8 @@ const CalendarPopover = ({ month, setMonth, selected, minDate, onSelect }) => {
   };
 
   return (
-    <div className="booking-calendar-popover">
-      <div className="booking-calendar-head">
+    <div className="absolute inset-x-0 top-[calc(100%+0.65rem)] z-20 border border-[var(--glass-border)] bg-[var(--color-surface-solid)] p-4 shadow-[var(--shadow-hover)] max-sm:fixed max-sm:bottom-4 max-sm:left-3.5 max-sm:right-3.5 max-sm:top-auto max-sm:z-[250] max-sm:max-h-[calc(100dvh-2rem)] max-sm:overflow-y-auto">
+      <div className="mb-3 flex items-center justify-between gap-3 [&>strong]:text-sm [&>strong]:font-bold [&>button]:grid [&>button]:size-[34px] [&>button]:cursor-pointer [&>button]:place-items-center [&>button]:border [&>button]:border-[var(--color-accent)] [&>button]:bg-[var(--color-surface)] [&>button]:text-[var(--color-text)] [&>button]:transition [&>button:hover]:-translate-y-px [&>button:hover]:border-[var(--color-primary)]">
         <button type="button" onClick={() => changeMonth(-1)} aria-label="Bulan sebelumnya">
           {'<'}
         </button>
@@ -474,26 +492,27 @@ const CalendarPopover = ({ month, setMonth, selected, minDate, onSelect }) => {
         </button>
       </div>
 
-      <div className="booking-calendar-week" aria-hidden="true">
+      <div className="mb-1.5 grid grid-cols-7 gap-1.5 max-[380px]:gap-1 [&>span]:text-center [&>span]:text-[0.66rem] [&>span]:font-bold [&>span]:uppercase [&>span]:text-[var(--color-muted)]" aria-hidden="true">
         {weekdays.map((day) => <span key={day}>{day}</span>)}
       </div>
 
-      <div className="booking-calendar-grid">
+      <div className="grid grid-cols-7 gap-1.5 max-[380px]:gap-1">
         {cells.map((cell) => {
           const disabled = isBeforeDate(cell.value, minDate);
           return (
             <button
               type="button"
               key={cell.value}
-              className={[
-              'booking-calendar-day',
-              !cell.isCurrentMonth ? 'is-muted' : '',
-              selected === cell.value ? 'is-selected' : '',
-              disabled ? 'is-disabled' : ''].
-              filter(Boolean).join(' ')}
+              className={cn(
+                'grid min-h-9 cursor-pointer place-items-center border border-[var(--color-accent)] bg-[var(--color-surface)] text-[0.82rem] font-semibold text-[var(--color-text)] transition',
+                'hover:-translate-y-px hover:border-[var(--color-primary)] max-sm:min-h-[34px] max-sm:text-xs',
+                !cell.isCurrentMonth && 'opacity-40',
+                selected === cell.value && 'border-[var(--color-primary)] bg-[var(--color-primary)] text-white',
+                disabled && 'cursor-not-allowed opacity-30 hover:translate-y-0 hover:border-[var(--color-accent)]',
+              )}
               disabled={disabled}
               onClick={() => onSelect(cell.value)}>
-              
+
               {cell.day}
             </button>);
 

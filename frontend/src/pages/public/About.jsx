@@ -13,9 +13,9 @@ const About = () => {
 
 
   return (
-    <div className="about-page [min-height:100vh] [background:var(--color-background)] [padding:6rem_1.5rem]">
-      <div className="about-shell [max-width:850px] [margin:0_auto]">
-        
+    <div className="px-6 py-16 max-[920px]:px-4 max-[920px]:py-12 max-sm:px-3.5 max-sm:py-9 [min-height:100vh] [background:var(--color-background)] [padding:6rem_1.5rem]">
+      <div className="mx-auto max-w-[850px]">
+
         {/* Title Section */}
         <div className="reveal [text-align:center] [margin-bottom:5rem]">
           <span className="[font-family:var(--font-body)] [font-weight:400] [color:var(--color-primary)] [text-transform:uppercase] [letter-spacing:2px] [font-size:0.8rem]">{t('about.eyebrow')}</span>
@@ -28,7 +28,7 @@ const About = () => {
         </div>
 
         {/* Story Section */}
-        <div className="card reveal flow-animate about-story-card [padding:3rem] [margin-bottom:4rem] [border:1px_solid_var(--color-accent)]">
+        <div className="rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--color-text)] shadow-[var(--shadow-float)] backdrop-blur-xl transition-all duration-300 reveal will-change-[transform,opacity] max-sm:!p-4 [padding:3rem] [margin-bottom:4rem] [border:1px_solid_var(--color-accent)]">
           <h2 className="[font-family:var(--font-heading)] [font-weight:300] [font-size:1.8rem] [margin-bottom:1.5rem] [color:var(--color-text)]">{t('about.missionTitle')}</h2>
           <p className="[color:var(--color-text)] [font-weight:300] [line-height:1.9] [margin-bottom:1.5rem] [font-size:0.95rem]">
             {t('about.mission1')}
@@ -41,12 +41,12 @@ const About = () => {
         {/* Value Grid */}
         <div className="reveal [margin-bottom:5rem]">
           <h2 className="[font-family:var(--font-heading)] [font-weight:300] [font-size:2rem] [text-align:center] [margin-bottom:3rem] [color:var(--color-text)]">{t('about.valuesTitle')}</h2>
-          <div className="about-value-grid [display:grid] [grid-template-columns:repeat(auto-fit,_minmax(350px,_1fr))] [gap:2rem]">
+          <div className="max-[920px]:!grid-cols-2 max-sm:!grid-cols-1 [display:grid] [grid-template-columns:repeat(auto-fit,_minmax(350px,_1fr))] [gap:2rem]">
             {values.map((v, i) => {
               const meta = icons[i];
               const Icon = meta.icon;
               return (
-                <div key={i} className="card card-hover [padding:2rem] [display:flex] [flex-direction:column] [gap:1rem] [border:1px_solid_var(--color-accent)]">
+                <div key={i} className="rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--color-text)] shadow-[var(--shadow-float)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-[var(--color-primary)] hover:shadow-[var(--shadow-hover)] [padding:2rem] [display:flex] [flex-direction:column] [gap:1rem] [border:1px_solid_var(--color-accent)]">
                   <div className={`flex size-12 items-center justify-center rounded-full ${meta.wrapperClass}`}>
                     <Icon size={20} className={meta.iconClass} />
                   </div>
@@ -59,12 +59,12 @@ const About = () => {
         </div>
 
         {/* CTA Banner */}
-        <div className="reveal about-cta-panel [border-radius:var(--radius-sm)] [padding:3.5rem_2rem] [color:white] [text-align:center] [box-shadow:var(--shadow-hover)]">
+        <div className="reveal border border-[rgba(122,183,240,0.24)] bg-[radial-gradient(circle_at_16%_18%,rgba(122,183,240,0.24)_0_1px,transparent_2px),radial-gradient(circle_at_78%_32%,rgba(246,211,101,0.18),transparent_30%),linear-gradient(135deg,rgba(10,22,46,0.98),rgba(15,35,72,0.95))] max-sm:!px-4 max-sm:!py-8 max-sm:[&_.btn]:w-full [border-radius:var(--radius-sm)] [padding:3.5rem_2rem] [color:white] [text-align:center] [box-shadow:var(--shadow-hover)]">
           <h2 className="[font-family:var(--font-heading)] [font-weight:300] [font-size:2.2rem] [color:white] [margin-bottom:1rem]">{t('about.ctaTitle')}</h2>
           <p className="[color:rgba(255,255,255,0.7)] [font-weight:300] [margin-bottom:2.5rem] [max-width:500px] [margin:0_auto_2.5rem] [font-size:0.95rem]">{t('about.ctaText')}</p>
           <div className="[display:flex] [gap:1.5rem] [justify-content:center] [flex-wrap:wrap]">
-            <Link to="/hotels" className="btn btn-primary [background:var(--color-primary)]">{t('about.explore')}</Link>
-            <Link to="/register" className="btn btn-white border-white/30 bg-transparent text-white hover:bg-white/10">{t('about.createAccount')}</Link>
+            <Link to="/hotels" className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 [background:var(--color-primary)]">{t('about.explore')}</Link>
+            <Link to="/register" className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-[var(--color-text)] backdrop-blur-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-background)] border-white/30 bg-transparent text-white hover:bg-white/10">{t('about.createAccount')}</Link>
           </div>
         </div>
 

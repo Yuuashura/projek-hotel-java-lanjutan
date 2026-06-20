@@ -88,18 +88,18 @@ const MyBookings = () => {
 
 
   return (
-    <div className="user-page my-bookings-page [background:var(--color-background)] [min-height:100vh] [padding:6rem_1.5rem]">
-      <div className="user-page-shell [max-width:900px] [margin:0_auto]">
+    <div className="px-6 py-16 max-[920px]:px-4 max-[920px]:py-12 max-sm:px-3.5 max-sm:py-8 my-bookings-page [background:var(--color-background)] [min-height:100vh] [padding:6rem_1.5rem]">
+      <div className="mx-auto max-w-[900px]">
         <h1 className="[font-family:var(--font-heading)] [font-weight:300] [font-size:2.5rem] [margin-bottom:0.5rem] [color:var(--color-text)]">Pesanan Saya</h1>
         <p className="[color:var(--color-muted)] [font-weight:300] [margin-bottom:3rem] [font-size:0.9rem]">Kelola dan pantau status semua pemesanan hotel Anda</p>
 
         {/* Tabs */}
-        <div className="user-tabs [display:flex] [border-bottom:1px_solid_var(--color-accent)] [margin-bottom:2.5rem] [gap:2rem]">
+        <div className="mb-10 flex gap-8 overflow-x-auto border-b border-[var(--color-accent)] pb-1 max-sm:mb-6 max-sm:gap-2">
           {tabs.map(({ key, label, icon: Icon }) =>
           <button key={key} onClick={() => setTab(key)}
           className={cn(
             '-mb-px flex cursor-pointer items-center gap-2 border-0 border-b-2 bg-transparent py-3.5 font-[var(--font-body)] text-sm font-normal uppercase tracking-[1px] transition',
-            tab === key ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-[var(--color-muted)]',
+            tab === key ? 'border-[var(--color-primary)] text-[var(--color-primary)]' : 'border-transparent text-[var(--color-muted)]'
           )}>
               <Icon size={14} /> {label}
             </button>
@@ -118,10 +118,10 @@ const MyBookings = () => {
             <p className="[color:var(--color-muted)] [font-weight:300] [margin-bottom:2rem] [font-size:0.9rem]">
               {tab === 'active' ? 'Mulai pesan hotel impian Anda sekarang!' : 'Riwayat pemesanan akan muncul di sini.'}
             </p>
-            <Link to="/hotels" className="btn btn-primary [background:var(--color-primary)]">Cari Hotel <ArrowRight size={14} /></Link>
+            <Link to="/hotels" className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 [background:var(--color-primary)]">Cari Hotel <ArrowRight size={14} /></Link>
           </div> :
 
-        <div className="flow-animate [display:flex] [flex-direction:column] [gap:1.5rem]">
+        <div className="will-change-[transform,opacity] [display:flex] [flex-direction:column] [gap:1.5rem]">
             {bookings.map((booking) => <BookingCard key={booking.id_booking || booking.id} booking={booking} onCancel={handleCancel} />)}
           </div>
         }
@@ -142,7 +142,7 @@ const BookingCard = ({ booking, onCancel }) => {
       const deadline = new Date(booking.payment_deadline).getTime();
       const startTimer = window.setTimeout(
         () => setTimeLeft(Math.max(0, Math.floor((deadline - Date.now()) / 1000))),
-        0,
+        0
       );
       const t = setInterval(() => setTimeLeft((l) => Math.max(0, l - 1)), 1000);
       return () => {
@@ -166,17 +166,17 @@ const BookingCard = ({ booking, onCancel }) => {
   // Status badges colors matching Elegant Sanctuary theme
   const getBadgeClass = (status) => {
     switch (status) {
-      case 'PENDING': return 'bg-amber-400/10 text-[var(--color-primary)]';
-      case 'CONFIRMED': return 'bg-emerald-500/10 text-[#276749]';
-      case 'CANCELLED': return 'bg-red-500/10 text-[#9B2C2C]';
-      default: return 'bg-[var(--color-accent)] text-[var(--color-muted)]';
+      case 'PENDING':return 'bg-amber-400/10 text-[var(--color-primary)]';
+      case 'CONFIRMED':return 'bg-emerald-500/10 text-[#276749]';
+      case 'CANCELLED':return 'bg-red-500/10 text-[#9B2C2C]';
+      default:return 'bg-[var(--color-accent)] text-[var(--color-muted)]';
     }
   };
 
   const statusBadgeClass = getBadgeClass(booking.status);
 
   return (
-    <div className="card card-hover booking-history-card flow-animate [padding:2rem] [border:1px_solid_var(--color-accent)] [display:flex] [flex-direction:column] [gap:1.5rem] [background:var(--color-surface)]">
+    <div className="rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--color-text)] shadow-[var(--shadow-float)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-[var(--color-primary)] hover:shadow-[var(--shadow-hover)] max-sm:!p-4 will-change-[transform,opacity] [padding:2rem] [border:1px_solid_var(--color-accent)] [display:flex] [flex-direction:column] [gap:1.5rem] [background:var(--color-surface)]">
       {/* Header */}
       <div className="[display:flex] [justify-content:space-between] [align-items:flex-start] [flex-wrap:wrap] [gap:1rem]">
         <div>
@@ -197,11 +197,11 @@ const BookingCard = ({ booking, onCancel }) => {
             }
           </div>
         </div>
-        <span className={cn('badge border-transparent px-4 py-1.5', statusBadgeClass)}>{label}</span>
+        <span className={cn("inline-flex items-center gap-1 rounded-full border border-[var(--color-accent)] bg-[var(--color-background)] px-3 py-1 text-[0.7rem] font-medium uppercase text-[var(--color-text)] max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.64rem] border-transparent px-4 py-1.5", statusBadgeClass)}>{label}</span>
       </div>
 
       {/* Summary Grid */}
-      <div className="booking-history-grid [display:grid] [grid-template-columns:repeat(auto-fit,_minmax(130px,_1fr))] [gap:1.5rem] [padding:1.25rem] [background:var(--color-background)] [border:1px_solid_var(--color-accent)] [border-radius:var(--radius-sm)]">
+      <div className="max-sm:!grid-cols-1 max-sm:!gap-3 [display:grid] [grid-template-columns:repeat(auto-fit,_minmax(130px,_1fr))] [gap:1.5rem] [padding:1.25rem] [background:var(--color-background)] [border:1px_solid_var(--color-accent)] [border-radius:var(--radius-sm)]">
         <div>
           <div className="[color:var(--color-muted)] [font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.5px] [margin-bottom:0.25rem]">Check-In</div>
           <div className="[font-weight:400] [font-size:0.85rem] [color:var(--color-text)]">{formatDate(booking.check_in)}</div>
@@ -243,11 +243,11 @@ const BookingCard = ({ booking, onCancel }) => {
       {/* Expanded details */}
       {expanded &&
       <div className="[background:var(--color-background)] [border:1px_solid_var(--color-accent)] [padding:1.5rem] [font-size:0.85rem] [display:flex] [flex-direction:column] [gap:1.5rem] [border-radius:var(--radius-sm)]">
-          
+
           {/* Pemesan info */}
           <div>
             <h4 className="[font-family:var(--font-heading)] [font-size:1.1rem] [color:var(--color-text)] [margin:0_0_1rem] [font-weight:300]">Detail Pemesan</h4>
-            <div className="booking-history-detail-grid [display:grid] [grid-template-columns:1fr_1fr] [gap:1rem_2rem]">
+            <div className="max-sm:!grid-cols-1 max-sm:!gap-3 [display:grid] [grid-template-columns:1fr_1fr] [gap:1rem_2rem]">
               {[
             { label: 'Nama Pemesan', val: booking.orderer_name },
             { label: 'Email', val: booking.orderer_email },
@@ -284,11 +284,11 @@ const BookingCard = ({ booking, onCancel }) => {
                   {booking.payment_status ?
               <span className={cn(
                 'inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold',
-                booking.payment_status === 'PAID' || booking.payment_status === 'SETTLED'
-                  ? 'bg-emerald-500/10 text-[#276749]'
-                  : booking.payment_status === 'EXPIRED'
-                    ? 'bg-red-500/10 text-[#9B2C2C]'
-                    : 'bg-amber-400/10 text-[var(--color-primary)]',
+                booking.payment_status === 'PAID' || booking.payment_status === 'SETTLED' ?
+                'bg-emerald-500/10 text-[#276749]' :
+                booking.payment_status === 'EXPIRED' ?
+                'bg-red-500/10 text-[#9B2C2C]' :
+                'bg-amber-400/10 text-[var(--color-primary)]'
               )}>
                       {booking.payment_status === 'PAID' || booking.payment_status === 'SETTLED' ? '✓ ' : ''}
                       {booking.payment_status}
@@ -323,7 +323,7 @@ const BookingCard = ({ booking, onCancel }) => {
             <div className="[grid-column:1_/_-1]">
                     <div className="[color:var(--color-muted)] [font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.5px] [margin-bottom:0.35rem]">Link Invoice</div>
                     <a href={booking.xendit_invoice_url} target="_blank" rel="noopener noreferrer" className="[display:inline-flex] [align-items:center] [gap:0.4rem] [color:#0057FF] [font-size:0.8rem] [font-weight:400] [text-decoration:none] [border-bottom:1px_solid_#0057FF40]">
-                
+
                       🔗 Buka Halaman Pembayaran Xendit
                     </a>
                   </div>
@@ -344,32 +344,32 @@ const BookingCard = ({ booking, onCancel }) => {
       }
 
       {/* Action Buttons */}
-      <div className="booking-history-actions [display:flex] [gap:1rem] [flex-wrap:wrap] [border-top:1px_solid_var(--color-accent)] [padding-top:1.25rem]">
+      <div className="max-sm:!gap-2.5 max-sm:[&_.btn]:w-full max-sm:[&_.btn]:justify-center [display:flex] [gap:1rem] [flex-wrap:wrap] [border-top:1px_solid_var(--color-accent)] [padding-top:1.25rem]">
         {booking.status === 'PENDING' && !booking.xendit_invoice_url &&
-        <Link to={`/payment/${booking.id_booking || booking.id}`} className="btn btn-primary btn-sm [background:#0057FF] [border-color:#0057FF]">
+        <Link to={`/payment/${booking.id_booking || booking.id}`} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem] [background:#0057FF] [border-color:#0057FF]">
             Bayar via Xendit
           </Link>
         }
         {booking.status === 'PENDING' && booking.xendit_invoice_url && booking.payment_status !== 'EXPIRED' &&
         <>
-            <a href={booking.xendit_invoice_url} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm [background:#0057FF] [border-color:#0057FF] [color:#fff]">
+            <a href={booking.xendit_invoice_url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem] [background:#0057FF] [border-color:#0057FF] [color:#fff]">
               Lanjutkan Pembayaran
             </a>
           </>
         }
         {booking.status === 'PENDING' && (booking.payment_status === 'EXPIRED' || !booking.xendit_invoice_url) &&
-        <Link to={`/payment/${booking.id_booking || booking.id}`} className="btn btn-white btn-sm">
+        <Link to={`/payment/${booking.id_booking || booking.id}`} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-[var(--color-text)] backdrop-blur-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-background)] min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem]">
             Buat Ulang Invoice
           </Link>
         }
         {booking.status === 'COMPLETED' &&
-        <Link to={`/hotels/${hotelId}`} className="btn btn-primary btn-sm [background:var(--color-primary)]">Pesan Lagi</Link>
+        <Link to={`/hotels/${hotelId}`} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem] [background:var(--color-primary)]">Pesan Lagi</Link>
         }
-        <button onClick={() => setExpanded((e) => !e)} className="btn btn-white btn-sm">
+        <button onClick={() => setExpanded((e) => !e)} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-[var(--color-text)] backdrop-blur-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-background)] min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem]">
           {expanded ? <><ChevronUp size={12} /> Sembunyikan</> : <><ChevronDown size={12} /> Lihat Detail</>}
         </button>
         {booking.status === 'PENDING' &&
-        <button onClick={() => onCancel(booking.id_booking || booking.id)} className="btn btn-white btn-sm border-red-500/30 text-[#E53E3E] hover:bg-[#FFF5F5]">
+        <button onClick={() => onCancel(booking.id_booking || booking.id)} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-[var(--color-text)] backdrop-blur-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-background)] min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem] border-red-500/30 text-[#E53E3E] hover:bg-[#FFF5F5]">
             <XCircle size={12} className="[color:#E53E3E]" /> Batalkan
           </button>
         }

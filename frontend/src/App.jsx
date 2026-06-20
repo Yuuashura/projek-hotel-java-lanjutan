@@ -8,6 +8,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import LoadingState from './components/LoadingState';
 import { usePreferences } from './context/PreferencesContext';
+import { cn } from './lib/utils';
 
 // === Public Pages ===
 import Home from './pages/public/Home';
@@ -73,7 +74,7 @@ const RouteLoading = () =>
 const PublicLayout = ({ children }) =>
 <>
     <Navbar />
-    <main className="public-main">{children}</main>
+    <main className="min-w-0">{children}</main>
     <Footer />
   </>;
 
@@ -189,9 +190,19 @@ const FlashToast = () => {
   const message = flash.key ? t(flash.key) : flash.message;
 
   return createPortal(
-    <div className={`flash-toast ${flash.type === 'danger' ? 'danger' : ''}`} role="status" aria-live="polite">
-      <p className="flash-toast-title">NgiNep</p>
-      <p className="flash-toast-message">{message}</p>
+    <div
+      className={cn(
+        'fixed left-1/2 top-[5.5rem] z-[2000] w-[min(360px,calc(100vw-2rem))] -translate-x-1/2 animate-[toastDropIn_0.38s_cubic-bezier(0.16,1,0.3,1)]',
+        'rounded-lg border border-l-4 bg-[var(--color-surface)] px-[1.1rem] py-4 shadow-[var(--shadow-hover)] max-[920px]:top-[4.75rem] max-sm:top-[4.35rem] max-sm:w-[calc(100vw-1rem)]',
+        flash.type === 'danger'
+          ? 'border-[var(--color-danger-border)] border-l-[var(--color-danger)]'
+          : 'border-[var(--color-success-border)] border-l-[var(--color-success)]',
+      )}
+      role="status"
+      aria-live="polite"
+    >
+      <p className="m-0 text-[0.82rem] font-semibold uppercase text-[var(--color-text)]">NgiNep</p>
+      <p className="mt-1 text-[0.86rem] font-normal leading-relaxed text-[var(--color-muted)]">{message}</p>
     </div>,
     document.body
   );

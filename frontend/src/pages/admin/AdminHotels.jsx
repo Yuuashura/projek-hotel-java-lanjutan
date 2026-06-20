@@ -262,13 +262,13 @@ const AdminHotels = () => {
         <div className="[display:flex] [gap:0.75rem] [flex-wrap:wrap]">
           {!isAdminHotel &&
           <>
-              <button onClick={handleExcelDownload} className="btn btn-white btn-sm" disabled={excelDownloading}>
+              <button onClick={handleExcelDownload} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-[var(--color-text)] backdrop-blur-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-background)] min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem]" disabled={excelDownloading}>
                 <Download size={14} /> {excelDownloading ? t('admin.actions.downloading') : t('admin.actions.downloadExcel')}
               </button>
-              <button onClick={() => excelRef.current?.click()} className="btn btn-white btn-sm" disabled={excelUploading}>
+              <button onClick={() => excelRef.current?.click()} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-[var(--color-text)] backdrop-blur-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-background)] min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem]" disabled={excelUploading}>
                 <Upload size={14} /> {excelUploading ? t('admin.actions.uploading') : t('admin.actions.uploadExcel')}
               </button>
-              <button onClick={openCreate} className="btn btn-primary btn-sm"><Plus size={14} /> {t('admin.actions.addHotel')}</button>
+              <button onClick={openCreate} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem]"><Plus size={14} /> {t('admin.actions.addHotel')}</button>
             </>
           }
           <input ref={excelRef} type="file" accept=".xlsx" onChange={handleExcelUpload} className="[display:none]" />
@@ -276,7 +276,7 @@ const AdminHotels = () => {
       </div>
 
       {error &&
-      <div className="alert-danger [border-radius:var(--radius-sm)] [padding:0.75rem_1rem] [margin-bottom:1.25rem] [display:flex] [gap:0.5rem] [align-items:center]">
+      <div className="rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-soft)] text-[var(--color-danger)] [border-radius:var(--radius-sm)] [padding:0.75rem_1rem] [margin-bottom:1.25rem] [display:flex] [gap:0.5rem] [align-items:center]">
           <AlertCircle size={16} className="[color:var(--color-danger)] [flex-shrink:0]" />
           <span className="[font-weight:300] [color:var(--color-danger)] [font-size:0.85rem]">{error}</span>
         </div>
@@ -286,7 +286,7 @@ const AdminHotels = () => {
       <LoadingState text={t('admin.hotels.loading')} compact /> :
 
       <div className="[overflow-x:auto]">
-          <table className="neo-table">
+          <table className="w-full min-w-[720px] border-collapse overflow-hidden rounded-lg border border-[var(--color-accent)] bg-[var(--glass-bg)] text-left text-sm [&_th]:border-b-2 [&_th]:border-[var(--color-accent)] [&_th]:bg-[var(--color-background)] [&_th]:px-4 [&_th]:py-3 [&_th]:text-xs [&_th]:font-semibold [&_th]:uppercase [&_th]:text-[var(--color-text)] [&_td]:border-b [&_td]:border-[var(--color-accent)] [&_td]:px-4 [&_td]:py-3 [&_td]:text-[var(--color-text)] [&_td]:align-middle [&_tbody_tr:hover_td]:bg-[var(--color-background)] max-sm:[&_th]:px-3 max-sm:[&_th]:py-3 max-sm:[&_td]:px-3 max-sm:[&_td]:py-3">
             <thead>
               <tr>{[t('admin.table.number'), t('admin.table.hotel'), t('admin.table.city'), t('admin.table.type'), t('admin.table.rating'), t('admin.table.status'), t('admin.table.actions')].map((h) => <th key={h}>{h}</th>)}</tr>
             </thead>
@@ -299,7 +299,7 @@ const AdminHotels = () => {
                     <div className="[color:var(--color-muted)] [font-size:0.75rem] [font-weight:300] [display:flex] [align-items:center] [gap:0.25rem] [margin-top:0.15rem]"><MapPin size={10} />{h.address}</div>
                   </td>
                   <td className="[font-size:0.875rem] [color:var(--color-text)] [font-weight:300]">{h.city?.name}</td>
-                  <td><span className="badge badge-gray">{h.type}</span></td>
+                  <td><span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-accent)] bg-[var(--color-background)] px-3 py-1 text-[0.7rem] font-medium uppercase text-[var(--color-text)] max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.64rem] border-[var(--color-accent)] bg-[var(--color-accent)] text-[var(--color-muted)]">{h.type}</span></td>
                   <td className="[color:var(--color-primary)] [font-size:0.875rem] [font-weight:400]">
                     <div className="[display:flex] [align-items:center] [gap:0.25rem]">
                       <Star size={12} fill="var(--color-primary)" className="[stroke:var(--color-primary)]" />
@@ -308,22 +308,22 @@ const AdminHotels = () => {
                   </td>
                   <td>
                     <div className="[display:flex] [gap:0.35rem] [flex-wrap:wrap]">
-                      {h.featured && <span className="badge badge-yellow [background:var(--color-primary)] [color:white] [border-color:transparent]">Featured</span>}
-                      {h.onSale && <span className="badge badge-red">-{h.discount_percent}%</span>}
+                      {h.featured && <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-accent)] bg-[var(--color-background)] px-3 py-1 text-[0.7rem] font-medium uppercase text-[var(--color-text)] max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.64rem] border-[var(--color-primary-soft)] bg-[var(--color-primary-soft)] text-[var(--color-primary)] [background:var(--color-primary)] [color:white] [border-color:transparent]">Featured</span>}
+                      {h.onSale && <span className="inline-flex items-center gap-1 rounded-full border border-[var(--color-accent)] bg-[var(--color-background)] px-3 py-1 text-[0.7rem] font-medium uppercase text-[var(--color-text)] max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.64rem] border-[var(--color-danger-border)] bg-[var(--color-danger-soft)] text-[var(--color-danger)]">-{h.discount_percent}%</span>}
                     </div>
                   </td>
                   <td>
                     <div className="[display:flex] [gap:0.5rem]">
-                      <Link to={`/admin/hotels/${h.id_hotel}/rooms`} className="btn btn-white btn-sm [padding:0.4rem_0.8rem]" title={t('admin.hotels.manageRooms')}><Bed size={13} /></Link>
-                      <button onClick={() => openEdit(h)} className="btn btn-white btn-sm [padding:0.4rem_0.8rem]" title={t('admin.hotels.editHotel')}><Pencil size={13} /></button>
-                       {!isAdminHotel && <button onClick={() => openDelete(h)} className="btn btn-white btn-sm [padding:0.4rem_0.8rem] [color:var(--color-danger)]" title={t('admin.hotels.deleteHotel')}><Trash2 size={13} /></button>}
+                      <Link to={`/admin/hotels/${h.id_hotel}/rooms`} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-[var(--color-text)] backdrop-blur-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-background)] min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem] [padding:0.4rem_0.8rem]" title={t('admin.hotels.manageRooms')}><Bed size={13} /></Link>
+                      <button onClick={() => openEdit(h)} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-[var(--color-text)] backdrop-blur-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-background)] min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem] [padding:0.4rem_0.8rem]" title={t('admin.hotels.editHotel')}><Pencil size={13} /></button>
+                       {!isAdminHotel && <button onClick={() => openDelete(h)} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-[var(--color-text)] backdrop-blur-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-background)] min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem] [padding:0.4rem_0.8rem] [color:var(--color-danger)]" title={t('admin.hotels.deleteHotel')}><Trash2 size={13} /></button>}
                     </div>
                   </td>
                 </tr>
             )}
             </tbody>
           </table>
-          {hotels.length === 0 && <div className="card [text-align:center] [padding:3rem] [color:var(--color-muted)] [font-weight:300] [font-size:0.9rem]">{t('admin.hotels.empty')}</div>}
+          {hotels.length === 0 && <div className="rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--color-text)] shadow-[var(--shadow-float)] backdrop-blur-xl transition-all duration-300 [text-align:center] [padding:3rem] [color:var(--color-muted)] [font-weight:300] [font-size:0.9rem]">{t('admin.hotels.empty')}</div>}
           <PaginationControls
           page={currentPage}
           totalPages={totalPages}
@@ -341,22 +341,22 @@ const AdminHotels = () => {
             {modal === 'create' ? t('admin.hotels.createTitle') : t('admin.hotels.editTitle')}
             <button onClick={closeModal} className="[background:none] [border:none] [cursor:pointer] [color:var(--color-muted)]"><X size={18} /></button>
           </div>
-          {error && <div className="alert-danger [border-radius:var(--radius-sm)] [padding:0.75rem] [margin-bottom:1.25rem] [font-weight:300] [color:var(--color-danger)] [font-size:0.85rem] [display:flex] [gap:0.5rem] [align-items:center]"><AlertCircle size={16} />{error}</div>}
+          {error && <div className="rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-soft)] text-[var(--color-danger)] [border-radius:var(--radius-sm)] [padding:0.75rem] [margin-bottom:1.25rem] [font-weight:300] [color:var(--color-danger)] [font-size:0.85rem] [display:flex] [gap:0.5rem] [align-items:center]"><AlertCircle size={16} />{error}</div>}
           <form onSubmit={handleSubmit} className="[display:flex] [flex-direction:column] [gap:1.25rem]">
             <div className="[display:flex] [flex-direction:column] [gap:1.25rem]">
               <div className="[display:grid] [grid-template-columns:1fr_1fr] [gap:1.25rem]">
-                <div><label className="label">{t('admin.hotels.name')}</label><input className="input" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} required /></div>
-                <div><label className="label">{t('common.city')} *</label><CitySearchSelect cities={cities} value={form.city_id} onChange={(val) => setForm((f) => ({ ...f, city_id: val }))} placeholder={t('home.allCities')} /></div>
+                <div><label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem]">{t('admin.hotels.name')}</label><input className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} required /></div>
+                <div><label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem]">{t('common.city')} *</label><CitySearchSelect cities={cities} value={form.city_id} onChange={(val) => setForm((f) => ({ ...f, city_id: val }))} placeholder={t('home.allCities')} /></div>
               </div>
-              <div><label className="label">Alamat</label><input className="input" value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} /></div>
+              <div><label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem]">Alamat</label><input className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm" value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} /></div>
               <div className="[display:grid] [grid-template-columns:1fr_1fr] [gap:1.25rem]">
-                <div><label className="label">{t('admin.hotels.type')}</label><select className="input" value={form.type} onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}><option value="">{t('admin.hotels.chooseType')}</option>{['Budget', 'Bintang 2', 'Bintang 3', 'Bintang 4', 'Bintang 5', 'Resort', 'Boutique'].map((t) => <option key={t}>{t}</option>)}</select></div>
-                <div><label className="label">Rating (0-5)</label><input type="number" className="input" min={0} max={5} step={0.1} value={form.rating} onChange={(e) => setForm((f) => ({ ...f, rating: e.target.value }))} /></div>
+                <div><label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem]">{t('admin.hotels.type')}</label><select className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm" value={form.type} onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}><option value="">{t('admin.hotels.chooseType')}</option>{['Budget', 'Bintang 2', 'Bintang 3', 'Bintang 4', 'Bintang 5', 'Resort', 'Boutique'].map((t) => <option key={t}>{t}</option>)}</select></div>
+                <div><label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem]">Rating (0-5)</label><input type="number" className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm" min={0} max={5} step={0.1} value={form.rating} onChange={(e) => setForm((f) => ({ ...f, rating: e.target.value }))} /></div>
               </div>
-              <div><label className="label">{t('admin.rooms.description')}</label><textarea className="input [resize:vertical]" rows={3} value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} /></div>
+              <div><label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem]">{t('admin.rooms.description')}</label><textarea className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm [resize:vertical]" rows={3} value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} /></div>
 
               <div>
-                <label className="label"><Sparkles size={12} className="[display:inline] [margin-right:0.4rem] [vertical-align:middle]" />{t('admin.hotels.facilities')}</label>
+                <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem]"><Sparkles size={12} className="[display:inline] [margin-right:0.4rem] [vertical-align:middle]" />{t('admin.hotels.facilities')}</label>
                 <p className="[color:var(--color-muted)] [font-size:0.78rem] [line-height:1.5] [margin:0_0_0.75rem]">
                   {t('admin.hotels.facilitiesHint')}
                 </p>
@@ -373,17 +373,17 @@ const AdminHotels = () => {
                       aria-pressed={selectedFacility}
                       className={cn(
                         'flex min-h-[42px] cursor-pointer items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-[0.82rem] text-[var(--color-text)]',
-                        selectedFacility
-                          ? 'border-[var(--color-primary)] bg-[var(--color-primary-soft)]'
-                          : 'border-[var(--color-accent)] bg-[var(--color-surface)]',
+                        selectedFacility ?
+                        'border-[var(--color-primary)] bg-[var(--color-primary-soft)]' :
+                        'border-[var(--color-accent)] bg-[var(--color-surface)]'
                       )}>
 
                           <span className={cn(
-                            'grid size-[18px] shrink-0 place-items-center rounded text-white',
-                            selectedFacility
-                              ? 'border border-[var(--color-primary)] bg-[var(--color-primary)]'
-                              : 'border border-[var(--color-muted)] bg-transparent',
-                          )}>
+                        'grid size-[18px] shrink-0 place-items-center rounded text-white',
+                        selectedFacility ?
+                        'border border-[var(--color-primary)] bg-[var(--color-primary)]' :
+                        'border border-[var(--color-muted)] bg-transparent'
+                      )}>
                             {selectedFacility && <Check size={12} />}
                           </span>
                           <span>{facility.name}</span>
@@ -399,8 +399,8 @@ const AdminHotels = () => {
               </div>
 
               {!isAdminHotel &&
-            <div><label className="label"><UserCog size={12} className="[display:inline] [margin-right:0.4rem] [vertical-align:middle]" />{t('admin.hotels.adminHotel')}</label>
-                  <select className="input" value={form.admin_hotel_id} onChange={(e) => setForm((f) => ({ ...f, admin_hotel_id: e.target.value }))}>
+            <div><label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem]"><UserCog size={12} className="[display:inline] [margin-right:0.4rem] [vertical-align:middle]" />{t('admin.hotels.adminHotel')}</label>
+                  <select className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm" value={form.admin_hotel_id} onChange={(e) => setForm((f) => ({ ...f, admin_hotel_id: e.target.value }))}>
                     <option value="">{t('admin.hotels.chooseAdminHotel')}</option>
                     {adminHotelList.map((ah) => <option key={ah.id_customer || ah.id} value={ah.id_customer || ah.id}>{ah.first_name} {ah.last_name} ({ah.email})</option>)}
                   </select>
@@ -409,7 +409,7 @@ const AdminHotels = () => {
 
               {/* Multiple Images Upload Section */}
               <div>
-                <label className="label"><ImageIcon size={12} className="[display:inline] [margin-right:0.4rem] [vertical-align:middle]" />{t('admin.hotels.gallery')}</label>
+                <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem]"><ImageIcon size={12} className="[display:inline] [margin-right:0.4rem] [vertical-align:middle]" />{t('admin.hotels.gallery')}</label>
                 <div className="[display:grid] [grid-template-columns:repeat(auto-fill,_minmax(90px,_1fr))] [gap:0.75rem] [margin-bottom:0.5rem]">
                   {imagesList.map((img, idx) =>
                 <div key={idx} className="[position:relative] [height:75px] [border:1px_solid_var(--color-accent)] [border-radius:var(--radius-sm)] [overflow:hidden]">
@@ -434,15 +434,15 @@ const AdminHotels = () => {
               <div className="[display:grid] [grid-template-columns:1fr_1fr] [gap:1.25rem]">
                 <div className={cn('flex cursor-pointer items-center gap-2 rounded-lg border border-[var(--color-accent)] p-3 transition', form.is_featured ? 'bg-[var(--color-primary-soft)]' : 'bg-[var(--color-surface)]')} onClick={() => setForm((f) => ({ ...f, is_featured: !f.is_featured }))}>
                   <input type="checkbox" checked={form.is_featured} readOnly className="[width:15px] [height:15px] [accent-color:var(--color-primary)]" />
-                  <label className="label [margin:0] [cursor:pointer] [color:var(--color-text)]">Is Featured</label>
+                  <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem] [margin:0] [cursor:pointer] [color:var(--color-text)]">Is Featured</label>
                 </div>
                 <div className={cn('flex cursor-pointer items-center gap-2 rounded-lg border border-[var(--color-accent)] p-3 transition', form.is_on_sale ? 'bg-[var(--color-danger-soft)]' : 'bg-[var(--color-surface)]')} onClick={() => setForm((f) => ({ ...f, is_on_sale: !f.is_on_sale }))}>
                   <input type="checkbox" checked={form.is_on_sale} readOnly className="[width:15px] [height:15px] [accent-color:var(--color-danger)]" />
-                  <label className="label [margin:0] [cursor:pointer] [color:var(--color-text)]">On Sale</label>
+                  <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem] [margin:0] [cursor:pointer] [color:var(--color-text)]">On Sale</label>
                 </div>
               </div>
-              {form.is_on_sale && <div><label className="label">Persen Diskon (%)</label><input type="number" className="input" min={0} max={100} value={form.discount_percent} onChange={(e) => setForm((f) => ({ ...f, discount_percent: e.target.value }))} /></div>}
-              <button type="submit" className="btn btn-primary btn-full [margin-top:0.5rem] [justify-content:center]" disabled={submitting}>
+              {form.is_on_sale && <div><label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem]">Persen Diskon (%)</label><input type="number" className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm" min={0} max={100} value={form.discount_percent} onChange={(e) => setForm((f) => ({ ...f, discount_percent: e.target.value }))} /></div>}
+              <button type="submit" className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 w-full [margin-top:0.5rem] [justify-content:center]" disabled={submitting}>
                 {submitting ? t('admin.actions.saving') : <><Check size={14} /> {modal === 'create' ? t('admin.actions.addHotel') : t('admin.actions.saveChanges')}</>}
               </button>
             </div>
@@ -459,8 +459,8 @@ const AdminHotels = () => {
             <p className="[color:var(--color-muted)] [font-weight:300] [font-size:0.9rem] [line-height:1.5] [margin-bottom:1.75rem]">{t('admin.hotels.deleteMessage', { name: selected.name })}</p>
             {error && <div className="[color:var(--color-danger)] [font-weight:400] [margin-bottom:1rem] [font-size:0.85rem]">{error}</div>}
             <div className="[display:flex] [gap:0.75rem] [justify-content:center]">
-              <button onClick={closeModal} className="btn btn-white btn-sm">{t('admin.actions.cancel')}</button>
-              <button onClick={handleDelete} className="btn btn-primary btn-sm [background:var(--color-danger)] [color:#FFFFFF]" disabled={submitting}>{submitting ? t('admin.actions.deleting') : t('admin.actions.delete')}</button>
+              <button onClick={closeModal} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-[var(--color-text)] backdrop-blur-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-background)] min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem]">{t('admin.actions.cancel')}</button>
+              <button onClick={handleDelete} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem] [background:var(--color-danger)] [color:#FFFFFF]" disabled={submitting}>{submitting ? t('admin.actions.deleting') : t('admin.actions.delete')}</button>
             </div>
           </div>
         </ModalOverlay>
@@ -472,9 +472,9 @@ const AdminHotels = () => {
 const ModalOverlay = ({ children, onClose, maxWidth = 550 }) =>
 <div onClick={(e) => e.target === e.currentTarget && onClose()} className="[position:fixed] [inset:0] [background:rgba(26,54,93,0.3)] [backdrop-filter:blur(4px)] [display:flex] [align-items:center] [justify-content:center] [z-index:200] [padding:1rem]">
     <div className={cn(
-      'max-h-[90vh] w-full overflow-y-auto rounded-lg border border-[var(--color-accent)] bg-[var(--color-surface)] p-8 shadow-[var(--shadow-hover)] [animation:fadeIn_0.2s_ease-out]',
-      maxWidth <= 400 ? 'max-w-[400px]' : 'max-w-[550px]',
-    )}>
+    'max-h-[90vh] w-full overflow-y-auto rounded-lg border border-[var(--color-accent)] bg-[var(--color-surface)] p-8 shadow-[var(--shadow-hover)] [animation:fadeIn_0.2s_ease-out]',
+    maxWidth <= 400 ? 'max-w-[400px]' : 'max-w-[550px]'
+  )}>
       {children}
     </div>
   </div>;

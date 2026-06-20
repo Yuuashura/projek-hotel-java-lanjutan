@@ -159,18 +159,18 @@ const AdminBookings = () => {
         </div>
         <div className="[display:flex] [gap:0.5rem] [flex-wrap:wrap] [align-items:center]">
           {!isAdminHotel &&
-          <button onClick={handleExcelDownload} className="btn btn-white btn-sm" disabled={excelDownloading}>
+          <button onClick={handleExcelDownload} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-[var(--color-text)] backdrop-blur-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-background)] min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem]" disabled={excelDownloading}>
               <Download size={14} /> {excelDownloading ? t('admin.actions.downloading') : t('admin.actions.downloadExcel')}
             </button>
           }
           {['ALL', ...STATUS_OPTIONS].map((s) => {
             const active = statusFilter === s;
             return (
-              <button key={s} onClick={() => { setStatusFilter(s); setPage(0); }} className={cn(
+              <button key={s} onClick={() => {setStatusFilter(s);setPage(0);}} className={cn(
                 'cursor-pointer rounded-lg border px-3.5 py-1.5 font-[var(--font-body)] text-xs uppercase tracking-[0.5px] transition',
-                active
-                  ? 'border-[var(--color-primary)] bg-[var(--color-primary)] font-normal text-white'
-                  : 'border-[var(--color-accent)] bg-[var(--color-surface)] font-light text-[var(--color-muted)]',
+                active ?
+                'border-[var(--color-primary)] bg-[var(--color-primary)] font-normal text-white' :
+                'border-[var(--color-accent)] bg-[var(--color-surface)] font-light text-[var(--color-muted)]'
               )}>{s}</button>);
 
           })}
@@ -180,11 +180,11 @@ const AdminBookings = () => {
       {/* Search */}
       <div className="[position:relative] [max-width:360px] [margin-bottom:1.5rem]">
         <Search size={14} className="[position:absolute] [left:0.75rem] [top:50%] [transform:translateY(-50%)] [color:var(--color-muted)]" />
-        <input className="input [padding-left:2.25rem] [height:2.25rem]" placeholder={t('admin.bookings.searchPlaceholder')} value={search} onChange={(e) => { setSearch(e.target.value); setPage(0); }} />
+        <input className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm [padding-left:2.25rem] [height:2.25rem]" placeholder={t('admin.bookings.searchPlaceholder')} value={search} onChange={(e) => {setSearch(e.target.value);setPage(0);}} />
       </div>
 
       {error &&
-      <div className="alert-danger [border-radius:var(--radius-sm)] [padding:0.75rem_1rem] [margin-bottom:1.25rem] [display:flex] [gap:0.5rem] [align-items:center]">
+      <div className="rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-soft)] text-[var(--color-danger)] [border-radius:var(--radius-sm)] [padding:0.75rem_1rem] [margin-bottom:1.25rem] [display:flex] [gap:0.5rem] [align-items:center]">
           <AlertCircle size={16} className="[color:var(--color-danger)] [flex-shrink:0]" />
           <span className="[font-weight:300] [color:var(--color-danger)] [font-size:0.85rem]">{error}</span>
         </div>
@@ -194,15 +194,20 @@ const AdminBookings = () => {
       <LoadingState text={t('admin.bookings.loading')} compact /> :
 
       <div className="[overflow-x:auto]">
-          <table className="neo-table">
+          <table className="w-full min-w-[720px] border-collapse overflow-hidden rounded-lg border border-[var(--color-accent)] bg-[var(--glass-bg)] text-left text-sm [&_th]:border-b-2 [&_th]:border-[var(--color-accent)] [&_th]:bg-[var(--color-background)] [&_th]:px-4 [&_th]:py-3 [&_th]:text-xs [&_th]:font-semibold [&_th]:uppercase [&_th]:text-[var(--color-text)] [&_td]:border-b [&_td]:border-[var(--color-accent)] [&_td]:px-4 [&_td]:py-3 [&_td]:text-[var(--color-text)] [&_td]:align-middle [&_tbody_tr:hover_td]:bg-[var(--color-background)] max-sm:[&_th]:px-3 max-sm:[&_th]:py-3 max-sm:[&_td]:px-3 max-sm:[&_td]:py-3">
             <thead>
               <tr>{[t('admin.table.id'), t('admin.table.booker'), t('admin.table.hotel'), t('admin.table.checkIn'), t('admin.table.checkOut'), t('admin.table.total'), t('admin.table.status'), t('admin.table.actions')].map((h) => <th key={h}>{h}</th>)}</tr>
             </thead>
             <tbody>
               {paginated.map((b) => {
               const { label } = statusColor(b.status);
-              // Simplify status matching for styling
-              const badgeClass = b.status === 'PENDING' ? 'orange' : b.status === 'CONFIRMED' ? 'green' : b.status === 'CANCELLED' ? 'red' : 'gray';
+              const badgeClass = b.status === 'PENDING'
+                ? 'border-[var(--color-warning-border)] bg-[var(--color-warning-soft)] text-[var(--color-warning)]'
+                : b.status === 'CONFIRMED'
+                  ? 'border-[var(--color-success-border)] bg-[var(--color-success-soft)] text-[var(--color-success)]'
+                  : b.status === 'CANCELLED'
+                    ? 'border-[var(--color-danger-border)] bg-[var(--color-danger-soft)] text-[var(--color-danger)]'
+                    : 'border-[var(--color-accent)] bg-[var(--color-accent)] text-[var(--color-muted)]';
               return (
                 <tr key={b.id_booking || b.id}>
                     <td className="[font-weight:400] [color:var(--color-muted)] [font-size:0.85rem]">#{b.id_booking || b.id}</td>
@@ -218,17 +223,17 @@ const AdminBookings = () => {
                     <td className="[font-size:0.85rem] [color:var(--color-text)] [font-weight:300]">{formatDate(b.check_out)}</td>
                     <td className="[font-weight:400] [color:var(--color-primary)] [font-size:0.85rem]">{formatCurrency(b.total_price)}</td>
                     <td>
-                      <span className={cn(`badge badge-${badgeClass}`, "[font-size:0.7rem]")}>{label}</span>
+                      <span className={cn('inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[0.7rem] font-medium uppercase', badgeClass)}>{label}</span>
                     </td>
                     <td>
-                      <button onClick={() => openDetail(b)} className="btn btn-white btn-sm [padding:0.4rem_0.8rem]"><Eye size={12} className="[margin-right:0.25rem]" /> {t('admin.actions.details')}</button>
+                      <button onClick={() => openDetail(b)} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-[var(--color-text)] backdrop-blur-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-background)] min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem] [padding:0.4rem_0.8rem]"><Eye size={12} className="[margin-right:0.25rem]" /> {t('admin.actions.details')}</button>
                     </td>
                   </tr>);
 
             })}
             </tbody>
           </table>
-          {filtered.length === 0 && <div className="card [text-align:center] [padding:3rem] [color:var(--color-muted)] [font-weight:300] [font-size:0.9rem]">{t('admin.bookings.empty')}</div>}
+          {filtered.length === 0 && <div className="rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg)] text-[var(--color-text)] shadow-[var(--shadow-float)] backdrop-blur-xl transition-all duration-300 [text-align:center] [padding:3rem] [color:var(--color-muted)] [font-weight:300] [font-size:0.9rem]">{t('admin.bookings.empty')}</div>}
           <PaginationControls
           page={currentPage}
           totalPages={totalPages}
@@ -273,24 +278,24 @@ const AdminBookings = () => {
                 {selected.payment_proof.startsWith('data:image') || selected.payment_proof.match(/\.(jpeg|jpg|gif|png)$/) != null ?
             <img src={selected.payment_proof} alt={t('admin.bookings.paymentProof')} className="[max-width:100%] [max-height:240px] [object-fit:contain] [border:1px_solid_var(--color-accent)] [border-radius:var(--radius-sm)] [background:var(--color-background)] [padding:4px]" /> :
 
-            <a href={selected.payment_proof} target="_blank" rel="noopener noreferrer" className="btn btn-white btn-sm [display:inline-flex] [align-items:center]">{t('admin.bookings.viewPaymentProof')}</a>
+            <a href={selected.payment_proof} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-[var(--color-text)] backdrop-blur-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-background)] min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem] [display:inline-flex] [align-items:center]">{t('admin.bookings.viewPaymentProof')}</a>
             }
               </div>
           }
 
             <div className="[border-top:1px_dashed_var(--color-accent)] [padding-top:1.25rem]">
-              <label className="label">{t('admin.bookings.updateStatus')}</label>
-              <select className="input [margin-bottom:1.25rem]" value={newStatus} onChange={(e) => setNewStatus(e.target.value)}>
+              <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem]">{t('admin.bookings.updateStatus')}</label>
+              <select className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm [margin-bottom:1.25rem]" value={newStatus} onChange={(e) => setNewStatus(e.target.value)}>
                 {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
 
               {error && <div className="[color:var(--color-danger)] [font-weight:300] [font-size:0.85rem] [margin-bottom:0.75rem] [display:flex] [gap:0.4rem] [align-items:center]"><AlertCircle size={14} />{error}</div>}
 
               <div className="[display:flex] [gap:0.75rem]">
-                <button onClick={handleUpdateStatus} className="btn btn-primary btn-sm [flex:1] [justify-content:center]" disabled={submitting || newStatus === selected.status}>
+                <button onClick={handleUpdateStatus} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem] [flex:1] [justify-content:center]" disabled={submitting || newStatus === selected.status}>
                   {submitting ? t('admin.actions.saving') : <><Check size={14} /> {t('admin.actions.saveStatus')}</>}
                 </button>
-                <button onClick={() => setModal(null)} className="btn btn-white btn-sm">{t('admin.actions.close')}</button>
+                <button onClick={() => setModal(null)} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[var(--glass-border)] bg-[var(--glass-bg-strong)] text-[var(--color-text)] backdrop-blur-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-background)] min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem]">{t('admin.actions.close')}</button>
               </div>
             </div>
           </div>
