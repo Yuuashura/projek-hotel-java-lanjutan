@@ -1,6 +1,7 @@
 package com.ngninep.user.exception;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -10,9 +11,20 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.LinkedHashMap;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(LoginRateLimitException.class)
+    public ResponseEntity<Map<String, Object>> handleLoginRateLimitException(LoginRateLimitException ex) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("message", ex.getMessage());
+        response.put("retry_after_seconds", ex.getRetryAfterSeconds());
+        return ResponseEntity.status(429)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()))
+                .body(response);
+    }
 
     // Menangani error dari ResponseStatusException (misal: throw new ResponseStatusException(...))
     @ExceptionHandler(ResponseStatusException.class)

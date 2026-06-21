@@ -3,6 +3,7 @@ package com.ngninep.user.controller;
 import com.ngninep.user.dto.*;
 import com.ngninep.user.service.AuthService;
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -68,8 +69,15 @@ public class AuthController {
 
     // POST /api/auth/login
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-        LoginResponse response = authService.login(request);
+    public ResponseEntity<LoginResponse> login(
+            @Valid @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        String forwardedClientIp = httpRequest.getHeader("X-NgiNep-Client-IP");
+        String clientIp = forwardedClientIp == null || forwardedClientIp.isBlank()
+                ? httpRequest.getRemoteAddr()
+                : forwardedClientIp;
+        LoginResponse response = authService.login(request, clientIp);
         return ResponseEntity.ok(response);
     }
 }

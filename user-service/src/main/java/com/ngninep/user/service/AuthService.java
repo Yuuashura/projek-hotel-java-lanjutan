@@ -16,6 +16,6 @@ public interface AuthService {
     String forgotPassword(ForgotPasswordRequest request);
     String verifyResetOtp(VerifyOtpRequest request);
     String resetPassword(ResetPasswordRequest request);
-    LoginResponse login(LoginRequest request);
+    LoginResponse login(LoginRequest request, String ipAddress);
     String createAdminHotel(CreateAdminHotelRequest request);
 }

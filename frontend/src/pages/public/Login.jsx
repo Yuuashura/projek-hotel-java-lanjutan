@@ -21,9 +21,19 @@ const Login = () => {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [retryAfter, setRetryAfter] = useState(0);
+
+  useEffect(() => {
+    if (retryAfter <= 0) return undefined;
+    const timer = window.setTimeout(() => {
+      setRetryAfter((seconds) => Math.max(0, seconds - 1));
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [retryAfter]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (retryAfter > 0) return;
     setLoading(true);
     setError('');
     try {
@@ -53,6 +63,13 @@ const Login = () => {
       }
     } catch (err) {
       const msg = err.response?.data?.message || 'Email atau password salah';
+      if (err.response?.status === 429) {
+        const bodyRetryAfter = Number(err.response?.data?.retry_after_seconds);
+        const headerRetryAfter = Number(err.response?.headers?.['retry-after']);
+        setRetryAfter(Math.max(1, bodyRetryAfter || headerRetryAfter || 60));
+        setError(msg);
+        return;
+      }
       if (msg.includes('UNVERIFIED_ACCOUNT')) {
         navigate(`/verify-otp?email=${form.email}`);
       } else {
@@ -62,6 +79,10 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  const retryLabel = retryAfter > 0
+    ? `${Math.floor(retryAfter / 60)}:${String(retryAfter % 60).padStart(2, '0')}`
+    : '';
 
   return (
     <div className="grid min-h-screen place-items-center bg-[linear-gradient(135deg,rgba(122,183,240,0.1),rgba(122,183,240,0)_42%),linear-gradient(160deg,rgba(246,211,101,0.06),rgba(246,211,101,0)_50%),var(--background-luxury)] px-5 pb-8 pt-[5.5rem] max-sm:min-h-dvh max-sm:place-items-start max-sm:p-4">
@@ -85,7 +106,9 @@ const Login = () => {
           {error &&
           <div className="rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-soft)] text-[var(--color-danger)] [padding:0.875rem_1rem] [margin-bottom:1.5rem] [display:flex] [gap:0.5rem] [align-items:center] [border-radius:var(--radius-sm)]">
               <AlertCircle size={16} className="[color:var(--color-danger)] [flex-shrink:0]" />
-              <span className="[font-weight:300] [color:var(--color-danger)] [font-size:0.85rem]">{error}</span>
+              <span className="[font-weight:300] [color:var(--color-danger)] [font-size:0.85rem]">
+                {error}{retryAfter > 0 ? ` (${retryLabel})` : ''}
+              </span>
             </div>
           }
 
@@ -109,8 +132,10 @@ const Login = () => {
               </div>
             </div>
 
-            <button type="submit" className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 w-full mt-2 h-[50px] bg-[var(--color-primary)] disabled:opacity-70" disabled={loading}>
-              {loading ? <><span className="size-[15px] animate-[spin_0.75s_linear_infinite] rounded-full border-2 border-white/40 border-t-white" /> Memproses...</> : 'Masuk Sekarang'}
+            <button type="submit" className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 w-full mt-2 h-[50px] bg-[var(--color-primary)] disabled:opacity-70" disabled={loading || retryAfter > 0}>
+              {loading
+                ? <><span className="size-[15px] animate-[spin_0.75s_linear_infinite] rounded-full border-2 border-white/40 border-t-white" /> Memproses...</>
+                : retryAfter > 0 ? `Coba lagi ${retryLabel}` : 'Masuk Sekarang'}
             </button>
           </form>
         </div>

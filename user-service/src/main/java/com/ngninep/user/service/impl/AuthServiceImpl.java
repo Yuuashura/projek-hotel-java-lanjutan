@@ -7,6 +7,8 @@ import com.ngninep.user.entity.Role;
 import com.ngninep.user.repository.CustomerRepository;
 import com.ngninep.user.config.JwtUtil;
 import com.ngninep.user.service.AuthService;
+import com.ngninep.user.service.LoginAttemptService;
+import com.ngninep.user.util.Message;
 import com.ngninep.user.service.OtpService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,7 @@ public class AuthServiceImpl implements AuthService {
     private final OtpService otpService;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final LoginAttemptService loginAttemptService;
     private final UserDetailsService userDetailsService;
     private static final OtpToken.Purpose REGISTER_PURPOSE = OtpToken.Purpose.REGISTER_VERIFICATION;
     private static final OtpToken.Purpose RESET_PURPOSE = OtpToken.Purpose.PASSWORD_RESET;
@@ -231,13 +234,16 @@ public class AuthServiceImpl implements AuthService {
 
     // ==================== LOGIN ====================
     @Override
-    public LoginResponse login(LoginRequest request) {
-        Customer customer = customerRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Email atau password salah"));
+    public LoginResponse login(LoginRequest request, String ipAddress) {
+        loginAttemptService.checkAllowed(request.getEmail(), ipAddress);
 
-        if (!passwordEncoder.matches(request.getPassword(), customer.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Email atau password salah");
+        Customer customer = customerRepository.findByEmail(request.getEmail()).orElse(null);
+        if (customer == null || !passwordEncoder.matches(request.getPassword(), customer.getPassword())) {
+            loginAttemptService.recordFailure(request.getEmail(), ipAddress);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, Message.LOGIN_INVALID_CREDENTIALS);
         }
+
+        loginAttemptService.clearFailures(request.getEmail(), ipAddress);
 
         if (!customer.isVerified()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "UNVERIFIED_ACCOUNT:" + customer.getEmail());

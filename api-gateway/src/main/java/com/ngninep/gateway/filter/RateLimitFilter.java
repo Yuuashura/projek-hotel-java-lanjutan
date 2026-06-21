@@ -9,6 +9,7 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
 
 import reactor.core.publisher.Mono;
@@ -21,16 +22,22 @@ public class RateLimitFilter implements GlobalFilter{
     @Value("${time_window_second}")
     Long WINDOW_SECOND;
 
+    @Value("${security.trusted-proxy-hops:0}")
+    int trustedProxyHops;
+
     private final Map<String, ReqInfo> req = new ConcurrentHashMap<>();
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         
-        String ip = 
-            exchange.getRequest()
-                    .getRemoteAddress()
-                    .getAddress()
-                    .getHostAddress();
+        String ip = resolveClientIp(exchange);
+        ServerHttpRequest request = exchange.getRequest().mutate()
+                .headers(headers -> {
+                    headers.remove("X-NgiNep-Client-IP");
+                    headers.set("X-NgiNep-Client-IP", ip);
+                })
+                .build();
+        ServerWebExchange sanitizedExchange = exchange.mutate().request(request).build();
 
         Long now = Instant.now().getEpochSecond();
 
@@ -68,9 +75,32 @@ public class RateLimitFilter implements GlobalFilter{
             return exchange.getResponse()
                             .writeWith(Mono.just(buffer));
         }
-        return chain.filter(exchange);
+        return chain.filter(sanitizedExchange);
     }
 
+    private String resolveClientIp(ServerWebExchange exchange) {
+        String remoteIp = exchange.getRequest().getRemoteAddress() == null
+                ? "unknown"
+                : exchange.getRequest().getRemoteAddress().getAddress().getHostAddress();
+
+        if (trustedProxyHops <= 0) {
+            return remoteIp;
+        }
+
+        String forwardedFor = exchange.getRequest().getHeaders().getFirst("X-Forwarded-For");
+        if (forwardedFor == null || forwardedFor.isBlank()) {
+            return remoteIp;
+        }
+
+        String[] addresses = forwardedFor.split(",");
+        int clientIndex = addresses.length - trustedProxyHops;
+        if (clientIndex < 0 || clientIndex >= addresses.length) {
+            return remoteIp;
+        }
+
+        String candidate = addresses[clientIndex].trim();
+        return candidate.isBlank() ? remoteIp : candidate;
+    }
 
 
     static class ReqInfo {
