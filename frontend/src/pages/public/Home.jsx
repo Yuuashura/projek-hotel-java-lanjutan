@@ -1,13 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import { memo, useState, useEffect, useRef } from 'react';
 import { cn } from '../../lib/utils';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Star, MapPin, ArrowRight, ChevronDown } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
-import api from '../../utils/api';
 import CitySearchSelect from '../../components/CitySearchSelect';
 import LoadingState from '../../components/LoadingState';
 import { usePreferences } from '../../context/PreferencesContext';
 import { getImageUrl } from '../../utils/uploads';
+import { cachedGet } from '../../utils/requestCache';
 
 // Slide Banner Data (Luxury resorts photography)
 const slides = [
@@ -16,8 +16,7 @@ const slides = [
 { id: 3, image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1600&h=1000', title: 'The Heritage Pavilion', city: 'Yogyakarta', desc: 'Ketenteraman arsitektur klasik Jawa berbalut layanan berstandar internasional modern', price: 1200000 }];
 
 
-const FEATURED_LIMIT = 30;
-const SALE_LIMIT = 10;
+const HOME_HOTEL_LIMIT = 20;
 
 const getHotelMinPrice = (hotel) => {
   if (hotel.min_price != null) return hotel.min_price;
@@ -52,6 +51,7 @@ const Home = () => {
   const navigate = useNavigate();
   const [current, setCurrent] = useState(0);
   const [hovering, setHovering] = useState(false);
+  const [pageVisible, setPageVisible] = useState(() => !document.hidden);
   const [cities, setCities] = useState([]);
   const [featuredHotels, setFeaturedHotels] = useState([]);
   const [saleHotels, setSaleHotels] = useState([]);
@@ -61,39 +61,35 @@ const Home = () => {
 
   // Auto-play slider
   useEffect(() => {
-    if (!hovering) {
+    if (!hovering && pageVisible) {
       timerRef.current = setInterval(() => setCurrent((c) => (c + 1) % slides.length), 5000);
     }
     return () => clearInterval(timerRef.current);
-  }, [hovering]);
+  }, [hovering, pageVisible]);
+
+  useEffect(() => {
+    const handleVisibility = () => setPageVisible(!document.hidden);
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
 
   // Fetch initial data
   useEffect(() => {
-    const controller = new AbortController();
-
-    api.get('/api/cities', { signal: controller.signal }).
+    cachedGet('/api/cities').
     then((r) => setCities(r.data.data || [])).
     catch(() => {});
 
-    api.get('/api/hotels', {
-      params: { page: 0, size: FEATURED_LIMIT, sortBy: 'rating' },
-      signal: controller.signal
+    cachedGet('/api/hotels', {
+      params: { page: 0, size: HOME_HOTEL_LIMIT, sortBy: 'rating' },
+      ttl: 60 * 1000
     }).
     then((r) => {
       const list = r.data.data || [];
       setFeaturedHotels(list.filter((h) => !h.onSale && !h.on_sale && !h.discountPercent && !h.discount_percent).slice(0, 10));
+      setSaleHotels(list.filter((h) => (h.onSale || h.on_sale) && (h.discountPercent || h.discount_percent)).slice(0, 10));
     }).
     catch(() => setFeaturedHotels([])).
     finally(() => setFeaturedLoading(false));
-
-    api.get('/api/hotels', {
-      params: { onSale: true, page: 0, size: SALE_LIMIT, sortBy: 'rating' },
-      signal: controller.signal
-    }).
-    then((r) => setSaleHotels(r.data.data || [])).
-    catch(() => {});
-
-    return () => controller.abort();
   }, []);
 
   const handleSearch = (e) => {
@@ -115,7 +111,14 @@ const Home = () => {
 
         {slides.map((s, i) =>
         <div key={s.id} className={cn('absolute inset-0 transition-opacity duration-1000 ease-out', i === current ? 'z-[1] opacity-100' : 'z-0 opacity-0')}>
-            <img src={s.image} alt={s.title} className={cn('h-full w-full object-cover transition-transform duration-[6000ms]', i === current ? 'scale-[1.02]' : 'scale-100')} />
+            <img
+              src={s.image}
+              alt={s.title}
+              loading={i === current ? 'eager' : 'lazy'}
+              fetchPriority={i === current ? 'high' : 'low'}
+              decoding="async"
+              className={cn('h-full w-full object-cover transition-transform duration-[6000ms]', i === current ? 'scale-[1.02]' : 'scale-100')}
+            />
             {/* Dark luxury navy overlay */}
             <div className="[position:absolute] [inset:0] [background:linear-gradient(90deg,_rgba(7,22,38,0.74)_0%,_rgba(7,22,38,0.48)_42%,_rgba(7,22,38,0.16)_100%)]" />
             <div className="[position:absolute] [inset:0] [background:linear-gradient(to_top,_rgba(7,22,38,0.74)_0%,_rgba(7,22,38,0.2)_58%,_rgba(7,22,38,0.34)_100%)]" />
@@ -250,7 +253,7 @@ const Home = () => {
 };
 
 // Reusable Hotel Card
-export const HotelCard = ({ hotel, className = '' }) => {
+export const HotelCard = memo(function HotelCard({ hotel, className = '' }) {
   const { t } = usePreferences();
   const minPrice = getHotelMinPrice(hotel);
 
@@ -306,6 +309,6 @@ export const HotelCard = ({ hotel, className = '' }) => {
       </div>
     </div>);
 
-};
+});
 
 export default Home;

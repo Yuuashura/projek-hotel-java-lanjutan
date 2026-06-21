@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import api from '../../utils/api';
+import { cachedGet } from '../../utils/requestCache';
 import CitySearchSelect from '../../components/CitySearchSelect';
 import { useAuth } from '../../context/AuthContext';
 
@@ -30,7 +31,7 @@ const Register = () => {
   const [step, setStep] = useState('form');
 
   useEffect(() => {
-    api.get('/api/cities').then((r) => setCities(r.data.data || [])).catch(() => {});
+    cachedGet('/api/cities').then((r) => setCities(r.data.data || [])).catch(() => {});
   }, []);
 
   const handleSubmit = async (e) => {

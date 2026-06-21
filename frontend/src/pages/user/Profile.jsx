@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { User, Lock, Camera, AlertCircle, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
+import { cachedGet } from '../../utils/requestCache';
 import { getImageUrl, validateImageFile } from '../../utils/uploads';
 import { cn } from '../../lib/utils';
 
@@ -45,7 +46,7 @@ const Profile = () => {
         setForm({ first_name: user.first_name || '', last_name: user.last_name || '', age: user.age || '', city_id: user.city_id || '', phone: user.phone || '', profile_picture: user.profile_picture || '' });
       }
     }, 0);
-    api.get('/api/cities').then((r) => setCities(r.data.data || [])).catch(() => {});
+    cachedGet('/api/cities').then((r) => setCities(r.data.data || [])).catch(() => {});
     return () => window.clearTimeout(timer);
   }, [user, navigate]);
 

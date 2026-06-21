@@ -4,6 +4,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import PaginationControls from '../../components/admin/PaginationControls';
 import LoadingState from '../../components/LoadingState';
 import api from '../../utils/api';
+import { cachedGet } from '../../utils/requestCache';
 import { getImageUrl } from '../../utils/uploads';
 import { getErrorMessage, unwrapList } from '../../utils/response';
 import { usePreferences } from '../../context/PreferencesContext';
@@ -43,7 +44,7 @@ const AdminAdminHotels = () => {
     Promise.all([
     api.get('/api/users/admin-hotels'),
     api.get('/api/hotels'),
-    api.get('/api/cities').catch(() => ({ data: { data: [] } }))]
+    cachedGet('/api/cities').catch(() => ({ data: { data: [] } }))]
     ).then(([resAdmins, resHotels, resCities]) => {
       const adminList = unwrapList(resAdmins.data);
       setAdmins(adminList);

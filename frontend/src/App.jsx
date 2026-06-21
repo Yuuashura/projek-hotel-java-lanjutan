@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { animate, stagger } from 'animejs';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { PreferencesProvider } from './context/PreferencesContext';
 import Navbar from './components/Navbar';
@@ -10,30 +9,25 @@ import LoadingState from './components/LoadingState';
 import { usePreferences } from './context/PreferencesContext';
 import { cn } from './lib/utils';
 
-// === Public Pages ===
-import Home from './pages/public/Home';
-import Login from './pages/public/Login';
-import Register from './pages/public/Register';
-import VerifyOtp from './pages/public/VerifyOtp';
-import ForgotPassword from './pages/public/ForgotPassword';
-import ResetPassword from './pages/public/ResetPassword';
-import Hotels from './pages/public/Hotels';
-import HotelDetail from './pages/public/HotelDetail';
-import About from './pages/public/About';
-
-// === User Pages ===
-import Booking from './pages/user/Booking';
-import Payment from './pages/user/Payment';
-import MyBookings from './pages/user/MyBookings';
-import Profile from './pages/user/Profile';
-
-// === Admin Pages ===
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminHotels from './pages/admin/AdminHotels';
-import AdminVisitors from './pages/admin/AdminVisitors';
-import AdminAdminHotels from './pages/admin/AdminAdminHotels';
-import AdminBookings from './pages/admin/AdminBookings';
-import AdminRoomTypes from './pages/admin/AdminRoomTypes';
+const Home = lazy(() => import('./pages/public/Home'));
+const Login = lazy(() => import('./pages/public/Login'));
+const Register = lazy(() => import('./pages/public/Register'));
+const VerifyOtp = lazy(() => import('./pages/public/VerifyOtp'));
+const ForgotPassword = lazy(() => import('./pages/public/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/public/ResetPassword'));
+const Hotels = lazy(() => import('./pages/public/Hotels'));
+const HotelDetail = lazy(() => import('./pages/public/HotelDetail'));
+const About = lazy(() => import('./pages/public/About'));
+const Booking = lazy(() => import('./pages/user/Booking'));
+const Payment = lazy(() => import('./pages/user/Payment'));
+const MyBookings = lazy(() => import('./pages/user/MyBookings'));
+const Profile = lazy(() => import('./pages/user/Profile'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminHotels = lazy(() => import('./pages/admin/AdminHotels'));
+const AdminVisitors = lazy(() => import('./pages/admin/AdminVisitors'));
+const AdminAdminHotels = lazy(() => import('./pages/admin/AdminAdminHotels'));
+const AdminBookings = lazy(() => import('./pages/admin/AdminBookings'));
+const AdminRoomTypes = lazy(() => import('./pages/admin/AdminRoomTypes'));
 
 // ==========================================
 // Route Guards
@@ -84,7 +78,8 @@ const PublicLayout = ({ children }) =>
 // ==========================================
 function AppRoutes() {
   return (
-    <Routes>
+    <Suspense fallback={<RouteLoading />}>
+      <Routes>
       {/* ============ PUBLIC ROUTES ============ */}
       <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
       <Route path="/hotels" element={<PublicLayout><Hotels /></PublicLayout>} />
@@ -114,7 +109,8 @@ function AppRoutes() {
 
       {/* Catch all */}
       <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>);
+      </Routes>
+    </Suspense>);
 
 }
 
@@ -122,36 +118,38 @@ const ScrollRevealManager = () => {
   const { pathname } = useLocation();
 
   React.useEffect(() => {
-    // Scroll to top on route change
     window.scrollTo(0, 0);
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reducedMotion || !('IntersectionObserver' in window)) {
+      document.querySelectorAll('.reveal, .flow-animate').forEach((element) => element.classList.add('active'));
+      return undefined;
+    }
 
-    const handleReveal = () => {
-      const reveals = document.querySelectorAll('.reveal');
-      reveals.forEach((el) => {
-        const windowHeight = window.innerHeight;
-        const elementTop = el.getBoundingClientRect().top;
-        const elementVisible = 50;
-        if (elementTop < windowHeight - elementVisible) {
-          el.classList.add('active');
-        }
+    const observed = new WeakSet();
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('active');
+        revealObserver.unobserve(entry.target);
+      });
+    }, { rootMargin: '0px 0px -48px', threshold: 0.08 });
+
+    const observeElements = () => {
+      document.querySelectorAll('.reveal, .flow-animate').forEach((element) => {
+        if (observed.has(element)) return;
+        observed.add(element);
+        revealObserver.observe(element);
       });
     };
 
-    window.setTimeout(() => {
-      animate('.flow-animate, .reveal.active', {
-        opacity: [0, 1],
-        translateY: [14, 0],
-        scale: [0.985, 1],
-        duration: 520,
-        delay: stagger(45),
-        ease: 'outCubic'
-      });
-    }, 80);
+    observeElements();
+    const mutationObserver = new MutationObserver(observeElements);
+    mutationObserver.observe(document.getElementById('root'), { childList: true, subtree: true });
 
-    window.addEventListener('scroll', handleReveal);
-    // Initial run to reveal elements already in view
-    setTimeout(handleReveal, 100);
-    return () => window.removeEventListener('scroll', handleReveal);
+    return () => {
+      mutationObserver.disconnect();
+      revealObserver.disconnect();
+    };
   }, [pathname]);
 
   return null;
@@ -209,6 +207,15 @@ const FlashToast = () => {
 };
 
 function App() {
+  React.useEffect(() => {
+    const updateVisibility = () => {
+      document.documentElement.classList.toggle('page-hidden', document.hidden);
+    };
+    updateVisibility();
+    document.addEventListener('visibilitychange', updateVisibility);
+    return () => document.removeEventListener('visibilitychange', updateVisibility);
+  }, []);
+
   return (
     <PreferencesProvider>
       <AuthProvider>

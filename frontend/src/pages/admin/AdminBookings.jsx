@@ -34,7 +34,8 @@ const AdminBookings = () => {
   const isAdminHotel = user?.role === 'ROLE_ADMIN_HOTEL';
 
   const enrichHotelNames = async (items) => {
-    const hotelIds = [...new Set(items.map(getHotelId).filter(Boolean))];
+    const hotelIds = [...new Set(items.filter((item) => !item.hotel_name).map(getHotelId).filter(Boolean))];
+    if (hotelIds.length === 0) return items;
     const hotels = await Promise.all(
       hotelIds.map((id) => api.get(`/api/hotels/${id}`).then((res) => res.data?.data).catch(() => null))
     );

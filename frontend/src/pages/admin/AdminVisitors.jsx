@@ -4,6 +4,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 import PaginationControls from '../../components/admin/PaginationControls';
 import LoadingState from '../../components/LoadingState';
 import api from '../../utils/api';
+import { cachedGet } from '../../utils/requestCache';
 import { getImageUrl } from '../../utils/uploads';
 import { getErrorMessage, unwrapList } from '../../utils/response';
 import { usePreferences } from '../../context/PreferencesContext';
@@ -26,7 +27,7 @@ const AdminVisitors = () => {
     setError('');
     Promise.all([
     api.get('/api/users'),
-    api.get('/api/cities').catch(() => ({ data: { data: [] } })) // Fallback if cities fail
+    cachedGet('/api/cities').catch(() => ({ data: { data: [] } })) // Fallback if cities fail
     ]).then(([resUsers, resCities]) => {
       const data = unwrapList(resUsers.data).filter((u) => u.role === 'ROLE_USER');
       setUsers(data);

@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { animate, stagger } from 'animejs';
 import { useAuth } from '../context/AuthContext';
 import { usePreferences } from '../context/PreferencesContext';
 import { LogOut, User, Calendar, Menu, X, ChevronDown, Globe } from 'lucide-react';
@@ -31,12 +30,19 @@ const Navbar = () => {
   useEffect(() => {
     if (!isOpen) return;
     window.requestAnimationFrame(() => {
-      animate('.site-mobile-menu > *', {
-        opacity: [0, 1],
-        translateY: [-8, 0],
-        duration: 360,
-        delay: stagger(36),
-        ease: 'outCubic'
+      document.querySelectorAll('.site-mobile-menu > *').forEach((element, index) => {
+        element.animate(
+          [
+            { opacity: 0, transform: 'translateY(-8px)' },
+            { opacity: 1, transform: 'translateY(0)' }
+          ],
+          {
+            duration: 360,
+            delay: index * 36,
+            easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+            fill: 'both'
+          }
+        );
       });
     });
   }, [isOpen]);

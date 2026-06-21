@@ -9,6 +9,7 @@ import LoadingState from '../../components/LoadingState';
 import { getImageUrl } from '../../utils/uploads';
 import PaginationControls from '../../components/admin/PaginationControls';
 import { cn } from '../../lib/utils';
+import { cachedGet } from '../../utils/requestCache';
 
 const PAGE_SIZE = 25;
 
@@ -85,7 +86,7 @@ const Hotels = () => {
   const [submittedSearch, setSubmittedSearch] = useState(initialSearch);
 
   useEffect(() => {
-    api.get('/api/cities').then((r) => setCities(r.data.data || [])).catch(() => {});
+    cachedGet('/api/cities').then((r) => setCities(r.data.data || [])).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -403,7 +404,7 @@ const PropertyHorizontalCard = ({ hotel, t }) => {
   return (
     <div className="reveal active max-sm:!min-h-0 max-sm:!flex-col max-sm:gap-3.5 [display:flex] [min-height:240px] [overflow:hidden] [border-bottom:1px_solid_var(--color-accent)] [padding-bottom:1.5rem]">
       <div className="max-[920px]:!h-[210px] max-[920px]:!w-[200px] max-sm:!h-auto max-sm:!w-full max-sm:aspect-[16/10] [width:240px] [height:240px] [flex-shrink:0] [overflow:hidden] [border-radius:var(--radius-sm)]">
-        <img src={getPrimaryImage(hotel)} alt={hotel.name} className="[width:100%] [height:100%] [object-fit:cover] [transition:transform_0.8s_ease]" />
+        <img src={getPrimaryImage(hotel)} alt={hotel.name} loading="lazy" decoding="async" className="[width:100%] [height:100%] [object-fit:cover] [transition:transform_0.8s_ease]" />
       </div>
 
        <div className="max-sm:!p-0 max-sm:gap-4 [padding:1rem_1.5rem] [flex:1] [display:flex] [flex-direction:column] [justify-content:space-between] [min-width:0]">

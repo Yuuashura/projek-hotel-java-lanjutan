@@ -126,6 +126,17 @@ public class BookingServiceImpl implements BookingService {
                 .build();
     }
 
+    private BookingResponse mapToDetailedResponse(
+            Booking booking,
+            Map<Integer, String> hotelNameCache,
+            Map<Integer, String> roomTypeNameCache
+    ) {
+        BookingResponse response = mapToResponse(booking);
+        response.setHotelName(getHotelName(booking.getHotelId(), hotelNameCache));
+        response.setRoomTypeName(getRoomTypeName(booking.getRoomTypeId(), roomTypeNameCache));
+        return response;
+    }
+
     @Override
     @Transactional
     public BookingResponse createBooking(BookingRequest request, int customerId) {
@@ -708,8 +719,10 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private PagedResult<BookingResponse> mapPage(Page<Booking> page) {
+        Map<Integer, String> hotelNameCache = new HashMap<>();
+        Map<Integer, String> roomTypeNameCache = new HashMap<>();
         List<BookingResponse> data = page.getContent().stream()
-                .map(this::mapToResponse)
+                .map(booking -> mapToDetailedResponse(booking, hotelNameCache, roomTypeNameCache))
                 .collect(Collectors.toList());
 
         return PagedResult.<BookingResponse>builder()
@@ -726,8 +739,10 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private PagedResult<BookingResponse> mapList(List<Booking> bookings) {
+        Map<Integer, String> hotelNameCache = new HashMap<>();
+        Map<Integer, String> roomTypeNameCache = new HashMap<>();
         List<BookingResponse> data = bookings.stream()
-                .map(this::mapToResponse)
+                .map(booking -> mapToDetailedResponse(booking, hotelNameCache, roomTypeNameCache))
                 .collect(Collectors.toList());
 
         return PagedResult.<BookingResponse>builder()

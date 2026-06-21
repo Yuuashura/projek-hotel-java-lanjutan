@@ -22,8 +22,12 @@ const MyBookings = () => {
   const getRoomTypeId = (booking) => booking.room_type_id ?? booking.roomTypeId;
 
   const enrichBookingDetails = async (items) => {
-    const hotelIds = [...new Set(items.map(getHotelId).filter(Boolean))];
-    const roomTypeIds = [...new Set(items.map(getRoomTypeId).filter(Boolean))];
+    const hotelIds = [...new Set(items.filter((item) => !item.hotel_name).map(getHotelId).filter(Boolean))];
+    const roomTypeIds = [...new Set(items.filter((item) => !item.room_type_name).map(getRoomTypeId).filter(Boolean))];
+
+    if (hotelIds.length === 0 && roomTypeIds.length === 0) {
+      return items;
+    }
 
     const [hotelResults, roomTypeResults] = await Promise.all([
     Promise.all(hotelIds.map((id) => api.get(`/api/hotels/${id}`).then((res) => res.data?.data).catch(() => null))),

@@ -28,6 +28,12 @@ public class BookingResponse {
     @JsonProperty("room_type_id")
     private int roomTypeId;
 
+    @JsonProperty("hotel_name")
+    private String hotelName;
+
+    @JsonProperty("room_type_name")
+    private String roomTypeName;
+
     @JsonProperty("check_in")
     private LocalDate checkIn;
 

@@ -86,17 +86,25 @@ const Booking = () => {
   }, [user, navigate]);
 
   useEffect(() => {
-    Promise.all([
-    api.get(`/api/hotels/${hotelId}`),
-    api.get(`/api/room-types/hotel/${hotelId}`)]
-    ).then(([hotelRes, roomsRes]) => {
-      setHotel(hotelRes.data.data);
-      setRooms(roomsRes.data.data || []);
-      if (!form.room_type_id && roomsRes.data.data?.length > 0) {
-        setForm((f) => ({ ...f, room_type_id: roomsRes.data.data[0].id_room_type }));
+    const loadBookingData = async () => {
+      const hotelRes = await api.get(`/api/hotels/${hotelId}`);
+      const hotelData = hotelRes.data.data;
+      let roomData = hotelData?.roomTypes || hotelData?.room_types || [];
+      if (roomData.length === 0) {
+        const roomsRes = await api.get(`/api/room-types/hotel/${hotelId}`);
+        roomData = roomsRes.data.data || [];
       }
-    }).catch(() => navigate('/hotels')).finally(() => setLoading(false));
-  }, [hotelId, form.room_type_id, navigate]);
+
+      setHotel(hotelData);
+      setRooms(roomData);
+      setForm((currentForm) => {
+        if (currentForm.room_type_id || !roomData.length) return currentForm;
+        return { ...currentForm, room_type_id: roomData[0].id_room_type ?? roomData[0].idRoomType };
+      });
+    };
+
+    loadBookingData().catch(() => navigate('/hotels')).finally(() => setLoading(false));
+  }, [hotelId, navigate]);
 
   // Auto-fill for self
   useEffect(() => {

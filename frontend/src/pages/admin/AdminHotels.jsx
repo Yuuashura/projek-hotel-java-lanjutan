@@ -11,6 +11,7 @@ import { uploadFile, validateImageFile, getImageUrl } from '../../utils/uploads'
 import { usePreferences } from '../../context/PreferencesContext';
 import { useAuth } from '../../context/AuthContext';
 import { cn } from '../../lib/utils';
+import { cachedGet } from '../../utils/requestCache';
 
 const EMPTY_FORM = { name: '', city_id: '', address: '', type: '', description: '', is_featured: false, is_on_sale: false, discount_percent: 0, rating: 0, image_url: '', admin_hotel_id: '', facility_ids: [] };
 const PAGE_SIZE = 25;
@@ -60,7 +61,7 @@ const AdminHotels = () => {
     const hotelParams = isAdminHotel ? {} : { page, size: PAGE_SIZE };
     Promise.all([
     api.get('/api/hotels', { params: hotelParams }),
-    api.get('/api/cities'),
+    cachedGet('/api/cities'),
     api.get('/api/facilities'),
     !isAdminHotel ? api.get('/api/users/admin-hotels').catch(() => ({ data: { data: [] } })) : Promise.resolve({ data: { data: [] } })]
     ).then(([h, c, f, a]) => {

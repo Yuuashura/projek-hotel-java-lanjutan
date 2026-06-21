@@ -148,12 +148,17 @@ h6 {
 .reveal {
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.reveal.active {
+.reveal.active,
+.flow-animate.active {
   opacity: 1;
   transform: translateY(0);
+}
+
+.page-hidden #root > div::after {
+  animation-play-state: paused;
 }
 
 ::selection {
@@ -183,6 +188,44 @@ h6 {
   body,
   #root {
     background-attachment: fixed;
+  }
+}
+
+@media (max-width: 920px), (update: slow) {
+  body,
+  #root {
+    background-attachment: scroll;
+  }
+
+  #root > div::after {
+    animation: none;
+    opacity: 0.72;
+  }
+
+  .backdrop-blur-xl {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  #root > div::after {
+    animation: none;
+  }
+
+  .reveal,
+  .flow-animate {
+    opacity: 1;
+    transform: none;
   }
 }
 
