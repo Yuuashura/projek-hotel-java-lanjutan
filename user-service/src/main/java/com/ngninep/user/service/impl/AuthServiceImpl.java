@@ -33,8 +33,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserDetailsService userDetailsService;
     private static final OtpToken.Purpose REGISTER_PURPOSE = OtpToken.Purpose.REGISTER_VERIFICATION;
     private static final OtpToken.Purpose RESET_PURPOSE = OtpToken.Purpose.PASSWORD_RESET;
-    private static final String FORGOT_PASSWORD_RESPONSE =
-            "Jika email terdaftar, kode reset password akan dikirim.";
+    private static final String FORGOT_PASSWORD_RESPONSE = "Jika email terdaftar, kode reset password akan dikirim.";
 
     // ==================== REGISTER ====================
     @Override
@@ -148,29 +147,33 @@ public class AuthServiceImpl implements AuthService {
     // ==================== FORGOT PASSWORD ====================
     @Override
     public String forgotPassword(ForgotPasswordRequest request) {
-        Optional<Customer> optionalCustomer = customerRepository.findByEmail(request.getEmail());
+        try {
+            
+            Optional<Customer> optionalCustomer = customerRepository.findByEmail(request.getEmail());
+            if (optionalCustomer.isEmpty()) {
+                return "Email tidak ditemukan";
+            }
 
-        if (optionalCustomer.isEmpty()) {
-            return FORGOT_PASSWORD_RESPONSE;
-        }
-
-        Customer customer = optionalCustomer.get();
-        if (!customer.isVerified() || customer.isBanned()) {
-            return FORGOT_PASSWORD_RESPONSE;
-        }
-
-        Optional<OtpToken> activeOtp = otpService.getActiveOtp(request.getEmail(), RESET_PURPOSE);
-        if (activeOtp.isPresent()) {
-            LocalDateTime canResendAt = activeOtp.get().getCreatedAt().plusMinutes(5);
-            if (LocalDateTime.now().isBefore(canResendAt)) {
+            Customer customer = optionalCustomer.get();
+            if (!customer.isVerified() || customer.isBanned()) {
                 return FORGOT_PASSWORD_RESPONSE;
             }
+
+            Optional<OtpToken> activeOtp = otpService.getActiveOtp(request.getEmail(), RESET_PURPOSE);
+            if (activeOtp.isPresent()) {
+                LocalDateTime canResendAt = activeOtp.get().getCreatedAt().plusMinutes(5);
+                if (LocalDateTime.now().isBefore(canResendAt)) {
+                    return FORGOT_PASSWORD_RESPONSE;
+                }
+            }
+
+            otpService.invalidateAllActiveOtp(request.getEmail(), RESET_PURPOSE);
+            otpService.generateAndSendOtp(request.getEmail(), RESET_PURPOSE);
+
+            return FORGOT_PASSWORD_RESPONSE;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kode reset tidak valid");
         }
-
-        otpService.invalidateAllActiveOtp(request.getEmail(), RESET_PURPOSE);
-        otpService.generateAndSendOtp(request.getEmail(), RESET_PURPOSE);
-
-        return FORGOT_PASSWORD_RESPONSE;
     }
 
     // ==================== VERIFY RESET OTP ====================

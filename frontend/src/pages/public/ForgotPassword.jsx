@@ -27,6 +27,12 @@ const ForgotPassword = () => {
     try {
       const res = await api.post('/api/auth/forgot-password', { email });
       const message = res.data?.message || 'Jika email terdaftar, kode reset password akan dikirim.';
+      if (message.trim().toLowerCase() === 'email tidak ditemukan') {
+        sessionStorage.removeItem('reset_password_email');
+        setError(message);
+        return;
+      }
+
       sessionStorage.setItem('reset_password_email', email);
       setSuccess(message);
       window.setTimeout(() => {
@@ -73,7 +79,18 @@ const ForgotPassword = () => {
             <div className="mb-5">
               <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem]">Alamat Email</label>
               <div className="[position:relative]">
-                <input className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm [padding-right:2.5rem]" type="email" placeholder="nama@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                <input
+                  className="w-full rounded-lg border border-[var(--glass-border)] bg-[var(--glass-bg-strong)] px-4 py-3 text-[0.95rem] font-normal text-[var(--color-text)] outline-none backdrop-blur-xl transition placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)] disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-11 max-sm:px-3.5 max-sm:py-3 max-sm:text-sm [padding-right:2.5rem]"
+                  type="email"
+                  placeholder="nama@email.com"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setError('');
+                    setSuccess('');
+                  }}
+                  required
+                />
                 <Mail size={16} className="[position:absolute] [right:0.875rem] [top:50%] [transform:translateY(-50%)] [color:var(--color-muted)]" />
               </div>
             </div>
