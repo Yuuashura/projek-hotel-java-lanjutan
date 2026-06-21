@@ -8,7 +8,6 @@ import com.ngninep.user.repository.CustomerRepository;
 import com.ngninep.user.config.JwtUtil;
 import com.ngninep.user.service.AuthService;
 import com.ngninep.user.service.LoginAttemptService;
-import com.ngninep.user.util.Message;
 import com.ngninep.user.service.OtpService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -33,7 +32,6 @@ public class AuthServiceImpl implements AuthService {
     private final UserDetailsService userDetailsService;
     private static final OtpToken.Purpose REGISTER_PURPOSE = OtpToken.Purpose.REGISTER_VERIFICATION;
     private static final OtpToken.Purpose RESET_PURPOSE = OtpToken.Purpose.PASSWORD_RESET;
-    private static final String FORGOT_PASSWORD_RESPONSE = "Jika email terdaftar, kode reset password akan dikirim.";
 
     // ==================== REGISTER ====================
     @Override
@@ -156,21 +154,21 @@ public class AuthServiceImpl implements AuthService {
 
             Customer customer = optionalCustomer.get();
             if (!customer.isVerified() || customer.isBanned()) {
-                return FORGOT_PASSWORD_RESPONSE;
+                return "Jika email terdaftar, kode reset password akan dikirim.";
             }
 
             Optional<OtpToken> activeOtp = otpService.getActiveOtp(request.getEmail(), RESET_PURPOSE);
             if (activeOtp.isPresent()) {
                 LocalDateTime canResendAt = activeOtp.get().getCreatedAt().plusMinutes(5);
                 if (LocalDateTime.now().isBefore(canResendAt)) {
-                    return FORGOT_PASSWORD_RESPONSE;
+                    return "Jika email terdaftar, kode reset password akan dikirim.";
                 }
             }
 
             otpService.invalidateAllActiveOtp(request.getEmail(), RESET_PURPOSE);
             otpService.generateAndSendOtp(request.getEmail(), RESET_PURPOSE);
 
-            return FORGOT_PASSWORD_RESPONSE;
+            return "Jika email terdaftar, kode reset password akan dikirim.";
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kode reset tidak valid");
         }
@@ -243,7 +241,7 @@ public class AuthServiceImpl implements AuthService {
         Customer customer = customerRepository.findByEmail(request.getEmail()).orElse(null);
         if (customer == null || !passwordEncoder.matches(request.getPassword(), customer.getPassword())) {
             loginAttemptService.recordFailure(request.getEmail(), ipAddress);
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, Message.LOGIN_INVALID_CREDENTIALS);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Email atau password salah");
         }
 
         loginAttemptService.clearFailures(request.getEmail(), ipAddress);

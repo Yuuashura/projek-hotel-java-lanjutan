@@ -194,7 +194,7 @@ const Payment = () => {
                     <svg width="18" height="12" viewBox="0 0 22 16" fill="none">
                       <path d="M 5 0 L 11 7 L 5 14 M 13 0 L 19 7 L 13 14" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
                     </svg>
-                    Bayar via Xendit
+                    Bayar Sekarang
                   </>
                 }
               </button>

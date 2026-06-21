@@ -170,7 +170,7 @@ public class HotelController {
     public ResponseEntity<WebResponse<HotelResponse>> addFacility(@PathVariable int id, @PathVariable int facilityId) {
         WebResponse<HotelResponse> response = WebResponse.<HotelResponse>builder()
                 .status("200")
-                .message(Message.HOTEL_FACILITY_ADDED)
+                .message("Fasilitas hotel berhasil ditambahkan")
                 .data(hotelService.addFacility(id, facilityId))
                 .build();
         return ResponseEntity.ok(response);
@@ -181,7 +181,7 @@ public class HotelController {
     public ResponseEntity<WebResponse<HotelResponse>> removeFacility(@PathVariable int id, @PathVariable int facilityId) {
         WebResponse<HotelResponse> response = WebResponse.<HotelResponse>builder()
                 .status("200")
-                .message(Message.HOTEL_FACILITY_REMOVED)
+                .message("Fasilitas hotel berhasil dihapus")
                 .data(hotelService.removeFacility(id, facilityId))
                 .build();
         return ResponseEntity.ok(response);
@@ -203,7 +203,7 @@ public class HotelController {
     public ResponseEntity<String> uploadExcel(@RequestParam("file") MultipartFile file) {
         try{
             hotelService.uploadExcel(file);
-            return ResponseEntity.ok(Message.EXCEL_UPLOADED);
+            return ResponseEntity.ok("Excel berhasil diunggah");
         }catch(Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -216,7 +216,7 @@ public class HotelController {
             hotelService.uploadExcel(file);
             WebResponse<Void> response = WebResponse.<Void>builder()
                     .status("200")
-                    .message(Message.EXCEL_UPLOADED)
+                    .message("Excel berhasil diunggah")
                     .build();
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -233,7 +233,7 @@ public class HotelController {
         String imageUrl = fileStorageService.saveHotelImage(file);
         WebResponse<Map<String, String>> response = WebResponse.<Map<String, String>>builder()
                 .status("200")
-                .message(Message.HOTEL_IMAGE_UPLOADED)
+                .message("Gambar hotel berhasil diunggah")
                 .data(Map.of("url", imageUrl))
                 .build();
         return ResponseEntity.ok(response);

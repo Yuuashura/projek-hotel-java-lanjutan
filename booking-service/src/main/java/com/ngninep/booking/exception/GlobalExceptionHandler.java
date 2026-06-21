@@ -1,7 +1,6 @@
 package com.ngninep.booking.exception;
 
 import com.ngninep.booking.dto.res.WebResponse;
-import com.ngninep.booking.util.Message;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -55,7 +54,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<WebResponse<String>> handleAccessDenied(AccessDeniedException ex) {
         WebResponse<String> response = WebResponse.<String>builder()
                 .status("403")
-                .message(Message.ACCESS_DENIED)
+                .message("Anda tidak memiliki izin untuk mengakses fitur ini")
                 .build();
         return ResponseEntity.status(403).body(response);
     }
@@ -64,7 +63,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<WebResponse<String>> handleGeneral(Exception ex) {
         WebResponse<String> response = WebResponse.<String>builder()
                 .status("500")
-                .message(Message.GENERAL_ERROR_PREFIX + ex.getMessage())
+                .message("Terjadi kesalahan: " + ex.getMessage())
                 .build();
         return ResponseEntity.internalServerError().body(response);
     }

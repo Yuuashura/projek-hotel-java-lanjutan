@@ -96,13 +96,13 @@ public class XenditPaymentServiceImpl implements XenditPaymentService {
                     .block(XENDIT_TIMEOUT);
         } catch (WebClientResponseException ex) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
-                    Message.XENDIT_INVOICE_CREATE_FAILED + ": " + ex.getResponseBodyAsString());
+                    "Gagal membuat invoice Xendit" + ": " + ex.getResponseBodyAsString());
         } catch (RuntimeException ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, Message.XENDIT_INVOICE_CREATE_FAILED);
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Gagal membuat invoice Xendit");
         }
 
         if (xenditResponse == null || xenditResponse.get("invoice_url") == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, Message.XENDIT_INVOICE_CREATE_FAILED);
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Gagal membuat invoice Xendit");
         }
 
         booking.setPaymentMethod(PAYMENT_METHOD_XENDIT);
@@ -126,7 +126,7 @@ public class XenditPaymentServiceImpl implements XenditPaymentService {
         validateCallbackToken(requestCallbackToken);
         if (request == null || isBlank(request.getExternalId())) {
             logger.warn("=== XENDIT WEBHOOK REJECTED === request null or missing external_id");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.XENDIT_WEBHOOK_INVALID);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Payload webhook Xendit tidak valid");
         }
 
         Optional<Booking> found = bookingRepository.findByXenditExternalId(request.getExternalId());
@@ -216,17 +216,17 @@ public class XenditPaymentServiceImpl implements XenditPaymentService {
 
     private void ensureApiKeyConfigured() {
         if (isBlank(apiKey)) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, Message.XENDIT_API_KEY_NOT_CONFIGURED);
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "API key Xendit belum dikonfigurasi");
         }
     }
 
     private void validateCallbackToken(String requestCallbackToken) {
         if (isBlank(callbackToken)) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, Message.XENDIT_CALLBACK_TOKEN_NOT_CONFIGURED);
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Callback token Xendit belum dikonfigurasi");
         }
 
         if (!callbackToken.equals(requestCallbackToken)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, Message.XENDIT_CALLBACK_TOKEN_INVALID);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Callback token Xendit tidak valid");
         }
     }
 

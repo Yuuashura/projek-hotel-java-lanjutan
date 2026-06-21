@@ -351,7 +351,7 @@ const BookingCard = ({ booking, onCancel }) => {
       <div className="max-sm:!gap-2.5 max-sm:[&_.btn]:w-full max-sm:[&_.btn]:justify-center [display:flex] [gap:1rem] [flex-wrap:wrap] [border-top:1px_solid_var(--color-accent)] [padding-top:1.25rem]">
         {booking.status === 'PENDING' && !booking.xendit_invoice_url &&
         <Link to={`/payment/${booking.id_booking || booking.id}`} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 min-h-9 px-5 py-2 text-xs max-sm:min-h-[38px] max-sm:px-3 max-sm:py-2 max-sm:text-[0.7rem] [background:#0057FF] [border-color:#0057FF]">
-            Bayar via Xendit
+            Bayar Sekarang
           </Link>
         }
         {booking.status === 'PENDING' && booking.xendit_invoice_url && booking.payment_status !== 'EXPIRED' &&

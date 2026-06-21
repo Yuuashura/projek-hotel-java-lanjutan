@@ -4,7 +4,6 @@ import com.ngninep.user.entity.LoginAttempt;
 import com.ngninep.user.exception.LoginRateLimitException;
 import com.ngninep.user.repository.LoginAttemptRepository;
 import com.ngninep.user.service.LoginAttemptService;
-import com.ngninep.user.util.Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -93,7 +92,7 @@ public class LoginAttemptServiceImpl implements LoginAttemptService {
         long retryAfter = Math.max(1, Duration.between(now, availableAt).getSeconds());
         long retryMinutes = Math.max(1, (retryAfter + 59) / 60);
         throw new LoginRateLimitException(
-                String.format(Message.LOGIN_RATE_LIMITED, retryMinutes),
+                String.format("Terlalu banyak percobaan login. Silakan coba lagi dalam %d menit.", retryMinutes),
                 retryAfter
         );
     }

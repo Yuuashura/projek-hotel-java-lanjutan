@@ -14,7 +14,6 @@ import com.ngninep.booking.entity.BookingStatus;
 import com.ngninep.booking.service.FileStorageService;
 import com.ngninep.booking.service.BookingService;
 import com.ngninep.booking.service.XenditPaymentService;
-import com.ngninep.booking.util.Message;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
@@ -47,7 +46,7 @@ public class BookingController {
         Object credentials = authentication.getCredentials();
         if (credentials == null) {
             throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED, Message.USER_ID_NOT_FOUND_IN_TOKEN
+                    HttpStatus.UNAUTHORIZED, "User ID tidak ditemukan dalam token"
             );
         }
         return (Integer) credentials;
@@ -60,7 +59,7 @@ public class BookingController {
         int customerId = getCurrentUserId();
         WebResponse<BookingResponse> response = WebResponse.<BookingResponse>builder()
                 .status("200")
-                .message(Message.BOOKING_CREATED)
+                .message("Pesanan berhasil dibuat")
                 .data(bookingService.createBooking(request, customerId))
                 .build();
         return ResponseEntity.ok(response);
@@ -77,7 +76,7 @@ public class BookingController {
         PagedResult<BookingResponse> result = bookingService.getMyBookings(customerId, status, page, size);
         WebResponse<List<BookingResponse>> response = WebResponse.<List<BookingResponse>>builder()
                 .status("200")
-                .message(Message.BOOKING_DATA_FETCHED)
+                .message("Berhasil mengambil data pesanan")
                 .data(result.getData())
                 .pagination(result.getPagination())
                 .build();
@@ -95,7 +94,7 @@ public class BookingController {
         
         WebResponse<BookingResponse> response = WebResponse.<BookingResponse>builder()
                 .status("200")
-                .message(Message.BOOKING_PAYMENT_PROCESSED)
+                .message("Pembayaran berhasil diproses")
                 .data(bookingService.payBooking(id, request, customerId))
                 .build();
         return ResponseEntity.ok(response);
@@ -117,7 +116,7 @@ public class BookingController {
 
         WebResponse<BookingResponse> response = WebResponse.<BookingResponse>builder()
                 .status("200")
-                .message(Message.BOOKING_PAYMENT_PROCESSED)
+                .message("Pembayaran berhasil diproses")
                 .data(bookingService.payBooking(id, request, customerId))
                 .build();
         return ResponseEntity.ok(response);
@@ -129,7 +128,7 @@ public class BookingController {
         int customerId = getCurrentUserId();
         WebResponse<XenditInvoiceResponse> response = WebResponse.<XenditInvoiceResponse>builder()
                 .status("200")
-                .message(Message.XENDIT_INVOICE_CREATED)
+                .message("Invoice Xendit berhasil dibuat")
                 .data(xenditPaymentService.createInvoice(id, customerId))
                 .build();
         return ResponseEntity.ok(response);
@@ -142,7 +141,7 @@ public class BookingController {
         xenditPaymentService.handleInvoiceWebhook(callbackToken, request);
         WebResponse<Void> response = WebResponse.<Void>builder()
                 .status("200")
-                .message(Message.XENDIT_WEBHOOK_PROCESSED)
+                .message("Webhook Xendit berhasil diproses")
                 .build();
         return ResponseEntity.ok(response);
     }
@@ -154,7 +153,7 @@ public class BookingController {
         int customerId = getCurrentUserId();
         WebResponse<BookingResponse> response = WebResponse.<BookingResponse>builder()
                 .status("200")
-                .message(Message.BOOKING_CANCELLED)
+                .message("Pesanan berhasil dibatalkan")
                 .data(bookingService.cancelBooking(id, customerId))
                 .build();
         return ResponseEntity.ok(response);
@@ -169,7 +168,7 @@ public class BookingController {
         PagedResult<BookingResponse> result = bookingService.getAllBookings(page, size);
         WebResponse<List<BookingResponse>> response = WebResponse.<List<BookingResponse>>builder()
                 .status("200")
-                .message(Message.BOOKING_ALL_FETCHED)
+                .message("Berhasil mengambil semua pesanan")
                 .data(result.getData())
                 .pagination(result.getPagination())
                 .build();
@@ -186,7 +185,7 @@ public class BookingController {
         PagedResult<BookingResponse> result = bookingService.getBookingsByHotel(hotelId, page, size);
         WebResponse<List<BookingResponse>> response = WebResponse.<List<BookingResponse>>builder()
                 .status("200")
-                .message(Message.BOOKING_BY_HOTEL_FETCHED)
+                .message("Berhasil mengambil pesanan hotel")
                 .data(result.getData())
                 .pagination(result.getPagination())
                 .build();
@@ -197,7 +196,7 @@ public class BookingController {
     public ResponseEntity<WebResponse<List<RoomAvailabilityResponse>>> getRoomAvailabilityByHotel(@PathVariable int hotelId) {
         WebResponse<List<RoomAvailabilityResponse>> response = WebResponse.<List<RoomAvailabilityResponse>>builder()
                 .status("200")
-                .message(Message.SUCCESS)
+                .message("Success")
                 .data(bookingService.getRoomAvailabilityByHotel(hotelId))
                 .build();
         return ResponseEntity.ok(response);
@@ -208,7 +207,7 @@ public class BookingController {
     public ResponseEntity<WebResponse<BookingStatsResponse>> getDashboardStats() {
         WebResponse<BookingStatsResponse> response = WebResponse.<BookingStatsResponse>builder()
                 .status("200")
-                .message(Message.BOOKING_STATS_FETCHED)
+                .message("Berhasil mengambil statistik booking")
                 .data(bookingService.getDashboardStats())
                 .build();
         return ResponseEntity.ok(response);
@@ -237,13 +236,13 @@ public class BookingController {
         } catch (IllegalArgumentException ex) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    Message.BOOKING_STATUS_INVALID
+                    "Status booking tidak valid"
             );
         }
         
         WebResponse<BookingResponse> response = WebResponse.<BookingResponse>builder()
                 .status("200")
-                .message(Message.BOOKING_STATUS_UPDATED)
+                .message("Status pesanan berhasil diperbarui")
                 .data(bookingService.updateStatus(id, status))
                 .build();
         return ResponseEntity.ok(response);
@@ -255,7 +254,7 @@ public class BookingController {
         bookingService.deleteBooking(id);
         WebResponse<Void> response = WebResponse.<Void>builder()
                 .status("200")
-                .message(Message.BOOKING_DELETED)
+                .message("Pesanan berhasil dihapus secara permanen")
                 .build();
         return ResponseEntity.ok(response);
     }

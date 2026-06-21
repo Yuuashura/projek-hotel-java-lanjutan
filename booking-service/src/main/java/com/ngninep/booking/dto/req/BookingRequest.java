@@ -1,7 +1,6 @@
 package com.ngninep.booking.dto.req;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.ngninep.booking.util.Message;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -19,44 +18,44 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class BookingRequest {
 
-    @NotNull(message = Message.HOTEL_ID_REQUIRED)
+    @NotNull(message = "ID Hotel tidak boleh kosong")
     @JsonProperty("hotel_id")
     private Integer hotelId;
 
-    @NotNull(message = Message.ROOM_TYPE_ID_REQUIRED)
+    @NotNull(message = "ID Tipe Kamar tidak boleh kosong")
     @JsonProperty("room_type_id")
     private Integer roomTypeId;
 
-    @NotNull(message = Message.CHECK_IN_REQUIRED)
+    @NotNull(message = "Tanggal Check-in tidak boleh kosong")
     @JsonProperty("check_in")
     private LocalDate checkIn;
 
-    @NotNull(message = Message.CHECK_OUT_REQUIRED)
+    @NotNull(message = "Tanggal Check-out tidak boleh kosong")
     @JsonProperty("check_out")
     private LocalDate checkOut;
 
-    @NotNull(message = Message.GUEST_COUNT_REQUIRED)
-    @Min(value = 1, message = Message.GUEST_COUNT_MIN)
+    @NotNull(message = "Jumlah tamu tidak boleh kosong")
+    @Min(value = 1, message = "Jumlah tamu minimal 1")
     @JsonProperty("number_of_guest")
     private Integer numberOfGuest;
 
     @JsonProperty("total_price")
     private Long totalPrice;
 
-    @NotBlank(message = Message.ORDERER_NAME_REQUIRED)
+    @NotBlank(message = "Nama pemesan tidak boleh kosong")
     @JsonProperty("orderer_name")
     private String ordererName;
 
-    @NotBlank(message = Message.ORDERER_PHONE_REQUIRED)
+    @NotBlank(message = "Nomor telepon pemesan tidak boleh kosong")
     @JsonProperty("orderer_phone")
     private String ordererPhone;
 
-    @NotBlank(message = Message.ORDERER_EMAIL_REQUIRED)
-    @Email(message = Message.EMAIL_INVALID)
+    @NotBlank(message = "Email pemesan tidak boleh kosong")
+    @Email(message = "Format email tidak valid")
     @JsonProperty("orderer_email")
     private String ordererEmail;
 
-    @NotNull(message = Message.FOR_SELF_REQUIRED)
+    @NotNull(message = "Status is_for_self tidak boleh kosong")
     @JsonProperty("is_for_self")
     private Boolean isForSelf;
 }

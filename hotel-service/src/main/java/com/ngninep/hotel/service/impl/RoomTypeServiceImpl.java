@@ -113,7 +113,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     @Override
     public RoomTypeResponse getById(int id) {
         RoomType roomType = roomTypeRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.ROOM_TYPE_NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tipe kamar tidak ditemukan"));
         return mapToResponse(roomType);
     }
 
@@ -121,7 +121,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     @Transactional
     public RoomTypeResponse create(RoomTypeRequest request) {
         Hotel hotel = hotelRepository.findById(request.getHotelId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.HOTEL_INVALID));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hotel tidak valid"));
         validateHotelOwnership(hotel);
                  
         RoomType roomType = RoomType.builder()
@@ -153,11 +153,11 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     @Transactional
     public RoomTypeResponse update(int id, RoomTypeRequest request) {
         RoomType roomType = roomTypeRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.ROOM_TYPE_NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tipe kamar tidak ditemukan"));
         validateHotelOwnership(roomType.getHotel());
                  
         Hotel hotel = hotelRepository.findById(request.getHotelId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.HOTEL_INVALID));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hotel tidak valid"));
         validateHotelOwnership(hotel);
                  
         roomType.setName(request.getName());
@@ -190,7 +190,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     @Override
     public void delete(int id) {
         RoomType roomType = roomTypeRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.ROOM_TYPE_NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tipe kamar tidak ditemukan"));
         validateHotelOwnership(roomType.getHotel());
         roomTypeRepository.delete(roomType);
     }

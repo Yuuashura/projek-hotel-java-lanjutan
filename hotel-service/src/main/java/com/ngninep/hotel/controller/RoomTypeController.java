@@ -89,7 +89,7 @@ public class RoomTypeController {
         String imageUrl = fileStorageService.saveRoomTypeImage(file);
         WebResponse<Map<String, String>> response = WebResponse.<Map<String, String>>builder()
                 .status("200")
-                .message(Message.ROOM_TYPE_IMAGE_UPLOADED)
+                .message("Gambar tipe kamar berhasil diunggah")
                 .data(Map.of("url", imageUrl))
                 .build();
         return ResponseEntity.ok(response);

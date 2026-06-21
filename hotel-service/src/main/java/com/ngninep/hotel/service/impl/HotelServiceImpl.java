@@ -98,7 +98,7 @@ public class HotelServiceImpl implements HotelService {
         }
 
         Hotel hotel = hotelRepository.findById(hotelId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.HOTEL_NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotel tidak ditemukan"));
         validateHotelOwnership(hotel);
     }
 
@@ -392,7 +392,7 @@ public class HotelServiceImpl implements HotelService {
     @Override
     public HotelResponse getById(int id) {
         Hotel hotel = hotelRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.HOTEL_NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotel tidak ditemukan"));
         return mapToResponse(hotel);
     }
 
@@ -400,10 +400,10 @@ public class HotelServiceImpl implements HotelService {
     @Transactional
     public HotelResponse addFacility(int hotelId, int facilityId) {
         Hotel hotel = hotelRepository.findById(hotelId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.HOTEL_NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotel tidak ditemukan"));
         validateHotelOwnership(hotel);
         Facility facility = facilityRepository.findById(facilityId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.FACILITY_INVALID));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Fasilitas tidak valid"));
 
         if (!hotelFacilityRepository.existsByHotel_IdHotelAndFacility_IdFacility(hotelId, facilityId)) {
             hotelFacilityRepository.save(HotelFacility.builder()
@@ -419,10 +419,10 @@ public class HotelServiceImpl implements HotelService {
     @Transactional
     public HotelResponse removeFacility(int hotelId, int facilityId) {
         Hotel hotel = hotelRepository.findById(hotelId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.HOTEL_NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotel tidak ditemukan"));
         validateHotelOwnership(hotel);
         if (!facilityRepository.existsById(facilityId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.FACILITY_INVALID);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Fasilitas tidak valid");
         }
 
         hotelFacilityRepository.deleteByHotel_IdHotelAndFacility_IdFacility(hotelId, facilityId);
@@ -433,7 +433,7 @@ public class HotelServiceImpl implements HotelService {
     @Transactional
     public HotelResponse create(HotelRequest request) {
         City city = cityRepository.findById(request.getCityId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.CITY_INVALID));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kota tidak valid"));
 
         Hotel hotel = Hotel.builder()
                 .name(request.getName())
@@ -473,11 +473,11 @@ public class HotelServiceImpl implements HotelService {
     @Transactional
     public HotelResponse update(int id, HotelRequest request) {
         Hotel hotel = hotelRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.HOTEL_NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotel tidak ditemukan"));
         validateHotelOwnership(hotel);
 
         City city = cityRepository.findById(request.getCityId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.CITY_INVALID));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kota tidak valid"));
 
         hotel.setName(request.getName());
         hotel.setCity(city);
@@ -521,7 +521,7 @@ public class HotelServiceImpl implements HotelService {
     @Override
     public void delete(int id) {
         Hotel hotel = hotelRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, Message.HOTEL_NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hotel tidak ditemukan"));
         validateHotelOwnership(hotel);
         hotelRepository.delete(hotel);
     }
@@ -535,12 +535,12 @@ public class HotelServiceImpl implements HotelService {
     public void uploadExcel(MultipartFile file) throws Exception {
         // validasi file kosong
         if (file.isEmpty()) {
-            throw new RuntimeException(Message.FILE_EMPTY);
+            throw new RuntimeException("File kosong");
         }
 
         String fileName = file.getOriginalFilename();
         if (fileName == null || !fileName.endsWith(".xlsx")) {
-            throw new RuntimeException(Message.FILE_MUST_BE_EXCEL);
+            throw new RuntimeException("File harus berupa excel");
         }
 
         // create folder jika belum ada
@@ -589,7 +589,7 @@ public class HotelServiceImpl implements HotelService {
             if (row.getCell(1) != null) {
                 int cityId = (int) row.getCell(1).getNumericCellValue();
                 City city = cityRepository.findById(cityId)
-                        .orElseThrow(() -> new RuntimeException(String.format(Message.CITY_WITH_ID_NOT_FOUND, cityId)));
+                        .orElseThrow(() -> new RuntimeException(String.format("Kota dengan ID %d tidak ditemukan", cityId)));
                 newHotel.setCity(city);
             }
 

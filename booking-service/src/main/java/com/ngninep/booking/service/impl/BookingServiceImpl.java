@@ -319,7 +319,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         if (booking.getStatus() != BookingStatus.PENDING) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.BOOKING_ONLY_PENDING_CAN_BE_CANCELLED);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Hanya pesanan dengan status PENDING yang bisa dibatalkan");
         }
 
         booking.setStatus(BookingStatus.CANCELLED);
@@ -459,11 +459,11 @@ public class BookingServiceImpl implements BookingService {
 
     private void validateBookingDates(BookingRequest request) {
         if (!request.getCheckOut().isAfter(request.getCheckIn())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.CHECK_OUT_AFTER_CHECK_IN);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tanggal check-out harus setelah check-in");
         }
 
         if (request.getCheckIn().isBefore(LocalDate.now())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.CHECK_IN_NOT_IN_PAST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tanggal check-in tidak boleh tanggal lampau");
         }
     }
 
@@ -477,13 +477,13 @@ public class BookingServiceImpl implements BookingService {
                     })
                     .block(HOTEL_SERVICE_TIMEOUT);
         } catch (WebClientResponseException ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.ROOM_TYPE_INVALID_OR_UNAVAILABLE);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipe kamar tidak valid atau tidak tersedia");
         } catch (RuntimeException ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.ROOM_TYPE_INVALID_OR_UNAVAILABLE);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipe kamar tidak valid atau tidak tersedia");
         }
 
         if (body == null || body.getData() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.ROOM_TYPE_INVALID_OR_UNAVAILABLE);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipe kamar tidak valid atau tidak tersedia");
         }
 
         return body.getData();
@@ -499,7 +499,7 @@ public class BookingServiceImpl implements BookingService {
                     })
                     .block(HOTEL_SERVICE_TIMEOUT);
         } catch (RuntimeException ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.ROOM_TYPE_INVALID_OR_UNAVAILABLE);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipe kamar tidak valid atau tidak tersedia");
         }
 
         if (body == null || body.getData() == null) {
@@ -606,7 +606,7 @@ public class BookingServiceImpl implements BookingService {
                 return ((Number) adminHotelId).intValue();
             }
         } catch (RuntimeException ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.ROOM_TYPE_INVALID_OR_UNAVAILABLE);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipe kamar tidak valid atau tidak tersedia");
         }
 
         throw new ResponseStatusException(HttpStatus.FORBIDDEN, Message.BOOKING_ACCESS_DENIED);
@@ -631,15 +631,15 @@ public class BookingServiceImpl implements BookingService {
 
     private void validateRoomType(BookingRequest request, RoomTypeSnapshot roomType) {
         if (roomType.getHotelId() != request.getHotelId()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.ROOM_TYPE_NOT_MATCH_HOTEL);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipe kamar tidak sesuai dengan hotel");
         }
 
         if (request.getNumberOfGuest() > roomType.getMaxGuest()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.GUEST_EXCEEDS_ROOM_CAPACITY);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Jumlah tamu melebihi kapasitas kamar");
         }
 
         if (roomType.getRoomAvailable() <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Message.ROOM_UNAVAILABLE);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kamar tidak tersedia");
         }
 
         long bookedRooms = bookingRepository.countByRoomTypeIdAndStatusInAndCheckInLessThanAndCheckOutGreaterThan(
@@ -655,7 +655,7 @@ public class BookingServiceImpl implements BookingService {
                     ? roomType.getName()
                     : "Tipe Kamar #" + request.getRoomTypeId();
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(
-                    Message.ROOM_FULL_ON_DATE,
+                    "Hotel %s dengan kamar %s sedang penuh pada tanggal %s sampai %s",
                     hotelName,
                     roomTypeName,
                     request.getCheckIn().format(DATE_FORMATTER),
@@ -690,21 +690,21 @@ public class BookingServiceImpl implements BookingService {
 
         if (currentStatus == BookingStatus.CANCELLED || currentStatus == BookingStatus.COMPLETED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    String.format(Message.BOOKING_STATUS_CANNOT_BE_CHANGED, currentStatus));
+                    String.format("Status %s tidak bisa diubah lagi", currentStatus));
         }
 
         if (currentStatus == BookingStatus.PENDING &&
                 nextStatus != BookingStatus.CONFIRMED &&
                 nextStatus != BookingStatus.CANCELLED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    Message.BOOKING_PENDING_TRANSITION_ONLY);
+                    "Booking PENDING hanya bisa dikonfirmasi atau dibatalkan");
         }
 
         if (currentStatus == BookingStatus.CONFIRMED &&
                 nextStatus != BookingStatus.COMPLETED &&
                 nextStatus != BookingStatus.CANCELLED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    Message.BOOKING_CONFIRMED_TRANSITION_ONLY);
+                    "Booking CONFIRMED hanya bisa diselesaikan atau dibatalkan");
         }
     }
 

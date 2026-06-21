@@ -1,7 +1,6 @@
 package com.ngninep.hotel.dto.req;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.ngninep.hotel.util.Message;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -17,11 +16,11 @@ import java.util.List;
 @NoArgsConstructor
 public class HotelRequest {
     
-    @NotBlank(message = Message.HOTEL_NAME_REQUIRED)
+    @NotBlank(message = "Nama hotel tidak boleh kosong")
     private String name;
     
     // Kita gunakan ID langsung untuk DTO agar lebih rapi daripada nested object
-    @NotNull(message = Message.CITY_ID_REQUIRED)
+    @NotNull(message = "ID Kota tidak boleh kosong")
     @JsonProperty("city_id")
     private Integer cityId;
     
