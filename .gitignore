@@ -11,7 +11,7 @@ dist/
 !**/src/main/resources/application.properties
 !**/src/main/resources/application.properties.example
 
-*.log
+*.log 
 uploads/
 **/uploads/
 *.xlsx
