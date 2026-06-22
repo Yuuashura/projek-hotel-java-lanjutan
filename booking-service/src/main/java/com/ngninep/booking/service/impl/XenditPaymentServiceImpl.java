@@ -53,10 +53,10 @@ public class XenditPaymentServiceImpl implements XenditPaymentService {
     @Value("${xendit.callback-token:}")
     private String callbackToken;
 
-    @Value("${xendit.success-redirect-url:https://deciduous-unfurrowed-august.ngrok-free.dev/my-bookings}")
+    @Value("${xendit.success-redirect-url:http://localhost:5173/my-bookings}")
     private String successRedirectUrl;
 
-    @Value("${xendit.failure-redirect-url:https://deciduous-unfurrowed-august.ngrok-free.dev/my-bookings}")
+    @Value("${xendit.failure-redirect-url:http://localhost:5173/my-bookings}")
     private String failureRedirectUrl;
 
     @Override

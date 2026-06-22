@@ -161,51 +161,16 @@ Backend dependencies utama:
 
 ## Environment Variables
 
-Jangan commit nilai secret asli. Docker membaca `.env` di root proyek, sedangkan eksekusi manual backend membaca `application-local.properties` pada masing-masing service. Kedua jenis file tersebut sudah diabaikan Git.
+Jangan commit nilai secret asli. Salin `.env.example` menjadi `.env` untuk local, atau masukkan variabel yang sama melalui halaman **Environment** Dokploy. File `.env` sudah diabaikan Git.
 
-Contoh `.env`:
+Variabel production penting:
 
 ```env
-USER_DB_URL=jdbc:postgresql://<host>:<port>/<user_database>?sslmode=require&prepareThreshold=0
-USER_DB_USERNAME=<user_database_username>
-USER_DB_PASSWORD=<user_database_password>
-
-HOTEL_DB_URL=jdbc:postgresql://<host>:<port>/<hotel_database>?sslmode=require&prepareThreshold=0
-HOTEL_DB_USERNAME=<hotel_database_username>
-HOTEL_DB_PASSWORD=<hotel_database_password>
-
-BOOKING_DB_URL=jdbc:postgresql://<host>:<port>/<booking_database>?sslmode=require&prepareThreshold=0
-BOOKING_DB_USERNAME=<booking_database_username>
-BOOKING_DB_PASSWORD=<booking_database_password>
-
-SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
-SPRING_JPA_HIBERNATE_DDL_AUTO=update
-
-JWT_SECRET=<random_secret_minimum_64_characters>
-JWT_EXPIRATION=3600000
-
-SPRING_MAIL_USERNAME=<smtp_email>
-SPRING_MAIL_PASSWORD=<smtp_app_password>
-
-LOGIN_RATE_LIMIT_EMAIL_IP=10
-LOGIN_RATE_LIMIT_IP=30
-LOGIN_RATE_LIMIT_WINDOW_SECONDS=900
-
-XENDIT_BASE_URL=https://api.xendit.co
-XENDIT_API_KEY=<xendit_api_key>
-XENDIT_CALLBACK_TOKEN=<xendit_callback_token>
-XENDIT_SUCCESS_REDIRECT_URL=https://deciduous-unfurrowed-august.ngrok-free.dev/my-bookings
-XENDIT_FAILURE_REDIRECT_URL=https://deciduous-unfurrowed-august.ngrok-free.dev/my-bookings
-APP_URL=https://deciduous-unfurrowed-august.ngrok-free.dev
-
-USER_SERVICE_URL=http://user-service:8081
-HOTEL_SERVICE_URL=http://hotel-service:8082
-BOOKING_SERVICE_URL=http://booking-service:8083
-CORS_ALLOWED_ORIGINS=http://localhost:5173,https://deciduous-unfurrowed-august.ngrok-free.dev
-TRUSTED_PROXY_HOPS=0
-
-NGROK_AUTHTOKEN=<ngrok_authtoken>
-NGROK_URL=https://deciduous-unfurrowed-august.ngrok-free.dev
+APP_URL=https://hotel.yuuashura.my.id
+CORS_ALLOWED_ORIGINS=https://hotel.yuuashura.my.id
+VITE_API_URL=https://api-hotel.yuuashura.my.id
+XENDIT_SUCCESS_REDIRECT_URL=https://hotel.yuuashura.my.id/my-bookings
+XENDIT_FAILURE_REDIRECT_URL=https://hotel.yuuashura.my.id/my-bookings
 ```
 
 `application.properties` mengaktifkan profil `local` secara default. Saat service dijalankan manual, Spring menggabungkan konfigurasi dasar dengan `application-local.properties`. File lokal tersebut dikecualikan dari Docker image melalui `.dockerignore`, sehingga container tetap menerima database dan secret dari `.env` melalui `docker-compose.yml`.
@@ -215,7 +180,7 @@ NGROK_URL=https://deciduous-unfurrowed-august.ngrok-free.dev
 Pastikan `.env` sudah tersedia di root proyek.
 
 ```bash
-docker compose up --build -d
+docker compose up -d --build
 ```
 
 Service yang berjalan:
@@ -227,10 +192,31 @@ Service yang berjalan:
 | Hotel Service | `http://localhost:8082` |
 | Booking Service | `http://localhost:8083` |
 | Frontend | `http://localhost:5173` |
-| Frontend via ngrok | `https://deciduous-unfurrowed-august.ngrok-free.dev` |
-| Ngrok Inspector | `http://localhost:4040` |
 
-Frontend Vite dan agent ngrok dijalankan oleh Compose. Frontend meneruskan request `/api` ke API Gateway melalui jaringan internal Docker.
+Frontend Vite meneruskan request `/api` ke API Gateway melalui jaringan internal Docker. Ngrok tidak dijalankan secara default. Jika diperlukan untuk development:
+
+```bash
+docker compose --profile ngrok up -d --build
+```
+
+## Deployment Production / Dokploy
+
+Production memakai `docker-compose.prod.yml`. Compose ini menjalankan frontend statis melalui Nginx, tidak menjalankan ngrok, dan tidak mempublikasikan port user-service, hotel-service, atau booking-service ke host.
+
+```bash
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Konfigurasi domain pada menu **Domains** Dokploy:
+
+| Domain | Service | Container Port | Path |
+| --- | --- | --- | --- |
+| `hotel.yuuashura.my.id` | `frontend` | `80` | `/` |
+| `api-hotel.yuuashura.my.id` | `api-gateway` | `8080` | `/` |
+
+Aktifkan HTTPS/Let's Encrypt untuk kedua domain. Jangan membuat domain publik untuk `user-service`, `hotel-service`, atau `booking-service`; API Gateway mengaksesnya melalui nama service Docker.
+
+Upload profil, gambar hotel/kamar, dan bukti pembayaran disimpan pada named volume Docker sehingga tetap tersedia setelah redeploy. Secret database, JWT, SMTP, dan Xendit harus dimasukkan melalui Environment Dokploy berdasarkan `.env.example`.
 
 ## Menjalankan Local Manual
 

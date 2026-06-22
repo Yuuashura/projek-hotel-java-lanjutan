@@ -1,0 +1,119 @@
+services:
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    expose:
+      - "8081"
+    environment:
+      PORT: 8081
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: ${USER_DB_URL:?Set USER_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${USER_DB_USERNAME:?Set USER_DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${USER_DB_PASSWORD:?Set USER_DB_PASSWORD}
+      SPRING_JPA_DATABASE_PLATFORM: ${SPRING_JPA_DATABASE_PLATFORM:-org.hibernate.dialect.PostgreSQLDialect}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO:-update}
+      SPRING_JPA_SHOW_SQL: "false"
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "false"
+      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME:?Set SPRING_MAIL_USERNAME}
+      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD:?Set SPRING_MAIL_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-3600000}
+      LOGIN_RATE_LIMIT_EMAIL_IP: ${LOGIN_RATE_LIMIT_EMAIL_IP:-10}
+      LOGIN_RATE_LIMIT_IP: ${LOGIN_RATE_LIMIT_IP:-30}
+      LOGIN_RATE_LIMIT_WINDOW_SECONDS: ${LOGIN_RATE_LIMIT_WINDOW_SECONDS:-900}
+      APP_FILE_UPLOAD_PATH: /app/uploads/user-service
+    volumes:
+      - user_uploads:/app/uploads/user-service
+    restart: unless-stopped
+
+  hotel-service:
+    build:
+      context: ./hotel-service
+      dockerfile: Dockerfile
+    expose:
+      - "8082"
+    environment:
+      PORT: 8082
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: ${HOTEL_DB_URL:?Set HOTEL_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${HOTEL_DB_USERNAME:?Set HOTEL_DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${HOTEL_DB_PASSWORD:?Set HOTEL_DB_PASSWORD}
+      SPRING_JPA_DATABASE_PLATFORM: ${SPRING_JPA_DATABASE_PLATFORM:-org.hibernate.dialect.PostgreSQLDialect}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO:-update}
+      SPRING_JPA_SHOW_SQL: "false"
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "false"
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-3600000}
+      APP_FILE_UPLOAD_PATH: /app/uploads/hotel-service
+    volumes:
+      - hotel_uploads:/app/uploads/hotel-service
+    restart: unless-stopped
+
+  booking-service:
+    build:
+      context: ./booking-service
+      dockerfile: Dockerfile
+    expose:
+      - "8083"
+    environment:
+      PORT: 8083
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: ${BOOKING_DB_URL:?Set BOOKING_DB_URL}
+      SPRING_DATASOURCE_USERNAME: ${BOOKING_DB_USERNAME:?Set BOOKING_DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${BOOKING_DB_PASSWORD:?Set BOOKING_DB_PASSWORD}
+      SPRING_JPA_DATABASE_PLATFORM: ${SPRING_JPA_DATABASE_PLATFORM:-org.hibernate.dialect.PostgreSQLDialect}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO:-update}
+      SPRING_JPA_SHOW_SQL: "false"
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "false"
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-3600000}
+      HOTEL_SERVICE_URL: http://hotel-service:8082
+      XENDIT_BASE_URL: ${XENDIT_BASE_URL:-https://api.xendit.co}
+      XENDIT_API_KEY: ${XENDIT_API_KEY:?Set XENDIT_API_KEY}
+      XENDIT_CALLBACK_TOKEN: ${XENDIT_CALLBACK_TOKEN:?Set XENDIT_CALLBACK_TOKEN}
+      XENDIT_SUCCESS_REDIRECT_URL: ${XENDIT_SUCCESS_REDIRECT_URL:-https://hotel.yuuashura.my.id/my-bookings}
+      XENDIT_FAILURE_REDIRECT_URL: ${XENDIT_FAILURE_REDIRECT_URL:-https://hotel.yuuashura.my.id/my-bookings}
+      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME:?Set SPRING_MAIL_USERNAME}
+      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD:?Set SPRING_MAIL_PASSWORD}
+      APP_URL: ${APP_URL:-https://hotel.yuuashura.my.id}
+      APP_FILE_UPLOAD_PATH: /app/uploads/booking-service
+    volumes:
+      - booking_uploads:/app/uploads/booking-service
+    restart: unless-stopped
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    expose:
+      - "8080"
+    depends_on:
+      - user-service
+      - hotel-service
+      - booking-service
+    environment:
+      PORT: 8080
+      USER_SERVICE_URL: http://user-service:8081
+      HOTEL_SERVICE_URL: http://hotel-service:8082
+      BOOKING_SERVICE_URL: http://booking-service:8083
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-https://hotel.yuuashura.my.id}
+      TRUSTED_PROXY_HOPS: ${TRUSTED_PROXY_HOPS:-1}
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        VITE_API_URL: ${VITE_API_URL:-https://api-hotel.yuuashura.my.id}
+    expose:
+      - "80"
+    depends_on:
+      - api-gateway
+    restart: unless-stopped
+
+volumes:
+  user_uploads:
+  hotel_uploads:
+  booking_uploads:
