@@ -21,8 +21,7 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "com.ngninep.user.UserApplication",
             "projectName": "user-service",
-            "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "args": ""
         },
         {
             "type": "java",
@@ -31,8 +30,7 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "com.ngninep.hotel.HotelServiceApplication",
             "projectName": "hotel-service",
-            "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "args": ""
         },
         {
             "type": "java",
@@ -41,8 +39,7 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "com.ngninep.booking.BookingServiceApplication",
             "projectName": "booking-service",
-            "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "args": ""
         },
         {
             "type": "java",
@@ -51,8 +48,7 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "com.ngninep.gateway.ApiGatewayApplication",
             "projectName": "api-gateway",
-            "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "args": ""
         },
         {
             "type": "java",
@@ -61,8 +57,7 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "com.ngninep.user.UserApplication",
             "projectName": "user",
-            "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "args": ""
         }
     ]
 }

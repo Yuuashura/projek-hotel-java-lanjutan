@@ -2,6 +2,8 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
+const apiProxyTarget = process.env.VITE_PROXY_TARGET || 'http://localhost:8080'
+
 export default defineConfig({
   plugins: [
     react(),
@@ -12,8 +14,7 @@ export default defineConfig({
     allowedHosts: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
-        // target: 'https://deciduous-unfurrowed-august.ngrok-free.dev',
+        target: apiProxyTarget,
         changeOrigin: true,
       }
     }

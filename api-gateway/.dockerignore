@@ -1,0 +1,7 @@
+target/
+uploads/
+src/main/resources/application-local.properties
+.git/
+.idea/
+.vscode/
+*.log

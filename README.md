@@ -161,34 +161,54 @@ Backend dependencies utama:
 
 ## Environment Variables
 
-Jangan commit nilai secret asli. Gunakan `.env` lokal untuk Docker dan environment variable lokal untuk menjalankan service manual.
+Jangan commit nilai secret asli. Docker membaca `.env` di root proyek, sedangkan eksekusi manual backend membaca `application-local.properties` pada masing-masing service. Kedua jenis file tersebut sudah diabaikan Git.
 
 Contoh `.env`:
 
 ```env
-SPRING_DATASOURCE_URL=jdbc:postgresql://<host>:<port>/<database>?sslmode=require&prepareThreshold=0
-SPRING_DATASOURCE_USERNAME=<database_username>
-SPRING_DATASOURCE_PASSWORD=<database_password>
+USER_DB_URL=jdbc:postgresql://<host>:<port>/<user_database>?sslmode=require&prepareThreshold=0
+USER_DB_USERNAME=<user_database_username>
+USER_DB_PASSWORD=<user_database_password>
+
+HOTEL_DB_URL=jdbc:postgresql://<host>:<port>/<hotel_database>?sslmode=require&prepareThreshold=0
+HOTEL_DB_USERNAME=<hotel_database_username>
+HOTEL_DB_PASSWORD=<hotel_database_password>
+
+BOOKING_DB_URL=jdbc:postgresql://<host>:<port>/<booking_database>?sslmode=require&prepareThreshold=0
+BOOKING_DB_USERNAME=<booking_database_username>
+BOOKING_DB_PASSWORD=<booking_database_password>
+
 SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
 SPRING_JPA_HIBERNATE_DDL_AUTO=update
 
-JWT_SECRET=<long_random_secret>
+JWT_SECRET=<random_secret_minimum_64_characters>
 JWT_EXPIRATION=3600000
 
 SPRING_MAIL_USERNAME=<smtp_email>
 SPRING_MAIL_PASSWORD=<smtp_app_password>
 
+LOGIN_RATE_LIMIT_EMAIL_IP=10
+LOGIN_RATE_LIMIT_IP=30
+LOGIN_RATE_LIMIT_WINDOW_SECONDS=900
+
 XENDIT_BASE_URL=https://api.xendit.co
 XENDIT_API_KEY=<xendit_api_key>
 XENDIT_CALLBACK_TOKEN=<xendit_callback_token>
-XENDIT_SUCCESS_REDIRECT_URL=http://localhost:5173/my-bookings
-XENDIT_FAILURE_REDIRECT_URL=http://localhost:5173/my-bookings
+XENDIT_SUCCESS_REDIRECT_URL=https://deciduous-unfurrowed-august.ngrok-free.dev/my-bookings
+XENDIT_FAILURE_REDIRECT_URL=https://deciduous-unfurrowed-august.ngrok-free.dev/my-bookings
+APP_URL=https://deciduous-unfurrowed-august.ngrok-free.dev
 
 USER_SERVICE_URL=http://user-service:8081
 HOTEL_SERVICE_URL=http://hotel-service:8082
 BOOKING_SERVICE_URL=http://booking-service:8083
-CORS_ALLOWED_ORIGINS=http://localhost:5173
+CORS_ALLOWED_ORIGINS=http://localhost:5173,https://deciduous-unfurrowed-august.ngrok-free.dev
+TRUSTED_PROXY_HOPS=0
+
+NGROK_AUTHTOKEN=<ngrok_authtoken>
+NGROK_URL=https://deciduous-unfurrowed-august.ngrok-free.dev
 ```
+
+`application.properties` mengaktifkan profil `local` secara default. Saat service dijalankan manual, Spring menggabungkan konfigurasi dasar dengan `application-local.properties`. File lokal tersebut dikecualikan dari Docker image melalui `.dockerignore`, sehingga container tetap menerima database dan secret dari `.env` melalui `docker-compose.yml`.
 
 ## Menjalankan dengan Docker
 
@@ -206,8 +226,11 @@ Service yang berjalan:
 | User Service | `http://localhost:8081` |
 | Hotel Service | `http://localhost:8082` |
 | Booking Service | `http://localhost:8083` |
+| Frontend | `http://localhost:5173` |
+| Frontend via ngrok | `https://deciduous-unfurrowed-august.ngrok-free.dev` |
+| Ngrok Inspector | `http://localhost:4040` |
 
-Frontend tidak didefinisikan di `docker-compose.yml`, jadi jalankan frontend secara terpisah.
+Frontend Vite dan agent ngrok dijalankan oleh Compose. Frontend meneruskan request `/api` ke API Gateway melalui jaringan internal Docker.
 
 ## Menjalankan Local Manual
 
@@ -215,19 +238,21 @@ Frontend tidak didefinisikan di `docker-compose.yml`, jadi jalankan frontend sec
 
 Jalankan setiap service di terminal terpisah.
 
+Profil `local` aktif secara default, jadi tidak perlu menambahkan argumen `-Dspring-boot.run.profiles=local`.
+
 ```bash
 cd user-service
-mvn spring-boot:run -Dspring-boot.run.profiles=local
+mvn spring-boot:run
 ```
 
 ```bash
 cd hotel-service
-mvn spring-boot:run -Dspring-boot.run.profiles=local
+mvn spring-boot:run
 ```
 
 ```bash
 cd booking-service
-mvn spring-boot:run -Dspring-boot.run.profiles=local
+mvn spring-boot:run
 ```
 
 ```bash
