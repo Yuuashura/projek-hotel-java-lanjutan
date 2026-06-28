@@ -170,7 +170,7 @@ const Profile = () => {
           {tab === 'info' && (
           !isEditing ?
           <div className="[display:flex] [flex-direction:column] [gap:1.5rem]">
-                <div className="[display:grid] [grid-template-columns:1fr_1fr] [gap:1.5rem]">
+                <div className="[display:grid] [grid-template-columns:repeat(2,1fr)] [gap:1.5rem_2.5rem] max-sm:[grid-template-columns:1fr]">
                   <div>
                     <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem] [color:var(--color-muted)] [font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.5px]">Nama Depan</label>
                     <div className="[font-weight:400] [color:var(--color-text)] [margin-top:0.25rem]">{user?.first_name}</div>
@@ -179,8 +179,14 @@ const Profile = () => {
                     <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem] [color:var(--color-muted)] [font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.5px]">Nama Belakang</label>
                     <div className="[font-weight:400] [color:var(--color-text)] [margin-top:0.25rem]">{user?.last_name || '-'}</div>
                   </div>
-                </div>
-                <div className="[display:grid] [grid-template-columns:1fr_1fr] [gap:1.5rem]">
+                  <div>
+                    <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem] [color:var(--color-muted)] [font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.5px]">Email</label>
+                    <div className="[font-weight:400] [color:var(--color-text)] [margin-top:0.25rem]">{user?.email || '-'}</div>
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem] [color:var(--color-muted)] [font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.5px]">No. Telepon</label>
+                    <div className="[font-weight:400] [color:var(--color-text)] [margin-top:0.25rem]">{user?.phone || '-'}</div>
+                  </div>
                   <div>
                     <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem] [color:var(--color-muted)] [font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.5px]">Umur</label>
                     <div className="[font-weight:400] [color:var(--color-text)] [margin-top:0.25rem]">{user?.age} tahun</div>
@@ -189,10 +195,6 @@ const Profile = () => {
                     <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem] [color:var(--color-muted)] [font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.5px]">Kota asal</label>
                     <div className="[font-weight:400] [color:var(--color-text)] [margin-top:0.25rem]">{cities.find((c) => c.id_city === user?.city_id)?.name || '-'}</div>
                   </div>
-                </div>
-                <div>
-                  <label className="mb-2 block text-xs font-semibold uppercase text-[var(--color-muted)] max-sm:text-[0.68rem] [color:var(--color-muted)] [font-size:0.7rem] [text-transform:uppercase] [letter-spacing:0.5px]">No. Telepon</label>
-                  <div className="[font-weight:400] [color:var(--color-text)] [margin-top:0.25rem]">{user?.phone}</div>
                 </div>
                 <button onClick={() => setIsEditing(true)} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 [align-self:flex-start] [margin-top:1rem] [background:var(--color-primary)] [padding:0_2rem] [height:44px]">
                   Edit Profil
@@ -264,7 +266,7 @@ const Profile = () => {
                   </div>
                 </div>
             )}
-              <div className="[background:#FFFDF3] [border:1px_solid_#FEEBC8] [padding:0.875rem_1rem] [font-size:0.8rem] [color:#DD6B20] [border-radius:var(--radius-sm)]">
+              <div className="[border:1px_solid_var(--color-warning-border)] [background:var(--color-warning-soft)] [color:var(--color-warning)] [padding:0.875rem_1rem] [font-size:0.8rem] [border-radius:var(--radius-sm)]">
                 Setelah password berhasil diubah, Anda akan otomatis keluar dan perlu masuk kembali.
               </div>
               <button type="submit" className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[var(--glass-border)] px-8 py-3 text-sm font-bold no-underline shadow-[0_14px_34px_-24px_rgba(15,23,42,0.42)] transition-all duration-300 hover:-translate-y-px hover:shadow-[var(--shadow-hover)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 max-sm:min-h-[42px] max-sm:whitespace-normal max-sm:px-4 max-sm:py-2.5 max-sm:text-xs border-[color-mix(in_srgb,var(--color-primary)_46%,transparent)] bg-[linear-gradient(135deg,var(--color-primary),var(--color-primary-hover))] text-[#061426] hover:brightness-105 h-11 self-start bg-[var(--color-primary)] px-8 disabled:opacity-70" disabled={loading}>
