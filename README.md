@@ -194,18 +194,20 @@ LOGIN_RATE_LIMIT_WINDOW_SECONDS=900
 XENDIT_BASE_URL=https://api.xendit.co
 XENDIT_API_KEY=<xendit_api_key>
 XENDIT_CALLBACK_TOKEN=<xendit_callback_token>
-XENDIT_SUCCESS_REDIRECT_URL=https://deciduous-unfurrowed-august.ngrok-free.dev/my-bookings
-XENDIT_FAILURE_REDIRECT_URL=https://deciduous-unfurrowed-august.ngrok-free.dev/my-bookings
-APP_URL=https://deciduous-unfurrowed-august.ngrok-free.dev
+XENDIT_SUCCESS_REDIRECT_URL=http://localhost:5173/my-bookings
+XENDIT_FAILURE_REDIRECT_URL=http://localhost:5173/my-bookings
+APP_URL=http://localhost:5173
 
 USER_SERVICE_URL=http://user-service:8081
 HOTEL_SERVICE_URL=http://hotel-service:8082
 BOOKING_SERVICE_URL=http://booking-service:8083
-CORS_ALLOWED_ORIGINS=http://localhost:5173,https://deciduous-unfurrowed-august.ngrok-free.dev
+CORS_ALLOWED_ORIGINS=http://localhost:5173,https://stinging-usual-risotto.ngrok-free.dev
 TRUSTED_PROXY_HOPS=0
+VITE_API_URL=/
 
-NGROK_AUTHTOKEN=<ngrok_authtoken>
-NGROK_URL=https://deciduous-unfurrowed-august.ngrok-free.dev
+# Opsional, hanya diperlukan untuk profile tunnel
+NGROK_AUTHTOKEN=<ngrok_authtoken_baru>
+NGROK_URL=https://stinging-usual-risotto.ngrok-free.dev
 ```
 
 `application.properties` mengaktifkan profil `local` secara default. Saat service dijalankan manual, Spring menggabungkan konfigurasi dasar dengan `application-local.properties`. File lokal tersebut dikecualikan dari Docker image melalui `.dockerignore`, sehingga container tetap menerima database dan secret dari `.env` melalui `docker-compose.yml`.
@@ -227,10 +229,16 @@ Service yang berjalan:
 | Hotel Service | `http://localhost:8082` |
 | Booking Service | `http://localhost:8083` |
 | Frontend | `http://localhost:5173` |
-| Frontend via ngrok | `https://deciduous-unfurrowed-august.ngrok-free.dev` |
-| Ngrok Inspector | `http://localhost:4040` |
 
-Frontend Vite dan agent ngrok dijalankan oleh Compose. Frontend meneruskan request `/api` ke API Gateway melalui jaringan internal Docker.
+Frontend Vite meneruskan request `/api` ke API Gateway melalui jaringan internal Docker.
+
+Ngrok bersifat opsional. Setelah menyimpan authtoken baru di `.env`, jalankan profile tunnel:
+
+```bash
+docker compose --profile tunnel up --build -d
+```
+
+Status tunnel dapat dilihat melalui inspector di `http://localhost:4040`. Domain publik yang dikonfigurasi adalah `https://stinging-usual-risotto.ngrok-free.dev`.
 
 ## Menjalankan Local Manual
 

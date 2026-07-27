@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.6 Chrome/144.0.7559.236 Electron/40.8.4 Safari/537.36" version="29.6.6" pages="6">
   <diagram name="Main" id="ec977932-5221-4c9f-bccc-7a188d8545db">
-    <mxGraphModel dx="918" dy="607" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="1150" background="none" math="0" shadow="0">
+    <mxGraphModel dx="969" dy="641" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="1150" background="none" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -10,7 +10,7 @@
         <mxCell id="m_start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;" value="START" vertex="1">
           <mxGeometry height="60" width="100" x="500" y="90" as="geometry" />
         </mxCell>
-        <mxCell id="m_home" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;" value="Home Page&lt;br&gt;/" vertex="1">
+        <mxCell id="m_home" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;" value="Home Page" vertex="1">
           <mxGeometry height="60" width="210" x="445" y="190" as="geometry" />
         </mxCell>
         <mxCell id="m_menu" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;" value="Pilih Menu" vertex="1">
@@ -28,8 +28,11 @@
         <mxCell id="01 Flow Utama_e3" edge="1" parent="1" source="m_menu" style="endArrow=classic;html=1;rounded=0;strokeColor=#000000;fontColor=#000000;" target="m_about" value="About">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="01 Flow Utama_e4" edge="1" parent="1" source="m_about" style="endArrow=classic;html=1;rounded=0;strokeColor=#000000;fontColor=#000000;" value="">
+        <mxCell id="01 Flow Utama_e4" edge="1" parent="1" source="m_about" style="endArrow=classic;html=1;rounded=0;strokeColor=#000000;fontColor=#000000;entryX=0.467;entryY=0.019;entryDx=0;entryDy=0;entryPerimeter=0;" target="7dZQX2QPmG8HtoQA9SSc-2" value="">
           <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="180" y="590" />
+            </Array>
             <mxPoint x="185" y="440" as="targetPoint" />
           </mxGeometry>
         </mxCell>
@@ -42,9 +45,6 @@
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="780" y="340" as="targetPoint" />
           </mxGeometry>
-        </mxCell>
-        <mxCell id="hUUA-ZJlPKz0pglwWrQV-11" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" value="end" vertex="1">
-          <mxGeometry height="50" width="50" x="160" y="440" as="geometry" />
         </mxCell>
         <mxCell id="IEoBLYtzd4FuW1skuUEk-1" parent="1" style="verticalLabelPosition=bottom;verticalAlign=top;html=1;shape=offPageConnector;rounded=0;size=0.6666666666666666;" value="" vertex="1">
           <mxGeometry height="60" width="60" x="780" y="320" as="geometry" />
@@ -67,11 +67,14 @@
         <mxCell id="F2jP_JguHhGNkA1flReq-3" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="H" vertex="1">
           <mxGeometry height="30" width="60" x="730" y="220" as="geometry" />
         </mxCell>
+        <mxCell id="7dZQX2QPmG8HtoQA9SSc-2" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="END" vertex="1">
+          <mxGeometry height="80" width="120" x="540" y="580" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram name="User Booking" id="79cbede3-9110-4188-b1cb-a5b51e6bb024">
-    <mxGraphModel dx="793" dy="525" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="2650" background="none" math="0" shadow="0">
+    <mxGraphModel dx="3488" dy="2308" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="2650" background="none" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -286,7 +289,7 @@
     </mxGraphModel>
   </diagram>
   <diagram name="Auth And Role" id="4d1c87fb-b87d-4bbb-9362-2a81ef6e1619">
-    <mxGraphModel dx="758" dy="502" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="1550" background="none" math="0" shadow="0">
+    <mxGraphModel dx="872" dy="577" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="1550" background="none" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -316,7 +319,7 @@
         <mxCell id="8uOmEh6R9X_iXr8fRITy-18" edge="1" parent="1" source="a_email_exist" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="8uOmEh6R9X_iXr8fRITy-17" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="8uOmEh6R9X_iXr8fRITy-19" connectable="0" parent="8uOmEh6R9X_iXr8fRITy-18" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Tidak" vertex="1">
+        <mxCell id="8uOmEh6R9X_iXr8fRITy-19" connectable="0" parent="8uOmEh6R9X_iXr8fRITy-18" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="ya" vertex="1">
           <mxGeometry relative="1" x="-0.2823" y="2" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
@@ -619,7 +622,7 @@
     </mxGraphModel>
   </diagram>
   <diagram name=" Flow Admin" id="70472416-d440-4c1c-a362-ae44ef391ccf">
-    <mxGraphModel dx="3038" dy="1282" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="1400" background="none" math="0" shadow="0">
+    <mxGraphModel dx="2190" dy="721" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="1400" background="none" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -777,7 +780,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="WgX5nvb302uSMOK6-NOX" name="My Booking">
-    <mxGraphModel dx="1026" dy="679" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="830" dy="550" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -832,6 +835,31 @@
         <mxCell id="Pwbs7ZGbknhyxhSQo6BC-5" edge="1" parent="1" source="Pwbs7ZGbknhyxhSQo6BC-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="Pwbs7ZGbknhyxhSQo6BC-4" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
+        <mxCell id="nQKx3E9CaoTnjAI8VM5_-1" connectable="0" parent="Pwbs7ZGbknhyxhSQo6BC-5" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="True" vertex="1">
+          <mxGeometry relative="1" x="-0.248" y="2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="nQKx3E9CaoTnjAI8VM5_-2" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="232.5" y="780" />
+              <mxPoint x="232.5" y="1160" />
+            </Array>
+            <mxPoint x="482.5" y="780" as="sourcePoint" />
+            <mxPoint x="370" y="1160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="nQKx3E9CaoTnjAI8VM5_-3" connectable="0" parent="nQKx3E9CaoTnjAI8VM5_-2" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Text" vertex="1">
+          <mxGeometry relative="1" x="0.8742" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="nQKx3E9CaoTnjAI8VM5_-4" connectable="0" parent="nQKx3E9CaoTnjAI8VM5_-2" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="false" vertex="1">
+          <mxGeometry relative="1" x="-0.5859" y="-2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
         <mxCell id="Pwbs7ZGbknhyxhSQo6BC-2" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Lihat Invoice&lt;div&gt;&amp;nbsp;Xendit?&lt;/div&gt;" vertex="1">
           <mxGeometry height="120" width="115" x="372.5" y="720" as="geometry" />
         </mxCell>
@@ -839,7 +867,7 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="Pwbs7ZGbknhyxhSQo6BC-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Redirect Halaman&amp;nbsp;&lt;div&gt;invoice Xendit&lt;/div&gt;" vertex="1">
-          <mxGeometry height="60" width="120" x="370" y="880" as="geometry" />
+          <mxGeometry height="60" width="120" x="370" y="890" as="geometry" />
         </mxCell>
         <mxCell id="Pwbs7ZGbknhyxhSQo6BC-9" edge="1" parent="1" source="Pwbs7ZGbknhyxhSQo6BC-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="Pwbs7ZGbknhyxhSQo6BC-8" value="">
           <mxGeometry relative="1" as="geometry" />
@@ -864,7 +892,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="oGHA9DQQIYG17S60ghHB" name="Profile">
-    <mxGraphModel dx="1026" dy="679" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="830" dy="550" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />

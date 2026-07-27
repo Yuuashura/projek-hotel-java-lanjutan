@@ -21,4 +21,5 @@ public class City {
     private String name;        // "Bandung", "Jakarta", "Bali"
 
     private String province;    // "Jawa Barat", "DKI Jakarta", "Bali"
+
 }
